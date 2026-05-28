@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Roboto:wght@300;400;700&family=Noto+Sans+Arabic:wght@300;400;700&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  --bg:        #1a1917;
+  --bg-alt:    #222120;
+  --bg-header: #2d2b28;
+  --bg-card:   #252422;
+  --gold:      #c9a84c;
+  --gold-dim:  rgba(201,168,76,0.5);
+  --white:     #ffffff;
+  --text:      rgba(255,255,255,0.55);
+  --text-dim:  rgba(255,255,255,0.3);
+  --border:    rgba(255,255,255,0.08);
+  --border-gold: rgba(201,168,76,0.3);
+
+  /* aliases */
+  --ink:      #1a1917;
+  --charcoal: #111110;
+  --warm:     #222120;
+  --paper:    #ffffff;
+  --grey-bg:  #2d2b28;
+  --linen:    #2d2b28;
+  --linen-dk: rgba(255,255,255,0.12);
+  --smoke:    rgba(255,255,255,0.55);
+  --ash:      #ffffff;
+  --clay:     #cc5a4a;
+  --muted:    rgba(255,255,255,0.4);
+  --bronze:   #c9a84c;
+  --bronze-dk: #8a6e2a;
+  --ink-soft: rgba(255,255,255,0.7);
+  --cream:    rgba(255,255,255,0.85);
+  --forest:   #6aad4a;
+  --sage:     #82b541;
+  --gold-lt:  #d4b86a;
+  --gold-dk:  #8a6e2a;
+  --ivory:    rgba(255,255,255,0.85);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Roboto', -apple-system, sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+[dir="rtl"],
+[dir="rtl"] body {
+  font-family: 'Noto Sans Arabic', 'Roboto', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--white);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+h1, h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', Georgia, serif !important;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+/* Section heading pattern matching the template */
+.section-title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--white);
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.section-divider {
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--gold);
+  margin: 0 auto 36px;
+}
+
+/* Page header (inner pages) */
+.page-header {
+  background: var(--bg-header);
+  padding: 52px 0 44px;
+  text-align: center;
+}
+
+.page-header h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 400;
+  color: var(--white);
+  margin-bottom: 10px;
+}
+
+.page-header .breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.page-header .breadcrumb span {
+  color: var(--gold);
+}
+
+/* Template-style button */
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: #1a1917;
+  cursor: pointer;
+  transition: all 0.3s;
+  line-height: 1;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn:hover {
+  background: transparent;
+  color: var(--gold);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--gold);
+}
+
+.btn-outline:hover {
+  background: var(--gold);
+  color: #1a1917;
+}
+
+.btn-white {
+  border-color: rgba(255,255,255,0.4);
+  background: transparent;
+  color: var(--white);
+}
+
+.btn-white:hover {
+  background: var(--white);
+  color: #1a1917;
+}
+
+/* Form inputs */
+.field {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 300;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.field::placeholder { color: var(--text-dim); }
+
+.field:focus { border-color: var(--gold); }
+
+.field option { background: #1a1917; }
+
+/* Utility */
+.font-display { font-family: 'Roboto', sans-serif; font-weight: 100; }
+.num { font-variant-numeric: tabular-nums; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.6s ease both; }
+
+/* Responsive home grids */
+@media (max-width: 900px) {
+  .home-about   { grid-template-columns: 1fr !important; }
+  .home-services { grid-template-columns: repeat(2, 1fr) !important; }
+  .home-testimonials { grid-template-columns: 1fr !important; }
+  .home-products { grid-template-columns: 1fr !important; }
+  .home-infobar  { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 600px) {
+  .home-services { grid-template-columns: 1fr !important; }
+}
+
+/* Aliases for old code */
+.theme-btn { display: inline-block; padding: 14px 28px; font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid var(--gold); background: var(--gold); color: #1a1917; cursor: pointer; transition: all 0.3s; line-height: 1; text-decoration: none; font-family: inherit; }
+.theme-btn:hover { background: transparent; color: var(--gold); }
+.theme-btn.outline { background: transparent; color: var(--gold); }
+.theme-btn.outline:hover { background: var(--gold); color: #1a1917; }
+.theme-btn.dark { border-color: rgba(255,255,255,0.3); background: transparent; color: var(--white); }
+.theme-btn.dark:hover { background: var(--white); color: #1a1917; }
