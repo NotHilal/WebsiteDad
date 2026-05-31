@@ -1,9 +1,56 @@
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link2, Scissors, User } from 'lucide-react'
-import { supabase } from '../lib/supabase'
 
-const placeholders = Array.from({ length: 4 }, (_, i) => ({ id: i, ph: true }))
+const TEAM = [
+  {
+    id: 1, name: 'Sophie Laurent', title: 'Head Stylist & Color Director',
+    bio: 'With 14 years of experience in Parisian salons, Sophie brings an unmatched eye for shape and color. She specialises in transformative balayage and precision cuts tailored to each client.',
+    specialties: ['Balayage', 'Precision Cut'],
+    photo_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+  {
+    id: 2, name: 'Isabelle Moreau', title: 'Senior Colorist',
+    bio: 'Isabelle trained in Lyon and New York before joining HairGo. Her mastery of complex color corrections and vivid transformations has earned her a loyal following.',
+    specialties: ['Color Correction', 'Highlights', 'Ombré'],
+    photo_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+  {
+    id: 3, name: 'Camille Dubois', title: 'Style & Texture Expert',
+    bio: "Camille's passion lies in bringing out the natural beauty of every texture — from sleek blow-outs to voluminous curls. She is the go-to for special events and editorial looks.",
+    specialties: ['Blow-Out', 'Curl Styling'],
+    photo_url: 'https://images.unsplash.com/photo-1573497019236-17f8177b81e8?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+  {
+    id: 4, name: 'Elena Rousseau', title: 'Hair Treatment Specialist',
+    bio: 'Elena dedicates herself to hair health. From keratin smoothing to deep hydration therapies, she restores shine and vitality to even the most stressed hair.',
+    specialties: ['Keratin', 'Hair Treatments'],
+    photo_url: 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+  {
+    id: 5, name: 'Marie Fontaine', title: 'Color Artist',
+    bio: "Marie treats hair as her canvas. Bold vivid shades and hand-painted highlights are her signature — always designed to complement the client's skin tone and personality.",
+    specialties: ['Vivid Color', 'Balayage'],
+    photo_url: 'https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+  {
+    id: 6, name: 'Julien Lefebvre', title: 'Master Barber & Stylist',
+    bio: 'Julien blends classic barbering tradition with modern styling. Known for immaculate fades and textured cuts, he brings a refined edge to every appointment.',
+    specialties: ["Men's Cut", 'Fade', 'Textured Styles'],
+    photo_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+  {
+    id: 7, name: 'Antoine Bernard', title: 'Creative Director',
+    bio: "Antoine's avant-garde vision has graced runways and magazine covers. At HairGo he channels that creativity into elevated everyday looks and stunning special-occasion styles.",
+    specialties: ['Editorial', 'Avant-Garde', 'Updos'],
+    photo_url: 'https://images.unsplash.com/photo-1590873803005-539ede4d828a?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+  {
+    id: 8, name: 'Lucas Martin', title: 'Stylist',
+    bio: 'The newest member of the HairGo family, Lucas brings fresh energy and a keen attention to detail. He excels at modern cuts and relaxed styling for every day.',
+    specialties: ['Precision Cut', 'Blow-Out'],
+    photo_url: 'https://images.unsplash.com/photo-1543132220-4bf3de6e10ae?auto=format&fit=crop&crop=faces&w=600&h=800&q=80',
+  },
+]
 
 const inView = {
   hidden: { opacity:0, y:36 },
@@ -11,16 +58,6 @@ const inView = {
 }
 
 export default function Stylists() {
-  const [stylists, setStylists] = useState([])
-  const [loading, setLoading]   = useState(true)
-
-  useEffect(() => {
-    supabase.from('stylists').select('*').order('display_order')
-      .then(({ data }) => { setStylists(data || []); setLoading(false) })
-  }, [])
-
-  const items = loading || stylists.length === 0 ? placeholders : stylists
-
   return (
     <div style={{ minHeight:'100vh', paddingTop:140, paddingBottom:120 }}>
       <div className="wrap">
@@ -42,8 +79,8 @@ export default function Stylists() {
 
         {/* Grid */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px,1fr))', gap:'3.5rem' }}>
-          {items.map((s, i) => (
-            <motion.div key={s.id} initial="hidden" animate={loading ? 'hidden' : 'visible'}
+          {TEAM.map((s, i) => (
+            <motion.div key={s.id} initial="hidden" whileInView="visible" viewport={{ once: true }}
               custom={i} variants={inView} className="group">
 
               {/* Photo */}
@@ -51,7 +88,7 @@ export default function Stylists() {
                 background:'linear-gradient(135deg,#1a1a1a,#141414)', border:'1px solid rgba(255,255,255,0.06)',
                 position:'relative' }}>
                 {s.photo_url
-                  ? <img src={s.photo_url} alt={s.name} style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.7s ease' }}
+                  ? <img src={s.photo_url} alt={s.name} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.7s ease' }}
                       onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'}
                       onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
                   : s.ph
@@ -76,28 +113,17 @@ export default function Stylists() {
 
               {/* Info */}
               <div style={{ textAlign:'center' }}>
-                {s.ph ? (
-                  <>
-                    <div className="shimmer" style={{ height:22, borderRadius:8, width:140, margin:'0 auto 12px' }} />
-                    <div className="shimmer" style={{ height:12, borderRadius:6, width:100, margin:'0 auto 16px' }} />
-                    <div className="shimmer" style={{ height:48, borderRadius:8 }} />
-                  </>
-                ) : (
-                  <>
-                    <h3 className="font-display" style={{ fontSize:'1.6rem', color:'#fff', marginBottom:'0.5rem', textAlign:'center' }}>{s.name}</h3>
-                    <p style={{ fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:'#C9A84C', marginBottom:'1.25rem', textAlign:'center' }}>{s.title}</p>
-                    <p style={{ color:'rgba(255,255,255,0.36)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}
-                      className="line-clamp-3">{s.bio}</p>
-                    {s.specialties?.length > 0 && (
-                      <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:'0.5rem' }}>
-                        {s.specialties.map(spec => (
-                          <span key={spec} style={{ padding:'5px 14px', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.15)', color:'#C9A84C', fontSize:10, letterSpacing:'0.15em', textTransform:'uppercase' }}>
-                            {spec}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </>
+                <h3 className="font-display" style={{ fontSize:'1.6rem', color:'#fff', marginBottom:'0.5rem', textAlign:'center' }}>{s.name}</h3>
+                <p style={{ fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:'#C9A84C', marginBottom:'1.25rem', textAlign:'center' }}>{s.title}</p>
+                <p style={{ color:'rgba(255,255,255,0.36)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{s.bio}</p>
+                {s.specialties?.length > 0 && (
+                  <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:'0.5rem' }}>
+                    {s.specialties.map(spec => (
+                      <span key={spec} style={{ padding:'5px 14px', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.15)', color:'#C9A84C', fontSize:10, letterSpacing:'0.15em', textTransform:'uppercase' }}>
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             </motion.div>

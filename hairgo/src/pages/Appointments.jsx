@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors } from 'lucide-react'
+import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import {
@@ -10,26 +10,27 @@ import {
 import toast from 'react-hot-toast'
 
 const STEPS = ['Service', 'Stylist', 'Date & Time', 'Confirm']
-const STEP_ICONS = [Scissors, User, Calendar, Check]
-const SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30']
+const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
 
-const fadeSlide = {
-  initial: { opacity: 0, y: 32 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
-  exit: { opacity: 0, y: -20, transition: { duration: 0.25 } },
+const slide = {
+  initial: { opacity:0, x:24 },
+  animate: { opacity:1, x:0, transition:{ duration:0.45, ease:[0.22,1,0.36,1] } },
+  exit:    { opacity:0, x:-16, transition:{ duration:0.2 } },
 }
 
 export default function Appointments() {
   const { user, profile } = useAuth()
-  const [step,       setStep]       = useState(0)
-  const [services,   setServices]   = useState([])
-  const [stylists,   setStylists]   = useState([])
-  const [blocked,    setBlocked]    = useState([])
-  const [taken,      setTaken]      = useState([])
-  const [month,      setMonth]      = useState(new Date())
-  const [saving,     setSaving]     = useState(false)
-  const [done,       setDone]       = useState(false)
-  const [sel,        setSel]        = useState({ service:null, stylist:null, date:null, time:null, notes:'' })
+  const [step,     setStep]     = useState(0)
+  const [services, setServices] = useState([])
+  const [stylists, setStylists] = useState([])
+  const [blocked,  setBlocked]  = useState([])
+  const [taken,       setTaken]       = useState([])
+  const [blockedSlots, setBlockedSlots] = useState([])
+  const [month,    setMonth]    = useState(new Date())
+  const [saving,   setSaving]   = useState(false)
+  const [done,     setDone]     = useState(false)
+  const [sel,      setSel]      = useState({ service:null, stylist:null, date:null, time:null, notes:'' })
+  const [preview,  setPreview]  = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -45,11 +46,14 @@ export default function Appointments() {
 
   useEffect(() => {
     if (!sel.date || !sel.stylist) return
-    supabase.from('appointments').select('time')
-      .eq('stylist_id', sel.stylist.id)
-      .eq('date', format(sel.date, 'yyyy-MM-dd'))
-      .neq('status', 'cancelled')
-      .then(({ data }) => setTaken((data||[]).map(a => a.time.slice(0,5))))
+    const dateStr = format(sel.date, 'yyyy-MM-dd')
+    Promise.all([
+      supabase.from('appointments').select('time').eq('stylist_id', sel.stylist.id).eq('date', dateStr).neq('status', 'cancelled'),
+      supabase.from('blocked_hours').select('hour').eq('date', dateStr),
+    ]).then(([{ data: appts }, { data: hours }]) => {
+      setTaken((appts || []).map(a => a.time.slice(0, 5)))
+      setBlockedSlots((hours || []).map(h => h.hour))
+    })
   }, [sel.date, sel.stylist])
 
   const days     = eachDayOfInterval({ start:startOfMonth(month), end:endOfMonth(month) })
@@ -61,8 +65,8 @@ export default function Appointments() {
     setSaving(true)
     try {
       const { error } = await supabase.from('appointments').insert({
-        user_id: user.id, stylist_id: sel.stylist.id, service_id: sel.service.id,
-        date: format(sel.date,'yyyy-MM-dd'), time: sel.time, notes: sel.notes, status:'pending',
+        user_id:user.id, stylist_id:sel.stylist.id, service_id:sel.service.id,
+        date:format(sel.date,'yyyy-MM-dd'), time:sel.time, notes:sel.notes, status:'pending',
       })
       if (error) throw error
       await supabase.from('profiles').update({ points:(profile?.points||0)+10 }).eq('id', user.id)
@@ -72,639 +76,590 @@ export default function Appointments() {
     finally { setSaving(false) }
   }
 
-  /* ─── Success screen ──────────────────────────────────────── */
+  /* ── Success ──────────────────────────────────────────────── */
   if (done) return (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem', position:'relative', overflow:'hidden' }}>
-      {/* Ambient glow */}
-      <div style={{ position:'absolute', top:'40%', left:'50%', transform:'translate(-50%,-50%)', width:700, height:700, background:'radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 65%)', borderRadius:'50%', pointerEvents:'none' }} />
-
-      <motion.div initial={{ opacity:0, scale:0.92 }} animate={{ opacity:1, scale:1 }} transition={{ type:'spring', damping:22 }}
-        style={{ position:'relative', textAlign:'center' }}>
-
-        <motion.div
-          initial={{ scale:0 }} animate={{ scale:1 }}
-          transition={{ type:'spring', damping:15, delay:0.15 }}
-          style={{
-            width:100, height:100, borderRadius:'50%',
-            background:'linear-gradient(135deg,#C9A84C,#C4956A)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            margin:'0 auto 2.5rem auto',
-            boxShadow:'0 16px 64px rgba(201,168,76,0.45), 0 0 0 16px rgba(201,168,76,0.06)',
-          }}>
-          <Check size={42} color="#000" strokeWidth={2.5} />
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}>
+      <div style={{ position:'absolute', top:'40%', left:'50%', transform:'translate(-50%,-50%)', width:600, height:600, background:'radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 65%)', pointerEvents:'none' }} />
+      <motion.div initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }} transition={{ type:'spring', damping:22 }}
+        style={{ textAlign:'center', maxWidth:480, position:'relative' }}>
+        <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ type:'spring', damping:14, delay:0.15 }}
+          style={{ width:112, height:112, borderRadius:'50%', background:'linear-gradient(135deg,#C9A84C,#C4956A)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 2.5rem', boxShadow:'0 24px 80px rgba(201,168,76,0.5), 0 0 0 20px rgba(201,168,76,0.07)' }}>
+          <Check size={48} color="#000" strokeWidth={2.5}/>
         </motion.div>
-
-        <h2 className="font-display font-light" style={{ fontSize:'clamp(2.5rem,5vw,4.5rem)', color:'#fff', marginBottom:'1rem', lineHeight:1.05 }}>
+        <h2 className="font-display font-light" style={{ fontSize:'clamp(2.5rem,5vw,4.5rem)', color:'#fff', marginBottom:'1rem', lineHeight:1 }}>
           You're <span className="gold-gradient" style={{ fontStyle:'italic' }}>booked!</span>
         </h2>
-        <div className="gold-bar" />
-        <p style={{ color:'rgba(255,255,255,0.42)', fontSize:'0.9rem', lineHeight:1.85, maxWidth:400, margin:'1.5rem auto 2.5rem auto' }}>
-          Your appointment on <strong style={{ color:'#fff' }}>{format(sel.date,'MMMM d, yyyy')}</strong> at{' '}
-          <strong style={{ color:'#fff' }}>{sel.time}</strong> with{' '}
-          <strong style={{ color:'#fff' }}>{sel.stylist?.name}</strong> is pending confirmation.
+        <div className="gold-bar"/>
+        <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.9rem', lineHeight:1.9, margin:'1.5rem auto 2rem' }}>
+          <strong style={{ color:'#fff' }}>{format(sel.date,'MMMM d, yyyy')}</strong> at <strong style={{ color:'#fff' }}>{sel.time}</strong> · <strong style={{ color:'#fff' }}>{sel.stylist?.name}</strong>
         </p>
-
-        {/* Summary pills */}
-        <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:10, marginBottom:'3rem' }}>
-          {[
-            { label: sel.service?.name, icon: '✦' },
-            { label: `€${sel.service?.price}`, icon: '' },
-            { label: `${sel.service?.duration} min`, icon: '' },
-          ].filter(p => p.label).map(({ label, icon }, i) => (
-            <span key={i} style={{
-              display:'inline-flex', alignItems:'center', gap:6,
-              padding:'8px 18px', borderRadius:9999,
-              background:'rgba(201,168,76,0.07)', border:'1px solid rgba(201,168,76,0.15)',
-              fontSize:11, color:'#C9A84C', letterSpacing:'0.06em',
-              fontFamily:'Jost,sans-serif',
-            }}>{icon} {label}</span>
+        <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8, marginBottom:'2.5rem' }}>
+          {[sel.service?.name, `€${sel.service?.price}`, `${sel.service?.duration} min`].filter(Boolean).map((l,i)=>(
+            <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)', fontSize:11, color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{l}</span>
           ))}
         </div>
-
-        <button className="btn-gold"
-          onClick={() => { setDone(false); setStep(0); setSel({ service:null, stylist:null, date:null, time:null, notes:'' }) }}>
-          Book Another <ArrowRight size={15} />
+        <button className="btn-gold" onClick={() => { setDone(false); setStep(0); setSel({ service:null, stylist:null, date:null, time:null, notes:'' }) }}>
+          Book Another <ArrowRight size={15}/>
         </button>
       </motion.div>
     </div>
   )
 
-  /* ─── Main booking flow ───────────────────────────────────── */
+  /* ── Layout ───────────────────────────────────────────────── */
   return (
-    <div style={{ minHeight:'100vh', paddingTop:140, paddingBottom:120, position:'relative', overflow:'hidden' }}>
+    <div style={{ display:'flex', minHeight:'100vh' }}>
 
-      {/* Ambient background effects */}
-      <div style={{ position:'absolute', inset:0, pointerEvents:'none' }}>
-        <div style={{ position:'absolute', top:'15%', left:'50%', transform:'translateX(-50%)', width:900, height:600, background:'radial-gradient(ellipse, rgba(201,168,76,0.04) 0%, transparent 70%)', borderRadius:'50%' }} />
-        <div style={{ position:'absolute', top:'60%', left:'20%', width:400, height:400, background:'radial-gradient(circle, rgba(196,149,106,0.03) 0%, transparent 70%)', borderRadius:'50%' }} />
-      </div>
+      {/* ── LEFT SIDEBAR ──────────────────────────────────────── */}
+      <div className="appt-sidebar" style={{
+        width:300, position:'fixed', top:68, bottom:0, left:0, overflowY:'auto',
+        background:'#080808', borderRight:'1px solid rgba(201,168,76,0.1)',
+        display:'flex', flexDirection:'column', padding:'2.5rem 2rem',
+        zIndex:20,
+      }}>
+        {/* Ambient glow */}
+        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:300, height:200, background:'radial-gradient(ellipse, rgba(201,168,76,0.07) 0%, transparent 70%)', pointerEvents:'none' }} />
 
-      <div style={{ width:'100%', maxWidth:780, marginLeft:'auto', marginRight:'auto', paddingLeft:'1.5rem', paddingRight:'1.5rem', position:'relative' }}>
-
-        {/* ── Header ────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }}
-          transition={{ duration:0.7, ease:[0.22,1,0.36,1] }}
-          style={{ textAlign:'center', marginBottom:56 }}>
-          <div style={{
-            display:'inline-flex', alignItems:'center', gap:8,
-            padding:'8px 20px', borderRadius:9999, marginBottom:32,
-            background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)',
-          }}>
-            <div style={{ width:6, height:6, borderRadius:'50%', background:'#C9A84C', animation:'pulse-gold 2.4s infinite' }} />
-            <span style={{ fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>
-              Reserve Your Visit
-            </span>
+        {/* Brand */}
+        <div style={{ marginBottom:'2.5rem', position:'relative' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
+            <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#C9A84C,#C4956A)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Scissors size={11} color="#000" style={{ transform:'rotate(45deg)' }}/>
+            </div>
+            <span className="font-display" style={{ fontSize:'1.3rem', color:'#fff' }}>Hair<span style={{ color:'#C9A84C' }}>Go</span></span>
           </div>
-          <h1 className="font-display font-light"
-            style={{ color:'#fff', fontSize:'clamp(2.8rem,6vw,5rem)', lineHeight:0.95, marginBottom:'1.5rem' }}>
-            Book Your<br />
-            <span className="gold-gradient" style={{ fontStyle:'italic' }}>Appointment</span>
-          </h1>
-          <div className="gold-bar" />
-        </motion.div>
+          <p style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.2)', fontFamily:'Jost,sans-serif' }}>Premium Hair Studio · Doha</p>
+        </div>
 
-        {/* ── Step Progress ──────────────────────────────── */}
-        <motion.div
-          initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }}
-          transition={{ duration:0.5, delay:0.2 }}
-          style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:0, marginBottom:56 }}>
+        {/* Step list */}
+        <div style={{ position:'relative', marginBottom:'2.5rem' }}>
+          {/* Vertical line */}
+          <div style={{ position:'absolute', left:15, top:16, bottom:16, width:1, background:'rgba(255,255,255,0.06)' }} />
+
           {STEPS.map((s, i) => {
-            const Icon = STEP_ICONS[i]
             const isActive = i === step
-            const isDone = i < step
+            const isDone   = i < step
             return (
-              <div key={s} style={{ display:'flex', alignItems:'center' }}>
-                {/* Step circle + label */}
-                <div
-                  onClick={() => { if (isDone) setStep(i) }}
-                  style={{
-                    display:'flex', flexDirection:'column', alignItems:'center', gap:8,
-                    cursor: isDone ? 'pointer' : 'default',
-                    opacity: isActive ? 1 : isDone ? 0.85 : 0.35,
-                    transition: 'all 0.4s ease',
-                  }}>
-                  <div style={{
-                    width: isActive ? 48 : 40,
-                    height: isActive ? 48 : 40,
-                    borderRadius: '50%',
-                    display:'flex', alignItems:'center', justifyContent:'center',
-                    background: isActive
-                      ? 'linear-gradient(135deg,#C9A84C,#C4956A)'
-                      : isDone
-                        ? 'rgba(201,168,76,0.12)'
-                        : 'rgba(255,255,255,0.04)',
-                    border: isActive
-                      ? 'none'
-                      : isDone
-                        ? '1px solid rgba(201,168,76,0.25)'
-                        : '1px solid rgba(255,255,255,0.08)',
-                    boxShadow: isActive ? '0 8px 32px rgba(201,168,76,0.35)' : 'none',
-                    transition:'all 0.4s ease',
-                  }}>
-                    {isDone
-                      ? <Check size={16} color="#C9A84C" />
-                      : <Icon size={isActive ? 18 : 15} color={isActive ? '#000' : isDone ? '#C9A84C' : 'rgba(255,255,255,0.4)'} />
-                    }
-                  </div>
-                  <span className="appt-step-label" style={{
-                    fontSize:9, letterSpacing:'0.16em', textTransform:'uppercase',
-                    fontFamily:'Jost,sans-serif', fontWeight: isActive ? 500 : 300,
-                    color: isActive ? '#C9A84C' : isDone ? 'rgba(201,168,76,0.6)' : 'rgba(255,255,255,0.25)',
-                    transition:'all 0.3s',
-                  }}>{s}</span>
+              <div key={s} onClick={() => isDone && setStep(i)}
+                style={{ display:'flex', alignItems:'center', gap:14, padding:'0.75rem 0', cursor: isDone ? 'pointer' : 'default', position:'relative', zIndex:1 }}>
+                {/* Circle */}
+                <div style={{
+                  width:30, height:30, borderRadius:'50%', flexShrink:0,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  transition:'all 0.4s ease',
+                  background: isActive ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : isDone ? 'rgba(201,168,76,0.15)' : '#080808',
+                  border: isActive ? 'none' : isDone ? '1px solid rgba(201,168,76,0.35)' : '1px solid rgba(255,255,255,0.1)',
+                  boxShadow: isActive ? '0 4px 20px rgba(201,168,76,0.45)' : 'none',
+                }}>
+                  {isDone
+                    ? <Check size={13} color="#C9A84C"/>
+                    : <span style={{ fontSize:11, fontWeight:600, color: isActive ? '#000' : 'rgba(255,255,255,0.25)', fontFamily:'Jost,sans-serif' }}>{i+1}</span>
+                  }
                 </div>
-
-                {/* Connector line */}
-                {i < STEPS.length - 1 && (
-                  <div style={{
-                    width: 48, height: 1, margin:'0 8px', marginBottom: 22,
-                    background: isDone
-                      ? 'linear-gradient(90deg, rgba(201,168,76,0.5), rgba(201,168,76,0.3))'
-                      : 'rgba(255,255,255,0.06)',
-                    transition:'background 0.4s',
-                  }} />
-                )}
+                <span style={{
+                  fontSize:11, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'Jost,sans-serif',
+                  color: isActive ? '#fff' : isDone ? 'rgba(201,168,76,0.6)' : 'rgba(255,255,255,0.18)',
+                  fontWeight: isActive ? 500 : 300, transition:'color 0.3s',
+                }}>{s}</span>
               </div>
             )
           })}
-        </motion.div>
+        </div>
 
-        <AnimatePresence mode="wait">
+        {/* Divider */}
+        <div style={{ height:1, background:'rgba(255,255,255,0.06)', marginBottom:'2rem' }} />
 
-          {/* ── STEP 0: Service ──────────────────────────── */}
-          {step===0 && (
-            <motion.div key="s0" {...fadeSlide}>
-              <div style={{ textAlign:'center', marginBottom:40 }}>
-                <h3 className="font-display" style={{ color:'#fff', fontSize:'1.6rem', marginBottom:8 }}>
-                  Choose your service
-                </h3>
-                <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.85rem' }}>Select the service you'd like to book</p>
+        {/* Live summary */}
+        <div style={{ flex:1 }}>
+          <p style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(255,255,255,0.2)', fontFamily:'Jost,sans-serif', marginBottom:'1rem' }}>Your Selection</p>
+          <div style={{ display:'flex', flexDirection:'column', gap:'0.85rem' }}>
+            {[
+              { label:'Service', value: sel.service?.name, sub: sel.service?.price ? `€${sel.service.price}` : null },
+              { label:'Stylist', value: sel.stylist?.name },
+              { label:'Date',    value: sel.date ? format(sel.date,'MMM d, yyyy') : null },
+              { label:'Time',    value: sel.time },
+            ].map(({ label, value, sub }) => (
+              <div key={label}>
+                <p style={{ fontSize:8, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.18)', fontFamily:'Jost,sans-serif', marginBottom:3 }}>{label}</p>
+                {value
+                  ? <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                      <p style={{ fontSize:'0.82rem', color:'rgba(255,255,255,0.7)', fontFamily:'Jost,sans-serif' }}>{value}</p>
+                      {sub && <span style={{ fontSize:10, color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>· {sub}</span>}
+                    </div>
+                  : <div style={{ height:1, width:24, background:'rgba(255,255,255,0.1)', marginTop:4 }} />
+                }
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))', gap:'1rem' }}>
-                {(services.length ? services : Array.from({length:4},(_,i)=>({id:i,name:'Loading...',description:'',price:'',duration:0}))).map(svc => {
-                  const active = sel.service?.id === svc.id
-                  return (
-                    <button key={svc.id}
-                      onClick={() => { setSel(p=>({...p,service:svc})); setStep(1) }}
-                      className="appt-card"
-                      style={{
-                        textAlign:'left', padding:'2rem 2.25rem', borderRadius:22, width:'100%',
-                        cursor:'pointer', transition:'all 0.4s cubic-bezier(0.22,1,0.36,1)',
-                        position:'relative', overflow:'hidden',
-                        border: active ? '1px solid rgba(201,168,76,0.45)' : '1px solid rgba(255,255,255,0.06)',
-                        background: active ? 'rgba(201,168,76,0.06)' : 'rgba(255,255,255,0.02)',
-                        boxShadow: active ? '0 8px 40px rgba(201,168,76,0.12), inset 0 1px 0 rgba(201,168,76,0.1)' : 'none',
-                      }}>
-                      {/* Top row: name + price */}
-                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'0.85rem' }}>
-                        <h4 className="font-display" style={{ fontSize:'1.35rem', color:'#fff', lineHeight:1.2 }}>{svc.name}</h4>
-                        {svc.price && (
-                          <span style={{
-                            padding:'4px 14px', borderRadius:9999,
-                            background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.15)',
-                            fontSize:12, color:'#C9A84C', fontFamily:'Jost,sans-serif', whiteSpace:'nowrap',
-                          }}>€{svc.price}</span>
-                        )}
-                      </div>
-                      <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1rem' }}>{svc.description}</p>
-                      {svc.duration>0 && (
-                        <div style={{ display:'flex', alignItems:'center', gap:6, color:'rgba(255,255,255,0.2)', fontSize:'0.78rem' }}>
-                          <Clock size={12} strokeWidth={1.5} />{svc.duration} min
+            ))}
+          </div>
+        </div>
+
+        {/* Loyalty */}
+        <div style={{ marginTop:'2rem', padding:'1rem', borderRadius:14, background:'rgba(201,168,76,0.05)', border:'1px solid rgba(201,168,76,0.1)' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+            <Star size={10} color="#C9A84C"/>
+            <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>Loyalty</span>
+          </div>
+          <p style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontFamily:'Jost,sans-serif', lineHeight:1.6 }}>
+            Earn <span style={{ color:'#C9A84C' }}>+10 points</span> with your booking.
+          </p>
+        </div>
+      </div>
+
+      {/* ── RIGHT CONTENT ─────────────────────────────────────── */}
+      <div className="appt-content" style={{ marginLeft:300, flex:1, minHeight:'100vh', paddingTop:88, paddingBottom:60 }}>
+        <div style={{ maxWidth:680, margin:'0 auto', padding:'0 2.5rem' }}>
+
+          <AnimatePresence mode="wait">
+
+            {/* ── STEP 0: Service ───────────────────────────── */}
+            {step===0 && (
+              <motion.div key="s0" {...slide}>
+                <div style={{ marginBottom:28 }}>
+                  <h1 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(2rem,4vw,3rem)', marginBottom:6, lineHeight:1.1 }}>
+                    What would you like<br/>
+                    <span className="gold-gradient" style={{ fontStyle:'italic' }}>today?</span>
+                  </h1>
+                  <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.85rem', fontFamily:'Jost,sans-serif' }}>Choose a service — tap <em>Learn more</em> for details</p>
+                </div>
+
+                {/* ── 2-column compact grid ── */}
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem' }}>
+                  {(services.length ? services : Array.from({length:6},(_,i)=>({id:i,name:'Loading...',description:'',price:'',duration:0,category:''}))).map((svc, i) => {
+                    const isActive = sel.service?.id === svc.id
+                    return (
+                      <div key={svc.id}
+                        style={{
+                          borderRadius:14,
+                          border: isActive ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.07)',
+                          background: isActive ? 'rgba(201,168,76,0.07)' : 'rgba(255,255,255,0.025)',
+                          transition:'all 0.3s ease',
+                          boxShadow: isActive ? '0 6px 28px rgba(201,168,76,0.12)' : 'none',
+                          overflow:'hidden',
+                          display:'flex', flexDirection:'column',
+                        }}
+                        className="svc-card">
+
+                        {/* Top accent bar */}
+                        <div style={{ height:3, background: isActive ? 'linear-gradient(90deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.05)', transition:'background 0.3s', flexShrink:0 }} />
+
+                        {/* Card body — clicking here selects */}
+                        <div
+                          onClick={() => { setSel(p=>({...p,service:svc})); setStep(1) }}
+                          style={{ padding:'1rem 1.1rem 0.85rem', flex:1, display:'flex', flexDirection:'column', gap:6, cursor:'pointer' }}>
+                          {/* Name + price row */}
+                          <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:6 }}>
+                            <h4 className="font-display" style={{ fontSize:'1.05rem', color:'#fff', lineHeight:1.2, flex:1 }}>{svc.name}</h4>
+                            {svc.price && (
+                              <span className="font-display" style={{ fontSize:'1.1rem', color: isActive ? '#C9A84C' : 'rgba(255,255,255,0.55)', flexShrink:0, transition:'color 0.3s' }}>
+                                €{svc.price}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Duration pill */}
+                          {svc.duration>0 && (
+                            <div style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'2px 8px', borderRadius:9999, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)', width:'fit-content' }}>
+                              <Clock size={9} color="rgba(255,255,255,0.25)" strokeWidth={1.5}/>
+                              <span style={{ fontSize:9, color:'rgba(255,255,255,0.28)', fontFamily:'Jost,sans-serif', letterSpacing:'0.1em' }}>{svc.duration} min</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {/* Hover accent line */}
-                      <div className="appt-card-accent" style={{
-                        position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)',
-                        width:0, height:1,
-                        background:'linear-gradient(90deg,transparent,#C9A84C,transparent)',
-                        transition:'width 0.5s ease',
-                      }} />
-                    </button>
-                  )
-                })}
-              </div>
-            </motion.div>
-          )}
 
-          {/* ── STEP 1: Stylist ─────────────────────────── */}
-          {step===1 && (
-            <motion.div key="s1" {...fadeSlide}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:40 }}>
-                <div>
-                  <h3 className="font-display" style={{ color:'#fff', fontSize:'1.6rem', marginBottom:4 }}>Choose your stylist</h3>
-                  <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.82rem' }}>
-                    for {sel.service?.name}
-                    {sel.service?.price && <span style={{ color:'rgba(201,168,76,0.5)', marginLeft:8 }}>· €{sel.service.price}</span>}
-                  </p>
-                </div>
-                <button onClick={() => setStep(0)} className="appt-back-btn" style={{
-                  color:'rgba(255,255,255,0.3)', background:'rgba(255,255,255,0.04)',
-                  border:'1px solid rgba(255,255,255,0.06)', borderRadius:12,
-                  cursor:'pointer', display:'flex', alignItems:'center', gap:5,
-                  padding:'9px 16px', fontSize:'0.8rem', fontFamily:'Jost,sans-serif',
-                  transition:'all 0.3s',
-                }}>
-                  <ChevronLeft size={14}/>Back
-                </button>
-              </div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:'1.25rem' }}>
-                {(stylists.length ? stylists : Array.from({length:3},(_,i)=>({id:i,name:'...',title:''}))).map(sty => {
-                  const active = sel.stylist?.id === sty.id
-                  return (
-                    <button key={sty.id}
-                      onClick={() => { setSel(p=>({...p,stylist:sty})); setStep(2) }}
-                      className="appt-card"
-                      style={{
-                        textAlign:'center', padding:'2.5rem 1.5rem', borderRadius:22, width:'100%',
-                        cursor:'pointer', transition:'all 0.4s cubic-bezier(0.22,1,0.36,1)',
-                        position:'relative', overflow:'hidden',
-                        border: active ? '1px solid rgba(201,168,76,0.45)' : '1px solid rgba(255,255,255,0.06)',
-                        background: active ? 'rgba(201,168,76,0.06)' : 'rgba(255,255,255,0.02)',
-                      }}>
-                      {/* Avatar */}
-                      <div style={{
-                        width:72, height:72, borderRadius:'50%',
-                        background:'linear-gradient(135deg,rgba(201,168,76,0.15),rgba(196,149,106,0.1))',
-                        display:'flex', alignItems:'center', justifyContent:'center',
-                        margin:'0 auto 1.5rem auto', overflow:'hidden',
-                        border:'2px solid rgba(201,168,76,0.1)',
-                        boxShadow:'0 8px 24px rgba(0,0,0,0.3)',
-                      }}>
-                        {sty.photo_url
-                          ? <img src={sty.photo_url} alt={sty.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
-                          : <User size={26} color="#C9A84C" strokeWidth={1.5} />
-                        }
+                        {/* Action row */}
+                        <div style={{ display:'flex', gap:0, borderTop:'1px solid rgba(255,255,255,0.05)', flexShrink:0 }}>
+                          <button
+                            onClick={e => { e.stopPropagation(); setPreview(svc) }}
+                            style={{ flex:1, padding:'0.6rem 0', background:'transparent', border:'none', borderRight:'1px solid rgba(255,255,255,0.05)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:5, fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', fontFamily:'Jost,sans-serif', transition:'all 0.2s' }}
+                            className="svc-info-btn">
+                            <Info size={11}/> Learn more
+                          </button>
+                          <button
+                            onClick={() => { setSel(p=>({...p,service:svc})); setStep(1) }}
+                            style={{ flex:1, padding:'0.6rem 0', background: isActive ? 'rgba(201,168,76,0.15)' : 'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:5, fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color: isActive ? '#C9A84C' : 'rgba(255,255,255,0.3)', fontFamily:'Jost,sans-serif', transition:'all 0.2s', fontWeight: isActive ? 600 : 400 }}
+                            className="svc-select-btn">
+                            {isActive ? <><Check size={11}/> Selected</> : <>Select <ArrowRight size={11}/></>}
+                          </button>
+                        </div>
                       </div>
-                      <h4 className="font-display" style={{ fontSize:'1.25rem', color:'#fff', marginBottom:'0.4rem' }}>{sty.name}</h4>
-                      <p style={{ fontSize:10, color:'rgba(255,255,255,0.3)', letterSpacing:'0.18em', textTransform:'uppercase' }}>{sty.title}</p>
-                      <div className="appt-card-accent" style={{
-                        position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)',
-                        width:0, height:1,
-                        background:'linear-gradient(90deg,transparent,#C9A84C,transparent)',
-                        transition:'width 0.5s ease',
-                      }} />
-                    </button>
-                  )
-                })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* ── STEP 2: Date & Time ─────────────────────── */}
-          {step===2 && (
-            <motion.div key="s2" {...fadeSlide}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:40 }}>
-                <div>
-                  <h3 className="font-display" style={{ color:'#fff', fontSize:'1.6rem', marginBottom:4 }}>Pick a date & time</h3>
-                  <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.82rem' }}>
-                    {sel.service?.name} with {sel.stylist?.name}
-                  </p>
+                    )
+                  })}
                 </div>
-                <button onClick={() => setStep(1)} className="appt-back-btn" style={{
-                  color:'rgba(255,255,255,0.3)', background:'rgba(255,255,255,0.04)',
-                  border:'1px solid rgba(255,255,255,0.06)', borderRadius:12,
-                  cursor:'pointer', display:'flex', alignItems:'center', gap:5,
-                  padding:'9px 16px', fontSize:'0.8rem', fontFamily:'Jost,sans-serif',
-                  transition:'all 0.3s',
-                }}>
-                  <ChevronLeft size={14}/>Back
-                </button>
-              </div>
 
-              <div className="appt-datetime-grid" style={{ display:'grid', gap:'2rem' }}>
-                {/* Calendar */}
-                <div style={{
-                  background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)',
-                  borderRadius:22, padding:'2rem',
-                }}>
+                {/* ── Service detail modal ── */}
+                <AnimatePresence>
+                  {preview && (
+                    <motion.div
+                      initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                      style={{ position:'fixed', inset:0, zIndex:60, background:'rgba(0,0,0,0.75)', backdropFilter:'blur(6px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem' }}
+                      onClick={() => setPreview(null)}>
+                      <motion.div
+                        initial={{ opacity:0, scale:0.93, y:16 }} animate={{ opacity:1, scale:1, y:0 }} exit={{ opacity:0, scale:0.93, y:8 }}
+                        transition={{ type:'spring', damping:26, stiffness:340 }}
+                        onClick={e => e.stopPropagation()}
+                        style={{ width:'100%', maxWidth:420, background:'#111', border:'1px solid rgba(201,168,76,0.18)', borderRadius:20, overflow:'hidden', boxShadow:'0 32px 80px rgba(0,0,0,0.6)' }}>
+
+                        {/* Gold top bar */}
+                        <div style={{ height:3, background:'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.2))' }} />
+
+                        {/* Header */}
+                        <div style={{ padding:'1.5rem 1.5rem 1rem', display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12 }}>
+                          <div>
+                            <h2 className="font-display font-light" style={{ fontSize:'1.8rem', color:'#fff', lineHeight:1.1, marginBottom:4 }}>{preview.name}</h2>
+                            {preview.category && (
+                              <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{preview.category}</span>
+                            )}
+                          </div>
+                          <button onClick={() => setPreview(null)}
+                            style={{ width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.4)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all 0.2s' }}
+                            className="preview-close">
+                            <X size={14}/>
+                          </button>
+                        </div>
+
+                        {/* Divider */}
+                        <div style={{ height:1, background:'rgba(255,255,255,0.06)', margin:'0 1.5rem' }} />
+
+                        {/* Info pills */}
+                        <div style={{ display:'flex', gap:8, padding:'1rem 1.5rem', flexWrap:'wrap' }}>
+                          {preview.price && (
+                            <div style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)' }}>
+                              <span style={{ fontSize:10, letterSpacing:'0.12em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', fontFamily:'Jost,sans-serif' }}>Price</span>
+                              <span className="font-display" style={{ fontSize:'1.1rem', color:'#C9A84C' }}>€{preview.price}</span>
+                            </div>
+                          )}
+                          {preview.duration>0 && (
+                            <div style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)' }}>
+                              <Clock size={11} color="rgba(255,255,255,0.3)" strokeWidth={1.5}/>
+                              <span style={{ fontSize:'0.82rem', color:'rgba(255,255,255,0.55)', fontFamily:'Jost,sans-serif' }}>{preview.duration} min</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Description */}
+                        {preview.description && (
+                          <div style={{ padding:'0 1.5rem 1.5rem' }}>
+                            <p style={{ color:'rgba(255,255,255,0.45)', fontSize:'0.88rem', lineHeight:1.85, fontFamily:'Jost,sans-serif', fontWeight:300 }}>{preview.description}</p>
+                          </div>
+                        )}
+
+                        {/* CTA */}
+                        <div style={{ padding:'1.25rem 1.5rem', borderTop:'1px solid rgba(255,255,255,0.06)', display:'flex', gap:8 }}>
+                          <button onClick={() => setPreview(null)}
+                            style={{ flex:1, padding:'0.7rem', borderRadius:10, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.35)', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', cursor:'pointer', transition:'all 0.2s' }}
+                            className="preview-cancel">
+                            Close
+                          </button>
+                          <button onClick={() => { setSel(p=>({...p,service:preview})); setPreview(null); setStep(1) }}
+                            className="btn-gold"
+                            style={{ flex:2, padding:'0.7rem', fontSize:11, justifyContent:'center' }}>
+                            Book This Service <ArrowRight size={13}/>
+                          </button>
+                        </div>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )}
+
+            {/* ── STEP 1: Stylist ───────────────────────────── */}
+            {step===1 && (
+              <motion.div key="s1" {...slide}>
+                <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:36, gap:'1rem' }}>
+                  <div>
+                    <h1 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(2rem,4vw,3rem)', marginBottom:6, lineHeight:1.1 }}>
+                      Who should take<br/>
+                      <span className="gold-gradient" style={{ fontStyle:'italic' }}>care of you?</span>
+                    </h1>
+                    <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.85rem', fontFamily:'Jost,sans-serif' }}>
+                      {sel.service?.name} {sel.service?.price && `· €${sel.service.price}`}
+                    </p>
+                  </div>
+                  <button onClick={() => setStep(0)} className="appt-back-btn" style={{ display:'flex', alignItems:'center', gap:5, padding:'8px 16px', borderRadius:10, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.3)', cursor:'pointer', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', transition:'all 0.3s', whiteSpace:'nowrap', flexShrink:0, marginTop:6 }}>
+                    <ChevronLeft size={13}/> Back
+                  </button>
+                </div>
+
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:'1rem' }}>
+                  {(stylists.length ? stylists : Array.from({length:4},(_,i)=>({id:i,name:'...',title:''}))).map((sty,i) => {
+                    const isActive = sel.stylist?.id === sty.id
+                    return (
+                      <button key={sty.id}
+                        onClick={() => { setSel(p=>({...p,stylist:sty})); setStep(2) }}
+                        className="appt-sty-card"
+                        style={{
+                          padding:0, borderRadius:18, cursor:'pointer', overflow:'hidden',
+                          border: isActive ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.07)',
+                          background:'rgba(255,255,255,0.02)', transition:'all 0.35s ease',
+                          boxShadow: isActive ? '0 8px 40px rgba(201,168,76,0.12)' : 'none',
+                          position:'relative',
+                        }}>
+                        <div style={{ height:160, background:'linear-gradient(135deg,rgba(201,168,76,0.08),rgba(196,149,106,0.04))', position:'relative', overflow:'hidden' }}>
+                          {sty.photo_url
+                            ? <img src={sty.photo_url} alt={sty.name} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
+                            : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                <User size={36} color="rgba(201,168,76,0.2)" strokeWidth={1}/>
+                              </div>
+                          }
+                          {isActive && (
+                            <div style={{ position:'absolute', inset:0, background:'rgba(201,168,76,0.08)', display:'flex', alignItems:'flex-start', justifyContent:'flex-end', padding:10 }}>
+                              <div style={{ width:24, height:24, borderRadius:'50%', background:'#C9A84C', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                <Check size={12} color="#000" strokeWidth={3}/>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ padding:'0.9rem 1rem', textAlign:'center' }}>
+                          <p className="font-display" style={{ color:'#fff', fontSize:'1.05rem', marginBottom:3 }}>{sty.name}</p>
+                          <p style={{ fontSize:8, color:'rgba(255,255,255,0.25)', letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Jost,sans-serif' }}>{sty.title}</p>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── STEP 2: Date & Time ───────────────────────── */}
+            {step===2 && (
+              <motion.div key="s2" {...slide}>
+
+                {/* Compact header */}
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, gap:'1rem' }}>
+                  <div>
+                    <h1 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(1.6rem,3vw,2.2rem)', marginBottom:3, lineHeight:1.1 }}>
+                      When works <span className="gold-gradient" style={{ fontStyle:'italic' }}>for you?</span>
+                    </h1>
+                    <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.8rem', fontFamily:'Jost,sans-serif' }}>
+                      {sel.service?.name} with {sel.stylist?.name}
+                    </p>
+                  </div>
+                  <button onClick={() => setStep(1)} className="appt-back-btn" style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', borderRadius:10, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.3)', cursor:'pointer', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', transition:'all 0.3s', whiteSpace:'nowrap', flexShrink:0 }}>
+                    <ChevronLeft size={13}/> Back
+                  </button>
+                </div>
+
+                {/* ── Full-width calendar ── */}
+                <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'1rem 1.25rem', marginBottom:12 }}>
                   {/* Month nav */}
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:28 }}>
-                    <button onClick={() => setMonth(subMonths(month,1))} className="appt-nav-btn" style={{
-                      width:36, height:36, borderRadius:12,
-                      background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)',
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      color:'rgba(255,255,255,0.4)', cursor:'pointer', transition:'all 0.3s',
-                    }}>
-                      <ChevronLeft size={15}/>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+                    <button onClick={() => setMonth(subMonths(month,1))} className="appt-nav-btn" style={{ width:30, height:30, borderRadius:8, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,0.3)', cursor:'pointer', transition:'all 0.3s' }}>
+                      <ChevronLeft size={12}/>
                     </button>
-                    <span className="font-display" style={{ color:'#fff', fontSize:'1.1rem', letterSpacing:'0.04em' }}>
-                      {format(month,'MMMM yyyy')}
-                    </span>
-                    <button onClick={() => setMonth(addMonths(month,1))} className="appt-nav-btn" style={{
-                      width:36, height:36, borderRadius:12,
-                      background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.06)',
-                      display:'flex', alignItems:'center', justifyContent:'center',
-                      color:'rgba(255,255,255,0.4)', cursor:'pointer', transition:'all 0.3s',
-                    }}>
-                      <ChevronRight size={15}/>
+                    <span className="font-display" style={{ color:'#fff', fontSize:'1.05rem' }}>{format(month,'MMMM yyyy')}</span>
+                    <button onClick={() => setMonth(addMonths(month,1))} className="appt-nav-btn" style={{ width:30, height:30, borderRadius:8, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,0.3)', cursor:'pointer', transition:'all 0.3s' }}>
+                      <ChevronRight size={12}/>
                     </button>
                   </div>
 
-                  {/* Day headers */}
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:3, marginBottom:10 }}>
-                    {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-                      <div key={d} style={{
-                        textAlign:'center', fontSize:9, color:'rgba(255,255,255,0.18)',
-                        letterSpacing:'0.14em', textTransform:'uppercase', padding:'6px 0',
-                        fontFamily:'Jost,sans-serif',
-                      }}>{d}</div>
+                  {/* Weekday labels */}
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:4, marginBottom:4 }}>
+                    {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((d,i) => (
+                      <div key={i} style={{ textAlign:'center', fontSize:9, color:'rgba(255,255,255,0.18)', letterSpacing:'0.08em', padding:'3px 0', fontFamily:'Jost,sans-serif', textTransform:'uppercase' }}>{d}</div>
                     ))}
                   </div>
 
-                  {/* Day grid */}
-                  <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:3 }}>
-                    {Array.from({length:startPad}).map((_,i)=><div key={`p${i}`}/>)}
+                  {/* Day grid — fixed height cells, no aspect-ratio */}
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:4 }}>
+                    {Array.from({length:startPad}).map((_,i)=><div key={`p${i}`} style={{ height:44 }}/>)}
                     {days.map(day => {
-                      const off   = isOff(day)
-                      const isSel = sel.date && isSameDay(day,sel.date)
-                      const isToday = isSameDay(day, new Date())
+                      const off=isOff(day), isSel=sel.date&&isSameDay(day,sel.date), isToday=isSameDay(day,new Date())
                       return (
-                        <button key={day.toString()} disabled={off}
-                          onClick={() => setSel(p=>({...p,date:day,time:null}))}
-                          className="appt-day-btn"
+                        <button key={day.toString()} disabled={off} onClick={() => setSel(p=>({...p,date:day,time:null}))} className="appt-day-btn"
                           style={{
-                            aspectRatio:'1/1', borderRadius:12, fontSize:'0.82rem',
-                            border: isToday && !isSel ? '1px solid rgba(201,168,76,0.2)' : 'none',
-                            cursor: off ? 'not-allowed' : 'pointer',
-                            background: isSel ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'transparent',
-                            color: isSel ? '#000' : off ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.55)',
-                            fontWeight: isSel ? 600 : 400,
-                            boxShadow: isSel ? '0 4px 20px rgba(201,168,76,0.35)' : 'none',
-                            transition:'all 0.25s ease',
-                            fontFamily:'Jost,sans-serif',
-                          }}>
-                          {format(day,'d')}
-                        </button>
+                            height:44, borderRadius:10, fontSize:'0.85rem', fontFamily:'Jost,sans-serif',
+                            cursor:off?'not-allowed':'pointer', transition:'all 0.2s ease',
+                            border:isToday&&!isSel?'1px solid rgba(201,168,76,0.35)':'1px solid transparent',
+                            background:isSel?'linear-gradient(135deg,#C9A84C,#C4956A)':'transparent',
+                            color:isSel?'#000':off?'rgba(255,255,255,0.08)':isToday?'#C9A84C':'rgba(255,255,255,0.5)',
+                            fontWeight:isSel?700:400,
+                            boxShadow:isSel?'0 4px 16px rgba(201,168,76,0.4)':'none',
+                          }}>{format(day,'d')}</button>
                       )
                     })}
                   </div>
                 </div>
 
-                {/* Time slots */}
-                <div>
+                {/* ── Time slots (below calendar, same card width) ── */}
+                <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'0.875rem 1.25rem' }}>
                   {sel.date ? (
                     <>
-                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:20 }}>
-                        <Calendar size={13} color="#C9A84C" strokeWidth={1.5} />
-                        <p style={{ fontSize:11, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', fontFamily:'Jost,sans-serif' }}>
-                          {format(sel.date,'EEEE, MMMM d')}
-                        </p>
+                      {/* Selected date label */}
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                          <Calendar size={11} color="#C9A84C" strokeWidth={1.5}/>
+                          <span style={{ fontSize:10, letterSpacing:'0.13em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{format(sel.date,'EEEE, MMMM d')}</span>
+                        </div>
+                        {sel.time && (
+                          <button className="btn-gold" onClick={() => setStep(3)} style={{ padding:'6px 18px', fontSize:10, gap:6 }}>
+                            Continue <ArrowRight size={12}/>
+                          </button>
+                        )}
                       </div>
 
-                      {/* Morning / Afternoon labels */}
-                      <p style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.18)', marginBottom:10, fontFamily:'Jost,sans-serif' }}>
-                        Morning
-                      </p>
-                      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginBottom:20 }}>
-                        {SLOTS.filter(s => parseInt(s) < 13).map(slot => {
-                          const tk    = taken.includes(slot)
-                          const isSel = sel.time === slot
-                          return (
-                            <button key={slot} disabled={tk}
-                              onClick={() => setSel(p=>({...p,time:slot}))}
-                              className="appt-slot-btn"
-                              style={{
-                                padding:'0.8rem 0', borderRadius:12, fontSize:'0.85rem',
-                                cursor: tk ? 'not-allowed' : 'pointer',
-                                border: isSel ? 'none' : '1px solid rgba(255,255,255,0.06)',
-                                background: isSel ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.02)',
-                                color: isSel ? '#000' : tk ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)',
-                                fontWeight: isSel ? 600 : 300,
-                                textDecoration: tk ? 'line-through' : 'none',
-                                boxShadow: isSel ? '0 4px 20px rgba(201,168,76,0.3)' : 'none',
-                                transition:'all 0.25s ease',
-                                fontFamily:'Jost,sans-serif',
-                              }}>
-                              {slot}
-                            </button>
-                          )
-                        })}
-                      </div>
-
-                      <p style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.18)', marginBottom:10, fontFamily:'Jost,sans-serif' }}>
-                        Afternoon
-                      </p>
-                      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
-                        {SLOTS.filter(s => parseInt(s) >= 13).map(slot => {
-                          const tk    = taken.includes(slot)
-                          const isSel = sel.time === slot
-                          return (
-                            <button key={slot} disabled={tk}
-                              onClick={() => setSel(p=>({...p,time:slot}))}
-                              className="appt-slot-btn"
-                              style={{
-                                padding:'0.8rem 0', borderRadius:12, fontSize:'0.85rem',
-                                cursor: tk ? 'not-allowed' : 'pointer',
-                                border: isSel ? 'none' : '1px solid rgba(255,255,255,0.06)',
-                                background: isSel ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.02)',
-                                color: isSel ? '#000' : tk ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)',
-                                fontWeight: isSel ? 600 : 300,
-                                textDecoration: tk ? 'line-through' : 'none',
-                                boxShadow: isSel ? '0 4px 20px rgba(201,168,76,0.3)' : 'none',
-                                transition:'all 0.25s ease',
-                                fontFamily:'Jost,sans-serif',
-                              }}>
-                              {slot}
-                            </button>
-                          )
-                        })}
+                      {/* Morning | Afternoon side by side */}
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1px 1fr', gap:'0 12px' }}>
+                        {[
+                          ['Morning',   SLOTS.filter(s => parseInt(s) < 13)],
+                          ['Afternoon', SLOTS.filter(s => parseInt(s) >= 13)],
+                        ].map(([label, slots], col) => (
+                          col === 0 ? (
+                            <div key={label}>
+                              <p style={{ fontSize:9, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.18)', fontFamily:'Jost,sans-serif', marginBottom:7 }}>{label}</p>
+                              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
+                                {slots.map(slot => {
+                                  const tk   = taken.includes(slot) || blockedSlots.includes(slot)
+                                  const isSel = sel.time === slot
+                                  return (
+                                    <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
+                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'Jost,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(255,255,255,0.07)', background:isSel?'linear-gradient(135deg,#C9A84C,#C4956A)':'rgba(255,255,255,0.02)', color:isSel?'#000':tk?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.4)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(201,168,76,0.35)':'none' }}>
+                                      {slot}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          ) : [
+                            <div key="divider" style={{ background:'rgba(255,255,255,0.06)', borderRadius:1 }} />,
+                            <div key={label}>
+                              <p style={{ fontSize:9, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.18)', fontFamily:'Jost,sans-serif', marginBottom:7 }}>{label}</p>
+                              <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
+                                {slots.map(slot => {
+                                  const tk=taken.includes(slot), isSel=sel.time===slot
+                                  return (
+                                    <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
+                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'Jost,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(201,168,76,0.1)', background:isSel?'linear-gradient(135deg,#C9A84C,#C4956A)':'rgba(201,168,76,0.03)', color:isSel?'#000':tk?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.4)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(201,168,76,0.35)':'none' }}>
+                                      {slot}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          ]
+                        ))}
                       </div>
                     </>
                   ) : (
-                    <div style={{
-                      height:'100%', minHeight:200, display:'flex', flexDirection:'column',
-                      alignItems:'center', justifyContent:'center', gap:12,
-                      borderRadius:22, border:'1px dashed rgba(255,255,255,0.06)',
-                      background:'rgba(255,255,255,0.01)',
-                    }}>
-                      <Calendar size={28} color="rgba(255,255,255,0.1)" strokeWidth={1} />
-                      <p style={{ color:'rgba(255,255,255,0.18)', fontSize:'0.85rem', fontStyle:'italic' }}>Select a date first</p>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'0.75rem 0', color:'rgba(255,255,255,0.18)', fontSize:'0.8rem', fontFamily:'Jost,sans-serif', fontStyle:'italic' }}>
+                      <Calendar size={14} strokeWidth={1.2}/> Pick a date to see available times
                     </div>
                   )}
                 </div>
-              </div>
 
-              {sel.date && sel.time && (
-                <motion.div
-                  initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }}
-                  style={{ textAlign:'center', marginTop:48 }}>
-                  <button className="btn-gold" onClick={() => setStep(3)}>
-                    Continue <ArrowRight size={15}/>
-                  </button>
-                </motion.div>
-              )}
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {/* ── STEP 3: Confirm ─────────────────────────── */}
-          {step===3 && (
-            <motion.div key="s3" {...fadeSlide}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:40 }}>
-                <div>
-                  <h3 className="font-display" style={{ color:'#fff', fontSize:'1.6rem', marginBottom:4 }}>Confirm booking</h3>
-                  <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.82rem' }}>Review your appointment details</p>
-                </div>
-                <button onClick={() => setStep(2)} className="appt-back-btn" style={{
-                  color:'rgba(255,255,255,0.3)', background:'rgba(255,255,255,0.04)',
-                  border:'1px solid rgba(255,255,255,0.06)', borderRadius:12,
-                  cursor:'pointer', display:'flex', alignItems:'center', gap:5,
-                  padding:'9px 16px', fontSize:'0.8rem', fontFamily:'Jost,sans-serif',
-                  transition:'all 0.3s',
-                }}>
-                  <ChevronLeft size={14}/>Back
-                </button>
-              </div>
-
-              {/* Summary card */}
-              <div style={{
-                borderRadius:22, padding:'2.25rem',
-                background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)',
-                marginBottom:28, position:'relative', overflow:'hidden',
-              }}>
-                {/* Subtle corner glow */}
-                <div style={{
-                  position:'absolute', top:-40, right:-40, width:160, height:160,
-                  background:'radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)',
-                  pointerEvents:'none',
-                }} />
-
-                {[
-                  { label:'Service', value: sel.service?.name, extra: sel.service?.price ? `€${sel.service.price}` : null },
-                  { label:'Stylist', value: sel.stylist?.name },
-                  { label:'Date',    value: sel.date ? format(sel.date,'EEEE, MMMM d, yyyy') : '' },
-                  { label:'Time',    value: sel.time },
-                ].map(({ label, value, extra }, i, arr) => (
-                  <div key={label} style={{
-                    display:'flex', justifyContent:'space-between', alignItems:'center',
-                    padding:'1.15rem 0',
-                    borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                  }}>
-                    <span style={{
-                      fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase',
-                      color:'rgba(255,255,255,0.25)', fontFamily:'Jost,sans-serif',
-                    }}>{label}</span>
-                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <span style={{ color:'#f0f0f0', fontSize:'0.9rem', fontFamily:'Jost,sans-serif', fontWeight:300 }}>{value}</span>
-                      {extra && (
-                        <span style={{
-                          padding:'3px 12px', borderRadius:9999,
-                          background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.15)',
-                          fontSize:11, color:'#C9A84C', fontFamily:'Jost,sans-serif',
-                        }}>{extra}</span>
-                      )}
-                    </div>
+            {/* ── STEP 3: Confirm ───────────────────────────── */}
+            {step===3 && (
+              <motion.div key="s3" {...slide}>
+                <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:36, gap:'1rem' }}>
+                  <div>
+                    <h1 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(2rem,4vw,3rem)', marginBottom:6, lineHeight:1.1 }}>
+                      Almost there,<br/>
+                      <span className="gold-gradient" style={{ fontStyle:'italic' }}>let's confirm.</span>
+                    </h1>
+                    <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.85rem', fontFamily:'Jost,sans-serif' }}>Review your appointment details</p>
                   </div>
-                ))}
-              </div>
-
-              {/* Notes */}
-              <div style={{ marginBottom:28 }}>
-                <label style={{
-                  display:'block', fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase',
-                  color:'rgba(255,255,255,0.25)', marginBottom:10, fontFamily:'Jost,sans-serif',
-                }}>
-                  Notes (optional)
-                </label>
-                <textarea value={sel.notes} onChange={e => setSel(p=>({...p,notes:e.target.value}))} rows={3}
-                  placeholder="Any special requests or preferences..."
-                  className="appt-textarea"
-                  style={{
-                    width:'100%', background:'rgba(255,255,255,0.02)',
-                    border:'1px solid rgba(255,255,255,0.06)', borderRadius:16,
-                    padding:'1rem 1.25rem', fontSize:'0.88rem', color:'#f0f0f0',
-                    outline:'none', fontFamily:'Jost,sans-serif', fontWeight:300,
-                    resize:'none', transition:'border-color 0.3s',
-                  }}
-                />
-              </div>
-
-              {!user && (
-                <div style={{
-                  textAlign:'center', padding:'14px 20px', borderRadius:14,
-                  background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.12)',
-                  marginBottom:20,
-                }}>
-                  <p style={{ color:'rgba(251,191,36,0.8)', fontSize:'0.84rem', fontFamily:'Jost,sans-serif' }}>
-                    Please sign in to confirm your booking.
-                  </p>
+                  <button onClick={() => setStep(2)} className="appt-back-btn" style={{ display:'flex', alignItems:'center', gap:5, padding:'8px 16px', borderRadius:10, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.3)', cursor:'pointer', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', transition:'all 0.3s', whiteSpace:'nowrap', flexShrink:0, marginTop:6 }}>
+                    <ChevronLeft size={13}/> Back
+                  </button>
                 </div>
-              )}
 
-              <button className="btn-gold" onClick={book} disabled={saving || !user} style={{ width:'100%' }}>
-                {saving
-                  ? <div style={{ width:16, height:16, border:'2px solid rgba(0,0,0,0.25)', borderTopColor:'#000', borderRadius:'50%', animation:'spin 0.8s linear infinite' }}/>
-                  : <>Confirm Booking <Check size={15}/></>
-                }
-              </button>
+                {/* Summary card */}
+                <div style={{ borderRadius:18, overflow:'hidden', border:'1px solid rgba(201,168,76,0.14)', marginBottom:20, position:'relative' }}>
+                  <div style={{ height:3, background:'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.2))' }} />
+                  <div style={{ position:'absolute', top:0, right:0, width:180, height:180, background:'radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%)', pointerEvents:'none' }} />
+                  <div style={{ background:'rgba(255,255,255,0.02)' }}>
+                    {[
+                      { label:'Service', value:sel.service?.name, extra:`€${sel.service?.price}` },
+                      { label:'Stylist', value:sel.stylist?.name },
+                      { label:'Date',    value:sel.date?format(sel.date,'EEEE, MMMM d, yyyy'):'' },
+                      { label:'Time',    value:sel.time },
+                      ...(sel.service?.duration?[{ label:'Duration', value:`${sel.service.duration} min` }]:[]),
+                    ].map(({ label, value, extra }, i, arr) => (
+                      <div key={label} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'1rem 1.5rem', borderBottom:i<arr.length-1?'1px solid rgba(255,255,255,0.04)':'none' }}>
+                        <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.2)', fontFamily:'Jost,sans-serif' }}>{label}</span>
+                        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <span style={{ color:'rgba(255,255,255,0.75)', fontSize:'0.85rem', fontFamily:'Jost,sans-serif', fontWeight:300 }}>{value}</span>
+                          {extra && <span style={{ padding:'2px 10px', borderRadius:9999, background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.2)', fontSize:11, color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{extra}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-              {/* Loyalty hint */}
-              <div style={{
-                display:'flex', alignItems:'center', justifyContent:'center', gap:6,
-                marginTop:16,
-              }}>
-                <Sparkles size={11} color="rgba(201,168,76,0.4)" />
-                <p style={{ fontSize:10, color:'rgba(255,255,255,0.2)', letterSpacing:'0.12em', fontFamily:'Jost,sans-serif' }}>
-                  You'll earn +10 loyalty points
-                </p>
-              </div>
-            </motion.div>
-          )}
+                {/* Notes */}
+                <div style={{ marginBottom:18 }}>
+                  <label style={{ display:'block', fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.2)', marginBottom:8, fontFamily:'Jost,sans-serif' }}>Notes (optional)</label>
+                  <textarea value={sel.notes} onChange={e=>setSel(p=>({...p,notes:e.target.value}))} rows={3}
+                    placeholder="Any special requests or preferences..."
+                    className="appt-textarea"
+                    style={{ width:'100%', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:12, padding:'0.9rem 1.1rem', fontSize:'0.84rem', color:'#f0f0f0', outline:'none', fontFamily:'Jost,sans-serif', fontWeight:300, resize:'none', transition:'border-color 0.3s', boxSizing:'border-box' }}
+                  />
+                </div>
 
-        </AnimatePresence>
+                {!user && (
+                  <div style={{ padding:'11px 16px', borderRadius:12, background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.12)', marginBottom:14, textAlign:'center' }}>
+                    <p style={{ color:'rgba(251,191,36,0.8)', fontSize:'0.82rem', fontFamily:'Jost,sans-serif' }}>Please sign in to confirm your booking.</p>
+                  </div>
+                )}
+
+                <button className="btn-gold" onClick={book} disabled={saving||!user} style={{ width:'100%', justifyContent:'center' }}>
+                  {saving
+                    ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'#000',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
+                    : <>Confirm Booking <Check size={15}/></>
+                  }
+                </button>
+
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:12 }}>
+                  <Sparkles size={10} color="rgba(201,168,76,0.4)"/>
+                  <p style={{ fontSize:9, color:'rgba(255,255,255,0.18)', letterSpacing:'0.12em', fontFamily:'Jost,sans-serif' }}>You'll earn +10 loyalty points with this booking</p>
+                </div>
+              </motion.div>
+            )}
+
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* ── Scoped hover styles ─────────────────────────── */}
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg) } }
+        @keyframes spin { to { transform:rotate(360deg) } }
 
-        .appt-datetime-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-        @media (max-width: 700px) {
-          .appt-datetime-grid { grid-template-columns: 1fr; }
-          .appt-step-label { display: none; }
+        @media (max-width:700px) {
+          .appt-sidebar { display:none !important; }
+          .appt-content { margin-left:0 !important; }
         }
 
-        .appt-card:hover {
-          border-color: rgba(201,168,76,0.3) !important;
-          background: rgba(201,168,76,0.04) !important;
-          transform: translateY(-4px);
-          box-shadow: 0 12px 48px rgba(201,168,76,0.08);
+        .svc-card:hover { border-color:rgba(201,168,76,0.3) !important; background:rgba(201,168,76,0.04) !important; }
+        .svc-info-btn:hover   { color:rgba(255,255,255,0.65) !important; background:rgba(255,255,255,0.04) !important; }
+        .svc-select-btn:hover { color:#C9A84C !important; background:rgba(201,168,76,0.08) !important; }
+        .preview-close:hover  { background:rgba(255,255,255,0.1) !important; color:rgba(255,255,255,0.8) !important; }
+        .preview-cancel:hover { background:rgba(255,255,255,0.07) !important; color:rgba(255,255,255,0.6) !important; }
+        .appt-sty-card:hover {
+          border-color:rgba(201,168,76,0.3) !important;
+          transform:translateY(-4px);
+          box-shadow:0 12px 40px rgba(201,168,76,0.1) !important;
         }
-        .appt-card:hover .appt-card-accent {
-          width: 60% !important;
-        }
-
         .appt-back-btn:hover {
-          color: rgba(255,255,255,0.6) !important;
-          border-color: rgba(255,255,255,0.12) !important;
-          background: rgba(255,255,255,0.06) !important;
+          color:rgba(255,255,255,0.6) !important;
+          border-color:rgba(255,255,255,0.13) !important;
+          background:rgba(255,255,255,0.07) !important;
         }
-
         .appt-nav-btn:hover {
-          background: rgba(201,168,76,0.08) !important;
-          border-color: rgba(201,168,76,0.2) !important;
-          color: #C9A84C !important;
+          background:rgba(201,168,76,0.09) !important;
+          border-color:rgba(201,168,76,0.22) !important;
+          color:#C9A84C !important;
         }
-
         .appt-day-btn:not(:disabled):hover {
-          background: rgba(201,168,76,0.1) !important;
-          color: #C9A84C !important;
+          background:rgba(201,168,76,0.1) !important;
+          color:#C9A84C !important;
         }
-
         .appt-slot-btn:not(:disabled):hover {
-          border-color: rgba(201,168,76,0.25) !important;
-          background: rgba(201,168,76,0.06) !important;
-          color: #C9A84C !important;
+          border-color:rgba(201,168,76,0.28) !important;
+          background:rgba(201,168,76,0.07) !important;
+          color:#C9A84C !important;
         }
-
-        .appt-textarea:focus {
-          border-color: rgba(201,168,76,0.35) !important;
-        }
-        .appt-textarea::placeholder {
-          color: rgba(255,255,255,0.15);
-        }
+        .appt-textarea:focus { border-color:rgba(201,168,76,0.35) !important; }
+        .appt-textarea::placeholder { color:rgba(255,255,255,0.13); }
       `}</style>
     </div>
   )

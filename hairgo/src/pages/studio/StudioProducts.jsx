@@ -1,144 +1,191 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Edit2, Trash2, X, Package, Save } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
+const C = {
+  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
+  border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
+}
+
 const EMPTY = { name: '', description: '', price: '', category: '', stock: '', available: true, image_url: '' }
+const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
+
+function stockBadge(stock) {
+  if (stock === 0) return { bg: 'rgba(248,113,113,0.15)', color: '#f87171', label: 'Out of stock' }
+  if (stock < 5)  return { bg: 'rgba(245,158,11,0.15)',  color: '#f59e0b', label: `${stock} left` }
+  return { bg: 'rgba(52,211,153,0.12)', color: '#34d399', label: `${stock} in stock` }
+}
 
 export default function StudioProducts() {
   const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(null)
-  const [form, setForm] = useState(EMPTY)
-  const [saving, setSaving] = useState(false)
+  const [loading,  setLoading]  = useState(true)
+  const [modal,    setModal]    = useState(null)
+  const [form,     setForm]     = useState(EMPTY)
+  const [saving,   setSaving]   = useState(false)
 
   useEffect(() => { load() }, [])
 
   async function load() {
     const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false })
-    setProducts(data || [])
-    setLoading(false)
+    setProducts(data || []); setLoading(false)
   }
 
-  function openAdd() { setForm(EMPTY); setModal('add') }
-  function openEdit(p) { setForm({ ...p }); setModal('edit') }
-
   async function save() {
+    if (!form.name?.trim()) return toast.error('Name is required')
     setSaving(true)
     try {
       const payload = { ...form, price: parseFloat(form.price) || 0, stock: parseInt(form.stock) || 0 }
-      if (modal === 'add') {
-        const { error } = await supabase.from('products').insert(payload)
-        if (error) throw error
-        toast.success('Product added')
-      } else {
-        const { error } = await supabase.from('products').update(payload).eq('id', form.id)
-        if (error) throw error
-        toast.success('Product updated')
-      }
-      setModal(null)
-      load()
-    } catch (err) {
-      toast.error(err.message)
-    } finally {
-      setSaving(false)
-    }
+      const { error } = modal === 'add'
+        ? await supabase.from('products').insert(payload)
+        : await supabase.from('products').update(payload).eq('id', form.id)
+      if (error) throw error
+      toast.success(modal === 'add' ? 'Product added' : 'Product updated')
+      setModal(null); load()
+    } catch (err) { toast.error(err.message) }
+    finally { setSaving(false) }
   }
 
   async function deleteProduct(id) {
     if (!confirm('Delete this product?')) return
     await supabase.from('products').delete().eq('id', id)
-    toast.success('Product deleted')
-    load()
+    toast.success('Product deleted'); load()
   }
 
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-4xl text-white">Products</h1>
-        <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#C4956A] text-black text-sm font-medium hover:opacity-90 transition-opacity">
-          <Plus size={16} /> Add Product
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .prod-img { transition: transform .45s ease; }
+        .prod-card:hover .prod-img { transform: scale(1.05); }
+        .prod-overlay { opacity: 0; transition: opacity .2s; }
+        .prod-card:hover .prod-overlay { opacity: 1; }
+        .prod-card:hover { border-color: rgba(201,168,76,0.2) !important; }
+        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+      `}</style>
+
+      <div style={{ flexShrink: 0, marginBottom: '1.1rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div>
+          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Products</h1>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{products.length} in catalogue</p>
+        </div>
+        <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-g"
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+          <Plus size={13} /> Add Product
         </button>
       </div>
 
-      {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-48 shimmer rounded-2xl" />)}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {products.map(p => (
-            <motion.div key={p.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden group">
-              <div className="aspect-square bg-[#1a1a1a] relative">
-                {p.image_url ? <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" /> : (
-                  <div className="w-full h-full flex items-center justify-center"><Package size={32} className="text-white/10" /></div>
-                )}
-                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => openEdit(p)} className="w-7 h-7 rounded-lg bg-black/60 text-white/60 hover:text-white flex items-center justify-center backdrop-blur-sm"><Edit2 size={12} /></button>
-                  <button onClick={() => deleteProduct(p.id)} className="w-7 h-7 rounded-lg bg-black/60 text-red-400/60 hover:text-red-400 flex items-center justify-center backdrop-blur-sm"><Trash2 size={12} /></button>
+      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+        {loading ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(170px,1fr))', gap: '1rem' }}>
+            {Array.from({ length: 8 }).map((_, i) => <div key={i} style={{ height: 240, borderRadius: 14, background: C.card, border: `1px solid ${C.border}` }} />)}
+          </div>
+        ) : products.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 240 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 12, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+              <Package size={22} color={C.border} />
+            </div>
+            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>No products yet</p>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(170px,1fr))', gap: '1rem' }}>
+            {products.map(p => {
+              const badge = stockBadge(p.stock ?? 0)
+              return (
+                <div key={p.id} className="prod-card" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', cursor: 'default', transition: 'border-color .2s' }}>
+                  <div style={{ position: 'relative', paddingTop: '100%', background: '#0e0e14', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', inset: 0 }}>
+                      {p.image_url
+                        ? <img src={p.image_url} alt={p.name} className="prod-img" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Package size={28} color={C.border} />
+                          </div>
+                      }
+                    </div>
+                    <div className="prod-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', padding: '0.5rem', gap: 4 }}>
+                      <button onClick={() => { setForm({ ...p }); setModal('edit') }}
+                        style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(0,0,0,.65)', border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Edit2 size={11} />
+                      </button>
+                      <button onClick={() => deleteProduct(p.id)}
+                        style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(0,0,0,.65)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trash2 size={11} />
+                      </button>
+                    </div>
+                    {!p.available && (
+                      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, background: 'rgba(0,0,0,.5)', padding: '0.25rem 0.75rem', borderRadius: 20, border: `1px solid ${C.border}`, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Unavailable</span>
+                      </div>
+                    )}
+                    {p.stock !== undefined && p.stock !== null && (
+                      <div style={{ position: 'absolute', bottom: 7, left: 7 }}>
+                        <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 20, background: badge.bg, color: badge.color, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{badge.label}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ padding: '0.65rem 0.875rem' }}>
+                    <p style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{p.name}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ color: C.gold, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>€{p.price}</span>
+                      {p.category && <span style={{ fontSize: 9, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'Jost,sans-serif' }}>{p.category}</span>}
+                    </div>
+                  </div>
                 </div>
-                {!p.available && <div className="absolute inset-0 bg-black/50 flex items-center justify-center"><span className="text-xs text-white/60 uppercase tracking-widest">Unavailable</span></div>}
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {modal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onClick={() => setModal(null)}>
+          <div style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 16, padding: '1.75rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 32px 80px rgba(0,0,0,.6)' }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+              <div>
+                <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'Add Product' : 'Edit Product'}</h2>
+                <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Product details</p>
               </div>
-              <div className="p-3">
-                <p className="text-white text-sm line-clamp-1">{p.name}</p>
-                <div className="flex justify-between mt-1">
-                  <span className="text-[#C9A84C] text-xs">€{p.price}</span>
-                  <span className="text-white/30 text-xs">Stock: {p.stock}</span>
+              <button onClick={() => setModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div><label style={lbl}>Name *</label><input value={form.name || ''} onChange={set('name')} placeholder="Product name" className="m-inp" style={inp} /></div>
+              <div><label style={lbl}>Description</label><textarea value={form.description || ''} onChange={set('description')} rows={3} placeholder="Product description…" className="m-inp" style={{ ...inp, resize: 'none' }} /></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div><label style={lbl}>Price (€)</label><input type="number" value={form.price || ''} onChange={set('price')} placeholder="0.00" className="m-inp" style={inp} /></div>
+                <div><label style={lbl}>Stock</label><input type="number" value={form.stock || ''} onChange={set('stock')} placeholder="0" className="m-inp" style={inp} /></div>
+              </div>
+              <div><label style={lbl}>Category</label><input value={form.category || ''} onChange={set('category')} placeholder="Shampoo, Conditioner…" className="m-inp" style={inp} /></div>
+              <div>
+                <label style={lbl}>Image URL</label>
+                <input value={form.image_url || ''} onChange={set('image_url')} placeholder="https://…" className="m-inp" style={inp} />
+                {form.image_url && <img src={form.image_url} alt="preview" style={{ marginTop: 8, height: 72, width: 72, objectFit: 'cover', borderRadius: 8, border: `1px solid ${C.border}` }} />}
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                <div style={{ width: 38, height: 20, borderRadius: 10, background: form.available ? '#C9A84C' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .2s', flexShrink: 0 }}
+                  onClick={() => setForm(p => ({ ...p, available: !p.available }))}>
+                  <div style={{ position: 'absolute', top: 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left .2s', left: form.available ? 19 : 2 }} />
                 </div>
-              </div>
-            </motion.div>
-          ))}
+                <span style={{ fontSize: '0.82rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>Available for preorder</span>
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
+              <button onClick={() => setModal(null)} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
+                {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Save size={13} /> Save Product</>}
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Modal */}
-      <AnimatePresence>
-        {modal && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setModal(null)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={e => e.stopPropagation()} className="w-full max-w-lg bg-[#111] border border-white/8 rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-display text-2xl text-white">{modal === 'add' ? 'Add Product' : 'Edit Product'}</h2>
-                <button onClick={() => setModal(null)} className="p-1.5 text-white/30 hover:text-white"><X size={18} /></button>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  { k: 'name', label: 'Name', placeholder: 'Product name' },
-                  { k: 'category', label: 'Category', placeholder: 'Shampoo, Conditioner...' },
-                  { k: 'price', label: 'Price (€)', placeholder: '0.00', type: 'number' },
-                  { k: 'stock', label: 'Stock', placeholder: '0', type: 'number' },
-                  { k: 'image_url', label: 'Image URL', placeholder: 'https://...' },
-                ].map(({ k, label, placeholder, type = 'text' }) => (
-                  <div key={k}>
-                    <label className="text-xs uppercase tracking-widest text-white/30 mb-1.5 block">{label}</label>
-                    <input type={type} value={form[k] || ''} onChange={set(k)} placeholder={placeholder}
-                      className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C9A84C]/40 transition-colors" />
-                  </div>
-                ))}
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-white/30 mb-1.5 block">Description</label>
-                  <textarea value={form.description || ''} onChange={set('description')} rows={3} placeholder="Product description..."
-                    className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#C9A84C]/40 transition-colors resize-none" />
-                </div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.available} onChange={e => setForm(p => ({ ...p, available: e.target.checked }))} className="accent-[#C9A84C]" />
-                  <span className="text-sm text-white/60">Available for preorder</span>
-                </label>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl border border-white/8 text-white/40 text-sm hover:text-white hover:border-white/20 transition-colors">Cancel</button>
-                <button onClick={save} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#C9A84C] to-[#C4956A] text-black font-medium text-sm hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2">
-                  {saving ? <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : <><Save size={14} /> Save</>}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }

@@ -1,142 +1,162 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, Calendar, Package, Image, MessageSquare,
-  Tag, Users, LogOut, Scissors, Menu, X, ChevronRight
+  LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
+  Tag, Users, UserCheck, LogOut, Scissors, Menu
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 
+const C = {
+  bg: '#0e0e14', card: '#161620', sidebar: '#0a0a10', topbar: '#111118',
+  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
+  border: 'rgba(255,255,255,0.07)', danger: '#f87171',
+}
+
 const navItems = [
-  { to: '/studio/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/studio/appointments', icon: Calendar, label: 'Appointments' },
-  { to: '/studio/products', icon: Package, label: 'Products' },
-  { to: '/studio/gallery', icon: Image, label: 'Gallery' },
-  { to: '/studio/messages', icon: MessageSquare, label: 'Messages' },
-  { to: '/studio/coupons', icon: Tag, label: 'Coupons' },
-  { to: '/studio/users', icon: Users, label: 'Users' },
+  { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
+  { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
+  { to: '/studio/services',      icon: Scissors,        label: 'Services' },
+  { to: '/studio/stylists',      icon: UserCheck,       label: 'Stylists' },
+  { to: '/studio/products',      icon: Package,         label: 'Products' },
+  { to: '/studio/gallery',       icon: Image,           label: 'Gallery' },
+  { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
+  { to: '/studio/coupons',       icon: Tag,             label: 'Coupons' },
+  { to: '/studio/users',         icon: Users,           label: 'Users' },
 ]
 
 export default function StudioLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [open, setOpen] = useState(false)
   const { signOut, profile } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const currentPage = navItems.find(n => location.pathname.startsWith(n.to))?.label ?? 'Studio'
 
   async function handleSignOut() {
+    sessionStorage.removeItem('studio_access')
     await signOut()
-    toast.success('Signed out from Studio')
+    toast.success('Signed out')
     navigate('/studio')
   }
 
-  const SidebarContent = () => (
-    <>
+  const Sidebar = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Brand */}
-      <div className="px-6 py-5 border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C9A84C] to-[#C4956A] flex items-center justify-center">
-            <Scissors size={14} className="text-black rotate-45" />
+      <div style={{ padding: '1.5rem 1.25rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+        <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', opacity: 1, transition: 'opacity .18s' }}
+          className="s-brand">
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},#C4956A)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 16px rgba(201,168,76,0.3)` }}>
+            <Scissors size={13} color="#000" style={{ transform: 'rotate(45deg)' }} />
           </div>
           <div>
-            <span className="font-display text-lg text-white">Hair<span className="text-[#C9A84C]">Go</span></span>
-            <span className="block text-[10px] uppercase tracking-widest text-white/25">Studio</span>
+            <span className="font-display" style={{ fontSize: '1.15rem', color: C.white, lineHeight: 1 }}>
+              Hair<span style={{ color: C.gold }}>Go</span>
+            </span>
+            <span style={{ display: 'block', fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+              Studio
+            </span>
           </div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav style={{ flex: 1, padding: '0.75rem 0.625rem', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
         {navItems.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            onClick={() => setSidebarOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 ${
-                isActive
-                  ? 'bg-gradient-to-r from-[#C9A84C]/15 to-[#C4956A]/10 text-[#C9A84C] border border-[#C9A84C]/15'
-                  : 'text-white/40 hover:text-white hover:bg-white/5'
-              }`
-            }
-          >
+          <NavLink key={to} to={to} onClick={() => setOpen(false)}
+            style={({ isActive }) => ({
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '0.55rem 0.875rem', borderRadius: 10,
+              fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 500 : 400,
+              color: isActive ? C.gold : C.dim,
+              background: isActive ? C.goldBg : 'transparent',
+              border: isActive ? `1px solid ${C.goldBorder}` : '1px solid transparent',
+              textDecoration: 'none', transition: 'all .18s ease',
+            })}
+            className="s-nav">
             {({ isActive }) => (
               <>
-                <Icon size={16} />
-                <span className="flex-1">{label}</span>
-                {isActive && <ChevronRight size={12} className="opacity-60" />}
+                <Icon size={14} strokeWidth={isActive ? 2 : 1.5} style={{ flexShrink: 0 }} />
+                {label}
               </>
             )}
           </NavLink>
         ))}
       </nav>
 
-      {/* User + logout */}
-      <div className="px-3 py-4 border-t border-white/5">
-        <div className="px-3 py-2 mb-2">
-          <p className="text-xs text-white/30 truncate">{profile?.full_name || 'Admin'}</p>
-          <p className="text-[10px] text-[#C9A84C] uppercase tracking-widest mt-0.5">Studio Admin</p>
+      {/* Footer */}
+      <div style={{ padding: '0.75rem 0.625rem', borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
+        <div style={{ padding: '0.5rem 0.875rem', marginBottom: 6 }}>
+          <p style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {profile?.full_name || 'Admin'}
+          </p>
+          <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+            Studio Admin
+          </p>
         </div>
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-400/60 hover:text-red-400 hover:bg-red-400/5 transition-all duration-200"
-        >
-          <LogOut size={16} />
+        <button onClick={handleSignOut} className="s-signout"
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.5rem 0.875rem', borderRadius: 10, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', color: 'rgba(248,113,113,0.5)', background: 'none', border: `1px solid rgba(248,113,113,0.12)`, cursor: 'pointer', transition: 'all .18s ease', textAlign: 'left' }}>
+          <LogOut size={13} strokeWidth={1.5} />
           Sign Out
         </button>
       </div>
-    </>
+    </div>
   )
 
   return (
-    <div className="flex h-screen bg-[#0a0a0a] overflow-hidden">
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-60 bg-[#0d0d0d] border-r border-white/5 shrink-0">
-        <SidebarContent />
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: C.bg, overflow: 'hidden' }}>
+
+      <aside style={{ width: 210, flexShrink: 0, background: C.sidebar, borderRight: `1px solid ${C.border}` }} className="hidden lg:block">
+        <Sidebar />
       </aside>
 
-      {/* Mobile sidebar */}
       <AnimatePresence>
-        {sidebarOpen && (
+        {open && (
           <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-            <motion.aside
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 left-0 bottom-0 z-50 w-60 bg-[#0d0d0d] border-r border-white/5 flex flex-col lg:hidden"
-            >
-              <SidebarContent />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,.7)', backdropFilter: 'blur(4px)' }}
+              className="lg:hidden" onClick={() => setOpen(false)} />
+            <motion.aside initial={{ x: -210 }} animate={{ x: 0 }} exit={{ x: -210 }}
+              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+              style={{ position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50, width: 210, background: C.sidebar, borderRight: `1px solid ${C.border}` }}
+              className="lg:hidden">
+              <Sidebar />
             </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
-        <header className="h-14 border-b border-white/5 bg-[#0d0d0d] flex items-center justify-between px-5 shrink-0">
-          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-1.5 text-white/40 hover:text-white transition-colors">
-            <Menu size={18} />
-          </button>
-          <div className="hidden lg:block" />
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-xs text-white/30 uppercase tracking-widest">Live</span>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        {/* Topbar */}
+        <header style={{ height: 50, flexShrink: 0, borderBottom: `1px solid ${C.border}`, background: C.topbar, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button onClick={() => setOpen(true)} style={{ display: 'none', padding: 4, color: C.dim, background: 'none', border: 'none', cursor: 'pointer' }} className="lg:hidden s-menu-btn">
+              <Menu size={17} />
+            </button>
+            <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.14)' }}>
+            <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
+            <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#34d399', fontFamily: 'Jost,sans-serif' }}>Live</span>
           </div>
         </header>
 
-        {/* Page */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          <Outlet />
+        <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '1.75rem 2rem' }}>
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
+            <Outlet />
+          </div>
         </main>
       </div>
+
+      <style>{`
+        .s-brand:hover { opacity: 0.75 !important; }
+        .s-nav:hover { color: ${C.white} !important; background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.06) !important; }
+        .s-signout:hover { color: ${C.danger} !important; border-color: rgba(248,113,113,0.28) !important; background: rgba(248,113,113,0.06) !important; }
+        .s-menu-btn { display: flex !important; }
+        @media (min-width: 1024px) { .s-menu-btn { display: none !important; } }
+      `}</style>
     </div>
   )
 }

@@ -25,22 +25,29 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function fetchProfile(userId) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    setProfile(data)
+    try {
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
+      if (!error) setProfile(data)
+    } catch (_) {}
     setLoading(false)
   }
 
   async function signUp(email, password, fullName, phone) {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName, phone } },
+    })
     if (error) throw error
     if (data.user) {
-      await supabase.from('profiles').insert({
+      const { error: profileError } = await supabase.from('profiles').upsert({
         id: data.user.id,
         full_name: fullName,
-        phone,
+        phone: phone || null,
         role: 'user',
         points: 0,
-      })
+      }, { onConflict: 'id' })
+      if (profileError) console.error('Profile upsert failed:', profileError.message)
     }
     return data
   }
@@ -56,7 +63,7 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
-  const isAdmin = profile?.role === 'admin'
+  const isAdmin = user?.app_metadata?.role === 'admin' || profile?.role === 'admin'
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, isAdmin, signUp, signIn, signOut, fetchProfile }}>

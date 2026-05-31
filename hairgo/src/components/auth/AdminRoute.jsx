@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function AdminRoute({ children }) {
-  const { user, profile, loading, isAdmin } = useAuth()
+  const { user, loading } = useAuth()
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
@@ -10,6 +10,12 @@ export default function AdminRoute({ children }) {
     </div>
   )
 
-  if (!user || !isAdmin) return <Navigate to="/studio" replace />
+  const studioAccess = sessionStorage.getItem('studio_access') === 'true'
+  const isAdmin      = user?.app_metadata?.role === 'admin'
+
+  // Redirect only if clearly not authorised — avoids loops
+  if (!user) return <Navigate to="/studio" replace />
+  if (!studioAccess || !isAdmin) return <Navigate to="/studio" replace />
+
   return children
 }
