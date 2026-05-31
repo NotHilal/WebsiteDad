@@ -63,10 +63,12 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
-  const isAdmin = user?.app_metadata?.role === 'admin' || profile?.role === 'admin'
+  const isAdmin  = profile?.role === 'admin'
+  const isWorker = profile?.role === 'worker'
+  const isStaff  = isAdmin || isWorker
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isAdmin, signUp, signIn, signOut, fetchProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isWorker, isStaff, signUp, signIn, signOut, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   )

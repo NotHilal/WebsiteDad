@@ -15,7 +15,7 @@ const C = {
   border: 'rgba(255,255,255,0.07)', danger: '#f87171',
 }
 
-const navItems = [
+const adminNavItems = [
   { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
   { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
@@ -28,11 +28,17 @@ const navItems = [
   { to: '/studio/users',         icon: Users,           label: 'Users' },
 ]
 
+const workerNavItems = [
+  { to: '/studio/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/schedule',  icon: Calendar,        label: 'Schedule' },
+]
+
 export default function StudioLayout() {
   const [open, setOpen] = useState(false)
-  const { signOut, profile } = useAuth()
+  const { signOut, profile, isAdmin } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const navItems = isAdmin ? adminNavItems : workerNavItems
   const currentPage = navItems.find(n => location.pathname.startsWith(n.to))?.label ?? 'Studio'
 
   async function handleSignOut() {
@@ -93,7 +99,7 @@ export default function StudioLayout() {
             {profile?.full_name || 'Admin'}
           </p>
           <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
-            Studio Admin
+            {isAdmin ? 'Studio Admin' : 'Worker'}
           </p>
         </div>
         <button onClick={handleSignOut} className="s-signout"

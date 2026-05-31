@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Lock, Eye, EyeOff, Scissors, Mail, KeyRound, ArrowRight } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
 export default function StudioGate() {
@@ -18,10 +19,10 @@ export default function StudioGate() {
 
   // Already passed the gate this session — go straight in
   useEffect(() => {
-    if (!authLoading && user && sessionStorage.getItem('studio_access') === 'true' && user?.app_metadata?.role === 'admin') {
+    if (!authLoading && user && sessionStorage.getItem('studio_access') === 'true' && (profile?.role === 'admin' || profile?.role === 'worker')) {
       navigate('/studio/dashboard')
     }
-  }, [authLoading, user])
+  }, [authLoading, user, profile])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -29,12 +30,15 @@ export default function StudioGate() {
     setLoading(true)
     try {
       let currentUser = user
+      let role = profile?.role
       if (!currentUser) {
         const data = await signIn(email, password)
         currentUser = data.user
+        const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single()
+        role = prof?.role
       }
-      if (currentUser?.app_metadata?.role !== 'admin') {
-        toast.error('This account does not have admin access')
+      if (role !== 'admin' && role !== 'worker') {
+        toast.error('This account does not have studio access')
         setLoading(false)
         return
       }

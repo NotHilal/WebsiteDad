@@ -25,6 +25,7 @@ import StudioBlockedDates from './pages/studio/StudioBlockedDates'
 import StudioSchedule from './pages/studio/StudioSchedule'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
+import AdminOnlyRoute from './components/auth/AdminOnlyRoute'
 
 export default function App() {
   return (
@@ -62,15 +63,15 @@ export default function App() {
           <Route path="/studio" element={<StudioGate />} />
           <Route path="/studio/*" element={<AdminRoute><StudioLayout /></AdminRoute>}>
             <Route path="dashboard" element={<StudioDashboard />} />
-            <Route path="schedule" element={<StudioSchedule />} />
-            <Route path="services" element={<StudioServices />} />
-            <Route path="stylists" element={<StudioStylists />} />
-            <Route path="blocked-dates" element={<StudioBlockedDates />} />
-            <Route path="products" element={<StudioProducts />} />
-            <Route path="gallery" element={<StudioGallery />} />
-            <Route path="messages" element={<StudioMessages />} />
-            <Route path="coupons" element={<StudioCoupons />} />
-            <Route path="users" element={<StudioUsers />} />
+            <Route path="schedule"  element={<StudioSchedule />} />
+            <Route path="blocked-dates" element={<AdminOnlyRoute><StudioBlockedDates /></AdminOnlyRoute>} />
+            <Route path="services"  element={<AdminOnlyRoute><StudioServices /></AdminOnlyRoute>} />
+            <Route path="stylists"  element={<AdminOnlyRoute><StudioStylists /></AdminOnlyRoute>} />
+            <Route path="products"  element={<AdminOnlyRoute><StudioProducts /></AdminOnlyRoute>} />
+            <Route path="gallery"   element={<AdminOnlyRoute><StudioGallery /></AdminOnlyRoute>} />
+            <Route path="messages"  element={<AdminOnlyRoute><StudioMessages /></AdminOnlyRoute>} />
+            <Route path="coupons"   element={<AdminOnlyRoute><StudioCoupons /></AdminOnlyRoute>} />
+            <Route path="users"     element={<AdminOnlyRoute><StudioUsers /></AdminOnlyRoute>} />
           </Route>
         </Routes>
       </AuthProvider>
