@@ -157,7 +157,7 @@ export default function Navbar() {
                         {(profile?.points || 0) > 0 && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
                             <Star size={10} color="#C9A84C" />
-                            <span style={{ fontSize: 11, color: '#C9A84C', fontFamily: 'Jost,sans-serif' }}>{profile.points} loyalty points</span>
+                            <span style={{ fontSize: 11, color: '#C9A84C', fontFamily: 'Jost,sans-serif' }}>{profile.points} visit{profile.points !== 1 ? 's' : ''}</span>
                           </div>
                         )}
                       </div>

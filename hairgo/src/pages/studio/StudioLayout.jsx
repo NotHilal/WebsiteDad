@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
-  Tag, Users, UserCheck, LogOut, Scissors, Menu
+  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
@@ -17,7 +17,9 @@ const C = {
 
 const adminNavItems = [
   { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
   { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
+  { to: '/studio/sales',         icon: BarChart2,       label: 'Sales' },
   { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
   { to: '/studio/services',      icon: Scissors,        label: 'Services' },
   { to: '/studio/stylists',      icon: UserCheck,       label: 'Stylists' },

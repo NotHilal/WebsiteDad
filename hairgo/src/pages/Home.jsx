@@ -377,7 +377,7 @@ export default function Home() {
               </h3>
               <div className="gold-bar" />
               <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:340, margin:0 }}>
-                Every visit earns you loyalty points. Collect enough and unlock exclusive discount coupons for your next appointment or store purchase.
+                Come 5 times and unlock an exclusive 30% discount on your next appointment. Simple, rewarding, and made for our regulars.
               </p>
               <Link to="/register" className="btn-gold" style={{ marginTop:'0.5rem' }}>
                 Join for Free <ArrowRight size={14} />

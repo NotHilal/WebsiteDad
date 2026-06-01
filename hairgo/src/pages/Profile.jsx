@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ChevronRight } from 'lucide-react'
+import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ChevronRight, Copy, CheckCheck, Scissors } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
@@ -77,15 +77,13 @@ export default function Profile() {
     navigate('/')
   }
 
-  const pts      = profile?.points || 0
-  const tier     = pts >= 500 ? 'Gold' : pts >= 200 ? 'Silver' : 'Bronze'
-  const nextTier = pts >= 500 ? null : pts >= 200 ? { name: 'Gold', at: 500 } : { name: 'Silver', at: 200 }
-  const progress = nextTier ? Math.min(100, (pts / nextTier.at) * 100) : 100
+  const totalVisits    = profile?.points || 0
+  const stampsThisCycle = totalVisits % 5
+  const remaining      = stampsThisCycle === 0 ? 5 : 5 - stampsThisCycle
   const initial  = (profile?.full_name || user?.email)?.[0]?.toUpperCase()
   const name     = profile?.full_name || user?.email?.split('@')[0] || 'Guest'
   const isAdmin  = profile?.role === 'admin'
 
-  const tierColor = tier === 'Gold' ? '#C9A84C' : tier === 'Silver' ? '#9ca3af' : '#C4956A'
   const upcoming  = appointments.filter(a => a.status === 'confirmed' || a.status === 'pending').length
   const activePreorders = preorders.filter(p => p.status === 'active').length
   const activeCoupons   = coupons.filter(c => !c.used).length
@@ -124,30 +122,62 @@ export default function Profile() {
           transition={{ duration: 0.5, ease }}
           style={{ ...card, display: 'flex', overflow: 'hidden' }}
         >
-          {/* LEFT — loyalty */}
+          {/* LEFT — stamp card */}
           <div style={{ flex: '0 0 52%', padding: '22px 24px' }}>
-            <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)', marginBottom: 10 }}>
-              Loyalty Points
+            <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)', marginBottom: 14 }}>
+              Loyalty Visits
             </p>
 
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: 14 }}>
-              <span className="gold-gradient" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 56, lineHeight: 1, fontWeight: 400 }}>
-                {pts}
-              </span>
-              <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, paddingBottom: 6 }}>pts</span>
-            </div>
-
-            {/* Progress bar */}
-            <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: 99, height: 3, overflow: 'hidden', marginBottom: 8 }}>
-              <motion.div
-                initial={{ width: 0 }} animate={{ width: `${progress}%` }}
-                transition={{ duration: 1.6, delay: 0.3, ease }}
-                style={{ height: '100%', background: 'linear-gradient(90deg, #C9A84C, #C4956A)', borderRadius: 99 }}
-              />
-            </div>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)' }}>
-              {nextTier ? `${nextTier.at - pts} pts to ${nextTier.name}` : 'Maximum tier reached'}
-            </p>
+            {/* Reward just unlocked state */}
+            {totalVisits > 0 && stampsThisCycle === 0 ? (
+              <>
+                {/* All 5 filled */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <motion.div key={i}
+                      initial={{ scale: 0.7, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.35, delay: i * 0.06, ease }}
+                      style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #C9A84C, #C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px rgba(201,168,76,0.4)' }}>
+                      <Check size={14} color="#0a0a0a" strokeWidth={2.5} />
+                    </motion.div>
+                  ))}
+                </div>
+                <p style={{ fontSize: 11, color: '#C9A84C', marginBottom: 3, fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>
+                  Reward unlocked!
+                </p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
+                  Check your Rewards tab · {totalVisits} visits total
+                </p>
+              </>
+            ) : (
+              <>
+                {/* Normal stamp circles */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const filled = i < stampsThisCycle
+                    return (
+                      <motion.div key={i}
+                        initial={{ scale: 0.7, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.35, delay: i * 0.06, ease }}
+                        style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: filled ? 'linear-gradient(135deg, #C9A84C, #C4956A)' : 'transparent', border: filled ? 'none' : '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: filled ? '0 0 12px rgba(201,168,76,0.35)' : 'none' }}>
+                        {filled && <Check size={14} color="#0a0a0a" strokeWidth={2.5} />}
+                      </motion.div>
+                    )
+                  })}
+                </div>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
+                  <span className="gold-gradient" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 22 }}>{stampsThisCycle}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.2)' }}> / 5 visits</span>
+                </p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
+                  {totalVisits === 0
+                    ? 'Book 5 visits to unlock 30% off'
+                    : `${remaining} more to unlock 30% off`}
+                </p>
+              </>
+            )}
           </div>
 
           {/* Divider */}
@@ -202,14 +232,14 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Tier */}
+            {/* Role badge */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{
                 fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500,
-                color: tierColor, background: `${tierColor}18`, border: `1px solid ${tierColor}30`,
+                color: '#C9A84C', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
                 padding: '4px 12px', borderRadius: 6,
               }}>
-                {isAdmin ? 'Admin' : `${tier} Member`}
+                {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''} total`}
               </span>
             </div>
           </div>
@@ -389,42 +419,16 @@ export default function Profile() {
 
                 {/* — Rewards — */}
                 {tab === 'Rewards' && (
-                  <div>
+                  <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {loading ? (
-                      Array.from({ length: 3 }).map((_, i) => (
-                        <div key={i} style={{ height: 64, margin: '6px 16px', borderRadius: 10, background: S2 }} className="shimmer" />
+                      Array.from({ length: 2 }).map((_, i) => (
+                        <div key={i} style={{ height: 90, borderRadius: 14, background: S2 }} className="shimmer" />
                       ))
                     ) : coupons.length === 0 ? (
-                      <EmptyState icon={Star} text="No coupons yet. Book appointments to earn loyalty points and unlock rewards." />
+                      <EmptyState icon={Star} text="No coupons yet. Complete 5 visits to unlock your 30% reward." />
                     ) : (
-                      coupons.map(({ id, coupons: c, used }, i) => (
-                        <div key={id} style={{
-                          display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
-                          borderBottom: i < coupons.length - 1 ? `1px solid ${BD}` : 'none',
-                          opacity: used ? 0.35 : 1,
-                        }}>
-                          <div style={{
-                            width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                            background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.15)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          }}>
-                            <Tag size={13} style={{ color: '#C9A84C', opacity: 0.75 }} />
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <p style={{ fontFamily: 'monospace', color: '#C9A84C', fontSize: 13, letterSpacing: '0.08em', marginBottom: 2 }}>{c?.code}</p>
-                            <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: 11 }}>
-                              {c?.discount_type === 'percentage' ? `${c.discount_value}% off` : `€${c?.discount_value} off`}
-                              {c?.expiry_date && `  ·  expires ${format(new Date(c.expiry_date), 'MMM d, yyyy')}`}
-                            </p>
-                          </div>
-                          <span style={{
-                            fontSize: 11, fontWeight: 500, padding: '4px 10px', borderRadius: 6,
-                            color: used ? 'rgba(255,255,255,0.25)' : '#C9A84C',
-                            background: used ? 'rgba(255,255,255,0.05)' : 'rgba(201,168,76,0.1)',
-                          }}>
-                            {used ? 'Used' : 'Active'}
-                          </span>
-                        </div>
+                      coupons.map(({ id, coupons: c, used }) => (
+                        <CouponCard key={id} coupon={c} used={used} />
                       ))
                     )}
                   </div>
@@ -464,6 +468,133 @@ export default function Profile() {
         </motion.button>
 
       </div>
+    </div>
+  )
+}
+
+function CouponCard({ coupon: c, used }) {
+  const [copied, setCopied] = useState(false)
+
+  function copy() {
+    if (!c?.code || used) return
+    navigator.clipboard.writeText(c.code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const discountLabel = c?.discount_type === 'percentage'
+    ? `${c.discount_value}%`
+    : `€${c?.discount_value}`
+
+  return (
+    <div style={{
+      position: 'relative', borderRadius: 16, overflow: 'hidden',
+      opacity: used ? 0.5 : 1,
+      filter: used ? 'grayscale(0.4)' : 'none',
+      transition: 'opacity .2s',
+    }}>
+      {/* Outer border */}
+      <div style={{
+        border: `1px solid ${used ? 'rgba(255,255,255,0.08)' : 'rgba(201,168,76,0.25)'}`,
+        borderRadius: 16, display: 'flex', overflow: 'hidden',
+        background: used ? 'rgba(255,255,255,0.02)' : 'rgba(201,168,76,0.03)',
+      }}>
+
+        {/* LEFT — discount value */}
+        <div style={{
+          flexShrink: 0, width: 96, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', padding: '20px 8px',
+          background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.07)',
+          position: 'relative',
+        }}>
+          <span className="font-display gold-gradient" style={{
+            fontSize: '2.2rem', lineHeight: 1, fontWeight: 400,
+            filter: used ? 'grayscale(1)' : 'none',
+          }}>
+            {discountLabel}
+          </span>
+          <span style={{
+            fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+            color: used ? 'rgba(255,255,255,0.2)' : 'rgba(201,168,76,0.6)',
+            fontFamily: 'Jost,sans-serif', marginTop: 4,
+          }}>
+            OFF
+          </span>
+
+          {/* Notch top */}
+          <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', zIndex: 2 }} />
+          {/* Notch bottom */}
+          <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', zIndex: 2 }} />
+        </div>
+
+        {/* Perforated divider */}
+        <div style={{ width: 1, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '8px 0', position: 'relative' }}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} style={{ width: 1, height: 5, background: used ? 'rgba(255,255,255,0.08)' : 'rgba(201,168,76,0.2)' }} />
+          ))}
+          <Scissors size={10} style={{ color: used ? 'rgba(255,255,255,0.15)' : 'rgba(201,168,76,0.35)', position: 'absolute', top: '50%', transform: 'translateY(-50%) rotate(90deg)' }} />
+        </div>
+
+        {/* RIGHT — code + details */}
+        <div style={{ flex: 1, padding: '16px 16px 16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, minWidth: 0 }}>
+
+          {/* Label */}
+          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : 'rgba(201,168,76,0.55)', fontFamily: 'Jost,sans-serif' }}>
+            {used ? 'Used reward' : 'Loyalty Reward'}
+          </p>
+
+          {/* Code row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0,
+              background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.07)',
+              border: `1px solid ${used ? 'rgba(255,255,255,0.06)' : 'rgba(201,168,76,0.18)'}`,
+            }}>
+              <span style={{
+                fontFamily: '"Courier New", monospace',
+                fontSize: 13, letterSpacing: '0.14em',
+                color: used ? 'rgba(255,255,255,0.25)' : '#C9A84C',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block',
+              }}>
+                {c?.code}
+              </span>
+            </div>
+            {!used && (
+              <button onClick={copy} style={{
+                width: 32, height: 32, borderRadius: 8, flexShrink: 0, cursor: 'pointer',
+                background: copied ? 'rgba(52,211,153,0.12)' : 'rgba(201,168,76,0.08)',
+                border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'rgba(201,168,76,0.2)'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all .2s',
+              }}>
+                {copied
+                  ? <CheckCheck size={13} color="#34d399" />
+                  : <Copy size={13} color="#C9A84C" />}
+              </button>
+            )}
+          </div>
+
+          {/* Expiry */}
+          {c?.expiry_date && (
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif' }}>
+              {used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* USED stamp overlay */}
+      {used && (
+        <div style={{
+          position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)',
+          border: '2px solid rgba(255,255,255,0.12)', borderRadius: 6,
+          padding: '3px 10px',
+        }}>
+          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+            Used
+          </span>
+        </div>
+      )}
     </div>
   )
 }

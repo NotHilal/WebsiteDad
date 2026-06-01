@@ -22,6 +22,8 @@ import StudioUsers from './pages/studio/StudioUsers'
 import StudioServices from './pages/studio/StudioServices'
 import StudioStylists from './pages/studio/StudioStylists'
 import StudioBlockedDates from './pages/studio/StudioBlockedDates'
+import StudioSales from './pages/studio/StudioSales'
+import StudioAppointmentsList from './pages/studio/StudioAppointmentsList'
 import StudioSchedule from './pages/studio/StudioSchedule'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
@@ -62,8 +64,10 @@ export default function App() {
           {/* Studio (admin) routes */}
           <Route path="/studio" element={<StudioGate />} />
           <Route path="/studio/*" element={<AdminRoute><StudioLayout /></AdminRoute>}>
-            <Route path="dashboard" element={<StudioDashboard />} />
-            <Route path="schedule"  element={<StudioSchedule />} />
+            <Route path="dashboard"    element={<StudioDashboard />} />
+            <Route path="appointments" element={<AdminRoute><StudioAppointmentsList /></AdminRoute>} />
+            <Route path="schedule"     element={<StudioSchedule />} />
+            <Route path="sales"        element={<AdminOnlyRoute><StudioSales /></AdminOnlyRoute>} />
             <Route path="blocked-dates" element={<AdminOnlyRoute><StudioBlockedDates /></AdminOnlyRoute>} />
             <Route path="services"  element={<AdminOnlyRoute><StudioServices /></AdminOnlyRoute>} />
             <Route path="stylists"  element={<AdminOnlyRoute><StudioStylists /></AdminOnlyRoute>} />

@@ -41,6 +41,10 @@ export default function Store() {
         expires_at: addHours(new Date(), 48).toISOString(),
       })
       if (error) throw error
+      // decrement stock
+      await supabase.from('products')
+        .update({ stock: Math.max(0, (modal.stock || 0) - qty) })
+        .eq('id', modal.id)
       toast.success('Preorder placed! Pick up within 48 hours.')
       setModal(null); setQty(1); load()
     } catch (err) { toast.error(err.message || 'Failed') }
@@ -48,7 +52,13 @@ export default function Store() {
   }
 
   async function cancelPreorder(id) {
-    await supabase.from('preorders').update({ status:'cancelled' }).eq('id', id)
+    const order = preorders.find(p => p.id === id)
+    await supabase.from('preorders').update({ status: 'cancelled' }).eq('id', id)
+    // restore stock
+    if (order?.product_id && order?.quantity) {
+      const { data: prod } = await supabase.from('products').select('stock').eq('id', order.product_id).single()
+      if (prod) await supabase.from('products').update({ stock: (prod.stock || 0) + order.quantity }).eq('id', order.product_id)
+    }
     toast.success('Preorder cancelled'); load()
   }
 

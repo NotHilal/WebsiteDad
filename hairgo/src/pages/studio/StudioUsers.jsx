@@ -31,12 +31,27 @@ export default function StudioUsers() {
     toast.success(`Role changed to ${newRole}`)
   }
 
-  async function adjustPoints(id, delta, current) {
-    const newPts = Math.max(0, (current || 0) + delta)
-    const { error } = await supabase.from('profiles').update({ points: newPts }).eq('id', id)
+  async function adjustVisits(id, delta, current) {
+    const newCount = Math.max(0, (current || 0) + delta)
+    const { error } = await supabase.from('profiles').update({ points: newCount }).eq('id', id)
     if (error) return toast.error(error.message)
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, points: newPts } : u))
-    toast.success(delta > 0 ? `+${delta} points added` : `${Math.abs(delta)} points removed`)
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, points: newCount } : u))
+
+    if (delta > 0 && newCount % 5 === 0 && newCount > 0) {
+      const code = `REWARD${Math.random().toString(36).slice(2, 7).toUpperCase()}`
+      const expiry = new Date(); expiry.setMonth(expiry.getMonth() + 3)
+      const { data: coupon } = await supabase.from('coupons').insert({
+        code, discount_type: 'percentage', discount_value: 30,
+        min_points_required: 0, expiry_date: expiry.toISOString().split('T')[0],
+        max_uses: 1, active: true,
+      }).select().single()
+      if (coupon) {
+        await supabase.from('user_coupons').insert({ user_id: id, coupon_id: coupon.id, used: false })
+        toast.success(`Visit ${newCount} — 30% reward coupon sent!`)
+      }
+    } else {
+      toast.success(delta > 0 ? '+1 visit added' : '1 visit removed')
+    }
   }
 
   const filtered = users.filter(u =>
@@ -72,7 +87,7 @@ export default function StudioUsers() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${C.border}` }}>
-                {['Client', 'Phone', 'Points', 'Role', 'Joined', 'Actions'].map(h => (
+                {['Client', 'Phone', 'Visits', 'Role', 'Joined', 'Actions'].map(h => (
                   <th key={h} style={{ padding: '0.65rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif' }}>{h}</th>
                 ))}
               </tr>
@@ -109,8 +124,8 @@ export default function StudioUsers() {
                   <td style={{ padding: '0.7rem 1.1rem', color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{u.phone || '—'}</td>
                   <td style={{ padding: '0.7rem 1.1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <Star size={11} color={C.gold} />
                       <span style={{ color: C.dim, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>{u.points || 0}</span>
+                      <span style={{ color: C.muted, fontSize: '0.7rem', fontFamily: 'Jost,sans-serif' }}>/ {Math.ceil(((u.points || 0) + 1) / 5) * 5}</span>
                     </div>
                   </td>
                   <td style={{ padding: '0.7rem 1.1rem' }}>
@@ -126,10 +141,10 @@ export default function StudioUsers() {
                   <td style={{ padding: '0.7rem 1.1rem', color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{u.created_at ? format(new Date(u.created_at), 'MMM d, yyyy') : '—'}</td>
                   <td style={{ padding: '0.7rem 1.1rem' }}>
                     <div style={{ display: 'flex', gap: 4 }} className="usr-actions">
-                      <button onClick={() => adjustPoints(u.id, 10, u.points)} className="usr-pts-add"
-                        style={{ padding: '3px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>+10</button>
-                      <button onClick={() => adjustPoints(u.id, -10, u.points)} className="usr-pts-sub"
-                        style={{ padding: '3px 9px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>−10</button>
+                      <button onClick={() => adjustVisits(u.id, 1, u.points)} className="usr-pts-add"
+                        style={{ padding: '3px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>+1</button>
+                      <button onClick={() => adjustVisits(u.id, -1, u.points)} className="usr-pts-sub"
+                        style={{ padding: '3px 9px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
                     </div>
                   </td>
                 </tr>

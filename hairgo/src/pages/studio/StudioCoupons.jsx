@@ -1,45 +1,183 @@
-import { useState, useEffect } from 'react'
-import { Plus, Tag, X, Save, Gift, Trash2, Edit2 } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Plus, X, Save, Trash2, Edit2, Search, Scissors, AlertTriangle, ChevronRight, ChevronLeft, UserPlus } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
+  card: '#161620', card2: '#1a1a26',
+  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.22)',
+  white: '#f0f0f0', dim: 'rgba(255,255,255,0.55)', muted: 'rgba(255,255,255,0.28)', faint: 'rgba(255,255,255,0.1)',
+  border: 'rgba(255,255,255,0.07)', modal: '#13131f',
 }
 
-const EMPTY = { code: '', discount_type: 'percentage', discount_value: '', min_points_required: 0, max_uses: '', expiry_date: '', active: true }
 const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
+const EMPTY = { code: '', discount_type: 'percentage', discount_value: '', expiry_date: '' }
 
+function ModalWrap({ children, onClose, maxWidth = 440 }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={onClose}>
+      <div style={{ width: '100%', maxWidth, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 18, padding: '1.75rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function TypeToggle({ value, onChange }) {
+  return (
+    <div style={{ display: 'flex', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, overflow: 'hidden' }}>
+      {[['percentage', '% Percentage'], ['fixed', '€ Fixed']].map(([val, label]) => (
+        <button key={val} type="button" onClick={() => onChange(val)}
+          style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.03)', color: value === val ? '#C9A84C' : 'rgba(255,255,255,0.35)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign }) {
+  const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `€${coupon.discount_value}`
+  const used = !coupon.active
+  return (
+    <div style={{ display: 'flex', borderRadius: 14, overflow: 'hidden', border: `1px solid ${used ? C.border : C.goldBorder}`, opacity: used ? 0.5 : 1, filter: used ? 'grayscale(0.35)' : 'none', transition: 'all .2s' }} className="uc-row">
+      <div style={{ flexShrink: 0, width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(255,255,255,0.02)' : C.goldBg, borderRight: `1px dashed ${used ? C.border : C.goldBorder}`, padding: '14px 6px', position: 'relative' }}>
+        <span className="font-display gold-gradient" style={{ fontSize: '1.75rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
+        <span style={{ fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 3 }}>OFF</span>
+        <div style={{ position: 'absolute', top: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
+        <div style={{ position: 'absolute', bottom: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
+      </div>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: used ? 'rgba(255,255,255,0.01)' : C.card, minWidth: 0 }}>
+        <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.07)', border: `1px solid ${used ? C.border : 'rgba(201,168,76,0.18)'}` }}>
+          <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
+        </div>
+        {/* Expiry */}
+        <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', flexShrink: 0 }}>
+          {coupon.expiry_date ? `Exp. ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
+        </span>
+
+        {/* Assignment info */}
+        {assignment ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+            <div style={{ width: 20, height: 20, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 8, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>
+                {assignment.name?.[0]?.toUpperCase() || '?'}
+              </span>
+            </div>
+            <p style={{ fontSize: '0.72rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+              {assignment.name}
+            </p>
+          </div>
+        ) : (
+          <span style={{ flex: 1, fontSize: '0.7rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>
+            Not assigned
+          </span>
+        )}
+
+        {/* 1. Status badge */}
+        <span style={{ fontSize: 9, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>
+          {used ? 'Used' : 'Active'}
+        </span>
+
+        {/* 2. Mark used / Mark active */}
+        <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
+          {used ? 'Mark active' : 'Mark used'}
+        </button>
+
+        {/* 3. Unassign (only if assigned) */}
+        {assignment && (
+          <button onClick={() => onUnassign(coupon.id)} className="btn-unassign"
+            style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>
+            Unassign
+          </button>
+        )}
+
+        {/* 4. Edit */}
+        <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
+
+        {/* 5. Delete */}
+        <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
+      </div>
+    </div>
+  )
+}
+
+/* ── Selectable coupon mini card (used in assign step 1) ── */
+function SelectableCouponCard({ coupon, selected, onSelect }) {
+  const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `€${coupon.discount_value}`
+  return (
+    <button type="button" onClick={() => onSelect(coupon)}
+      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}
+      className="sel-card">
+      <div style={{ width: 60, height: 52, borderRadius: 10, background: selected ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px' }}>
+        <span className="font-display gold-gradient" style={{ fontSize: '1.1rem', lineHeight: 1, filter: selected ? 'none' : 'grayscale(1)' }}>{disc}</span>
+        <span style={{ fontSize: 7, letterSpacing: '0.18em', color: selected ? C.goldDim : 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>OFF</span>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: selected ? C.gold : C.white, letterSpacing: '0.1em', marginBottom: 3 }}>{coupon.code}</p>
+        <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+          {coupon.expiry_date ? `Expires ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
+        </p>
+      </div>
+      <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${selected ? C.gold : C.border}`, background: selected ? C.gold : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {selected && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#0e0e14' }} />}
+      </div>
+    </button>
+  )
+}
+
+/* ── Main ──────────────────────────────────────────── */
 export default function StudioCoupons() {
-  const [coupons,    setCoupons]    = useState([])
-  const [users,      setUsers]      = useState([])
-  const [loading,    setLoading]    = useState(true)
-  const [modal,      setModal]      = useState(null)
-  const [form,       setForm]       = useState(EMPTY)
-  const [grantModal, setGrantModal] = useState(null)
-  const [grantUser,  setGrantUser]  = useState('')
-  const [saving,     setSaving]     = useState(false)
-  const [hoveredId,  setHoveredId]  = useState(null)
+  const [coupons,      setCoupons]      = useState([])
+  const [users,        setUsers]        = useState([])
+  const [assignments,  setAssignments]  = useState({})   // coupon_id → { name, used }
+  const [assignedIds,  setAssignedIds]  = useState(new Set())
+  const [loading,      setLoading]      = useState(true)
+  const [modal,        setModal]        = useState(null)
+  const [form,         setForm]         = useState(EMPTY)
+  const [saving,       setSaving]       = useState(false)
+  const [search,       setSearch]       = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState(null)
+
+  // Assign wizard
+  const [assignStep,   setAssignStep]   = useState(1)
+  const [assignCoupon, setAssignCoupon] = useState(null)
+  const [assignUser,   setAssignUser]   = useState(null)
+  const [userSearch,   setUserSearch]   = useState('')
 
   useEffect(() => { load() }, [])
 
   async function load() {
-    const [{ data: c }, { data: u }] = await Promise.all([
-      supabase.from('coupons').select('*').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, full_name, points').eq('role', 'user').order('full_name'),
-    ])
-    setCoupons(c || []); setUsers(u || []); setLoading(false)
+    const { data: c } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
+    setCoupons(c || [])
+    setLoading(false)
+
+    // Load separately to avoid RLS recursion
+    const { data: uc } = await supabase.from('user_coupons').select('*, profiles(full_name)').order('created_at', { ascending: false })
+    const map = {}
+    const ids = new Set()
+    ;(uc || []).forEach(r => {
+      map[r.coupon_id] = { name: r.profiles?.full_name || 'Unknown', used: r.used }
+      ids.add(r.coupon_id)
+    })
+    setAssignments(map)
+    setAssignedIds(ids)
+
+    const { data: u } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+    setUsers(u || [])
   }
 
   async function save() {
     if (!form.code.trim()) return toast.error('Code is required')
+    if (!form.discount_value) return toast.error('Discount value is required')
     setSaving(true)
     try {
-      const payload = { ...form, code: form.code.toUpperCase(), discount_value: parseFloat(form.discount_value) || 0, min_points_required: parseInt(form.min_points_required) || 0, max_uses: form.max_uses ? parseInt(form.max_uses) : null, expiry_date: form.expiry_date || null }
+      const payload = { code: form.code.toUpperCase(), discount_type: form.discount_type, discount_value: parseFloat(form.discount_value), expiry_date: form.expiry_date || null, active: true }
       const { error } = modal === 'add'
         ? await supabase.from('coupons').insert(payload)
         : await supabase.from('coupons').update(payload).eq('id', form.id)
@@ -50,158 +188,352 @@ export default function StudioCoupons() {
     finally { setSaving(false) }
   }
 
-  async function grant() {
-    if (!grantUser || !grantModal) return
+  async function confirmDelete() {
+    if (!deleteTarget) return
+    const { error } = await supabase.from('coupons').delete().eq('id', deleteTarget.id)
+    if (error) { toast.error(error.message); return }
+    setCoupons(prev => prev.filter(c => c.id !== deleteTarget.id))
+    toast.success('Coupon deleted')
+    setDeleteTarget(null)
+  }
+
+  async function unassignCoupon(couponId) {
+    const { error } = await supabase.from('user_coupons').delete().eq('coupon_id', couponId)
+    if (error) { toast.error(error.message); return }
+    setAssignments(prev => { const next = { ...prev }; delete next[couponId]; return next })
+    setAssignedIds(prev => { const next = new Set(prev); next.delete(couponId); return next })
+    toast.success('Coupon unassigned')
+  }
+
+  async function toggleActive(id, currentActive) {
+    const { error } = await supabase.from('coupons').update({ active: !currentActive }).eq('id', id)
+    if (error) { toast.error(error.message); return }
+    setCoupons(prev => prev.map(c => c.id === id ? { ...c, active: !currentActive } : c))
+
+    // Sync user_coupons.used — active=true means used=false, active=false means used=true
+    if (assignedIds.has(id)) {
+      await supabase.from('user_coupons').update({ used: currentActive }).eq('coupon_id', id)
+      setAssignments(prev => prev[id] ? { ...prev, [id]: { ...prev[id], used: currentActive } } : prev)
+    }
+
+    toast.success(!currentActive ? 'Marked as active' : 'Marked as used')
+  }
+
+  async function confirmAssign() {
+    if (!assignCoupon || !assignUser) return
     setSaving(true)
     try {
-      const { error } = await supabase.from('user_coupons').insert({ user_id: grantUser, coupon_id: grantModal.id, granted_by: 'admin', used: false })
+      const { error } = await supabase.from('user_coupons').insert({ user_id: assignUser.id, coupon_id: assignCoupon.id, granted_by: 'admin', used: false })
       if (error) throw error
-      toast.success('Coupon granted'); setGrantModal(null); setGrantUser('')
+      setAssignedIds(prev => new Set([...prev, assignCoupon.id]))
+      setAssignments(prev => ({ ...prev, [assignCoupon.id]: { name: assignUser.full_name || 'Unknown', used: false } }))
+      toast.success(`Coupon assigned to ${assignUser.full_name || 'client'}`)
+      setModal(null); setAssignStep(1); setAssignCoupon(null); setAssignUser(null); setUserSearch('')
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }
 
-  async function deleteCoupon(id) {
-    if (!confirm('Delete this coupon?')) return
-    await supabase.from('coupons').delete().eq('id', id)
-    toast.success('Coupon deleted'); load()
-  }
+  const activeCount = coupons.filter(c => c.active).length
+  const usedCount   = coupons.filter(c => !c.active).length
 
-  const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))
+  const filtered = useMemo(() => coupons.filter(c => {
+    const matchStatus = statusFilter === 'all' || (statusFilter === 'used' ? !c.active : c.active)
+    const q = search.toLowerCase()
+    return !q || c.code.toLowerCase().includes(q)
+  }), [coupons, statusFilter, search])
 
-  const Modal = ({ children, onClose }) => (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-      onClick={onClose}>
-      <div style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 16, padding: '1.75rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 32px 80px rgba(0,0,0,.6)' }}
-        onClick={e => e.stopPropagation()}>
-        {children}
-      </div>
-    </div>
-  )
+  const filteredUsers = useMemo(() => {
+    const q = userSearch.toLowerCase()
+    return users.filter(u => !q || u.full_name?.toLowerCase().includes(q) || u.phone?.includes(q))
+  }, [users, userSearch])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
-        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .m-inp:focus       { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .uc-search:focus   { border-color: ${C.goldBorder} !important; }
+        .uc-row:hover      { border-color: rgba(201,168,76,0.35) !important; }
+        .btn-pill:hover    { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
+        .btn-mark-used:hover   { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.35) !important; color: #f87171 !important; }
+        .btn-mark-active:hover { background: rgba(52,211,153,0.1) !important; border-color: rgba(52,211,153,0.3) !important; color: #34d399 !important; }
+        .btn-edit-uc:hover   { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.07) !important; }
+        .btn-unassign:hover  { border-color: rgba(255,255,255,0.22) !important; color: ${C.white} !important; background: rgba(255,255,255,0.07) !important; }
+        .btn-del-uc:hover  { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.35) !important; color: #f87171 !important; }
+        .btn-gold-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .sel-card:hover    { border-color: ${C.goldBorder} !important; background: rgba(201,168,76,0.04) !important; }
+        .user-row:hover    { background: rgba(255,255,255,0.04) !important; }
       `}</style>
 
-      <div style={{ flexShrink: 0, marginBottom: '1.1rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      {/* ── Header ── */}
+      <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Coupons</h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{coupons.length} coupons</p>
+          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Coupons</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{coupons.length} total</span>
+            {activeCount > 0 && <span style={{ fontSize: '0.7rem', color: '#34d399', fontFamily: 'Jost,sans-serif', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)', padding: '2px 8px', borderRadius: 20 }}>{activeCount} active</span>}
+            {usedCount > 0 && <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, padding: '2px 8px', borderRadius: 20 }}>{usedCount} used</span>}
+          </div>
         </div>
-        <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
-          <Plus size={13} /> Create Coupon
-        </button>
+        <div style={{ display: 'flex', gap: 7 }}>
+          <button onClick={() => {
+            setAssignStep(1); setAssignCoupon(null); setAssignUser(null); setUserSearch(''); setModal('assign')
+          }}
+            className="btn-pill"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 0.875rem', borderRadius: 9, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s' }}>
+            <UserPlus size={13} /> Assign Coupon
+          </button>
+          <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-gold-sm"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+            <Plus size={13} /> New Coupon
+          </button>
+        </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+      {/* ── Toolbar ── */}
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
+          <Search size={12} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by coupon code…" autoComplete="off" className="uc-search"
+            style={{ width: '100%', boxSizing: 'border-box', background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.52rem 0.75rem 0.52rem 2.2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', transition: 'all .2s' }} />
+          {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex' }}><X size={12} /></button>}
+        </div>
+        {[['all','All',coupons.length],['active','Active',activeCount],['used','Used',usedCount]].map(([val,label,count]) => (
+          <button key={val} onClick={() => setStatusFilter(val)} className="btn-pill"
+            style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', border: `1px solid ${statusFilter === val ? C.goldBorder : C.border}`, background: statusFilter === val ? C.goldBg : 'transparent', color: statusFilter === val ? C.gold : C.muted }}>
+            {label} · {count}
+          </button>
+        ))}
+      </div>
+
+      {/* ── List ── */}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {Array.from({ length: 4 }).map((_, i) => <div key={i} style={{ height: 68, background: C.card, borderRadius: 14, border: `1px solid ${C.border}` }} />)}
-          </div>
-        ) : coupons.length === 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: '0.5rem' }}>
-            <Tag size={28} color={C.border} />
-            <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No coupons yet</p>
+          Array.from({ length: 4 }).map((_, i) => <div key={i} style={{ height: 76, borderRadius: 14, background: C.card, border: `1px solid ${C.border}` }} className="shimmer" />)
+        ) : filtered.length === 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 12 }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Scissors size={22} style={{ color: C.faint }} />
+            </div>
+            <p style={{ color: C.dim, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif' }}>{coupons.length === 0 ? 'No coupons yet' : 'No results match your search'}</p>
+            {(search || statusFilter !== 'all') && (
+              <button onClick={() => { setSearch(''); setStatusFilter('all') }} style={{ padding: '5px 16px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Clear filters</button>
+            )}
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {coupons.map(c => (
-              <div key={c.id} onMouseEnter={() => setHoveredId(c.id)} onMouseLeave={() => setHoveredId(null)}
-                style={{ background: C.card, border: `1px solid ${hoveredId === c.id ? C.goldBorder : C.border}`, borderRadius: 14, padding: '0.9rem 1.1rem', display: 'flex', alignItems: 'center', gap: '0.875rem', transition: 'border-color .2s' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Tag size={14} color={C.gold} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: 4 }}>
-                    <span style={{ fontFamily: 'monospace', color: C.white, fontSize: '0.85rem', letterSpacing: '0.12em', fontWeight: 700 }}>{c.code}</span>
-                    <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 20, background: c.active ? 'rgba(52,211,153,0.12)' : 'rgba(248,113,113,0.12)', color: c.active ? '#34d399' : '#f87171', fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                      {c.active ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.375rem' }}>
-                    <span style={{ color: C.gold, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
-                      {c.discount_type === 'percentage' ? `${c.discount_value}%` : `€${c.discount_value}`} off
-                    </span>
-                    {c.min_points_required > 0 && <span style={{ color: C.muted, fontSize: '0.73rem', fontFamily: 'Jost,sans-serif' }}>· {c.min_points_required} pts min</span>}
-                    {c.expiry_date && <span style={{ color: C.muted, fontSize: '0.73rem', fontFamily: 'Jost,sans-serif' }}>· Expires {format(new Date(c.expiry_date), 'MMM d, yyyy')}</span>}
-                    {c.max_uses && <span style={{ color: C.muted, fontSize: '0.73rem', fontFamily: 'Jost,sans-serif' }}>· {c.current_uses || 0}/{c.max_uses} uses</span>}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, opacity: hoveredId === c.id ? 1 : 0, transition: 'opacity .15s' }}>
-                  <button onClick={() => setGrantModal(c)} style={{ width: 28, height: 28, borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Gift size={12} /></button>
-                  <button onClick={() => { setForm({ ...c, expiry_date: c.expiry_date || '' }); setModal('edit') }} style={{ width: 28, height: 28, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Edit2 size={12} /></button>
-                  <button onClick={() => deleteCoupon(c.id)} style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={12} /></button>
-                </div>
-              </div>
-            ))}
-          </div>
+          filtered.map(c => (
+            <CouponCard key={c.id} coupon={c}
+              assignment={assignments[c.id] || null}
+              onEdit={c => { setForm({ code: c.code, discount_type: c.discount_type, discount_value: c.discount_value?.toString(), expiry_date: c.expiry_date || '', id: c.id }); setModal('edit') }}
+              onToggle={toggleActive}
+              onUnassign={unassignCoupon}
+              onDelete={setDeleteTarget} />
+          ))
         )}
       </div>
 
-      {modal && (
-        <Modal onClose={() => setModal(null)}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-            <div>
-              <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'Create Coupon' : 'Edit Coupon'}</h2>
-              <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Discount code details</p>
-            </div>
-            <button onClick={() => setModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div><label style={lbl}>Code</label><input value={form.code} onChange={set('code')} placeholder="SAVE20" className="m-inp" style={{ ...inp, fontFamily: 'monospace', textTransform: 'uppercase' }} /></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div><label style={lbl}>Type</label><select value={form.discount_type} onChange={set('discount_type')} className="m-inp" style={{ ...inp, appearance: 'none', cursor: 'pointer' }}><option value="percentage" style={{ background: '#1a1a24' }}>Percentage (%)</option><option value="fixed" style={{ background: '#1a1a24' }}>Fixed (€)</option></select></div>
-              <div><label style={lbl}>Value</label><input type="number" value={form.discount_value} onChange={set('discount_value')} placeholder="20" className="m-inp" style={inp} /></div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <div><label style={lbl}>Min Points</label><input type="number" value={form.min_points_required} onChange={set('min_points_required')} placeholder="0" className="m-inp" style={inp} /></div>
-              <div><label style={lbl}>Max Uses</label><input type="number" value={form.max_uses} onChange={set('max_uses')} placeholder="Unlimited" className="m-inp" style={inp} /></div>
-            </div>
-            <div><label style={lbl}>Expiry Date</label><input type="date" value={form.expiry_date} onChange={set('expiry_date')} className="m-inp" style={inp} /></div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-              <div style={{ width: 38, height: 20, borderRadius: 10, background: form.active ? '#C9A84C' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .2s', flexShrink: 0 }} onClick={() => setForm(p => ({ ...p, active: !p.active }))}>
-                <div style={{ position: 'absolute', top: 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left .2s', left: form.active ? 19 : 2 }} />
-              </div>
-              <span style={{ fontSize: '0.82rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>Active — visible to users</span>
-            </label>
-          </div>
-          <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
-            <button onClick={() => setModal(null)} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
-              {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Save size={13} /> Save</>}
-            </button>
-          </div>
-        </Modal>
+      {!loading && filtered.length > 0 && (
+        <p style={{ flexShrink: 0, textAlign: 'right', fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', opacity: 0.5 }}>{filtered.length} of {coupons.length}</p>
       )}
 
-      {grantModal && (
-        <Modal onClose={() => setGrantModal(null)}>
+      {/* ── Create / Edit modal ── */}
+      {(modal === 'add' || modal === 'edit') && (
+        <ModalWrap onClose={() => { setModal(null); setForm(EMPTY) }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
             <div>
-              <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>Grant Coupon</h2>
-              <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Send <span style={{ color: C.gold, fontFamily: 'monospace', fontWeight: 700 }}>{grantModal.code}</span> to a client</p>
+              <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'New Coupon' : 'Edit Coupon'}</h2>
+              <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Fill in the discount details</p>
             </div>
-            <button onClick={() => setGrantModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
+            <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
           </div>
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={lbl}>Select Client</label>
-            <select value={grantUser} onChange={e => setGrantUser(e.target.value)} className="m-inp" style={{ ...inp, appearance: 'none', cursor: 'pointer' }}>
-              <option value="" style={{ background: '#1a1a24' }}>Choose a client…</option>
-              {users.map(u => <option key={u.id} value={u.id} style={{ background: '#1a1a24' }}>{u.full_name || 'Unknown'} ({u.points || 0} pts)</option>)}
-            </select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={lbl}>Coupon Code</label>
+              <input value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} placeholder="e.g. LOYAL30" className="m-inp" style={{ ...inp, fontFamily: '"Courier New", monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+            </div>
+            <div>
+              <label style={lbl}>Discount Type</label>
+              <TypeToggle value={form.discount_type} onChange={v => setForm(p => ({ ...p, discount_type: v }))} />
+            </div>
+            <div>
+              <label style={lbl}>Value</label>
+              <input type="number" value={form.discount_value}
+                onChange={e => setForm(p => ({ ...p, discount_value: Math.min(100, Math.max(0, e.target.value)) }))}
+                placeholder={form.discount_type === 'percentage' ? '30' : '15'}
+                min={0} max={100} className="m-inp" style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>Expiry Date <span style={{ textTransform: 'none', letterSpacing: 0, color: C.muted }}>(optional)</span></label>
+              <input type="date" value={form.expiry_date} onChange={e => setForm(p => ({ ...p, expiry_date: e.target.value }))} className="m-inp" style={inp} />
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.625rem' }}>
-            <button onClick={() => setGrantModal(null)} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={grant} disabled={!grantUser || saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: !grantUser || saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: !grantUser || saving ? 0.4 : 1 }}>
-              {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Gift size={13} /> Grant</>}
+          <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
+            <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
+              {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Save size={13} /> {modal === 'add' ? 'Create' : 'Save'}</>}
             </button>
           </div>
-        </Modal>
+        </ModalWrap>
+      )}
+
+      {/* ── Delete confirmation modal ── */}
+      {deleteTarget && (
+        <ModalWrap onClose={() => setDeleteTarget(null)}>
+          <div style={{ height: 4, background: 'linear-gradient(90deg,#f87171,#ef4444)', borderRadius: '4px 4px 0 0', margin: '-1.75rem -1.75rem 1.5rem', width: 'calc(100% + 3.5rem)' }} />
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <AlertTriangle size={18} color="#f87171" />
+            </div>
+            <div>
+              <h3 className="font-display" style={{ color: C.white, fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete coupon?</h3>
+              <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
+            </div>
+          </div>
+
+          {/* Coupon preview */}
+          <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 9, background: 'rgba(201,168,76,0.08)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span className="font-display gold-gradient" style={{ fontSize: '1rem', lineHeight: 1 }}>
+                {deleteTarget.discount_type === 'percentage' ? `${deleteTarget.discount_value}%` : `€${deleteTarget.discount_value}`}
+              </span>
+            </div>
+            <div>
+              <p style={{ fontFamily: '"Courier New",monospace', color: C.gold, fontSize: '0.85rem', letterSpacing: '0.1em', marginBottom: 3 }}>{deleteTarget.code}</p>
+              <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif' }}>
+                {deleteTarget.expiry_date ? `Expires ${format(new Date(deleteTarget.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={confirmDelete} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <Trash2 size={13} /> Delete
+            </button>
+          </div>
+        </ModalWrap>
+      )}
+
+      {/* ── Assign Coupon wizard ── */}
+      {modal === 'assign' && (
+        <ModalWrap onClose={() => setModal(null)} maxWidth={520}>
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                {assignStep === 2 && (
+                  <button onClick={() => setAssignStep(1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex', padding: 0 }}>
+                    <ChevronLeft size={16} />
+                  </button>
+                )}
+                <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, fontWeight: 500 }}>
+                  {assignStep === 1 ? 'Choose a Coupon' : 'Choose a Client'}
+                </h2>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {[1, 2].map(s => (
+                  <div key={s} style={{ height: 3, width: s === assignStep ? 24 : 8, borderRadius: 2, background: s <= assignStep ? C.gold : C.border, transition: 'all .2s' }} />
+                ))}
+                <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginLeft: 4 }}>Step {assignStep} of 2</span>
+              </div>
+            </div>
+            <button onClick={() => setModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
+          </div>
+
+          {/* Step 1 — Pick coupon */}
+          {assignStep === 1 && (
+            <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 320, overflowY: 'auto', marginBottom: '1.25rem' }}>
+                {(() => {
+                  const available = coupons.filter(c => c.active && !assignedIds.has(c.id))
+                  if (available.length === 0) return (
+                    <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', textAlign: 'center', padding: '2rem 0' }}>
+                      All active coupons are already assigned
+                    </p>
+                  )
+                  return available.map(c => (
+                    <SelectableCouponCard key={c.id} coupon={c} selected={assignCoupon?.id === c.id} onSelect={setAssignCoupon} />
+                  ))
+                })()}
+              </div>
+              <button onClick={() => assignCoupon && setAssignStep(2)} disabled={!assignCoupon}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignCoupon ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.05)', color: assignCoupon ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: assignCoupon ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s' }}>
+                Next <ChevronRight size={14} />
+              </button>
+            </>
+          )}
+
+          {/* Step 2 — Pick user */}
+          {assignStep === 2 && (
+            <>
+              {/* Chosen coupon reminder */}
+              {assignCoupon && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 9, background: C.goldBg, border: `1px solid ${C.goldBorder}`, marginBottom: '1rem' }}>
+                  <span className="font-display gold-gradient" style={{ fontSize: '1rem' }}>
+                    {assignCoupon.discount_type === 'percentage' ? `${assignCoupon.discount_value}%` : `€${assignCoupon.discount_value}`} OFF
+                  </span>
+                  <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.78rem', color: C.gold, letterSpacing: '0.1em' }}>{assignCoupon.code}</span>
+                </div>
+              )}
+
+              {/* Search */}
+              <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                <Search size={12} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
+                <input value={userSearch} onChange={e => setUserSearch(e.target.value)}
+                  placeholder="Search client by name…" autoComplete="off"
+                  style={{ ...inp, paddingLeft: '2.2rem' }} className="m-inp" />
+                {userSearch && <button onClick={() => setUserSearch('')} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex' }}><X size={12} /></button>}
+              </div>
+
+              {/* Users list */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 240, overflowY: 'auto', marginBottom: '1.25rem' }}>
+                {filteredUsers.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
+                    <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>
+                      {users.length === 0 ? 'No users registered yet' : 'No users match your search'}
+                    </p>
+                    {userSearch && (
+                      <button onClick={() => setUserSearch('')} style={{ fontSize: 10, color: C.goldDim, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '3px 12px', cursor: 'pointer', fontFamily: 'Jost,sans-serif' }}>
+                        Clear search
+                      </button>
+                    )}
+                    {users.length === 0 && (
+                      <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', marginTop: 4 }}>
+                        Users need to register on the website first
+                      </p>
+                    )}
+                  </div>
+                ) : filteredUsers.map(u => {
+                  const selected = assignUser?.id === u.id
+                  const initials = u.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+                  return (
+                    <button key={u.id} type="button" onClick={() => setAssignUser(u)} className="user-row"
+                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: selected ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, color: selected ? C.gold : C.muted, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <p style={{ fontSize: '0.82rem', color: selected ? C.white : C.dim, fontFamily: 'Jost,sans-serif', fontWeight: selected ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.full_name || 'No name'}</p>
+                          {u.role && <span style={{ fontSize: 8, padding: '1px 6px', borderRadius: 9, background: u.role === 'admin' ? C.goldBg : 'rgba(255,255,255,0.05)', color: u.role === 'admin' ? C.goldDim : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>{u.role}</span>}
+                        </div>
+                        <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{u.points || 0} visits</p>
+                      </div>
+                      <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${selected ? C.gold : C.border}`, background: selected ? C.gold : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {selected && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#0e0e14' }} />}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button onClick={confirmAssign} disabled={!assignUser || saving}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignUser ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.05)', color: assignUser ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: assignUser && !saving ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: saving ? 0.6 : 1 }}>
+                {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><UserPlus size={14} /> Assign Coupon</>}
+              </button>
+            </>
+          )}
+        </ModalWrap>
       )}
     </div>
   )

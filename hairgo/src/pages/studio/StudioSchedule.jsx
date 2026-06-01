@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Calendar, ChevronLeft, ChevronRight, X, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import toast from 'react-hot-toast'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay,
@@ -89,9 +90,34 @@ export default function StudioSchedule() {
     setLoading(false)
   }
 
-  async function updateStatus(id, status) {
-    const { error } = await supabase.from('appointments').update({ status }).eq('id', id)
-    if (!error) setAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a))
+  async function updateStatus(id, newStatus) {
+    const appt = appointments.find(a => a.id === id)
+    const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id)
+    if (error) return
+    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
+
+    if (newStatus === 'completed' && appt?.status !== 'completed' && appt?.user_id) {
+      const { data: prof } = await supabase.from('profiles').select('points').eq('id', appt.user_id).single()
+      const newCount = (prof?.points || 0) + 1
+      await supabase.from('profiles').update({ points: newCount }).eq('id', appt.user_id)
+
+      if (newCount % 5 === 0) {
+        const code = `REWARD${Math.random().toString(36).slice(2, 7).toUpperCase()}`
+        const expiry = new Date()
+        expiry.setMonth(expiry.getMonth() + 3)
+        const { data: coupon } = await supabase.from('coupons').insert({
+          code, discount_type: 'percentage', discount_value: 30,
+          min_points_required: 0, expiry_date: expiry.toISOString().split('T')[0],
+          max_uses: 1, active: true,
+        }).select().single()
+        if (coupon) {
+          await supabase.from('user_coupons').insert({ user_id: appt.user_id, coupon_id: coupon.id, used: false })
+          toast.success(`Visit ${newCount} — 30% reward sent to ${appt.profiles?.full_name || 'client'}`)
+        }
+      } else {
+        toast.success(`Visit ${newCount % 5}/5 — ${5 - (newCount % 5)} more to unlock 30% off`)
+      }
+    }
   }
 
   async function deleteAppt(id) {

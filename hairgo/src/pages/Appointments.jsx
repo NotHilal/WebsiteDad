@@ -69,9 +69,7 @@ export default function Appointments() {
         date:format(sel.date,'yyyy-MM-dd'), time:sel.time, notes:sel.notes, status:'pending',
       })
       if (error) throw error
-      await supabase.from('profiles').update({ points:(profile?.points||0)+10 }).eq('id', user.id)
       setDone(true)
-      toast.success('+10 loyalty points earned!')
     } catch(err) { toast.error(err.message||'Booking failed') }
     finally { setSaving(false) }
   }
@@ -199,7 +197,7 @@ export default function Appointments() {
             <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>Loyalty</span>
           </div>
           <p style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontFamily:'Jost,sans-serif', lineHeight:1.6 }}>
-            Earn <span style={{ color:'#C9A84C' }}>+10 points</span> with your booking.
+            Every completed visit counts toward your <span style={{ color:'#C9A84C' }}>30% reward</span>.
           </p>
         </div>
       </div>
@@ -612,7 +610,7 @@ export default function Appointments() {
 
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:12 }}>
                   <Sparkles size={10} color="rgba(201,168,76,0.4)"/>
-                  <p style={{ fontSize:9, color:'rgba(255,255,255,0.18)', letterSpacing:'0.12em', fontFamily:'Jost,sans-serif' }}>You'll earn +10 loyalty points with this booking</p>
+                  <p style={{ fontSize:9, color:'rgba(255,255,255,0.18)', letterSpacing:'0.12em', fontFamily:'Jost,sans-serif' }}>Every completed visit counts toward your 30% reward</p>
                 </div>
               </motion.div>
             )}
