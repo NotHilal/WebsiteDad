@@ -120,7 +120,7 @@ export default function Gallery() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const source   = images.length > 0 ? images : GALLERY
+  const source   = loading ? [] : images.length > 0 ? images : GALLERY
   const filtered = source
     .filter(img => active === 'All' || img.category === active.toLowerCase())
     .filter(img => gender === 'All' || img.gender === gender.toLowerCase())
@@ -205,8 +205,17 @@ export default function Gallery() {
 
         </motion.div>
 
+        {/* Skeleton while loading */}
+        {loading && (
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'1.25rem' }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="shimmer" style={{ aspectRatio:'4/3', borderRadius:20 }} />
+            ))}
+          </div>
+        )}
+
         {/* Grid */}
-        <motion.div layout style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'1.25rem' }}>
+        <motion.div layout style={{ display: loading ? 'none' : 'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'1.25rem' }}>
           <AnimatePresence>
             {paginated.map((item, i) => (
               <motion.div key={item.id}

@@ -3,11 +3,6 @@ import { motion } from 'framer-motion'
 import { Link2, Scissors, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
-const inView = {
-  hidden: { opacity:0, y:36 },
-  visible: (i=0) => ({ opacity:1, y:0, transition:{ duration:0.8, delay:i*0.12, ease:[0.22,1,0.36,1] } }),
-}
-
 export default function Stylists() {
   const [team,    setTeam]    = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,84 +15,158 @@ export default function Stylists() {
   }, [])
 
   return (
-    <div style={{ minHeight:'100vh', paddingTop:140, paddingBottom:120 }}>
+    <div style={{ minHeight: '100vh', paddingTop: 140, paddingBottom: 140 }}>
+      <style>{`
+        .team-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
+          max-width: 960px;
+          margin: 0 auto;
+        }
+        @media (max-width: 860px) { .team-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; } }
+        @media (max-width: 520px) { .team-grid { grid-template-columns: 1fr; max-width: 340px; } }
+
+        .team-card { cursor: default; }
+        .team-photo-wrap { position: relative; overflow: hidden; border-radius: 4px; }
+        .team-photo { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.7s cubic-bezier(0.22,1,0.36,1); display: block; }
+        .team-card:hover .team-photo { transform: scale(1.05); }
+
+        .team-overlay {
+          position: absolute; inset: 0;
+          background: linear-gradient(to top, rgba(6,6,6,0.92) 0%, rgba(6,6,6,0.55) 40%, transparent 72%);
+          display: flex; flex-direction: column; justify-content: flex-end;
+          padding: 1.5rem;
+          opacity: 0;
+          transition: opacity 0.4s ease;
+        }
+        .team-card:hover .team-overlay { opacity: 1; }
+
+        .team-overlay-bio {
+          transform: translateY(10px);
+          transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        .team-card:hover .team-overlay-bio { transform: translateY(0); }
+
+        .team-pill {
+          display: inline-flex; align-items: center;
+          padding: 3px 10px; border-radius: 9999px;
+          background: rgba(201,168,76,0.15);
+          border: 1px solid rgba(201,168,76,0.25);
+          font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+          color: #C9A84C; font-family: Jost,sans-serif;
+          white-space: nowrap;
+        }
+
+        .ig-link {
+          display: inline-flex; align-items: center; gap: 5px;
+          font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+          color: rgba(255,255,255,0.5); text-decoration: none;
+          font-family: Jost,sans-serif; transition: color 0.2s;
+          margin-top: 0.75rem;
+        }
+        .ig-link:hover { color: #C9A84C; }
+
+        .team-placeholder {
+          width: 100%; height: 100%;
+          display: flex; align-items: center; justify-content: center;
+          background: linear-gradient(135deg, rgba(201,168,76,0.06), rgba(255,255,255,0.02));
+        }
+
+        .join-card:hover { border-color: rgba(201,168,76,0.22) !important; }
+      `}</style>
+
       <div className="wrap">
 
-        {/* Header */}
-        <motion.div initial={{ opacity:0, y:28 }} animate={{ opacity:1, y:0 }}
-          transition={{ duration:0.75, ease:[0.22,1,0.36,1] }}
-          style={{ textAlign:'center', marginBottom:96 }}>
+        {/* ── Header ───────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+          style={{ textAlign: 'center', marginBottom: 80 }}
+        >
           <span className="sec-label">The Artists</span>
           <h1 className="font-display font-light"
-            style={{ color:'#fff', fontSize:'clamp(3rem,8vw,6rem)', textAlign:'center', marginBottom:'1.5rem' }}>
+            style={{ color: '#fff', fontSize: 'clamp(3rem,8vw,6rem)', marginBottom: '1.5rem', lineHeight: 1 }}>
             Our Team
           </h1>
           <div className="gold-bar" />
-          <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.9rem', lineHeight:1.85, maxWidth:460, margin:'0 auto', textAlign:'center' }}>
-            Passionate experts with years of training and a genuine eye for what makes you uniquely beautiful.
+          <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.9rem', lineHeight: 1.85, maxWidth: 440, margin: '0 auto' }}>
+            Passionate experts united by one purpose — to deliver the look that's truly yours.
           </p>
         </motion.div>
 
-        {/* Grid */}
+        {/* ── Grid ─────────────────────────────────────────────── */}
         {loading ? (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px,1fr))', gap:'3.5rem' }}>
-            {Array.from({ length: 4 }).map((_, i) => (
+          <div className="team-grid">
+            {Array.from({ length: 3 }).map((_, i) => (
               <div key={i}>
-                <div className="shimmer" style={{ aspectRatio:'3/4', borderRadius:24, marginBottom:'2rem' }} />
-                <div className="shimmer" style={{ height:14, borderRadius:6, width:'60%', margin:'0 auto 10px' }} />
-                <div className="shimmer" style={{ height:10, borderRadius:6, width:'40%', margin:'0 auto' }} />
+                <div className="shimmer" style={{ aspectRatio: '4/5', borderRadius: 4, marginBottom: '1.25rem' }} />
+                <div className="shimmer" style={{ height: 13, borderRadius: 4, width: '55%', marginBottom: 8 }} />
+                <div className="shimmer" style={{ height: 9,  borderRadius: 4, width: '35%' }} />
               </div>
             ))}
           </div>
         ) : team.length === 0 ? (
-          <div style={{ textAlign:'center', padding:'6rem 0', color:'rgba(255,255,255,0.22)', fontSize:'0.9rem' }}>
+          <div style={{ textAlign: 'center', padding: '6rem 0', color: 'rgba(255,255,255,0.22)', fontSize: '0.9rem' }}>
             No stylists added yet.
           </div>
         ) : (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px,1fr))', gap:'3.5rem' }}>
+          <div className="team-grid">
             {team.map((s, i) => (
-              <motion.div key={s.id} initial="hidden" whileInView="visible" viewport={{ once: true }}
-                custom={i} variants={inView} className="group">
-
+              <motion.div key={s.id} className="team-card"
+                initial={{ opacity: 0, y: 32 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.7, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              >
                 {/* Photo */}
-                <div style={{ aspectRatio:'3/4', borderRadius:24, overflow:'hidden', marginBottom:'2rem',
-                  background:'linear-gradient(135deg,#1a1a1a,#141414)', border:'1px solid rgba(255,255,255,0.06)',
-                  position:'relative' }}>
+                <div className="team-photo-wrap" style={{ aspectRatio: '4/5', marginBottom: '1.25rem' }}>
                   {s.photo_url
-                    ? <img src={s.photo_url} alt={s.name} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.7s ease' }}
-                        onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'}
-                        onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
-                    : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <User size={64} color="rgba(255,255,255,0.06)" />
+                    ? <img src={s.photo_url} alt={s.name} className="team-photo" />
+                    : <div className="team-placeholder" style={{ aspectRatio: '4/5' }}>
+                        <User size={48} color="rgba(255,255,255,0.06)" strokeWidth={1} />
                       </div>
                   }
-                  {/* Instagram hover overlay */}
-                  {s.instagram && (
-                    <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%)', opacity:0, transition:'opacity 0.4s' }}
-                      onMouseEnter={e => { e.currentTarget.style.opacity='1' }}
-                      onMouseLeave={e => { e.currentTarget.style.opacity='0' }}>
-                      <a href={`https://instagram.com/${s.instagram}`} target="_blank" rel="noopener noreferrer"
-                        style={{ position:'absolute', bottom:16, right:16, width:40, height:40, borderRadius:'50%', background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,0.6)', textDecoration:'none' }}
-                        onClick={e => e.stopPropagation()}>
-                        <Link2 size={15} />
-                      </a>
+
+                  {/* Hover overlay */}
+                  <div className="team-overlay">
+                    <div className="team-overlay-bio">
+                      {s.bio && (
+                        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem', lineHeight: 1.75, marginBottom: '0.875rem', fontFamily: 'Jost,sans-serif', fontWeight: 300, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {s.bio}
+                        </p>
+                      )}
+                      {s.specialties?.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: s.instagram ? '0.5rem' : 0 }}>
+                          {s.specialties.map(spec => (
+                            <span key={spec} className="team-pill">{spec}</span>
+                          ))}
+                        </div>
+                      )}
+                      {s.instagram && (
+                        <a href={`https://instagram.com/${s.instagram.replace('@','')}`}
+                          target="_blank" rel="noopener noreferrer"
+                          className="ig-link"
+                          onClick={e => e.stopPropagation()}>
+                          <Link2 size={11} /> @{s.instagram.replace('@','')}
+                        </a>
+                      )}
                     </div>
-                  )}
+                  </div>
+
+                  {/* Permanent bottom gradient for name peek */}
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(6,6,6,0.35) 0%, transparent 30%)', pointerEvents: 'none' }} />
                 </div>
 
-                {/* Info */}
-                <div style={{ textAlign:'center' }}>
-                  <h3 className="font-display" style={{ fontSize:'1.6rem', color:'#fff', marginBottom:'0.5rem', textAlign:'center' }}>{s.name}</h3>
-                  <p style={{ fontSize:10, letterSpacing:'0.22em', textTransform:'uppercase', color:'#C9A84C', marginBottom:'1.25rem', textAlign:'center' }}>{s.title}</p>
-                  {s.bio && <p style={{ color:'rgba(255,255,255,0.36)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{s.bio}</p>}
-                  {s.specialties?.length > 0 && (
-                    <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:'0.5rem' }}>
-                      {s.specialties.map(spec => (
-                        <span key={spec} style={{ padding:'5px 14px', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.15)', color:'#C9A84C', fontSize:10, letterSpacing:'0.15em', textTransform:'uppercase' }}>
-                          {spec}
-                        </span>
-                      ))}
-                    </div>
+                {/* Name / title */}
+                <div style={{ paddingLeft: '0.1rem' }}>
+                  <h3 className="font-display" style={{ fontSize: '1.45rem', color: '#f0f0f0', lineHeight: 1.15, marginBottom: '0.3rem' }}>
+                    {s.name}
+                  </h3>
+                  {s.title && (
+                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C', fontFamily: 'Jost,sans-serif', fontWeight: 400 }}>
+                      {s.title}
+                    </p>
                   )}
                 </div>
               </motion.div>
@@ -105,17 +174,28 @@ export default function Stylists() {
           </div>
         )}
 
-        {/* Join CTA */}
-        <motion.div initial={{ opacity:0, y:24 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }}
-          transition={{ duration:0.7 }} style={{ textAlign:'center', marginTop:100 }}>
-          <div style={{ display:'inline-block', background:'rgba(255,255,255,0.025)', border:'1px solid rgba(255,255,255,0.07)', backdropFilter:'blur(16px)', borderRadius:28, padding:'4rem 4rem' }}>
-            <div style={{ width:52, height:52, borderRadius:'50%', background:'linear-gradient(135deg,rgba(201,168,76,0.18),rgba(196,149,106,0.12))', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1.75rem auto' }}>
-              <Scissors size={22} color="#C9A84C" style={{ transform:'rotate(45deg)' }} />
+        {/* ── Join CTA ──────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.7 }}
+          style={{ textAlign: 'center', marginTop: 120 }}
+        >
+          <div className="join-card" style={{
+            display: 'inline-block', maxWidth: 480, width: '100%',
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 4, padding: '3.5rem 3rem',
+            transition: 'border-color 0.3s',
+          }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.75rem' }}>
+              <Scissors size={18} color="#C9A84C" style={{ transform: 'rotate(45deg)' }} />
             </div>
-            <h3 className="font-display" style={{ fontSize:'2rem', color:'#fff', marginBottom:'1rem', textAlign:'center' }}>Join the family</h3>
+            <h3 className="font-display font-light" style={{ fontSize: '2rem', color: '#fff', marginBottom: '1rem' }}>
+              Join the family
+            </h3>
             <div className="gold-bar" />
-            <p style={{ color:'rgba(255,255,255,0.36)', fontSize:'0.88rem', lineHeight:1.85, maxWidth:340, margin:'0 auto', textAlign:'center' }}>
-              Passionate about hair? We're always looking for talented stylists to join the HairGo team.
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.87rem', lineHeight: 1.9, maxWidth: 320, margin: '0 auto' }}>
+              Passionate about hair? We're always looking for talented artists to join the HairGo team.
             </p>
           </div>
         </motion.div>
