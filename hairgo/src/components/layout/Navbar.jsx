@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, User, LogOut, Scissors, MessageCircle, Star, ChevronDown } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 
-const links = [
+const BASE_LINKS = [
   { to: '/', label: 'Home', exact: true },
   { to: '/gallery', label: 'Gallery' },
   { to: '/appointments', label: 'Book' },
@@ -19,6 +20,29 @@ export default function Navbar() {
   const [profileOpen, setProfile]   = useState(false)
   const { user, profile, signOut }  = useAuth()
   const navigate                    = useNavigate()
+  const links = user
+    ? [...BASE_LINKS, { to: '/chat', label: 'Messages' }]
+    : BASE_LINKS
+  const [unread, setUnread] = useState(0)
+
+  useEffect(() => {
+    if (!user) return
+    fetchUnread()
+    const sub = supabase.channel(`navbar-unread-${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ticket_messages' }, fetchUnread)
+      .subscribe()
+    return () => supabase.removeChannel(sub)
+  }, [user])
+
+  async function fetchUnread() {
+    const { data: myTickets } = await supabase.from('tickets').select('id').eq('user_id', user.id)
+    const ids = (myTickets || []).map(t => t.id)
+    if (!ids.length) return setUnread(0)
+    const { count } = await supabase
+      .from('ticket_messages').select('*', { count: 'exact', head: true })
+      .in('ticket_id', ids).eq('is_from_admin', true).eq('read', false)
+    setUnread(count || 0)
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30)
@@ -103,6 +127,9 @@ export default function Navbar() {
                 {({ isActive }) => (
                   <>
                     {label}
+                    {to === '/chat' && unread > 0 && (
+                      <span style={{ position: 'absolute', top: -3, right: -8, width: 7, height: 7, borderRadius: '50%', background: '#ef4444' }} />
+                    )}
                     <span style={{
                       position: 'absolute', bottom: -4, left: 0,
                       height: 1,

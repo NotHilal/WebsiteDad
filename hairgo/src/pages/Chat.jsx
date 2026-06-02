@@ -1,140 +1,377 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { Send, MessageCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, Send, MessageSquare, X, CheckCircle, Scissors } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { format } from 'date-fns'
+import { format, isToday, isYesterday } from 'date-fns'
+import toast from 'react-hot-toast'
+
+const C = {
+  bg: '#0a0a0a', card: '#111118',
+  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
+  goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)',
+  muted: 'rgba(255,255,255,0.22)', border: 'rgba(255,255,255,0.07)',
+  msgBg: '#0d0d14',
+}
+
+function timeFmt(d) {
+  const date = new Date(d)
+  if (isToday(date)) return format(date, 'HH:mm')
+  if (isYesterday(date)) return 'Yesterday'
+  return format(date, 'MMM d')
+}
 
 export default function Chat() {
   const { user, profile } = useAuth()
+  const [tickets,  setTickets]  = useState([])
+  const [selected, setSelected] = useState(null)
   const [messages, setMessages] = useState([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
-  const bottomRef = useRef(null)
+  const [input,    setInput]    = useState('')
+  const [loading,  setLoading]  = useState(true)
+  const [sending,  setSending]  = useState(false)
+  const [showNew,  setShowNew]  = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [newMsg,   setNewMsg]   = useState('')
+  const [creating, setCreating] = useState(false)
+  const bottomRef  = useRef(null)
+  const selectedRef = useRef(null)
+
+  useEffect(() => { selectedRef.current = selected }, [selected])
 
   useEffect(() => {
     if (!user) return
-    loadMessages()
-
-    const sub = supabase
-      .channel('messages-channel')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-        setMessages(prev => [...prev, payload.new])
-        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+    loadTickets()
+    const sub = supabase.channel(`client-tickets-${user.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_messages' }, payload => {
+        const msg = payload.new
+        if (selectedRef.current?.id === msg.ticket_id) {
+          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg])
+          if (msg.is_from_admin) {
+            supabase.from('ticket_messages').update({ read: true }).eq('id', msg.id)
+          }
+          setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+        }
+        loadTickets()
       })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' }, loadTickets)
       .subscribe()
-
     return () => supabase.removeChannel(sub)
   }, [user])
 
   useEffect(() => {
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
-  }, [messages])
+    if (!selected) return
+    loadMessages(selected.id)
+  }, [selected?.id])
 
-  async function loadMessages() {
-    const { data } = await supabase
-      .from('messages')
-      .select('*, profiles(full_name, role)')
-      .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id},is_admin_broadcast.eq.true`)
-      .order('created_at')
-      .limit(100)
-    setMessages(data || [])
+  async function loadTickets() {
+    const { data: tkts } = await supabase
+      .from('tickets').select('*').eq('user_id', user.id)
+      .order('updated_at', { ascending: false })
+    if (!tkts?.length) { setTickets([]); setLoading(false); return }
+
+    const ids = tkts.map(t => t.id)
+    const { data: msgs } = await supabase
+      .from('ticket_messages')
+      .select('ticket_id, content, created_at, read, is_from_admin')
+      .in('ticket_id', ids)
+      .order('created_at', { ascending: false })
+
+    const meta = {}
+    for (const m of (msgs || [])) {
+      if (!meta[m.ticket_id]) meta[m.ticket_id] = { lastMsg: m.content, lastTime: m.created_at, unread: 0 }
+      if (!m.read && m.is_from_admin) meta[m.ticket_id].unread++
+    }
+    setTickets(tkts.map(t => ({ ...t, ...(meta[t.id] || {}) })))
     setLoading(false)
+  }
+
+  async function loadMessages(ticketId) {
+    const { data } = await supabase
+      .from('ticket_messages').select('*').eq('ticket_id', ticketId).order('created_at')
+    setMessages(data || [])
+    await supabase.from('ticket_messages')
+      .update({ read: true }).eq('ticket_id', ticketId).eq('is_from_admin', true).eq('read', false)
+    loadTickets()
+    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+  }
+
+  async function createTicket() {
+    if (!newTitle.trim()) return toast.error('Please enter a title')
+    setCreating(true)
+    try {
+      const { data: ticket, error } = await supabase
+        .from('tickets').insert({ user_id: user.id, title: newTitle.trim(), status: 'open' })
+        .select().single()
+      if (error) throw error
+      if (newMsg.trim()) {
+        await supabase.from('ticket_messages').insert({
+          ticket_id: ticket.id, sender_id: user.id,
+          content: newMsg.trim(), is_from_admin: false, read: false,
+        })
+        await supabase.from('tickets').update({ updated_at: new Date().toISOString() }).eq('id', ticket.id)
+      }
+      setShowNew(false); setNewTitle(''); setNewMsg('')
+      await loadTickets()
+      setSelected(ticket)
+      toast.success('Ticket created')
+    } catch (err) { toast.error(err.message) }
+    finally { setCreating(false) }
   }
 
   async function send(e) {
     e.preventDefault()
-    if (!input.trim() || sending) return
+    if (!input.trim() || !selected || sending || selected.status === 'closed') return
     setSending(true)
-    const content = input.trim()
-    setInput('')
-    const { error } = await supabase.from('messages').insert({
-      sender_id: user.id,
-      content,
-      read: false,
-    })
-    if (error) setInput(content)
+    const content = input.trim(); setInput('')
+    const { data, error } = await supabase
+      .from('ticket_messages')
+      .insert({ ticket_id: selected.id, sender_id: user.id, content, is_from_admin: false, read: false })
+      .select().single()
+    if (error) { setInput(content); toast.error('Failed to send') }
+    else if (data) {
+      setMessages(prev => [...prev, data])
+      await supabase.from('tickets').update({ updated_at: new Date().toISOString() }).eq('id', selected.id)
+      loadTickets()
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+    }
     setSending(false)
   }
 
-  return (
-    <div className="min-h-screen pt-24 pb-6 px-6 flex flex-col">
-      <div className="max-w-2xl mx-auto w-full flex flex-col flex-1">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <h1 className="font-display text-4xl text-white">Messages</h1>
-          <p className="text-white/40 text-sm mt-1">Chat with the HairGo team</p>
-        </motion.div>
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'You'
 
-        <div className="flex-1 glass rounded-2xl flex flex-col overflow-hidden" style={{ minHeight: '60vh', maxHeight: '70vh' }}>
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="w-5 h-5 border-2 border-[#C9A84C]/30 border-t-[#C9A84C] rounded-full animate-spin" />
-              </div>
-            ) : messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <MessageCircle size={32} className="text-white/10 mb-3" />
-                <p className="text-white/30 text-sm">No messages yet. Start the conversation!</p>
-              </div>
-            ) : (
-              messages.map(msg => {
-                const isMe = msg.sender_id === user.id
-                const isAdmin = msg.profiles?.role === 'admin'
-                return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div className={`max-w-xs lg:max-w-md ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
-                      {!isMe && (
-                        <span className={`text-xs ${isAdmin ? 'text-[#C9A84C]' : 'text-white/30'} ml-1`}>
-                          {isAdmin ? 'HairGo Team' : msg.profiles?.full_name || 'User'}
-                        </span>
-                      )}
-                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                        isMe
-                          ? 'bg-gradient-to-br from-[#C9A84C] to-[#C4956A] text-black rounded-tr-sm'
-                          : isAdmin
-                          ? 'bg-white/8 border border-[#C9A84C]/20 text-white rounded-tl-sm'
-                          : 'bg-white/5 text-white/80 rounded-tl-sm'
-                      }`}>
-                        {msg.content}
-                      </div>
-                      <span className="text-xs text-white/20 mx-1">
-                        {format(new Date(msg.created_at), 'HH:mm')}
-                      </span>
-                    </div>
-                  </motion.div>
-                )
-              })
-            )}
-            <div ref={bottomRef} />
+  return (
+    <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: C.bg, paddingTop: 68 }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .tk-item:hover { background: rgba(255,255,255,0.025) !important; }
+        .msg-inp:focus { border-color: ${C.goldBorder} !important; outline: none; }
+        .msg-inp::placeholder { color: rgba(255,255,255,0.18); }
+        .send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
+        .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .new-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.07); outline: none; }
+        .new-inp::placeholder { color: rgba(255,255,255,0.18); }
+      `}</style>
+
+      {/* 2-panel */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1px', overflow: 'hidden', background: C.border }}>
+
+        {/* ── LEFT: ticket list ────────────────────────────── */}
+        <div style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+          <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>My Tickets</p>
+              <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+                {tickets.length} {tickets.length === 1 ? 'conversation' : 'conversations'}
+              </p>
+            </div>
+            <button onClick={() => setShowNew(true)} style={{
+              display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8,
+              background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000',
+              fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer',
+              letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'transform .2s',
+            }}>
+              <Plus size={11} /> New
+            </button>
           </div>
 
-          {/* Input */}
-          <div className="border-t border-white/5 p-4">
-            <form onSubmit={send} className="flex items-center gap-3">
-              <input
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-white/25 focus:outline-none focus:border-[#C9A84C]/40 transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || sending}
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C9A84C] to-[#C4956A] flex items-center justify-center text-black hover:opacity-90 disabled:opacity-40 transition-opacity shrink-0"
-              >
-                <Send size={15} />
-              </button>
-            </form>
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+            {loading ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1, padding: '0.5rem' }}>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} style={{ height: 72, borderRadius: 8, background: 'rgba(255,255,255,0.03)' }} className="shimmer" />
+                ))}
+              </div>
+            ) : tickets.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, padding: '1.5rem', textAlign: 'center' }}>
+                <MessageSquare size={24} color="rgba(255,255,255,0.08)" style={{ marginBottom: 10 }} />
+                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', marginBottom: 10 }}>No tickets yet</p>
+                <button onClick={() => setShowNew(true)} style={{ fontSize: 10, color: C.gold, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontFamily: 'Jost,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                  Open first ticket
+                </button>
+              </div>
+            ) : tickets.map(tk => {
+              const isActive = selected?.id === tk.id
+              return (
+                <button key={tk.id} className="tk-item" onClick={() => setSelected(tk)}
+                  style={{ width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10, background: isActive ? C.goldBg : 'transparent', borderTopWidth: 0, borderRightWidth: 0, borderBottomWidth: 0, borderLeftWidth: 2, borderLeftStyle: 'solid', borderLeftColor: isActive ? C.gold : 'transparent', cursor: 'pointer', transition: 'background .15s' }}>
+                  {/* Status dot */}
+                  <div style={{ marginTop: 4, width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: tk.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.18)' }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 500 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, marginLeft: 6 }}>
+                        {tk.unread > 0 && (
+                          <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#ef4444', color: '#fff', fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                            {tk.unread}
+                          </span>
+                        )}
+                        {tk.lastTime && <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>{timeFmt(tk.lastTime)}</span>}
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      {tk.lastMsg || 'No messages yet'}
+                    </p>
+                    <span style={{ marginTop: 4, display: 'inline-block', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', color: tk.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.25)', fontWeight: 600 }}>
+                      {tk.status}
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Profile footer */}
+          <div style={{ padding: '0.75rem 1rem', borderTop: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},#C4956A)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: 10, color: '#000', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{displayName[0]?.toUpperCase()}</span>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: '0.75rem', color: C.white, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{displayName}</p>
+              <p style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Client</p>
+            </div>
           </div>
         </div>
+
+        {/* ── RIGHT: thread ────────────────────────────────── */}
+        <div style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {!selected ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, textAlign: 'center', padding: '2rem' }}>
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Scissors size={20} color={C.gold} strokeWidth={1.5} style={{ transform: 'rotate(45deg)' }} />
+              </div>
+              <div>
+                <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Select a ticket</p>
+                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>or open a new one to start</p>
+              </div>
+              <button onClick={() => setShowNew(true)} style={{ padding: '8px 20px', borderRadius: 8, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+                New Ticket
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Thread header */}
+              <div style={{ padding: '0.75rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{selected.title}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+                      <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? '#34d399' : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{selected.status}</span>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif' }}>·</span>
+                      <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Opened {format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: C.msgBg }}>
+                {messages.length === 0 ? (
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>No messages yet — start the conversation</p>
+                  </div>
+                ) : messages.map((msg, i) => {
+                  const isMe = !msg.is_from_admin
+                  const showDate = i === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[i - 1].created_at).toDateString()
+                  return (
+                    <div key={msg.id}>
+                      {showDate && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.5rem 0' }}>
+                          <div style={{ flex: 1, height: 1, background: C.border }} />
+                          <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                            {isToday(new Date(msg.created_at)) ? 'Today' : isYesterday(new Date(msg.created_at)) ? 'Yesterday' : format(new Date(msg.created_at), 'MMMM d')}
+                          </span>
+                          <div style={{ flex: 1, height: 1, background: C.border }} />
+                        </div>
+                      )}
+                      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
+                        style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 3, maxWidth: '70%' }}>
+                          {!isMe && <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase' }}>HairGo Team</span>}
+                          <div style={{ padding: '0.5rem 0.875rem', borderRadius: isMe ? '12px 12px 3px 12px' : '12px 12px 12px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontWeight: 500 } : { background: 'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(196,149,106,0.06))', border: '1px solid rgba(201,168,76,0.2)', color: 'rgba(255,255,255,0.82)' }) }}>
+                            {msg.content}
+                          </div>
+                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )
+                })}
+                <div ref={bottomRef} />
+              </div>
+
+              {/* Input */}
+              {selected.status === 'closed' ? (
+                <div style={{ padding: '0.875rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <CheckCircle size={14} color="rgba(255,255,255,0.2)" />
+                  <p style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>This ticket has been closed by the team.</p>
+                </div>
+              ) : (
+                <div style={{ padding: '0.75rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card }}>
+                  <form onSubmit={send} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input value={input} onChange={e => setInput(e.target.value)} placeholder="Reply to HairGo team…" className="msg-inp"
+                      style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.55rem 0.875rem', fontSize: '0.84rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s' }} />
+                    <button type="submit" disabled={!input.trim() || sending} className="send-btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.55rem 1rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
+                      {sending ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Send size={12} /> Send</>}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
+
+      {/* ── New Ticket Modal ─────────────────────────────── */}
+      <AnimatePresence>
+        {showNew && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+            onClick={() => setShowNew(false)}>
+            <motion.div initial={{ opacity: 0, scale: 0.94, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: 440, background: '#111118', border: `1px solid ${C.goldBorder}`, borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,.7)' }}>
+              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#C4956A,rgba(201,168,76,.2))` }} />
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                  <div>
+                    <h2 className="font-display" style={{ fontSize: '1.4rem', color: C.white, marginBottom: 2 }}>New Ticket</h2>
+                    <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Our team will reply as soon as possible</p>
+                  </div>
+                  <button onClick={() => setShowNew(false)} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <X size={13} />
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>Subject *</label>
+                    <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. Question about my appointment…" className="new-inp"
+                      style={{ width: '100%', background: 'rgba(255,255,255,.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s, box-shadow .2s' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>Message <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(255,255,255,0.18)' }}>(optional)</span></label>
+                    <textarea value={newMsg} onChange={e => setNewMsg(e.target.value)} rows={3} placeholder="Describe your question or request…" className="new-inp"
+                      style={{ width: '100%', background: 'rgba(255,255,255,.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300, boxSizing: 'border-box', resize: 'none', transition: 'border-color .2s, box-shadow .2s' }} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem' }}>
+                  <button onClick={() => setShowNew(false)} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={createTicket} disabled={creating || !newTitle.trim()}
+                    style={{ flex: 2, padding: '0.6rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: creating || !newTitle.trim() ? 'not-allowed' : 'pointer', opacity: creating || !newTitle.trim() ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    {creating ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : 'Create Ticket'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

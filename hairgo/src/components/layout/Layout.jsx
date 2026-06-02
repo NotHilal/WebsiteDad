@@ -2,10 +2,8 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import Navbar from './Navbar'
 import Footer from './Footer'
-import ChatWidget from '../chat/ChatWidget'
-import { useAuth } from '../../contexts/AuthContext'
 
-const NO_FOOTER = ['/login', '/register']
+const NO_FOOTER = ['/login', '/register', '/chat']
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -14,7 +12,6 @@ function ScrollToTop() {
 }
 
 export default function Layout() {
-  const { user }     = useAuth()
   const { pathname } = useLocation()
   const hideFooter   = NO_FOOTER.includes(pathname)
 
@@ -26,7 +23,6 @@ export default function Layout() {
         <Outlet />
       </main>
       {!hideFooter && <Footer />}
-      {user && <ChatWidget />}
     </div>
   )
 }

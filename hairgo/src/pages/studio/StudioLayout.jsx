@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
@@ -37,7 +38,25 @@ const workerNavItems = [
 
 export default function StudioLayout() {
   const [open, setOpen] = useState(false)
+  const [unread, setUnread] = useState(0)
   const { signOut, profile, isAdmin } = useAuth()
+
+  useEffect(() => {
+    fetchUnread()
+    const sub = supabase.channel('studio-unread-badge')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ticket_messages' }, fetchUnread)
+      .subscribe()
+    return () => supabase.removeChannel(sub)
+  }, [])
+
+  async function fetchUnread() {
+    const { count } = await supabase
+      .from('ticket_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_from_admin', false)
+      .eq('read', false)
+    setUnread(count || 0)
+  }
   const navigate = useNavigate()
   const location = useLocation()
   const navItems = isAdmin ? adminNavItems : workerNavItems
@@ -88,6 +107,11 @@ export default function StudioLayout() {
               <>
                 <Icon size={14} strokeWidth={isActive ? 2 : 1.5} style={{ flexShrink: 0 }} />
                 {label}
+                {label === 'Messages' && unread > 0 && (
+                  <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
+                    {unread > 9 ? '9+' : unread}
+                  </span>
+                )}
               </>
             )}
           </NavLink>
