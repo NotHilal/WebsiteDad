@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import Navbar from './Navbar'
 import Footer from './Footer'
 
-const NO_FOOTER = ['/login', '/register', '/chat']
+const NO_FOOTER = ['/login', '/register', '/chat', '/profile']
 
 function ScrollToTop() {
   const { pathname } = useLocation()

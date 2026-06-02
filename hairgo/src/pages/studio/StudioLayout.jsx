@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
-  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList
+  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
@@ -25,6 +25,7 @@ const adminNavItems = [
   { to: '/studio/services',      icon: Scissors,        label: 'Services' },
   { to: '/studio/stylists',      icon: UserCheck,       label: 'Stylists' },
   { to: '/studio/products',      icon: Package,         label: 'Products' },
+  { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
   { to: '/studio/gallery',       icon: Image,           label: 'Gallery' },
   { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
   { to: '/studio/coupons',       icon: Tag,             label: 'Coupons' },

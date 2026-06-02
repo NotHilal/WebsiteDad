@@ -25,6 +25,7 @@ import StudioBlockedDates from './pages/studio/StudioBlockedDates'
 import StudioSales from './pages/studio/StudioSales'
 import StudioAppointmentsList from './pages/studio/StudioAppointmentsList'
 import StudioSchedule from './pages/studio/StudioSchedule'
+import StudioOrders from './pages/studio/StudioOrders'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
 import AdminOnlyRoute from './components/auth/AdminOnlyRoute'
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="services"  element={<AdminOnlyRoute><StudioServices /></AdminOnlyRoute>} />
             <Route path="stylists"  element={<AdminOnlyRoute><StudioStylists /></AdminOnlyRoute>} />
             <Route path="products"  element={<AdminOnlyRoute><StudioProducts /></AdminOnlyRoute>} />
+            <Route path="orders"    element={<AdminOnlyRoute><StudioOrders /></AdminOnlyRoute>} />
             <Route path="gallery"   element={<AdminOnlyRoute><StudioGallery /></AdminOnlyRoute>} />
             <Route path="messages"  element={<AdminOnlyRoute><StudioMessages /></AdminOnlyRoute>} />
             <Route path="coupons"   element={<AdminOnlyRoute><StudioCoupons /></AdminOnlyRoute>} />
