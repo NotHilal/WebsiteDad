@@ -231,7 +231,7 @@ export default function StudioGallery() {
             </div>
             <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
               <button onClick={closeModal} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
-              <button onClick={add} disabled={saving || !form.image_url} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || !form.image_url) ? 'not-allowed' : 'pointer', opacity: (saving || !form.image_url) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <button onClick={add} disabled={saving || (!file && !form.image_url)} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || (!file && !form.image_url)) ? 'not-allowed' : 'pointer', opacity: (saving || (!file && !form.image_url)) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Save size={13} /> Add Photo</>}
               </button>
             </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, X, Package, Save } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Package, Save, Image } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -20,11 +20,13 @@ function stockBadge(stock) {
 }
 
 export default function StudioProducts() {
-  const [products, setProducts] = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [modal,    setModal]    = useState(null)
-  const [form,     setForm]     = useState(EMPTY)
-  const [saving,   setSaving]   = useState(false)
+  const [products,     setProducts]     = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [modal,        setModal]        = useState(null)
+  const [form,         setForm]         = useState(EMPTY)
+  const [saving,       setSaving]       = useState(false)
+  const [file,         setFile]         = useState(null)
+  const [filePreview,  setFilePreview]  = useState('')
 
   useEffect(() => { load() }, [])
 
@@ -33,17 +35,48 @@ export default function StudioProducts() {
     setProducts(data || []); setLoading(false)
   }
 
+  function handleFile(e) {
+    const f = e.target.files[0]
+    if (!f) return
+    setFile(f)
+    setFilePreview(URL.createObjectURL(f))
+  }
+
+  function openModal(mode, product = null) {
+    setFile(null)
+    setFilePreview('')
+    setForm(product ? { ...product } : EMPTY)
+    setModal(mode)
+  }
+
+  function closeModal() {
+    setModal(null)
+    setFile(null)
+    setFilePreview('')
+  }
+
   async function save() {
     if (!form.name?.trim()) return toast.error('Name is required')
     setSaving(true)
     try {
-      const payload = { ...form, price: parseFloat(form.price) || 0, stock: parseInt(form.stock) || 0 }
+      let imageUrl = form.image_url
+
+      if (file) {
+        const ext  = file.name.split('.').pop()
+        const path = `${Date.now()}.${ext}`
+        const { error: uploadErr } = await supabase.storage.from('products').upload(path, file, { upsert: true })
+        if (uploadErr) throw new Error('Upload failed: ' + uploadErr.message)
+        const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(path)
+        imageUrl = publicUrl
+      }
+
+      const payload = { ...form, image_url: imageUrl, price: parseFloat(form.price) || 0, stock: parseInt(form.stock) || 0 }
       const { error } = modal === 'add'
         ? await supabase.from('products').insert(payload)
         : await supabase.from('products').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Product added' : 'Product updated')
-      setModal(null); load()
+      closeModal(); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }
@@ -74,7 +107,7 @@ export default function StudioProducts() {
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Products</h1>
           <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{products.length} in catalogue</p>
         </div>
-        <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-g"
+        <button onClick={() => openModal('add')} className="btn-g"
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
           <Plus size={13} /> Add Product
         </button>
@@ -108,7 +141,7 @@ export default function StudioProducts() {
                       }
                     </div>
                     <div className="prod-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', padding: '0.5rem', gap: 4 }}>
-                      <button onClick={() => { setForm({ ...p }); setModal('edit') }}
+                      <button onClick={() => openModal('edit', p)}
                         style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(0,0,0,.65)', border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Edit2 size={11} />
                       </button>
@@ -144,7 +177,7 @@ export default function StudioProducts() {
 
       {modal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-          onClick={() => setModal(null)}>
+          onClick={closeModal}>
           <div style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 16, padding: '1.75rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 32px 80px rgba(0,0,0,.6)' }}
             onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
@@ -152,7 +185,7 @@ export default function StudioProducts() {
                 <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'Add Product' : 'Edit Product'}</h2>
                 <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Product details</p>
               </div>
-              <button onClick={() => setModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <button onClick={closeModal} style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                 <X size={14} />
               </button>
             </div>
@@ -164,11 +197,41 @@ export default function StudioProducts() {
                 <div><label style={lbl}>Stock</label><input type="number" value={form.stock || ''} onChange={set('stock')} placeholder="0" className="m-inp" style={inp} /></div>
               </div>
               <div><label style={lbl}>Category</label><input value={form.category || ''} onChange={set('category')} placeholder="Shampoo, Conditioner…" className="m-inp" style={inp} /></div>
+              {/* File upload */}
               <div>
-                <label style={lbl}>Image URL</label>
-                <input value={form.image_url || ''} onChange={set('image_url')} placeholder="https://…" className="m-inp" style={inp} />
-                {form.image_url && <img src={form.image_url} alt="preview" style={{ marginTop: 8, height: 72, width: 72, objectFit: 'cover', borderRadius: 8, border: `1px solid ${C.border}` }} />}
+                <label style={lbl}>Photo</label>
+                <label style={{ display: 'block', cursor: 'pointer' }}>
+                  <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+                  <div style={{
+                    border: `2px dashed ${(filePreview || form.image_url) ? C.goldBorder : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: 10, padding: (filePreview || form.image_url) ? 0 : '1.5rem',
+                    textAlign: 'center', transition: 'border-color .2s', overflow: 'hidden',
+                    background: (filePreview || form.image_url) ? 'transparent' : 'rgba(255,255,255,0.02)',
+                  }}>
+                    {(filePreview || form.image_url)
+                      ? <img src={filePreview || form.image_url} alt="preview" style={{ width: '100%', height: 140, objectFit: 'cover', display: 'block' }} />
+                      : <>
+                          <Image size={22} style={{ color: 'rgba(255,255,255,0.18)', margin: '0 auto 8px' }} />
+                          <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Click to upload</p>
+                          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif', marginTop: 3 }}>JPG, PNG, WEBP</p>
+                        </>
+                    }
+                  </div>
+                </label>
+                {filePreview && (
+                  <button onClick={() => { setFile(null); setFilePreview('') }}
+                    style={{ marginTop: 6, fontSize: 10, color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Jost,sans-serif' }}>
+                    Remove file
+                  </button>
+                )}
               </div>
+              {/* URL fallback */}
+              {!file && (
+                <div>
+                  <label style={lbl}>Or image URL</label>
+                  <input value={form.image_url || ''} onChange={set('image_url')} placeholder="https://…" className="m-inp" style={inp} />
+                </div>
+              )}
               <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
                 <div style={{ width: 38, height: 20, borderRadius: 10, background: form.available ? '#C9A84C' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .2s', flexShrink: 0 }}
                   onClick={() => setForm(p => ({ ...p, available: !p.available }))}>
@@ -178,7 +241,7 @@ export default function StudioProducts() {
               </label>
             </div>
             <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
-              <button onClick={() => setModal(null)} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={closeModal} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
               <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
                 {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Save size={13} /> Save Product</>}
               </button>
