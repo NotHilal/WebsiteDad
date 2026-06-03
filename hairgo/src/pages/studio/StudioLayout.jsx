@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
-  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag
+  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
@@ -18,16 +18,19 @@ const C = {
 
 const adminNavItems = [
   { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/sales',         icon: BarChart2,       label: 'Sales' },
   { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
   { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
-  { to: '/studio/sales',         icon: BarChart2,       label: 'Sales' },
   { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
+  { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
+  { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
+  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
+  { to: '/studio/pay-runs',      icon: Banknote,        label: 'Pay Runs' },
+  { to: '/studio/home-display',  icon: Sparkles,        label: 'Home Display' },
   { to: '/studio/services',      icon: Scissors,        label: 'Services' },
   { to: '/studio/stylists',      icon: UserCheck,       label: 'Stylists' },
   { to: '/studio/products',      icon: Package,         label: 'Products' },
-  { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
   { to: '/studio/gallery',       icon: Image,           label: 'Gallery' },
-  { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
   { to: '/studio/coupons',       icon: Tag,             label: 'Coupons' },
   { to: '/studio/users',         icon: Users,           label: 'Users' },
 ]
@@ -35,6 +38,7 @@ const adminNavItems = [
 const workerNavItems = [
   { to: '/studio/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/studio/schedule',  icon: Calendar,        label: 'Schedule' },
+  { to: '/studio/timesheets', icon: Clock,          label: 'Timesheets' },
 ]
 
 export default function StudioLayout() {
@@ -126,7 +130,7 @@ export default function StudioLayout() {
             {profile?.full_name || 'Admin'}
           </p>
           <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
-            {isAdmin ? 'Studio Admin' : 'Worker'}
+            {isAdmin ? 'Studio Admin' : 'Employee'}
           </p>
         </div>
         <button onClick={handleSignOut} className="s-signout"

@@ -26,6 +26,9 @@ import StudioSales from './pages/studio/StudioSales'
 import StudioAppointmentsList from './pages/studio/StudioAppointmentsList'
 import StudioSchedule from './pages/studio/StudioSchedule'
 import StudioOrders from './pages/studio/StudioOrders'
+import StudioHomeDisplay from './pages/studio/StudioHomeDisplay'
+import StudioTimesheets  from './pages/studio/StudioTimesheets'
+import StudioPayRuns     from './pages/studio/StudioPayRuns'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
 import AdminOnlyRoute from './components/auth/AdminOnlyRoute'
@@ -77,7 +80,10 @@ export default function App() {
             <Route path="gallery"   element={<AdminOnlyRoute><StudioGallery /></AdminOnlyRoute>} />
             <Route path="messages"  element={<AdminOnlyRoute><StudioMessages /></AdminOnlyRoute>} />
             <Route path="coupons"   element={<AdminOnlyRoute><StudioCoupons /></AdminOnlyRoute>} />
-            <Route path="users"     element={<AdminOnlyRoute><StudioUsers /></AdminOnlyRoute>} />
+            <Route path="users"        element={<AdminOnlyRoute><StudioUsers /></AdminOnlyRoute>} />
+            <Route path="home-display" element={<AdminOnlyRoute><StudioHomeDisplay /></AdminOnlyRoute>} />
+            <Route path="timesheets"  element={<AdminRoute><StudioTimesheets /></AdminRoute>} />
+            <Route path="pay-runs"    element={<AdminOnlyRoute><StudioPayRuns /></AdminOnlyRoute>} />
           </Route>
         </Routes>
       </AuthProvider>

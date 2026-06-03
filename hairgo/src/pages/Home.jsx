@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, Star, ChevronDown } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 const inView = {
   hidden: { opacity: 0, y: 40 },
@@ -11,12 +12,19 @@ const inView = {
   }),
 }
 
+const FALLBACK_TEAM = [
+  { id: 'f1', name: 'Sophie Laurent',   title: 'Head Stylist',       photo_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
+  { id: 'f2', name: 'Camille Dubois',   title: 'Style Expert',       photo_url: 'https://images.unsplash.com/photo-1573497019236-17f8177b81e8?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
+  { id: 'f3', name: 'Julien Lefebvre',  title: 'Master Barber',      photo_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
+  { id: 'f4', name: 'Antoine Bernard',  title: 'Creative Director',  photo_url: 'https://images.unsplash.com/photo-1590873803005-539ede4d828a?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
+]
 
-const services = [
-  { name: 'Precision Cut', desc: "Sculpted to your bone structure and lifestyle — a silhouette that's perfectly yours.", price: 'from €45', image: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=600&h=260&q=80' },
-  { name: 'Color & Highlights', desc: 'Balayage, ombré, vivid transformations. Color that moves the way you do.', price: 'from €80', image: 'https://images.unsplash.com/photo-1614020863825-28a0bb7e3c3c?auto=format&fit=crop&w=600&h=260&q=80' },
-  { name: 'Blow-Out & Style', desc: 'A flawless finish for every occasion, from everyday elegance to special events.', price: 'from €35', image: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=600&h=260&q=80' },
-  { name: 'Hair Treatments', desc: "Keratin, deep hydration, and repair therapies to restore your hair's vitality.", price: 'from €55', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&h=260&q=80' },
+
+const FALLBACK_SERVICES = [
+  { id: 'fsvc1', name: 'Precision Cut',     description: "Sculpted to your bone structure and lifestyle — a silhouette that's perfectly yours.", price_display: 'from €45', image_url: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=600&h=260&q=80' },
+  { id: 'fsvc2', name: 'Color & Highlights', description: 'Balayage, ombré, vivid transformations. Color that moves the way you do.',            price_display: 'from €80', image_url: 'https://images.unsplash.com/photo-1614020863825-28a0bb7e3c3c?auto=format&fit=crop&w=600&h=260&q=80' },
+  { id: 'fsvc3', name: 'Blow-Out & Style',   description: 'A flawless finish for every occasion, from everyday elegance to special events.',        price_display: 'from €35', image_url: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=600&h=260&q=80' },
+  { id: 'fsvc4', name: 'Hair Treatments',    description: "Keratin, deep hydration, and repair therapies to restore your hair's vitality.",          price_display: 'from €55', image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&h=260&q=80' },
 ]
 
 const stats = [
@@ -26,18 +34,49 @@ const stats = [
   { value: '4.9 ★', label: 'Average rating' },
 ]
 
-const gallery = [
-  { h: 300, image: 'https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?auto=format&fit=crop&w=600&h=300&q=80' },
-  { h: 220, image: 'https://images.unsplash.com/photo-1595475884562-073c30d45670?auto=format&fit=crop&w=600&h=220&q=80' },
-  { h: 260, image: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=600&h=260&q=80' },
-  { h: 240, image: 'https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=600&h=240&q=80' },
-  { h: 320, image: 'https://images.unsplash.com/photo-1554519934-e32b1629d9ee?auto=format&fit=crop&w=600&h=320&q=80' },
+const FALLBACK_GALLERY = [
+  { id: 'fg1', image_url: 'https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?auto=format&fit=crop&w=600&q=80' },
+  { id: 'fg2', image_url: 'https://images.unsplash.com/photo-1595475884562-073c30d45670?auto=format&fit=crop&w=600&q=80' },
+  { id: 'fg3', image_url: 'https://images.unsplash.com/photo-1560869713-7d0a29430803?auto=format&fit=crop&w=600&q=80' },
+  { id: 'fg4', image_url: 'https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=600&q=80' },
+  { id: 'fg5', image_url: 'https://images.unsplash.com/photo-1554519934-e32b1629d9ee?auto=format&fit=crop&w=600&q=80' },
 ]
 
 export default function Home() {
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+  const [teamMembers,   setTeamMembers]   = useState([])
+  const [galleryImages, setGalleryImages] = useState([])
+  const [homeServices,  setHomeServices]  = useState([])
+
+  useEffect(() => {
+    supabase.from('stylists').select('id, name, title, photo_url').eq('featured', true).order('display_order')
+      .then(async ({ data }) => {
+        if (data && data.length > 0) { setTeamMembers(data); return }
+        const { data: fallback } = await supabase.from('stylists').select('id, name, title, photo_url').order('display_order').limit(4)
+        if (fallback) setTeamMembers(fallback)
+      })
+    supabase.from('gallery').select('id, image_url').eq('featured', true).order('display_order')
+      .then(async ({ data }) => {
+        if (data && data.length > 0) { setGalleryImages(data); return }
+        const { data: fallback } = await supabase.from('gallery').select('id, image_url').order('display_order').limit(5)
+        if (fallback) setGalleryImages(fallback)
+      })
+    supabase.from('services').select('id, name, description, price, image_url').eq('featured', true).order('name')
+      .then(async ({ data }) => {
+        if (data && data.length > 0) {
+          setHomeServices(data.map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' })))
+          return
+        }
+        const { data: fallback } = await supabase.from('services').select('id, name, description, price, image_url').order('name').limit(4)
+        if (fallback) setHomeServices(fallback.map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' })))
+      })
+  }, [])
+
+  const displayedTeam     = [...teamMembers,  ...FALLBACK_TEAM.slice(teamMembers.length)].slice(0, 4)
+  const displayedGallery  = [...galleryImages, ...FALLBACK_GALLERY.slice(galleryImages.length)].slice(0, 5)
+  const displayedServices = [...homeServices,  ...FALLBACK_SERVICES.slice(homeServices.length)].slice(0, 4)
 
   return (
     <div>
@@ -164,8 +203,8 @@ export default function Home() {
 
           {/* Cards */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:'1.75rem' }}>
-            {services.map(({ name, desc, price, image }, i) => (
-              <motion.div key={name}
+            {displayedServices.map((svc, i) => (
+              <motion.div key={svc.id}
                 initial="hidden" whileInView="visible" viewport={{ once:true, margin:'-40px' }}
                 custom={i} variants={inView}
                 className="glass-light service-card"
@@ -174,16 +213,16 @@ export default function Home() {
               >
                 {/* Photo */}
                 <div style={{ height:200, overflow:'hidden', position:'relative' }}>
-                  <img src={image} alt={name} className="service-img"
+                  <img src={svc.image_url} alt={svc.name} className="service-img"
                     style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.65s ease', willChange:'transform', backfaceVisibility:'hidden' }} />
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.75))' }} />
                 </div>
 
                 {/* Text */}
                 <div style={{ padding:'1.5rem 2rem 2.5rem 2rem' }}>
-                  <h3 className="font-display" style={{ fontSize:'1.4rem', color:'#fff', marginBottom:'0.85rem', textAlign:'center' }}>{name}</h3>
-                  <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{desc}</p>
-                  <span style={{ fontSize:10, color:'#C9A84C', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', textAlign:'center' }}>{price}</span>
+                  <h3 className="font-display" style={{ fontSize:'1.4rem', color:'#fff', marginBottom:'0.85rem', textAlign:'center' }}>{svc.name}</h3>
+                  <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{svc.description}</p>
+                  <span style={{ fontSize:10, color:'#C9A84C', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', textAlign:'center' }}>{svc.price_display}</span>
                 </div>
 
                 {/* Bottom accent */}
@@ -220,8 +259,8 @@ export default function Home() {
 
           {/* Grid */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(5, 1fr)', gap:'1.25rem', marginBottom:'1.5rem' }}>
-            {gallery.map(({ image }, i) => (
-              <motion.div key={i}
+            {displayedGallery.map((item, i) => (
+              <motion.div key={item.id}
                 initial={{ opacity:0, scale:0.95 }}
                 whileInView={{ opacity:1, scale:1 }}
                 viewport={{ once:true, margin:'-30px' }}
@@ -230,7 +269,7 @@ export default function Home() {
                 style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', position:'relative', cursor:'pointer' }}
                 whileHover={{ scale:1.02 }}
               >
-                <img src={image} alt={`Gallery ${i + 1}`} className="gallery-img"
+                <img src={item.image_url} alt={`Gallery ${i + 1}`} className="gallery-img"
                   style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.65s ease' }} />
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 55%, rgba(10,10,10,0.5))', transition:'opacity 0.4s' }} />
               </motion.div>
@@ -277,11 +316,8 @@ export default function Home() {
 
                 {/* Left column — slides in from left */}
                 <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
-                  {[
-                    { name:'Sophie Laurent', title:'Head Stylist', url:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
-                    { name:'Camille Dubois',  title:'Style Expert',  url:'https://images.unsplash.com/photo-1573497019236-17f8177b81e8?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
-                  ].map((m, i) => (
-                    <motion.div key={m.name}
+                  {displayedTeam.slice(0, 2).map((m, i) => (
+                    <motion.div key={m.id}
                       initial={{ opacity:0, x:-50 }}
                       whileInView={{ opacity:1, x:0 }}
                       viewport={{ once:true, margin:'-40px' }}
@@ -293,10 +329,15 @@ export default function Home() {
                         boxShadow:'0 16px 48px rgba(0,0,0,0.5)',
                         marginBottom:'0.4rem',
                       }}>
-                        <img src={m.url} alt={m.name}
-                          style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
-                          onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
-                          onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
+                        {m.photo_url
+                          ? <img src={m.photo_url} alt={m.name}
+                              style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
+                              onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
+                              onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
+                          : <div style={{ width:'100%', height:'100%', background:'rgba(201,168,76,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(201,168,76,0.4)' }}>{m.name?.[0]}</span>
+                            </div>
+                        }
                       </div>
                       <p className="font-display" style={{ color:'#fff', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
                       <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,#C9A84C,transparent)', margin:'0 auto 5px auto' }} />
@@ -307,11 +348,8 @@ export default function Home() {
 
                 {/* Right column — slides in from right */}
                 <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', paddingTop:'1rem' }}>
-                  {[
-                    { name:'Julien Lefebvre', title:'Master Barber',     url:'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
-                    { name:'Antoine Bernard', title:'Creative Director', url:'https://images.unsplash.com/photo-1590873803005-539ede4d828a?auto=format&fit=crop&crop=faces&w=400&h=400&q=80' },
-                  ].map((m, i) => (
-                    <motion.div key={m.name}
+                  {displayedTeam.slice(2, 4).map((m, i) => (
+                    <motion.div key={m.id}
                       initial={{ opacity:0, x:50 }}
                       whileInView={{ opacity:1, x:0 }}
                       viewport={{ once:true, margin:'-40px' }}
@@ -323,10 +361,15 @@ export default function Home() {
                         boxShadow:'0 16px 48px rgba(0,0,0,0.5)',
                         marginBottom:'0.4rem',
                       }}>
-                        <img src={m.url} alt={m.name}
-                          style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
-                          onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
-                          onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
+                        {m.photo_url
+                          ? <img src={m.photo_url} alt={m.name}
+                              style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
+                              onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
+                              onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
+                          : <div style={{ width:'100%', height:'100%', background:'rgba(201,168,76,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(201,168,76,0.4)' }}>{m.name?.[0]}</span>
+                            </div>
+                        }
                       </div>
                       <p className="font-display" style={{ color:'#fff', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
                       <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,#C9A84C,transparent)', margin:'0 auto 5px auto' }} />

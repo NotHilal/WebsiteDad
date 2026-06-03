@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Edit2, Trash2, X, Save, Scissors, Clock, Tag } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, Scissors, Clock, Upload, ImageIcon } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -21,7 +21,7 @@ const CAT = {
   other:     { color: 'rgba(255,255,255,0.4)', bg: 'rgba(255,255,255,0.06)', gradient: 'rgba(255,255,255,0.06)', label: 'Other' },
 }
 
-const EMPTY = { name: '', description: '', price: '', duration: '', category: '', active: true }
+const EMPTY = { name: '', description: '', price: '', duration: '', category: '', active: true, image_url: '' }
 
 const inp = (extra = {}) => ({
   width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -32,12 +32,28 @@ const inp = (extra = {}) => ({
 const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 export default function StudioServices() {
-  const [services, setServices] = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [modal,    setModal]    = useState(null)
-  const [form,     setForm]     = useState(EMPTY)
-  const [saving,   setSaving]   = useState(false)
-  const [catFilter, setCatFilter] = useState('all')
+  const [services,    setServices]    = useState([])
+  const [loading,     setLoading]     = useState(true)
+  const [modal,       setModal]       = useState(null)
+  const [form,        setForm]        = useState(EMPTY)
+  const [saving,      setSaving]      = useState(false)
+  const [catFilter,   setCatFilter]   = useState('all')
+  const [file,        setFile]        = useState(null)
+  const [filePreview, setFilePreview] = useState('')
+
+  function handleFile(e) {
+    const f = e.target.files[0]
+    if (!f) return
+    setFile(f)
+    setFilePreview(URL.createObjectURL(f))
+  }
+
+  function closeModal() {
+    setModal(null)
+    setForm(EMPTY)
+    setFile(null)
+    setFilePreview('')
+  }
 
   useEffect(() => { load() }, [])
 
@@ -51,13 +67,23 @@ export default function StudioServices() {
     if (!form.name.trim()) return toast.error('Name is required')
     setSaving(true)
     try {
-      const payload = { ...form, price: parseFloat(form.price) || 0, duration: parseInt(form.duration) || 0 }
+      let image_url = form.image_url || ''
+      if (file) {
+        const ext  = file.name.split('.').pop()
+        const path = `services/${Date.now()}.${ext}`
+        const { error: uploadErr } = await supabase.storage.from('gallery').upload(path, file, { upsert: true })
+        if (uploadErr) throw new Error('Upload failed: ' + uploadErr.message)
+        const { data: { publicUrl } } = supabase.storage.from('gallery').getPublicUrl(path)
+        image_url = publicUrl
+      }
+      const { id: _id, ...rest } = form
+      const payload = { ...rest, price: parseFloat(form.price) || 0, duration: parseInt(form.duration) || 0, image_url }
       const { error } = modal === 'add'
         ? await supabase.from('services').insert(payload)
         : await supabase.from('services').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Service added' : 'Service updated')
-      setModal(null); load()
+      closeModal(); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }
@@ -85,6 +111,7 @@ export default function StudioServices() {
         .svc-card { transition: all .22s ease; }
         .svc-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important; }
         .svc-card:hover .svc-actions { opacity: 1 !important; }
+        .svc-card:hover .svc-img { transform: scale(1.06); }
         .svc-card:hover .svc-edit-btn:hover { background: rgba(255,255,255,0.15) !important; color: ${C.white} !important; }
         .svc-card:hover .svc-del-btn:hover  { background: rgba(248,113,113,0.2) !important; color: #f87171 !important; }
         .cat-filter:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.dim} !important; }
@@ -146,8 +173,16 @@ export default function StudioServices() {
                 <div key={s.id} className="svc-card"
                   style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.25)', position: 'relative' }}>
 
-                  {/* Top color bar */}
-                  <div style={{ height: 3, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}44)` }} />
+                  {/* Image or color bar */}
+                  {s.image_url ? (
+                    <div style={{ height: 160, overflow: 'hidden', position: 'relative' }}>
+                      <img src={s.image_url} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease' }} className="svc-img" />
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.7))' }} />
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}44)` }} />
+                    </div>
+                  ) : (
+                    <div style={{ height: 3, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}44)` }} />
+                  )}
 
                   {/* Card content */}
                   <div style={{ padding: '1.1rem 1.25rem 1rem' }}>
@@ -194,7 +229,7 @@ export default function StudioServices() {
                   {/* Action buttons */}
                   <div className="svc-actions"
                     style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 4, opacity: 0, transition: 'opacity .2s' }}>
-                    <button onClick={() => { setForm({ ...s }); setModal('edit') }} className="svc-edit-btn"
+                    <button onClick={() => { setForm({ ...s }); setFilePreview(s.image_url || ''); setFile(null); setModal('edit') }} className="svc-edit-btn"
                       style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'all .15s' }}>
                       <Edit2 size={12} />
                     </button>
@@ -218,7 +253,7 @@ export default function StudioServices() {
         {modal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-            onClick={() => setModal(null)}>
+            onClick={closeModal}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -240,7 +275,7 @@ export default function StudioServices() {
                       {modal === 'add' ? 'Add a Service' : form.name || 'Edit Service'}
                     </h2>
                   </div>
-                  <button onClick={() => setModal(null)} className="modal-close"
+                  <button onClick={closeModal} className="modal-close"
                     style={{ width: 32, height: 32, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
                     <X size={14} />
                   </button>
@@ -255,6 +290,33 @@ export default function StudioServices() {
                   <div>
                     <label style={lbl}>Description</label>
                     <textarea value={form.description || ''} onChange={set('description')} rows={2} placeholder="Short description of the service…" style={{ ...inp(), resize: 'none' }} className="m-inp" />
+                  </div>
+
+                  {/* Image upload */}
+                  <div>
+                    <label style={lbl}>Service Image</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {/* Preview */}
+                      {filePreview && (
+                        <div style={{ position: 'relative', height: 140, borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.goldBorder}` }}>
+                          <img src={filePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <button type="button" onClick={() => { setFile(null); setFilePreview(''); setForm(p => ({ ...p, image_url: '' })) }}
+                            style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                            <X size={12} />
+                          </button>
+                        </div>
+                      )}
+                      {/* Upload button */}
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: `1px dashed ${filePreview ? C.goldBorder : 'rgba(255,255,255,0.15)'}`, cursor: 'pointer', fontSize: '0.82rem', color: C.muted, fontFamily: 'Jost,sans-serif', transition: 'all 0.2s' }}>
+                        <Upload size={13} />
+                        {filePreview ? 'Replace image' : 'Upload image'}
+                        <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+                      </label>
+                      {/* URL fallback */}
+                      {!filePreview && (
+                        <input value={form.image_url} onChange={set('image_url')} placeholder="or paste an image URL…" style={inp()} className="m-inp" />
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
@@ -301,7 +363,7 @@ export default function StudioServices() {
 
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
-                  <button onClick={() => setModal(null)} className="modal-cancel"
+                  <button onClick={closeModal} className="modal-cancel"
                     style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
                     Cancel
                   </button>

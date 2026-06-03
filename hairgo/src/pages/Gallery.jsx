@@ -120,7 +120,7 @@ export default function Gallery() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const source   = loading ? [] : images.length > 0 ? images : GALLERY
+  const source   = loading ? [] : [...images, ...GALLERY.slice(images.length)]
   const filtered = source
     .filter(img => active === 'All' || img.category === active.toLowerCase())
     .filter(img => gender === 'All' || img.gender === gender.toLowerCase())

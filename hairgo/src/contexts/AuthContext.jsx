@@ -44,6 +44,7 @@ export function AuthProvider({ children }) {
         id: data.user.id,
         full_name: fullName,
         phone: phone || null,
+        email,
         role: 'user',
         points: 0,
       }, { onConflict: 'id' })
@@ -64,7 +65,7 @@ export function AuthProvider({ children }) {
   }
 
   const isAdmin  = profile?.role === 'admin'
-  const isWorker = profile?.role === 'worker'
+  const isWorker = profile?.role === 'employee'   // role value is 'employee' in DB
   const isStaff  = isAdmin || isWorker
 
   return (

@@ -1,20 +1,23 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Edit2, Trash2, X, Save, User, AtSign, Upload, ImageIcon } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, User, AtSign, Upload, Link2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
+  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
+  goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
+  subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
+  green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.18)',
 }
 
-const EMPTY = { name: '', title: '', bio: '', photo_url: '', specialties: '', instagram: '' }
-const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
+const EMPTY = { name: '', title: '', bio: '', photo_url: '', specialties: '', instagram: '', profile_id: '' }
+const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 export default function StudioStylists() {
   const [stylists,     setStylists]     = useState([])
+  const [staff,        setStaff]        = useState([])
   const [loading,      setLoading]      = useState(true)
   const [modal,        setModal]        = useState(null)
   const [form,         setForm]         = useState(EMPTY)
@@ -27,13 +30,18 @@ export default function StudioStylists() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const { data } = await supabase.from('stylists').select('*').order('display_order')
-    setStylists(data || []); setLoading(false)
+    const [{ data: stylistData }, { data: staffData }] = await Promise.all([
+      supabase.from('stylists').select('*').order('display_order'),
+      supabase.from('profiles').select('id, full_name, email').in('role', ['admin', 'employee']).order('full_name'),
+    ])
+    setStylists(stylistData || [])
+    setStaff(staffData || [])
+    setLoading(false)
   }
 
   async function uploadPhoto(file) {
     if (!file.type.startsWith('image/')) { toast.error('Please select an image file'); return null }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return null }
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5 MB'); return null }
     setUploading(true)
     try {
       const ext  = file.name.split('.').pop()
@@ -64,7 +72,7 @@ export default function StudioStylists() {
       }
       const { _pendingFile, ...rest } = form
       const specialtiesArr = rest.specialties ? rest.specialties.split(',').map(s => s.trim()).filter(Boolean) : []
-      const payload = { ...rest, photo_url, specialties: specialtiesArr }
+      const payload = { ...rest, photo_url, specialties: specialtiesArr, profile_id: rest.profile_id || null }
       const { error } = modal === 'add'
         ? await supabase.from('stylists').insert({ ...payload, display_order: stylists.length })
         : await supabase.from('stylists').update(payload).eq('id', form.id)
@@ -76,177 +84,306 @@ export default function StudioStylists() {
   }
 
   async function del(id) {
-    if (!confirm('Delete this stylist?')) return
+    if (!confirm('Delete this team member?')) return
     await supabase.from('stylists').delete().eq('id', id)
-    toast.success('Stylist removed'); load()
+    toast.success('Team member removed'); load()
+  }
+
+  function openEdit(s) {
+    setForm({ ...s, specialties: Array.isArray(s.specialties) ? s.specialties.join(', ') : (s.specialties || ''), profile_id: s.profile_id || '' })
+    setLocalPreview(null)
+    setModal('edit')
   }
 
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))
+  const linkedCount = stylists.filter(s => s.profile_id).length
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); outline: none; }
-        .sty-card-actions { opacity: 0; transition: opacity .2s; }
-        .sty-card:hover .sty-card-actions { opacity: 1; }
-        .sty-img { transition: transform .5s ease; }
+        .m-inp:focus    { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .sty-card       { transition: border-color .2s, box-shadow .2s; }
+        .sty-card:hover { border-color: rgba(201,168,76,0.22) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35); }
+        .sty-img        { transition: transform .5s ease; }
         .sty-card:hover .sty-img { transform: scale(1.05); }
-        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .sty-edit:hover { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
+        .sty-del:hover  { background: rgba(248,113,113,0.12) !important; border-color: rgba(248,113,113,0.3) !important; color: #f87171 !important; }
+        .btn-g:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .drop-zone:hover { border-color: ${C.goldBorder} !important; background: ${C.goldBg} !important; }
       `}</style>
 
-      <div style={{ flexShrink: 0, marginBottom: '1.1rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      {/* ── Header ──────────────────────────────────────────── */}
+      <div style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Stylists</h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{stylists.length} team members</p>
+          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
+          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Stylists</h1>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+              <span style={{ color: C.white, fontWeight: 600 }}>{stylists.length}</span> team members
+            </span>
+            {linkedCount > 0 && (
+              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                <span style={{ color: C.green, fontWeight: 600 }}>{linkedCount}</span> linked
+              </span>
+            )}
+          </div>
         </div>
         <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
-          <Plus size={13} /> Add Stylist
+          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+          <Plus size={14} /> Add Stylist
         </button>
       </div>
 
+      {/* ── Card grid ────────────────────────────────────────── */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(170px,1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.875rem' }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ aspectRatio: '3/4', borderRadius: 14, background: C.card, border: `1px solid ${C.border}` }} />
+              <div key={i} style={{ height: 120, borderRadius: 16, background: C.card, border: `1px solid ${C.border}` }} className="shimmer" />
             ))}
           </div>
         ) : stylists.length === 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: '0.5rem' }}>
-            <User size={28} color={C.border} />
-            <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No stylists yet</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 260, gap: '0.75rem', textAlign: 'center' }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <User size={26} color="rgba(255,255,255,0.15)" strokeWidth={1} />
+            </div>
+            <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif' }}>No team members yet</p>
+            <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>Add your first stylist to get started</p>
+            <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
+              style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+              <Plus size={14} /> Add Stylist
+            </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(170px,1fr))', gap: '1rem' }}>
-            {stylists.map(s => (
-              <div key={s.id} className="sty-card" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', cursor: 'default', transition: 'border-color .2s' }}>
-                <div style={{ aspectRatio: '3/4', background: '#0e0e14', position: 'relative', overflow: 'hidden' }}>
-                  {s.photo_url
-                    ? <img src={s.photo_url} alt={s.name} className="sty-img" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />
-                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <User size={40} color={C.border} />
-                      </div>
-                  }
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.75), transparent 55%)' }} />
-                  <div className="sty-card-actions" style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4 }}>
-                    <button onClick={() => { setForm({ ...s, specialties: Array.isArray(s.specialties) ? s.specialties.join(', ') : (s.specialties || '') }); setLocalPreview(null); setModal('edit') }}
-                      style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(0,0,0,.65)', border: `1px solid ${C.border}`, color: C.dim, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-                      <Edit2 size={11} />
-                    </button>
-                    <button onClick={() => del(s.id)}
-                      style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(0,0,0,.65)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-                      <Trash2 size={11} />
-                    </button>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.875rem' }}>
+            {stylists.map(s => {
+              const specs = Array.isArray(s.specialties) ? s.specialties : []
+              return (
+                <div key={s.id} className="sty-card"
+                  style={{ background: C.card, border: `1px solid ${s.profile_id ? C.greenBorder : C.border}`, borderRadius: 16, overflow: 'hidden', display: 'flex', minHeight: 120 }}>
+
+                  {/* Photo */}
+                  <div style={{ width: 110, flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#0e0e14' }}>
+                    {s.photo_url
+                      ? <img src={s.photo_url} alt={s.name} className="sty-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(201,168,76,0.05), rgba(196,149,106,0.03))' }}>
+                          <User size={32} color="rgba(201,168,76,0.18)" strokeWidth={1} />
+                        </div>
+                    }
+                    {/* Right-side gradient for smooth blend into card */}
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 55%, rgba(22,22,32,0.85))' }} />
+                    {/* Display order badge */}
+                    <div style={{ position: 'absolute', top: 7, left: 7, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{(s.display_order ?? 0) + 1}</span>
+                    </div>
                   </div>
-                  {s.instagram && (
-                    <div className="sty-card-actions" style={{ position: 'absolute', top: 8, left: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px', borderRadius: 7, background: 'rgba(0,0,0,.6)', backdropFilter: 'blur(4px)' }}>
-                        <AtSign size={9} color={C.muted} />
-                        <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>{s.instagram}</span>
+
+                  {/* Content */}
+                  <div style={{ flex: 1, padding: '0.875rem 1rem 0.875rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', minWidth: 0 }}>
+
+                    {/* Name row + actions */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <p className="font-display" style={{ color: C.white, fontSize: '1.1rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
+                        {s.title && (
+                          <p style={{ color: C.goldDim, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em', marginTop: 1 }}>{s.title}</p>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                        <button onClick={() => openEdit(s)} className="sty-edit"
+                          style={{ width: 28, height: 28, borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                          <Edit2 size={11} />
+                        </button>
+                        <button onClick={() => del(s.id)} className="sty-del"
+                          style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', color: 'rgba(248,113,113,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                          <Trash2 size={11} />
+                        </button>
                       </div>
                     </div>
-                  )}
-                </div>
-                <div style={{ padding: '0.75rem' }}>
-                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>{s.name}</p>
-                  {s.title && <p style={{ color: C.goldDim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>{s.title}</p>}
-                  {s.specialties?.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                      {s.specialties.slice(0, 2).map(sp => (
-                        <span key={sp} style={{ fontSize: 8, padding: '2px 7px', borderRadius: 20, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{sp}</span>
-                      ))}
-                      {s.specialties.length > 2 && <span style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif' }}>+{s.specialties.length - 2}</span>}
+
+                    {/* Divider */}
+                    <div style={{ height: 1, background: C.border, marginTop: 2, marginBottom: 2 }} />
+
+                    {/* Bio */}
+                    {s.bio && (
+                      <p style={{ color: C.muted, fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {s.bio}
+                      </p>
+                    )}
+
+                    {/* Specialties */}
+                    {specs.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {specs.slice(0, 3).map(sp => (
+                          <span key={sp} style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{sp}</span>
+                        ))}
+                        {specs.length > 3 && (
+                          <span style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', alignSelf: 'center' }}>+{specs.length - 3}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Footer: instagram + linked */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 2 }}>
+                      {s.instagram
+                        ? <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <AtSign size={10} color={C.muted} strokeWidth={1.5} />
+                            <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{s.instagram}</span>
+                          </div>
+                        : <div />
+                      }
+                      {s.profile_id
+                        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                            <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.green }} />
+                            Linked
+                          </span>
+                        : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}`, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                            <Link2 size={8} />
+                            Not linked
+                          </span>
+                      }
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
 
+      {/* ── Modal ────────────────────────────────────────────── */}
       {modal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.78)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
           onClick={() => { setModal(null); setLocalPreview(null) }}>
-          <div style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 16, padding: '1.75rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 32px 80px rgba(0,0,0,.6)' }}
+          <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,.65)' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-              <div>
-                <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'Add Stylist' : 'Edit Stylist'}</h2>
-                <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Team member details</p>
-              </div>
-              <button onClick={() => { setModal(null); setLocalPreview(null) }} style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <X size={14} />
-              </button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div><label style={lbl}>Name *</label><input value={form.name} onChange={set('name')} placeholder="Sophie Laurent" className="m-inp" style={inp} /></div>
-                <div><label style={lbl}>Title</label><input value={form.title || ''} onChange={set('title')} placeholder="Head Stylist" className="m-inp" style={inp} /></div>
-              </div>
-              <div><label style={lbl}>Bio</label><textarea value={form.bio || ''} onChange={set('bio')} rows={3} placeholder="Short bio…" className="m-inp" style={{ ...inp, resize: 'none' }} /></div>
-              <div>
-                <label style={lbl}>Photo</label>
-                <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }}
-                  onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]); e.target.value = '' }} />
 
-                {(localPreview || form.photo_url) ? (
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                    <div style={{ width: 72, height: 96, borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.border}`, flexShrink: 0 }}>
-                      <img src={localPreview || form.photo_url} alt="preview"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingTop: 4 }}>
-                      <button type="button" onClick={() => fileRef.current?.click()}
-                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
-                        <Upload size={11} /> Change photo
-                      </button>
-                      <button type="button" onClick={() => { setLocalPreview(null); setForm(p => ({ ...p, photo_url: '', _pendingFile: undefined })) }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
-                        <X size={11} /> Remove
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileRef.current?.click()}
-                    onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
-                    style={{
-                      border: `1.5px dashed ${dragOver ? C.gold : 'rgba(255,255,255,0.12)'}`,
-                      borderRadius: 12, padding: '1.5rem 1rem', textAlign: 'center', cursor: 'pointer',
-                      background: dragOver ? C.goldBg : 'rgba(255,255,255,0.02)', transition: 'all .2s',
-                    }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: dragOver ? C.goldBg : C.subtle, border: `1px solid ${dragOver ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.625rem', transition: 'all .2s' }}>
-                      <Upload size={16} color={dragOver ? C.gold : 'rgba(255,255,255,0.2)'} />
-                    </div>
-                    <p style={{ fontSize: '0.78rem', color: dragOver ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 3, transition: 'color .2s' }}>
-                      Click to upload or drag & drop
-                    </p>
-                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>
-                      JPG, PNG, WebP · max 5 MB
-                    </p>
-                  </div>
-                )}
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.15))' }} />
 
-                {uploading && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 8, color: C.goldDim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
-                    <div style={{ width: 12, height: 12, border: `2px solid ${C.goldBorder}`, borderTopColor: C.gold, borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
-                    Uploading…
-                  </div>
-                )}
+            <div style={{ padding: '1.75rem' }}>
+              {/* Modal header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <div>
+                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>
+                    {modal === 'add' ? 'New Member' : 'Edit Member'}
+                  </p>
+                  <h2 className="font-display font-light" style={{ fontSize: '1.6rem', color: C.white, lineHeight: 1 }}>
+                    {modal === 'add' ? 'Add Stylist' : form.name || 'Edit Stylist'}
+                  </h2>
+                </div>
+                <button onClick={() => { setModal(null); setLocalPreview(null) }}
+                  style={{ width: 32, height: 32, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                  <X size={14} />
+                </button>
               </div>
-              <div><label style={lbl}>Specialties <span style={{ textTransform: 'none', letterSpacing: 0, color: C.muted, fontSize: 9 }}>(comma separated)</span></label><input value={form.specialties || ''} onChange={set('specialties')} placeholder="Balayage, Precision Cut" className="m-inp" style={inp} /></div>
-              <div><label style={lbl}>Instagram</label><input value={form.instagram || ''} onChange={set('instagram')} placeholder="username" className="m-inp" style={inp} /></div>
-            </div>
-            <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
-              <button onClick={() => { setModal(null); setLocalPreview(null) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .2s' }}>Cancel</button>
-              <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
-                {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Save size={13} /> Save Stylist</>}
-              </button>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
+                {/* Name + Title */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div><label style={lbl}>Name <span style={{ color: C.gold }}>*</span></label><input value={form.name} onChange={set('name')} placeholder="Sophie Laurent" className="m-inp" style={inp} /></div>
+                  <div><label style={lbl}>Title</label><input value={form.title || ''} onChange={set('title')} placeholder="Head Stylist" className="m-inp" style={inp} /></div>
+                </div>
+
+                {/* Bio */}
+                <div><label style={lbl}>Bio</label><textarea value={form.bio || ''} onChange={set('bio')} rows={2} placeholder="Short bio about this stylist…" className="m-inp" style={{ ...inp, resize: 'none' }} /></div>
+
+                {/* Photo upload */}
+                <div>
+                  <label style={lbl}>Photo</label>
+                  <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }}
+                    onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]); e.target.value = '' }} />
+
+                  {(localPreview || form.photo_url) ? (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                      <div style={{ width: 68, height: 90, borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.border}`, flexShrink: 0 }}>
+                        <img src={localPreview || form.photo_url} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingTop: 4 }}>
+                        <button type="button" onClick={() => fileRef.current?.click()}
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                          <Upload size={11} /> Change photo
+                        </button>
+                        <button type="button" onClick={() => { setLocalPreview(null); setForm(p => ({ ...p, photo_url: '', _pendingFile: undefined })) }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                          <X size={11} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="drop-zone"
+                      onClick={() => fileRef.current?.click()}
+                      onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
+                      style={{ border: `1.5px dashed ${dragOver ? C.gold : 'rgba(255,255,255,0.1)'}`, borderRadius: 12, padding: '1.25rem', textAlign: 'center', cursor: 'pointer', background: dragOver ? C.goldBg : 'rgba(255,255,255,0.02)', transition: 'all .2s' }}>
+                      <Upload size={18} color={dragOver ? C.gold : 'rgba(255,255,255,0.18)'} style={{ margin: '0 auto 0.5rem' }} />
+                      <p style={{ fontSize: '0.78rem', color: dragOver ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 2 }}>Click or drag & drop</p>
+                      <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>JPG, PNG, WebP · max 5 MB</p>
+                    </div>
+                  )}
+                  {uploading && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, color: C.goldDim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
+                      <div style={{ width: 12, height: 12, border: `2px solid ${C.goldBorder}`, borderTopColor: C.gold, borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                      Uploading…
+                    </div>
+                  )}
+                </div>
+
+                {/* Specialties + Instagram */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <label style={lbl}>Specialties <span style={{ textTransform: 'none', letterSpacing: 0, color: C.muted, fontSize: 9 }}>(comma separated)</span></label>
+                    <input value={form.specialties || ''} onChange={set('specialties')} placeholder="Balayage, Precision Cut" className="m-inp" style={inp} />
+                  </div>
+                  <div>
+                    <label style={lbl}>Instagram</label>
+                    <input value={form.instagram || ''} onChange={set('instagram')} placeholder="username" className="m-inp" style={inp} />
+                  </div>
+                </div>
+
+                {/* Linked account */}
+                <div style={{ padding: '1rem', borderRadius: 12, background: 'rgba(52,211,153,0.04)', border: `1px solid ${C.greenBorder}` }}>
+                  <label style={{ ...lbl, color: C.green, marginBottom: 4 }}>
+                    <Link2 size={9} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />
+                    Linked Account
+                  </label>
+                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginBottom: 8 }}>
+                    Link a staff account so they can clock in/out from their own login.
+                  </p>
+                  <select value={form.profile_id || ''} onChange={set('profile_id')} className="m-inp"
+                    style={{ ...inp, appearance: 'none', borderColor: form.profile_id ? C.greenBorder : 'rgba(255,255,255,0.1)' }}>
+                    <option value="">No account linked</option>
+                    {staff.map(u => {
+                      const takenBy = stylists.find(s => s.profile_id === u.id && s.id !== form.id)
+                      return (
+                        <option key={u.id} value={u.id} disabled={!!takenBy}
+                          style={{ background: '#1a1a24', color: takenBy ? '#555' : '#f0f0f0' }}>
+                          {u.full_name || u.email}{takenBy ? ` — already linked to ${takenBy.name}` : ''}
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
+
+              </div>
+
+              {/* Buttons */}
+              <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
+                <button onClick={() => { setModal(null); setLocalPreview(null) }}
+                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button onClick={save} disabled={saving || uploading}
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || uploading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || uploading) ? 0.6 : 1 }}>
+                  {saving
+                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    : <><Save size={13} /> {modal === 'add' ? 'Add Stylist' : 'Save Changes'}</>
+                  }
+                </button>
+              </div>
             </div>
           </div>
         </div>
