@@ -132,24 +132,26 @@ export default function StudioSales() {
   const periodBadge   = mode === 'day' ? 'Today' : mode === 'week' ? 'This week' : 'This month'
   const emptyText     = mode === 'day' ? 'this day' : mode === 'week' ? 'this week' : 'this month'
 
+  const backLabel = mode === 'day' ? 'Back to Today' : mode === 'week' ? 'Back to This Week' : 'Back to This Month'
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.875rem', overflowY: 'auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.625rem', overflow: 'hidden' }}>
 
       {/* ── Header ── */}
-      <div style={{ flexShrink: 0, paddingBottom: '0.875rem', borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
-          <div>
-            <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Sales</h1>
-            <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Revenue overview</p>
-          </div>
+      <div style={{ flexShrink: 0 }}>
 
-          {/* Mode toggle */}
-          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 10, padding: 3, gap: 2 }}>
+        {/* Title row + mode toggle */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.625rem' }}>
+          <div>
+            <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.4rem,2vw,1.8rem)', color: C.white, lineHeight: 1 }}>Sales</h1>
+            <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 3 }}>Revenue overview</p>
+          </div>
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10, padding: 3, gap: 2 }}>
             {MODES.map(m => {
               const active = mode === m.toLowerCase()
               return (
                 <button key={m} onClick={() => { setMode(m.toLowerCase()); setSearch('') }}
-                  style={{ padding: '5px 14px', borderRadius: 7, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', border: 'none', background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, outline: active ? `1px solid ${C.goldBorder}` : 'none', transition: 'all .18s' }}>
+                  style={{ padding: '5px 18px', borderRadius: 7, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', border: 'none', background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, outline: active ? `1px solid ${C.goldBorder}` : 'none', transition: 'all .18s' }}>
                   {m}
                 </button>
               )
@@ -158,86 +160,92 @@ export default function StudioSales() {
         </div>
 
         {/* Date navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.025)', border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
           <button onClick={() => setAnchor(d => navigate(d, mode, -1))} className="s-nav-btn"
-            style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: C.muted, transition: 'all .18s' }}>
-            <ChevronLeft size={13} />
+            style={{ padding: '0.6rem 1rem', background: 'none', border: 'none', borderRight: `1px solid ${C.border}`, cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s', flexShrink: 0 }}>
+            <ChevronLeft size={15} strokeWidth={1.75} />
           </button>
-          <div style={{ flex: 1, textAlign: 'center' }}>
-            <p className="font-display" style={{ fontSize: '1.05rem', color: C.white, lineHeight: 1.2 }}>{periodLabel(anchor, mode)}</p>
-            {currentPeriod && <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif' }}>{periodBadge}</span>}
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '0.5rem 1rem' }}>
+            <p className="font-display" style={{ fontSize: '0.95rem', color: C.white, lineHeight: 1 }}>{periodLabel(anchor, mode)}</p>
+            {currentPeriod
+              ? <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, padding: '2px 9px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, flexShrink: 0 }}>{periodBadge}</span>
+              : <button onClick={() => setAnchor(new Date())} className="s-back-btn"
+                  style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '3px 10px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  ↩ {backLabel}
+                </button>
+            }
           </div>
           <button onClick={() => setAnchor(d => navigate(d, mode, 1))} className="s-nav-btn"
-            style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: C.muted, transition: 'all .18s' }}>
-            <ChevronRight size={13} />
-          </button>
-          <button onClick={() => setAnchor(new Date())} className="s-today-btn"
-            style={{ padding: '4px 13px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .18s' }}>
-            {periodBadge}
+            style={{ padding: '0.6rem 1rem', background: 'none', border: 'none', borderLeft: `1px solid ${C.border}`, cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s', flexShrink: 0 }}>
+            <ChevronRight size={15} strokeWidth={1.75} />
           </button>
         </div>
       </div>
 
-      {/* ── Summary cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.75rem', flexShrink: 0 }}>
+      {/* ── Stats + Status in one row ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 220px', gap: '0.625rem', flexShrink: 0 }}>
         {summaryCards.map(({ label, value, sub, color, icon: Icon }) => (
-          <div key={label} style={{ ...card, padding: '1.1rem 1.25rem' }}>
-            <div style={{ width: 32, height: 32, borderRadius: 9, background: `${color}14`, border: `1px solid ${color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.75rem' }}>
+          <div key={label} style={{ ...card, padding: '0.875rem 1rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: `${color}14`, border: `1px solid ${color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Icon size={14} color={color} strokeWidth={1.5} />
             </div>
-            <div className="font-display" style={{ fontSize: '1.75rem', color: loading ? C.border : C.white, lineHeight: 1, marginBottom: '0.2rem' }}>
-              {loading ? '—' : value}
+            <div style={{ minWidth: 0 }}>
+              <div className="font-display" style={{ fontSize: '1.5rem', color: loading ? C.border : C.white, lineHeight: 1, marginBottom: 3 }}>
+                {loading ? '—' : value}
+              </div>
+              <p style={{ fontSize: 9, letterSpacing: '0.13em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{label}</p>
+              <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.16)', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{loading ? '…' : sub}</p>
             </div>
-            <p style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.1rem' }}>{label}</p>
-            <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>{loading ? '…' : sub}</p>
           </div>
         ))}
-      </div>
-
-      {/* ── Chart row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '0.75rem', flexShrink: 0 }}>
-
-        <div style={{ ...card, padding: '1.1rem 1.25rem' }}>
-          <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.875rem' }}>
-            {mode === 'day' ? 'Appointments by Hour' : mode === 'week' ? 'Revenue by Day' : 'Revenue by Day'}
-          </p>
+        <div style={{ ...card, padding: '0.875rem 1rem' }}>
+          <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.5rem' }}>Status</p>
           {loading
-            ? <div style={{ height: 90, background: C.subtle, borderRadius: 8 }} className="shimmer" />
-            : mode === 'day'
-              ? <HourlyChart appointments={appointments} hours={HOURS} />
-              : <PeriodChart appointments={appointments} preorders={preorders} start={start} end={end} mode={mode} />
-          }
-        </div>
-
-        <div style={{ ...card, padding: '1.1rem 1.25rem' }}>
-          <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.875rem' }}>
-            Appointment Status
-          </p>
-          {loading
-            ? <div style={{ height: 90, background: C.subtle, borderRadius: 8 }} className="shimmer" />
-            : <StatusBreakdown appointments={appointments} />
+            ? <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <div className="sk" style={{ height: 7, borderRadius: 4 }} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
+                  {[0,1,2,3].map(i => <div key={i} className="sk" style={{ height: 36, borderRadius: 8, animationDelay: `${i*0.08}s` }} />)}
+                </div>
+              </div>
+            : <StatusBreakdown appointments={appointments} compact />
           }
         </div>
       </div>
 
-      {/* ── Revenue split bar ── */}
-      {!loading && totalRevenue > 0 && (
-        <div style={{ ...card, padding: '1rem 1.25rem', flexShrink: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
-            <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Revenue Breakdown</p>
-            <span className="font-display" style={{ color: C.gold, fontSize: '1rem' }}>€{totalRevenue.toFixed(2)}</span>
+      {/* ── Chart + revenue split ── */}
+      <div style={{ ...card, flexShrink: 0, padding: '0.875rem 1.25rem' }}>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.6rem' }}>
+              {mode === 'day' ? 'Appointments by Hour' : 'Revenue by Day'}
+            </p>
+            {loading
+              ? <div className="sk" style={{ height: 72, borderRadius: 8 }} />
+              : mode === 'day'
+                ? <HourlyChart appointments={appointments} hours={HOURS} />
+                : <PeriodChart appointments={appointments} preorders={preorders} start={start} end={end} mode={mode} />
+            }
           </div>
-          <RevenueSplit servicesRevenue={servicesRevenue} productsRevenue={productsRevenue} total={totalRevenue} />
+          {!loading && totalRevenue > 0 && (
+            <div style={{ width: 190, flexShrink: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Revenue Split</p>
+                <span className="font-display" style={{ color: C.gold, fontSize: '0.9rem' }}>€{totalRevenue.toFixed(2)}</span>
+              </div>
+              <RevenueSplit servicesRevenue={servicesRevenue} productsRevenue={productsRevenue} total={totalRevenue} />
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* ── Tabs + table ── */}
-      <div style={{ ...card, flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, padding: '0 1.25rem' }}>
+      {/* ── Tabs + table (fills remaining height, scrolls internally) ── */}
+      <div style={{ ...card, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}`, padding: '0 1.25rem' }}>
           <div style={{ display: 'flex' }}>
             {TABS.map(t => (
               <button key={t} onClick={() => { setTab(t); setSearch('') }} style={{
-                padding: '0.875rem 1rem', background: 'none', border: 'none', cursor: 'pointer',
+                padding: '0.75rem 1rem', background: 'none', border: 'none', cursor: 'pointer',
                 fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', fontFamily: 'Jost,sans-serif',
                 fontWeight: tab === t ? 600 : 400, color: tab === t ? C.gold : C.muted,
                 borderBottom: `2px solid ${tab === t ? C.gold : 'transparent'}`, marginBottom: -1, transition: 'color .2s',
@@ -258,136 +266,146 @@ export default function StudioSales() {
           </div>
         </div>
 
-        {/* Appointments table */}
-        {tab === 'Appointments' && (
-          loading ? <Skeleton rows={5} /> :
-          filteredAppts.length === 0 ? <Empty icon={Scissors} text={`No appointments for ${emptyText}`} /> : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${C.border}` }}>
-                  {['Booked', 'Appt. Date', 'Client', 'Service', 'Stylist', 'Status', 'Payment', 'Price'].map(h => (
-                    <th key={h} style={{ padding: '0.6rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAppts.map((appt, i) => {
-                  const s = STATUS_APPT[appt.status] || STATUS_APPT.pending
-                  return (
-                    <tr key={appt.id} style={{ borderBottom: i < filteredAppts.length - 1 ? `1px solid ${C.border}` : 'none' }} className="s-row">
-                      <td style={{ padding: '0.7rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.75rem', color: C.muted, whiteSpace: 'nowrap' }}>
-                        {appt.created_at ? format(new Date(appt.created_at), mode === 'day' ? 'HH:mm' : 'MMM d HH:mm') : '—'}
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.75rem', color: C.gold, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        {appt.date ? format(parseISO(appt.date), 'MMM d') : '—'} {appt.time?.slice(0, 5)}
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem' }}>
-                        <p style={{ color: C.white, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>{appt.profiles?.full_name || '—'}</p>
-                        {appt.profiles?.phone && <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif' }}>{appt.profiles.phone}</p>}
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem', color: C.dim, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>
-                        {appt.services?.name || '—'}
-                        {appt.services?.duration && <span style={{ color: C.muted, fontSize: '0.68rem', marginLeft: 5 }}>{appt.services.duration}min</span>}
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem', color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{appt.stylists?.name || '—'}</td>
-                      <td style={{ padding: '0.7rem 1.1rem' }}>
-                        <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'capitalize' }}>{appt.status}</span>
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem' }}>
-                        {appt.payment_status === 'paid'
-                          ? <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Paid</span>
-                          : <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Unpaid</span>
-                        }
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.8rem', color: appt.payment_status === 'paid' ? C.gold : C.muted, fontWeight: appt.payment_status === 'paid' ? 600 : 400 }}>
-                        {appt.services?.price ? `€${appt.services.price}` : '—'}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-              {paidAppts.length > 0 && !search && (
-                <tfoot>
-                  <tr style={{ borderTop: `1px solid ${C.goldBorder}`, background: C.goldBg }}>
-                    <td colSpan={7} style={{ padding: '0.6rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
-                      Revenue — paid via Stripe ({paidAppts.length})
-                    </td>
-                    <td style={{ padding: '0.6rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{servicesRevenue.toFixed(2)}</td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
-          )
-        )}
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
 
-        {/* Product Orders table */}
-        {tab === 'Product Orders' && (
-          loading ? <Skeleton rows={4} /> :
-          filteredOrders.length === 0 ? <Empty icon={Package} text={`No product orders for ${emptyText}`} /> : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${C.border}` }}>
-                  {['Product', 'Client', 'Qty', 'Status', 'Payment', 'Unit Price', 'Total'].map(h => (
-                    <th key={h} style={{ padding: '0.6rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map((order, i) => {
-                  const s = STATUS_ORDER[order.status] || STATUS_ORDER.active
-                  const lineTotal = (parseFloat(order.products?.price) || 0) * (order.quantity || 1)
-                  return (
-                    <tr key={order.id} style={{ borderBottom: i < filteredOrders.length - 1 ? `1px solid ${C.border}` : 'none' }} className="s-row">
-                      <td style={{ padding: '0.7rem 1.1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                          <div style={{ width: 32, height: 32, borderRadius: 6, background: '#181818', border: `1px solid ${C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {order.products?.image_url ? <img src={order.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={12} style={{ color: C.muted }} />}
-                          </div>
-                          <span style={{ color: C.white, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>{order.products?.name || '—'}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem' }}>
-                        <p style={{ color: C.dim, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{order.profiles?.full_name || '—'}</p>
-                        {order.profiles?.phone && <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif' }}>{order.profiles.phone}</p>}
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem', color: C.dim, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>×{order.quantity || 1}</td>
-                      <td style={{ padding: '0.7rem 1.1rem' }}>
-                        <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'capitalize' }}>{order.status === 'active' ? 'Awaiting Pickup' : order.status}</span>
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem' }}>
-                        {order.payment_status === 'paid'
-                          ? <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Paid</span>
-                          : <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Unpaid</span>
-                        }
-                      </td>
-                      <td style={{ padding: '0.7rem 1.1rem', color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{order.products?.price ? `€${order.products.price}` : '—'}</td>
-                      <td style={{ padding: '0.7rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.8rem', color: order.payment_status === 'paid' ? C.gold : C.muted, fontWeight: order.payment_status === 'paid' ? 600 : 400 }}>
-                        {order.products?.price ? `€${lineTotal.toFixed(2)}` : '—'}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-              {paidOrders.length > 0 && !search && (
-                <tfoot>
-                  <tr style={{ borderTop: `1px solid ${C.goldBorder}`, background: C.goldBg }}>
-                    <td colSpan={6} style={{ padding: '0.6rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Revenue — paid via Stripe ({paidOrders.length})</td>
-                    <td style={{ padding: '0.6rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{productsRevenue.toFixed(2)}</td>
+          {tab === 'Appointments' && (
+            loading ? <Skeleton rows={5} /> :
+            filteredAppts.length === 0 ? <Empty icon={Scissors} text={`No appointments for ${emptyText}`} /> : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 0 }}>
+                    {['Booked', 'Appt. Date', 'Client', 'Service', 'Stylist', 'Status', 'Payment', 'Price'].map(h => (
+                      <th key={h} style={{ padding: '0.55rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif', background: '#161620' }}>{h}</th>
+                    ))}
                   </tr>
-                </tfoot>
-              )}
-            </table>
-          )
-        )}
+                </thead>
+                <tbody>
+                  {filteredAppts.map((appt, i) => {
+                    const s = STATUS_APPT[appt.status] || STATUS_APPT.pending
+                    return (
+                      <tr key={appt.id} style={{ borderBottom: i < filteredAppts.length - 1 ? `1px solid ${C.border}` : 'none' }} className="s-row">
+                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.75rem', color: C.muted, whiteSpace: 'nowrap' }}>
+                          {appt.created_at ? format(new Date(appt.created_at), mode === 'day' ? 'HH:mm' : 'MMM d HH:mm') : '—'}
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.75rem', color: C.gold, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          {appt.date ? format(parseISO(appt.date), 'MMM d') : '—'} {appt.time?.slice(0, 5)}
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem' }}>
+                          <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{appt.profiles?.full_name || '—'}</p>
+                          {appt.profiles?.phone && <p style={{ color: C.muted, fontSize: '0.67rem', fontFamily: 'Jost,sans-serif' }}>{appt.profiles.phone}</p>}
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem', color: C.dim, fontSize: '0.76rem', fontFamily: 'Jost,sans-serif' }}>
+                          {appt.services?.name || '—'}
+                          {appt.services?.duration && <span style={{ color: C.muted, fontSize: '0.67rem', marginLeft: 5 }}>{appt.services.duration}min</span>}
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem', color: C.muted, fontSize: '0.76rem', fontFamily: 'Jost,sans-serif' }}>{appt.stylists?.name || '—'}</td>
+                        <td style={{ padding: '0.6rem 1.1rem' }}>
+                          <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'capitalize' }}>{appt.status}</span>
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem' }}>
+                          {appt.payment_status === 'paid'
+                            ? <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Paid</span>
+                            : <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Unpaid</span>
+                          }
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.78rem', color: appt.payment_status === 'paid' ? C.gold : C.muted, fontWeight: appt.payment_status === 'paid' ? 600 : 400 }}>
+                          {appt.services?.price ? `€${appt.services.price}` : '—'}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                {paidAppts.length > 0 && !search && (
+                  <tfoot>
+                    <tr style={{ borderTop: `1px solid ${C.goldBorder}`, background: C.goldBg }}>
+                      <td colSpan={7} style={{ padding: '0.55rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                        Revenue — paid via Stripe ({paidAppts.length})
+                      </td>
+                      <td style={{ padding: '0.55rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{servicesRevenue.toFixed(2)}</td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            )
+          )}
+
+          {tab === 'Product Orders' && (
+            loading ? <Skeleton rows={4} /> :
+            filteredOrders.length === 0 ? <Empty icon={Package} text={`No product orders for ${emptyText}`} /> : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${C.border}`, position: 'sticky', top: 0 }}>
+                    {['Product', 'Client', 'Qty', 'Status', 'Payment', 'Unit Price', 'Total'].map(h => (
+                      <th key={h} style={{ padding: '0.55rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif', background: '#161620' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order, i) => {
+                    const s = STATUS_ORDER[order.status] || STATUS_ORDER.active
+                    const lineTotal = (parseFloat(order.products?.price) || 0) * (order.quantity || 1)
+                    return (
+                      <tr key={order.id} style={{ borderBottom: i < filteredOrders.length - 1 ? `1px solid ${C.border}` : 'none' }} className="s-row">
+                        <td style={{ padding: '0.6rem 1.1rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                            <div style={{ width: 30, height: 30, borderRadius: 6, background: '#181818', border: `1px solid ${C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              {order.products?.image_url ? <img src={order.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={11} style={{ color: C.muted }} />}
+                            </div>
+                            <span style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{order.products?.name || '—'}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem' }}>
+                          <p style={{ color: C.dim, fontSize: '0.76rem', fontFamily: 'Jost,sans-serif' }}>{order.profiles?.full_name || '—'}</p>
+                          {order.profiles?.phone && <p style={{ color: C.muted, fontSize: '0.67rem', fontFamily: 'Jost,sans-serif' }}>{order.profiles.phone}</p>}
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem', color: C.dim, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>×{order.quantity || 1}</td>
+                        <td style={{ padding: '0.6rem 1.1rem' }}>
+                          <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'capitalize' }}>{order.status === 'active' ? 'Awaiting Pickup' : order.status}</span>
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem' }}>
+                          {order.payment_status === 'paid'
+                            ? <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Paid</span>
+                            : <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Unpaid</span>
+                          }
+                        </td>
+                        <td style={{ padding: '0.6rem 1.1rem', color: C.muted, fontSize: '0.76rem', fontFamily: 'Jost,sans-serif' }}>{order.products?.price ? `€${order.products.price}` : '—'}</td>
+                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.78rem', color: order.payment_status === 'paid' ? C.gold : C.muted, fontWeight: order.payment_status === 'paid' ? 600 : 400 }}>
+                          {order.products?.price ? `€${lineTotal.toFixed(2)}` : '—'}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                {paidOrders.length > 0 && !search && (
+                  <tfoot>
+                    <tr style={{ borderTop: `1px solid ${C.goldBorder}`, background: C.goldBg }}>
+                      <td colSpan={6} style={{ padding: '0.55rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Revenue — paid via Stripe ({paidOrders.length})</td>
+                      <td style={{ padding: '0.55rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{productsRevenue.toFixed(2)}</td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            )
+          )}
+        </div>
       </div>
 
       <style>{`
-        .s-nav-btn:hover   { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
-        .s-today-btn:hover { background: ${C.gold} !important; color: #000 !important; }
-        .s-search:focus    { border-color: ${C.goldBorder} !important; }
-        .s-row:hover       { background: rgba(255,255,255,0.02); }
+        .s-nav-btn:hover  { background: ${C.goldBg} !important; color: ${C.gold} !important; }
+        .s-back-btn:hover { background: ${C.goldBg} !important; color: ${C.gold} !important; border-color: ${C.gold} !important; }
+        .s-search:focus   { border-color: ${C.goldBorder} !important; }
+        .s-row:hover      { background: rgba(255,255,255,0.02); }
         .bar-col:hover .bar-fill  { filter: brightness(1.3); }
         .bar-col:hover .bar-label { color: rgba(255,255,255,0.6) !important; }
+        @keyframes shimmer {
+          0%   { background-position: -400px 0 }
+          100% { background-position:  400px 0 }
+        }
+        .sk {
+          background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.04) 75%);
+          background-size: 400px 100%;
+          animation: shimmer 1.6s ease-in-out infinite;
+        }
       `}</style>
     </div>
   )
@@ -511,24 +529,24 @@ function HourlyChart({ appointments, hours }) {
 }
 
 /* ── Status breakdown ────────────────────────────── */
-function StatusBreakdown({ appointments }) {
+function StatusBreakdown({ appointments, compact }) {
   const total   = appointments.length
   const statuses = ['completed', 'confirmed', 'pending', 'cancelled']
   const counts  = statuses.map(s => ({ s, n: appointments.filter(a => a.status === s).length, col: APPT_COLORS[s] }))
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', background: 'rgba(255,255,255,0.06)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 10 }}>
+      <div style={{ display: 'flex', height: compact ? 5 : 8, borderRadius: 4, overflow: 'hidden', background: 'rgba(255,255,255,0.06)' }}>
         {total > 0 && counts.map(({ s, n, col }) => n === 0 ? null : (
           <motion.div key={s} initial={{ width: 0 }} animate={{ width: `${(n / total) * 100}%` }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} style={{ height: '100%', background: col }} />
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: compact ? '0.3rem' : '0.5rem' }}>
         {counts.map(({ s, n, col }) => (
-          <div key={s} style={{ background: `${col}10`, border: `1px solid ${col}22`, borderRadius: 9, padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: col, flexShrink: 0 }} />
+          <div key={s} style={{ background: `${col}10`, border: `1px solid ${col}22`, borderRadius: 8, padding: compact ? '0.35rem 0.6rem' : '0.5rem 0.75rem', display: 'flex', alignItems: 'center', gap: 7 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: col, flexShrink: 0 }} />
             <div>
-              <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.1rem', color: n > 0 ? col : 'rgba(255,255,255,0.2)', lineHeight: 1 }}>{n}</p>
-              <p style={{ fontSize: 8, letterSpacing: '0.1em', textTransform: 'capitalize', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>{s}</p>
+              <p style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: compact ? '0.95rem' : '1.1rem', color: n > 0 ? col : 'rgba(255,255,255,0.2)', lineHeight: 1 }}>{n}</p>
+              <p style={{ fontSize: 7, letterSpacing: '0.1em', textTransform: 'capitalize', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{s}</p>
             </div>
           </div>
         ))}
@@ -559,12 +577,20 @@ function RevenueSplit({ servicesRevenue, productsRevenue, total }) {
   )
 }
 
-function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r }
 
 function Skeleton({ rows }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '0.75rem' }}>
-      {Array.from({ length: rows }).map((_, i) => <div key={i} style={{ height: 52, borderRadius: 8, background: 'rgba(255,255,255,0.04)' }} className="shimmer" />)}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0.625rem 0.875rem' }}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.7rem 0.25rem', borderBottom: i < rows - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+          <div className="sk" style={{ width: 60, height: 10, borderRadius: 5, animationDelay: `${i * 0.06}s` }} />
+          <div className="sk" style={{ width: 70, height: 10, borderRadius: 5, animationDelay: `${i * 0.06 + 0.05}s` }} />
+          <div className="sk" style={{ flex: 1, height: 10, borderRadius: 5, animationDelay: `${i * 0.06 + 0.1}s` }} />
+          <div className="sk" style={{ width: 50, height: 10, borderRadius: 5, animationDelay: `${i * 0.06 + 0.15}s` }} />
+          <div className="sk" style={{ width: 40, height: 22, borderRadius: 20, animationDelay: `${i * 0.06 + 0.2}s` }} />
+          <div className="sk" style={{ width: 44, height: 10, borderRadius: 5, animationDelay: `${i * 0.06 + 0.25}s` }} />
+        </div>
+      ))}
     </div>
   )
 }
