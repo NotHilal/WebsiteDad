@@ -11,7 +11,7 @@ const C = {
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.18)',
 }
 
-const EMPTY = { name: '', title: '', bio: '', photo_url: '', specialties: '', instagram: '', profile_id: '' }
+const EMPTY = { name: '', title: '', bio: '', photo_url: '', specialties: '', instagram: '', profile_id: '', hourly_rate: '' }
 const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
@@ -225,15 +225,21 @@ export default function StudioStylists() {
                       </div>
                     )}
 
-                    {/* Footer: instagram + linked */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 2 }}>
-                      {s.instagram
-                        ? <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    {/* Footer: instagram + rate + linked */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 2, gap: 4, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {s.instagram && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                             <AtSign size={10} color={C.muted} strokeWidth={1.5} />
                             <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{s.instagram}</span>
                           </div>
-                        : <div />
-                      }
+                        )}
+                        {s.hourly_rate != null && s.hourly_rate !== '' && (
+                          <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.06em' }}>
+                            €{parseFloat(s.hourly_rate).toFixed(2)}/hr
+                          </span>
+                        )}
+                      </div>
                       {s.profile_id
                         ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.green }} />
@@ -285,6 +291,25 @@ export default function StudioStylists() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div><label style={lbl}>Name <span style={{ color: C.gold }}>*</span></label><input value={form.name} onChange={set('name')} placeholder="Sophie Laurent" className="m-inp" style={inp} /></div>
                   <div><label style={lbl}>Title</label><input value={form.title || ''} onChange={set('title')} placeholder="Head Stylist" className="m-inp" style={inp} /></div>
+                </div>
+
+                {/* Hourly rate */}
+                <div style={{ padding: '1rem', borderRadius: 12, background: C.goldBg, border: `1px solid ${C.goldBorder}` }}>
+                  <label style={{ ...lbl, color: C.goldDim, marginBottom: 4 }}>Hourly Rate</label>
+                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginBottom: 8 }}>
+                    Used to auto-calculate pay runs from timesheet hours.
+                  </p>
+                  <div style={{ position: 'relative', maxWidth: 160 }}>
+                    <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', pointerEvents: 'none' }}>€</span>
+                    <input
+                      type="number" min="0" step="0.5"
+                      value={form.hourly_rate || ''}
+                      onChange={set('hourly_rate')}
+                      placeholder="0.00"
+                      className="m-inp"
+                      style={{ ...inp, paddingLeft: '1.75rem' }}
+                    />
+                  </div>
                 </div>
 
                 {/* Bio */}
