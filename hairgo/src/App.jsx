@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
+import { CartProvider } from './contexts/CartContext'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
 import Gallery from './pages/Gallery'
@@ -37,6 +38,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <CartProvider>
         <Toaster
           position="top-right"
           toastOptions={{
@@ -86,6 +88,7 @@ export default function App() {
             <Route path="pay-runs"    element={<AdminOnlyRoute><StudioPayRuns /></AdminOnlyRoute>} />
           </Route>
         </Routes>
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   )

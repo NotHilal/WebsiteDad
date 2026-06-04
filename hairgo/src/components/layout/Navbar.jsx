@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, User, LogOut, Scissors, MessageCircle, Star, ChevronDown } from 'lucide-react'
+import { Menu, X, User, LogOut, Scissors, MessageCircle, Star, ChevronDown, ShoppingCart } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useCart } from '../../contexts/CartContext'
 import toast from 'react-hot-toast'
 
 const BASE_LINKS = [
@@ -19,6 +20,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen]     = useState(false)
   const [profileOpen, setProfile]   = useState(false)
   const { user, profile, signOut }  = useAuth()
+  const { cartCount }               = useCart()
   const navigate                    = useNavigate()
   const links = user
     ? [...BASE_LINKS, { to: '/chat', label: 'Messages' }]
@@ -146,6 +148,17 @@ export default function Navbar() {
 
           {/* Auth — right */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 14 }} className="hidden-mobile">
+            {user && (
+              <Link to="/profile" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cartCount > 0 ? 'rgba(201,168,76,0.3)' : 'rgba(255,255,255,0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
+                onClick={() => {}}>
+                <ShoppingCart size={13} color={cartCount > 0 ? '#C9A84C' : 'rgba(255,255,255,0.4)'} />
+                {cartCount > 0 && (
+                  <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#C9A84C', color: '#000', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost, sans-serif' }}>
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
             {user ? (
               <div style={{ position: 'relative' }}>
                 <button onClick={() => setProfile(!profileOpen)} style={{

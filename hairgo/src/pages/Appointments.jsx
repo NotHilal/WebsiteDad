@@ -5,9 +5,10 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
-  eachDayOfInterval, isSameDay, isBefore, startOfDay, getDay
+  eachDayOfInterval, isSameDay, isBefore, startOfDay, getDay, getHours
 } from 'date-fns'
 import toast from 'react-hot-toast'
+import StripeCheckout from '../components/payment/StripeCheckout'
 
 const STEPS = ['Service', 'Stylist', 'Date & Time', 'Confirm']
 const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
@@ -27,10 +28,12 @@ export default function Appointments() {
   const [taken,       setTaken]       = useState([])
   const [blockedSlots, setBlockedSlots] = useState([])
   const [month,    setMonth]    = useState(new Date())
-  const [saving,   setSaving]   = useState(false)
-  const [done,     setDone]     = useState(false)
-  const [sel,      setSel]      = useState({ service:null, stylist:null, date:null, time:null, notes:'' })
-  const [preview,  setPreview]  = useState(null)
+  const [saving,       setSaving]       = useState(false)
+  const [done,         setDone]         = useState(false)
+  const [sel,          setSel]          = useState({ service:null, stylist:null, date:null, time:null, notes:'' })
+  const [preview,      setPreview]      = useState(null)
+  const [payStep,      setPayStep]      = useState(null)   // null | 'loading' | 'form'
+  const [clientSecret, setClientSecret] = useState(null)
 
   useEffect(() => {
     Promise.all([
@@ -60,18 +63,40 @@ export default function Appointments() {
   const startPad = getDay(startOfMonth(month))
   const isOff    = d => isBefore(d, startOfDay(new Date())) || getDay(d)===0 || blocked.includes(format(d,'yyyy-MM-dd'))
 
-  async function book() {
+  async function startPayment() {
     if (!user) return toast.error('Please sign in to book')
+    setPayStep('loading')
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment-intent', {
+        body: {
+          amount: sel.service.price,
+          label: `${sel.service.name} with ${sel.stylist.name} — ${format(sel.date, 'MMM d')} at ${sel.time}`,
+        },
+      })
+      if (error) throw error
+      setClientSecret(data.client_secret)
+      setPayStep('form')
+    } catch (err) {
+      toast.error(err.message || 'Could not start payment')
+      setPayStep(null)
+    }
+  }
+
+  async function completeBooking(paymentIntentId) {
     setSaving(true)
     try {
       const { error } = await supabase.from('appointments').insert({
-        user_id:user.id, stylist_id:sel.stylist.id, service_id:sel.service.id,
-        date:format(sel.date,'yyyy-MM-dd'), time:sel.time, notes:sel.notes, status:'pending',
+        user_id: user.id, stylist_id: sel.stylist.id, service_id: sel.service.id,
+        date: format(sel.date, 'yyyy-MM-dd'), time: sel.time, notes: sel.notes,
+        status: 'confirmed', payment_intent_id: paymentIntentId, payment_status: 'paid',
       })
       if (error) throw error
       setDone(true)
-    } catch(err) { toast.error(err.message||'Booking failed') }
-    finally { setSaving(false) }
+    } catch (err) {
+      toast.error('Payment succeeded but booking failed — please contact us')
+    } finally {
+      setSaving(false)
+    }
   }
 
   /* ── Success ──────────────────────────────────────────────── */
@@ -505,7 +530,8 @@ export default function Appointments() {
                               <p style={{ fontSize:9, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.18)', fontFamily:'Jost,sans-serif', marginBottom:7 }}>{label}</p>
                               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                                 {slots.map(slot => {
-                                  const tk   = taken.includes(slot) || blockedSlots.includes(slot)
+                                  const isPast = sel.date && isSameDay(sel.date, new Date()) && parseInt(slot) <= getHours(new Date())
+                                  const tk   = taken.includes(slot) || blockedSlots.includes(slot) || isPast
                                   const isSel = sel.time === slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
@@ -522,7 +548,8 @@ export default function Appointments() {
                               <p style={{ fontSize:9, letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(255,255,255,0.18)', fontFamily:'Jost,sans-serif', marginBottom:7 }}>{label}</p>
                               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                                 {slots.map(slot => {
-                                  const tk=taken.includes(slot), isSel=sel.time===slot
+                                  const isPast = sel.date && isSameDay(sel.date, new Date()) && parseInt(slot) <= getHours(new Date())
+                                  const tk=taken.includes(slot) || isPast, isSel=sel.time===slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
                                       style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'Jost,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(201,168,76,0.1)', background:isSel?'linear-gradient(135deg,#C9A84C,#C4956A)':'rgba(201,168,76,0.03)', color:isSel?'#000':tk?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.4)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(201,168,76,0.35)':'none' }}>
@@ -597,14 +624,16 @@ export default function Appointments() {
 
                 {!user && (
                   <div style={{ padding:'11px 16px', borderRadius:12, background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.12)', marginBottom:14, textAlign:'center' }}>
-                    <p style={{ color:'rgba(251,191,36,0.8)', fontSize:'0.82rem', fontFamily:'Jost,sans-serif' }}>Please sign in to confirm your booking.</p>
+                    <p style={{ color:'rgba(251,191,36,0.8)', fontSize:'0.82rem', fontFamily:'Jost,sans-serif' }}>Please sign in to book.</p>
                   </div>
                 )}
 
-                <button className="btn-gold" onClick={book} disabled={saving||!user} style={{ width:'100%', justifyContent:'center' }}>
-                  {saving
+                <button className="btn-gold" onClick={startPayment}
+                  disabled={payStep === 'loading' || !user}
+                  style={{ width:'100%', justifyContent:'center' }}>
+                  {payStep === 'loading'
                     ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'#000',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
-                    : <>Confirm Booking <Check size={15}/></>
+                    : <>Pay €{sel.service?.price} <ArrowRight size={15}/></>
                   }
                 </button>
 
@@ -618,6 +647,17 @@ export default function Appointments() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* ── Stripe payment modal ── */}
+      {payStep === 'form' && clientSecret && (
+        <StripeCheckout
+          clientSecret={clientSecret}
+          amount={sel.service?.price}
+          label={`${sel.service?.name} with ${sel.stylist?.name}`}
+          onSuccess={completeBooking}
+          onCancel={() => { setPayStep(null); setClientSecret(null) }}
+        />
+      )}
 
       <style>{`
         @keyframes spin { to { transform:rotate(360deg) } }

@@ -15,7 +15,7 @@ export default function StudioGate() {
   const { user, isAdmin, signIn, fetchProfile, loading: authLoading, profile } = useAuth()
   const navigate = useNavigate()
 
-  const STUDIO_PASSWORD = import.meta.env.VITE_STUDIO_PASSWORD || 'hairgo2024'
+  const STUDIO_PASSWORD = import.meta.env.VITE_STUDIO_PASSWORD || 'hairgo24'
 
   // Already passed the gate this session — go straight in
   useEffect(() => {

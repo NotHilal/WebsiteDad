@@ -121,7 +121,9 @@ export default function StudioSchedule() {
   }
 
   async function deleteAppt(id) {
-    if (!confirm('Delete this appointment? This cannot be undone.')) return
+    const pass = window.prompt('Enter password to delete this appointment:')
+    if (pass === null) return
+    if (pass !== 'hairgo24') { toast.error('Incorrect password'); return }
     const { error } = await supabase.from('appointments').delete().eq('id', id)
     if (!error) setAppointments(prev => prev.filter(a => a.id !== id))
   }

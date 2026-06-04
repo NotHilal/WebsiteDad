@@ -128,7 +128,7 @@ export default function StudioAppointmentsList() {
   }
 
   async function confirmDelete() {
-    if (deletePass !== '123') { setDeleteError(true); return }
+    if (deletePass !== 'hairgo24') { setDeleteError(true); return }
     setDeleting(true)
     const { error } = await supabase.from('appointments').delete().eq('id', deleteTarget.id)
     setDeleting(false)
@@ -255,7 +255,7 @@ export default function StudioAppointmentsList() {
           <Search size={13} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input
             value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by client name, phone, service or stylist…"
+            placeholder="Search by client name, phone, service or stylist…" autoComplete="off"
             autoComplete="off"
             className="al-search"
             style={{ width: '100%', background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.55rem 0.875rem 0.55rem 2.2rem', fontSize: '0.82rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'all .2s', boxSizing: 'border-box' }}

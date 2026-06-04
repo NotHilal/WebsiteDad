@@ -151,7 +151,7 @@ export default function StudioPayRuns() {
       {/* ── Search ───────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, position: 'relative', maxWidth: 260 }}>
         <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search team member…"
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search team member…" autoComplete="off"
           style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.48rem 0.75rem 0.48rem 2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }}
           className="m-inp" />
       </div>
