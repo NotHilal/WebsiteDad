@@ -17,7 +17,7 @@ const EMPTY = { code: '', discount_type: 'percentage', discount_value: '', expir
 
 function ModalWrap({ children, onClose, maxWidth = 440 }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onClick={onClose}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{ width: '100%', maxWidth, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 18, padding: '1.75rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
         {children}
       </div>

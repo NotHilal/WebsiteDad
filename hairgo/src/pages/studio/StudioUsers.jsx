@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Eye, EyeOff, Check } from 'lucide-react'
+import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Eye, EyeOff, Check, UserPlus, Scissors, Plus, ArrowRight } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { format } from 'date-fns'
@@ -101,46 +101,125 @@ export default function StudioUsers() {
   const [msgTitle,      setMsgTitle]      = useState('')
   const [msgBody,       setMsgBody]       = useState('')
   const [sending,       setSending]       = useState(false)
-  // role-change confirmation
-  const [roleConfirm,   setRoleConfirm]   = useState(null) // { userId, newRole, userName }
+  // role-change confirmation (user ↔ admin)
+  const [roleConfirm,   setRoleConfirm]   = useState(null)
   const [confirmPwd,    setConfirmPwd]    = useState('')
   const [showPwd,       setShowPwd]       = useState(false)
   const [confirmErr,    setConfirmErr]    = useState('')
   const [confirming,    setConfirming]    = useState(false)
   const pwdRef = useRef(null)
+  // employee promotion wizard
+  const [empModal,      setEmpModal]      = useState(null) // { userId, userName }
+  const [empStep,       setEmpStep]       = useState(1)    // 1=assign, 2=password
+  const [freeStylists,  setFreeStylists]  = useState([])   // unlinked stylists
+  const [empMode,       setEmpMode]       = useState('assign') // 'assign' | 'create'
+  const [empSelected,   setEmpSelected]   = useState(null)
+  const [empName,       setEmpName]       = useState('')
+  const [empTitle,      setEmpTitle]      = useState('')
+  const [empPwd,        setEmpPwd]        = useState('')
+  const [empPwdShow,    setEmpPwdShow]    = useState(false)
+  const [empErr,        setEmpErr]        = useState('')
+  const [empSaving,     setEmpSaving]     = useState(false)
+  const [stylists,      setStylists]      = useState([])
   const navigate = useNavigate()
 
   useEffect(() => { load() }, [])
 
   async function load() {
-    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+    const [{ data, error }, { data: stylistData }] = await Promise.all([
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      supabase.from('stylists').select('id, name, title, profile_id').not('profile_id', 'is', null),
+    ])
     if (error) toast.error('Could not load users: ' + error.message)
     setAll(data || [])
+    setStylists(stylistData || [])
     setLoading(false)
   }
 
-  function changeRole(id, newRole) {
+  async function unlinkStylist(userId, userName) {
+    const { error, count } = await supabase.from('stylists').update({ profile_id: null }).eq('profile_id', userId).select()
+    if (error) return toast.error(error.message)
+    toast.success(`Stylist unlinked from ${userName || 'account'}`)
+  }
+
+  async function changeRole(id, newRole) {
     const target = all.find(u => u.id === id)
+    if (newRole === 'employee') {
+      const { data } = await supabase.from('stylists').select('id, name, title, photo_url').is('profile_id', null).order('name')
+      const free = data || []
+      setFreeStylists(free)
+      setEmpModal({ userId: id, userName: target?.full_name || 'this user' })
+      setEmpStep(1)
+      setEmpMode(free.length > 0 ? 'assign' : 'create')
+      setEmpSelected(null)
+      setEmpName(target?.full_name || '')
+      setEmpTitle(''); setEmpPwd(''); setEmpPwdShow(false); setEmpErr('')
+      return
+    }
     setRoleConfirm({ userId: id, newRole, userName: target?.full_name || 'this user' })
-    setConfirmPwd('')
-    setConfirmErr('')
-    setShowPwd(false)
-    // focus password input after mount
+    setConfirmPwd(''); setConfirmErr(''); setShowPwd(false)
     setTimeout(() => pwdRef.current?.focus(), 80)
   }
 
+  async function applyEmployeePromotion() {
+    if (empStep === 1) {
+      if (empMode === 'assign' && !empSelected) { setEmpErr('Select an employee profile to link'); return }
+      if (empMode === 'create' && !empName.trim()) { setEmpErr('Enter a name for the new employee'); return }
+      setEmpErr(''); setEmpStep(2); return
+    }
+    // Step 2 — password + execute
+    if (!empPwd) { setEmpErr('Enter the admin password'); return }
+    if (empPwd !== 'hairgo24') { setEmpErr('Incorrect admin password'); return }
+    setEmpSaving(true); setEmpErr('')
+    try {
+      // 1. Change role via edge function
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-role`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
+        body: JSON.stringify({ userId: empModal.userId, newRole: 'employee' }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to update role')
+      // 2. Link or create stylist
+      if (empMode === 'assign') {
+        const { error } = await supabase.from('stylists').update({ profile_id: empModal.userId }).eq('id', empSelected)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('stylists').insert({ name: empName.trim(), title: empTitle.trim() || null, profile_id: empModal.userId })
+        if (error) throw error
+      }
+      setAll(prev => prev.map(u => u.id === empModal.userId ? { ...u, role: 'employee' } : u))
+      toast.success(`${empModal.userName} is now an employee`)
+      setEmpModal(null)
+    } catch (err) { setEmpErr(err.message) }
+    finally { setEmpSaving(false) }
+  }
+
   async function applyRoleChange() {
-    if (!confirmPwd) { setConfirmErr('Please enter your password'); return }
+    if (!confirmPwd) { setConfirmErr('Enter the admin password'); return }
+    if (confirmPwd !== 'hairgo24') { setConfirmErr('Incorrect admin password'); return }
     setConfirming(true)
     setConfirmErr('')
     try {
-      const { error: authErr } = await supabase.auth.signInWithPassword({
-        email: adminUser.email,
-        password: confirmPwd,
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-role`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ userId: roleConfirm.userId, newRole: roleConfirm.newRole }),
       })
-      if (authErr) { setConfirmErr('Incorrect password'); setConfirming(false); return }
-      const { error } = await supabase.from('profiles').update({ role: roleConfirm.newRole }).eq('id', roleConfirm.userId)
-      if (error) throw error
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to update role')
+      // If demoting from employee, unlink any attached stylist
+      const wasEmployee = all.find(u => u.id === roleConfirm.userId)?.role === 'employee'
+      if (wasEmployee) {
+        await supabase.from('stylists').update({ profile_id: null }).eq('profile_id', roleConfirm.userId)
+        setStylists(prev => prev.filter(s => s.profile_id !== roleConfirm.userId))
+      }
       setAll(prev => prev.map(u => u.id === roleConfirm.userId ? { ...u, role: roleConfirm.newRole } : u))
       toast.success(`Role changed to ${roleConfirm.newRole}`)
       setRoleConfirm(null)
@@ -222,6 +301,9 @@ export default function StudioUsers() {
         .usr-mail-btn:hover { background: rgba(52,211,153,0.13)  !important; border-color: rgba(52,211,153,0.35) !important; color: #6ee7b7 !important; }
         .msg-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
         .modal-cancel:hover { border-color: rgba(255,255,255,0.22) !important; color: ${C.dim} !important; }
+        .usr-unlink-btn:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
+        .emp-sty-card:hover { border-color: rgba(96,165,250,0.4) !important; background: rgba(96,165,250,0.05) !important; }
+        .emp-sty-card:hover .emp-sty-img { transform: scale(1.05); }
       `}</style>
 
       {/* ── Header ─────────────────────────────────────────────── */}
@@ -358,6 +440,17 @@ export default function StudioUsers() {
                           style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 11px', borderRadius: 7, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)', color: '#34d399', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', opacity: u.email ? 1 : 0.3 }}>
                           <Mail size={11} /> Email
                         </button>
+
+                        {/* Unlink stylist — employees only */}
+                        {tab === 'employee' && (
+                          <>
+                            <div style={{ width: 1, height: 18, background: C.border, flexShrink: 0 }} />
+                            <button onClick={() => unlinkStylist(u.id, u.full_name)} className="usr-unlink-btn"
+                              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+                              <Scissors size={9} /> Unlink
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -374,7 +467,7 @@ export default function StudioUsers() {
       {/* ── Role-Change Password Modal ────────────────────────── */}
       {roleConfirm && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-          onClick={() => setRoleConfirm(null)}>
+          onMouseDown={e => { if (e.target === e.currentTarget) setRoleConfirm(null) }}>
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
 
@@ -392,14 +485,14 @@ export default function StudioUsers() {
                 <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
                   You're changing <span style={{ color: C.white }}>{roleConfirm.userName}</span>'s role to{' '}
                   <span style={{ color: ROLE_STYLE[roleConfirm.newRole]?.color }}>{roleConfirm.newRole}</span>.
-                  <br />Enter your admin password to confirm.
+                  <br />Enter the HairGo admin password to confirm.
                 </p>
               </div>
 
               {/* Password field */}
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
-                  Your Password
+                  Admin Password
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
@@ -408,7 +501,7 @@ export default function StudioUsers() {
                     value={confirmPwd}
                     onChange={e => { setConfirmPwd(e.target.value); setConfirmErr('') }}
                     onKeyDown={e => e.key === 'Enter' && applyRoleChange()}
-                    placeholder="Enter your password…"
+                    placeholder="Enter admin password…"
                     style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${confirmErr ? 'rgba(248,113,113,0.5)' : C.border}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
                     className="msg-inp"
                   />
@@ -444,7 +537,7 @@ export default function StudioUsers() {
       {/* ── Send Message Modal ─────────────────────────────────── */}
       {msgModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-          onClick={() => setMsgModal(null)}>
+          onMouseDown={e => { if (e.target === e.currentTarget) setMsgModal(null) }}>
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.65)' }}>
 
@@ -507,6 +600,172 @@ export default function StudioUsers() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Employee Promotion Wizard ─────────────────────────── */}
+      {empModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onMouseDown={e => { if (e.target === e.currentTarget) setEmpModal(null) }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: empStep === 2 ? 460 : 680, background: C.modal, border: '1px solid rgba(96,165,250,0.2)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 48px 120px rgba(0,0,0,0.8)', transition: 'max-width .3s ease' }}>
+
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#60a5fa,#3b82f6,rgba(96,165,250,0.1))' }} />
+
+            <div style={{ padding: '1.75rem' }}>
+
+              {/* Header + step indicator */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                <div>
+                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(96,165,250,0.55)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Promoting to Employee</p>
+                  <h2 className="font-display font-light" style={{ fontSize: '1.6rem', color: C.white, lineHeight: 1.1 }}>
+                    {empStep === 1 ? empModal.userName : 'Almost done'}
+                  </h2>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                  {[1, 2].map(n => (
+                    <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, transition: 'all .2s', background: empStep === n ? '#60a5fa' : empStep > n ? 'rgba(96,165,250,0.18)' : 'rgba(255,255,255,0.05)', color: empStep === n ? '#000' : empStep > n ? '#60a5fa' : C.muted, border: empStep > n ? '1px solid rgba(96,165,250,0.3)' : 'none' }}>
+                        {empStep > n ? <Check size={9} /> : n}
+                      </div>
+                      {n < 2 && <div style={{ width: 18, height: 1, background: empStep > n ? 'rgba(96,165,250,0.35)' : C.border }} />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {empStep === 1 ? (<>
+                {/* ── Card grid ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '0.625rem', maxHeight: 340, overflowY: 'auto', marginBottom: empMode === 'create' ? '1rem' : 0, paddingRight: 2 }}>
+
+                  {/* Existing stylist cards */}
+                  {freeStylists.map(s => {
+                    const sel = empMode === 'assign' && empSelected === s.id
+                    return (
+                      <button key={s.id} onClick={() => { setEmpMode('assign'); setEmpSelected(s.id); setEmpErr('') }}
+                        className="emp-sty-card"
+                        style={{ display: 'flex', alignItems: 'stretch', borderRadius: 14, overflow: 'hidden', border: `1px solid ${sel ? 'rgba(96,165,250,0.6)' : C.border}`, background: sel ? 'rgba(96,165,250,0.06)' : C.card, cursor: 'pointer', transition: 'all .18s', textAlign: 'left', padding: 0, position: 'relative', boxShadow: sel ? '0 0 0 1px rgba(96,165,250,0.25)' : 'none' }}>
+
+                        {/* Photo */}
+                        <div style={{ width: 76, flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#0e0e14' }}>
+                          {s.photo_url
+                            ? <img src={s.photo_url} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block', transition: 'transform .4s ease' }} className="emp-sty-img" />
+                            : <div style={{ width: '100%', height: '100%', minHeight: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,rgba(96,165,250,0.06),rgba(59,130,246,0.03))' }}>
+                                <Scissors size={22} color="rgba(96,165,250,0.2)" strokeWidth={1} />
+                              </div>
+                          }
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 55%, rgba(22,22,32,0.8))' }} />
+                        </div>
+
+                        {/* Info */}
+                        <div style={{ flex: 1, padding: '0.75rem 0.875rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3, minWidth: 0 }}>
+                          <p className="font-display" style={{ color: sel ? C.white : C.dim, fontSize: '1rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .15s' }}>{s.name}</p>
+                          {s.title && <p style={{ color: sel ? 'rgba(201,168,76,0.65)' : C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em', transition: 'color .15s' }}>{s.title}</p>}
+                        </div>
+
+                        {/* Selected checkmark */}
+                        {sel && (
+                          <div style={{ position: 'absolute', top: 7, right: 7, width: 18, height: 18, borderRadius: '50%', background: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Check size={10} color="#000" strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+
+                  {/* Create New card */}
+                  <button onClick={() => { setEmpMode('create'); setEmpSelected(null); setEmpErr('') }}
+                    className="emp-sty-card"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, borderRadius: 14, border: `1px dashed ${empMode === 'create' ? 'rgba(96,165,250,0.5)' : 'rgba(255,255,255,0.12)'}`, background: empMode === 'create' ? 'rgba(96,165,250,0.05)' : 'transparent', cursor: 'pointer', transition: 'all .18s', minHeight: 80, padding: '0.875rem' }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: empMode === 'create' ? 'rgba(96,165,250,0.15)' : C.subtle, border: `1px solid ${empMode === 'create' ? 'rgba(96,165,250,0.35)' : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}>
+                      <Plus size={14} color={empMode === 'create' ? '#60a5fa' : C.muted} />
+                    </div>
+                    <span style={{ fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: empMode === 'create' ? '#60a5fa' : C.muted, transition: 'color .15s' }}>Create New Stylist</span>
+                  </button>
+                </div>
+
+                {/* Create form — shown when "Create New" is selected */}
+                {empMode === 'create' && (
+                  <div style={{ display: 'flex', gap: '0.75rem', padding: '1rem', borderRadius: 12, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.12)', marginBottom: 0 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Name <span style={{ color: '#60a5fa' }}>*</span></label>
+                      <input value={empName} onChange={e => { setEmpName(e.target.value); setEmpErr('') }} placeholder="Full name…" autoFocus
+                        style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Title</label>
+                      <input value={empTitle} onChange={e => setEmpTitle(e.target.value)} placeholder="e.g. Senior Stylist…"
+                        style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                    </div>
+                  </div>
+                )}
+
+                {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif', marginTop: 8 }}>{empErr}</p>}
+
+                <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.25rem' }}>
+                  <button onClick={() => setEmpModal(null)}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button onClick={applyEmployeePromotion}
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                    Next <ArrowRight size={13} />
+                  </button>
+                </div>
+              </>) : (<>
+
+                {/* ── Step 2: summary + password ── */}
+                <div style={{ padding: '0.875rem 1rem', borderRadius: 12, background: 'rgba(96,165,250,0.05)', border: '1px solid rgba(96,165,250,0.15)', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <UserPlus size={13} color="#60a5fa" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>
+                      <span style={{ color: C.white }}>{empModal.userName}</span> → Employee role
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <Scissors size={13} color="#60a5fa" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>
+                      {empMode === 'create'
+                        ? <>Creating: <span style={{ color: C.white }}>{empName}{empTitle ? ` — ${empTitle}` : ''}</span></>
+                        : <>Linked to: <span style={{ color: C.white }}>{freeStylists.find(s => s.id === empSelected)?.name}</span></>
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>Admin Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <input autoFocus type={empPwdShow ? 'text' : 'password'} value={empPwd}
+                      onChange={e => { setEmpPwd(e.target.value); setEmpErr('') }}
+                      onKeyDown={e => e.key === 'Enter' && applyEmployeePromotion()}
+                      placeholder="Enter admin password…"
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${empErr ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }}
+                      className="msg-inp" />
+                    <button type="button" onClick={() => setEmpPwdShow(p => !p)}
+                      style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', padding: 0 }}>
+                      {empPwdShow ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
+                  {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif', marginTop: 6 }}>{empErr}</p>}
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.625rem' }}>
+                  <button onClick={() => { setEmpStep(1); setEmpErr('') }}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                    ← Back
+                  </button>
+                  <button onClick={applyEmployeePromotion} disabled={empSaving}
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: empSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: empSaving ? 0.6 : 1 }}>
+                    {empSaving
+                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                      : <><ShieldCheck size={14} /> Confirm & Promote</>
+                    }
+                  </button>
+                </div>
+              </>)}
             </div>
           </div>
         </div>

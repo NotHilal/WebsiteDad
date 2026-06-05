@@ -325,7 +325,7 @@ export default function StudioBlockedDates() {
       {/* ── Day modal ── */}
       {selected && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-          onClick={closeModal}>
+          onMouseDown={e => { if (e.target === e.currentTarget) closeModal() }}>
           <div style={{ width: '100%', maxWidth: 460, background: C.modal, borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)', border: `1px solid ${C.goldBorder}` }}
             onClick={e => e.stopPropagation()}>
 

@@ -262,7 +262,7 @@ export default function StudioStylists() {
       {/* ── Modal ────────────────────────────────────────────── */}
       {modal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.78)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-          onClick={() => { setModal(null); setLocalPreview(null) }}>
+          onMouseDown={e => { if (e.target === e.currentTarget) { setModal(null); setLocalPreview(null) } }}>
           <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,.65)' }}
             onClick={e => e.stopPropagation()}>
 

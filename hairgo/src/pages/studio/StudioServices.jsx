@@ -65,6 +65,7 @@ export default function StudioServices() {
 
   async function save() {
     if (!form.name.trim()) return toast.error('Name is required')
+    if (!form.price || parseFloat(form.price) <= 0) return toast.error('Price must be greater than €0')
     setSaving(true)
     try {
       let image_url = form.image_url || ''
@@ -107,17 +108,20 @@ export default function StudioServices() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
         .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
-        .svc-card { transition: all .22s ease; }
-        .svc-card:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(0,0,0,0.4) !important; }
+        .svc-card { transition: transform .35s cubic-bezier(0.22,1,0.36,1), box-shadow .35s ease; }
+        .svc-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 28px 64px rgba(0,0,0,0.6) !important; }
+        .svc-card:hover .svc-img { transform: scale(1.08) !important; }
         .svc-card:hover .svc-actions { opacity: 1 !important; }
-        .svc-card:hover .svc-img { transform: scale(1.06); }
-        .svc-card:hover .svc-edit-btn:hover { background: rgba(255,255,255,0.15) !important; color: ${C.white} !important; }
-        .svc-card:hover .svc-del-btn:hover  { background: rgba(248,113,113,0.2) !important; color: #f87171 !important; }
+        .svc-card:hover .svc-overlay { opacity: 1 !important; }
+        .svc-edit-btn:hover { background: rgba(255,255,255,0.18) !important; color: #fff !important; border-color: rgba(255,255,255,0.25) !important; }
+        .svc-del-btn:hover  { background: rgba(248,113,113,0.25) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.4) !important; }
         .cat-filter:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.dim} !important; }
         .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,168,76,0.3); }
         .modal-close:hover { background: rgba(255,255,255,0.1) !important; }
         .modal-cancel:hover { border-color: rgba(255,255,255,0.2) !important; }
+        .skel { background: linear-gradient(90deg,#1a1a26 25%,#22222e 50%,#1a1a26 75%); background-size:200% 100%; animation:shimmer 1.6s infinite; }
       `}</style>
 
       {/* Header */}
@@ -155,92 +159,103 @@ export default function StudioServices() {
       {/* Card grid */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} style={{ height: 180, borderRadius: 16, background: C.card, border: `1px solid ${C.border}` }} />
+              <div key={i} style={{ height: 320, borderRadius: 20, border: `1px solid ${C.border}` }} className="skel" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 10 }}>
-            <Scissors size={30} color={C.border} />
-            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>No services found</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 260, gap: 12 }}>
+            <div style={{ width: 60, height: 60, borderRadius: 18, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Scissors size={24} color={C.muted} strokeWidth={1.2} />
+            </div>
+            <p style={{ color: C.muted, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif' }}>No services found</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
             {filtered.map(s => {
               const cat = CAT[s.category] || CAT.other
               return (
                 <div key={s.id} className="svc-card"
-                  style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.25)', position: 'relative' }}>
+                  style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', height: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.45)', border: `1px solid rgba(255,255,255,0.06)`, filter: s.active ? 'none' : 'saturate(0.35) brightness(0.75)' }}>
 
-                  {/* Image or color bar */}
-                  {s.image_url ? (
-                    <div style={{ height: 160, overflow: 'hidden', position: 'relative' }}>
-                      <img src={s.image_url} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s ease' }} className="svc-img" />
-                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.7))' }} />
-                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}44)` }} />
-                    </div>
-                  ) : (
-                    <div style={{ height: 3, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}44)` }} />
-                  )}
+                  {/* ── Background: full-bleed image or gradient ── */}
+                  <div style={{ position: 'absolute', inset: 0 }}>
+                    {s.image_url
+                      ? <img src={s.image_url} alt={s.name} className="svc-img"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.7s cubic-bezier(0.22,1,0.36,1)' }} />
+                      : <div style={{ width: '100%', height: '100%', background: `radial-gradient(ellipse at 25% 25%, ${cat.color}28 0%, ${cat.color}08 55%, #0d0d14 100%)` }}>
+                          <span className="font-display" style={{ position: 'absolute', bottom: -10, right: 12, fontSize: '9rem', color: `${cat.color}12`, lineHeight: 1, fontWeight: 700, userSelect: 'none', letterSpacing: '-0.04em' }}>
+                            {s.name.charAt(0)}
+                          </span>
+                        </div>
+                    }
+                    {/* Deep gradient overlay — readable text at bottom */}
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.04) 0%, rgba(8,8,12,0.5) 40%, rgba(8,8,12,0.97) 100%)' }} />
+                    {/* Category colour top-edge accent */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}33)` }} />
+                  </div>
 
-                  {/* Card content */}
-                  <div style={{ padding: '1.1rem 1.25rem 1rem' }}>
-
-                    {/* Category + active badge */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '3px 9px', borderRadius: 20, background: cat.bg, color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', border: `1px solid ${cat.color}30` }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: cat.color }} />
-                        {cat.label}
+                  {/* ── Top row: category badge + inactive ── */}
+                  <div style={{ position: 'absolute', top: 14, left: 14, right: 14, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', zIndex: 2 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(10px)', color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${cat.color}35` }}>
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: cat.color }} />
+                      {cat.label}
+                    </span>
+                    {!s.active && (
+                      <span style={{ fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(10px)', color: '#f87171', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: '1px solid rgba(248,113,113,0.3)' }}>
+                        Inactive
                       </span>
-                      {!s.active && (
-                        <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, background: 'rgba(248,113,113,0.1)', color: '#f87171', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', border: '1px solid rgba(248,113,113,0.2)' }}>
-                          Inactive
-                        </span>
-                      )}
-                    </div>
+                    )}
+                  </div>
+
+                  {/* ── Bottom content ── */}
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1.25rem 1.4rem 1.35rem', zIndex: 2 }}>
 
                     {/* Service name */}
-                    <h3 className="font-display" style={{ fontSize: '1.35rem', color: C.white, lineHeight: 1.15, marginBottom: '0.5rem' }}>
+                    <h3 className="font-display" style={{ fontSize: '1.65rem', color: '#fff', lineHeight: 1.1, marginBottom: s.description ? '0.35rem' : '0.85rem', fontWeight: 400 }}>
                       {s.name}
                     </h3>
 
                     {/* Description */}
                     {s.description && (
-                      <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.6, marginBottom: '0.75rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.48)', fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.6, marginBottom: '0.85rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {s.description}
                       </p>
                     )}
 
+                    {/* Divider */}
+                    <div style={{ height: 1, background: `linear-gradient(90deg, ${cat.color}40, transparent)`, marginBottom: '0.75rem' }} />
+
                     {/* Price + duration */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: s.description ? 0 : '0.5rem' }}>
-                      <span className="font-display" style={{ fontSize: '1.6rem', color: cat.color, lineHeight: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span className="font-display" style={{ fontSize: '2rem', color: cat.color, lineHeight: 1, textShadow: `0 0 24px ${cat.color}50` }}>
                         €{s.price}
                       </span>
                       {s.duration > 0 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: C.subtle, border: `1px solid ${C.border}` }}>
-                          <Clock size={10} color={C.muted} strokeWidth={1.5} />
-                          <span style={{ fontSize: 10, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{s.duration} min</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                          <Clock size={10} color="rgba(255,255,255,0.5)" strokeWidth={1.5} />
+                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
+                            {Math.floor(s.duration / 60) > 0 ? `${Math.floor(s.duration / 60)}h ` : ''}{s.duration % 60 > 0 ? `${s.duration % 60}m` : ''}
+                          </span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Action buttons */}
+                  {/* ── Hover: edit / delete ── */}
                   <div className="svc-actions"
-                    style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 4, opacity: 0, transition: 'opacity .2s' }}>
+                    style={{ position: 'absolute', top: 14, right: 14, display: 'flex', gap: 5, opacity: 0, transition: 'opacity .22s', zIndex: 3 }}>
                     <button onClick={() => { setForm({ ...s }); setFilePreview(s.image_url || ''); setFile(null); setModal('edit') }} className="svc-edit-btn"
-                      style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'all .15s' }}>
-                      <Edit2 size={12} />
+                      style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all .15s' }}>
+                      <Edit2 size={13} />
                     </button>
                     <button onClick={() => del(s.id)} className="svc-del-btn"
-                      style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(248,113,113,0.2)', color: 'rgba(248,113,113,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(4px)', transition: 'all .15s' }}>
-                      <Trash2 size={12} />
+                      style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(248,113,113,0.22)', color: 'rgba(248,113,113,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all .15s' }}>
+                      <Trash2 size={13} />
                     </button>
                   </div>
 
-                  {/* Bottom glow */}
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: `linear-gradient(to top, ${cat.gradient}, transparent)`, pointerEvents: 'none' }} />
                 </div>
               )
             })}
@@ -253,7 +268,7 @@ export default function StudioServices() {
         {modal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-            onClick={closeModal}>
+            onMouseDown={e => { if (e.target === e.currentTarget) closeModal() }}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -319,14 +334,32 @@ export default function StudioServices() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                     <div>
                       <label style={lbl}>Price (€)</label>
                       <input type="number" value={form.price} onChange={set('price')} placeholder="45" style={inp()} className="m-inp" />
                     </div>
                     <div>
-                      <label style={lbl}>Duration (min)</label>
-                      <input type="number" value={form.duration} onChange={set('duration')} placeholder="60" style={inp()} className="m-inp" />
+                      <label style={lbl}>Hours</label>
+                      <input type="number" min="0" max="12"
+                        value={Math.floor((parseInt(form.duration) || 0) / 60)}
+                        onChange={e => {
+                          const h = Math.max(0, parseInt(e.target.value) || 0)
+                          const m = (parseInt(form.duration) || 0) % 60
+                          setForm(p => ({ ...p, duration: h * 60 + m }))
+                        }}
+                        placeholder="0" style={inp()} className="m-inp" />
+                    </div>
+                    <div>
+                      <label style={lbl}>Minutes</label>
+                      <input type="number" min="0" max="59"
+                        value={(parseInt(form.duration) || 0) % 60}
+                        onChange={e => {
+                          const m = Math.min(59, Math.max(0, parseInt(e.target.value) || 0))
+                          const h = Math.floor((parseInt(form.duration) || 0) / 60)
+                          setForm(p => ({ ...p, duration: h * 60 + m }))
+                        }}
+                        placeholder="0" style={inp()} className="m-inp" />
                     </div>
                   </div>
 

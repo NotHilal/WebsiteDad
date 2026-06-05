@@ -6,7 +6,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
 import { useNavigate } from 'react-router-dom'
 
-const CATS = ['All', 'Shampoo', 'Conditioner', 'Treatment', 'Styling', 'Tools']
 
 /* Per-card quantity state lives here so each card tracks its own qty */
 function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail }) {
@@ -178,12 +177,12 @@ export default function Store() {
   const { user }                 = useAuth()
   const { cartItems, addToCart } = useCart()
   const navigate                 = useNavigate()
-  const [products, setProducts]  = useState([])
-  const [loading,  setLoading]   = useState(true)
-  const [active,   setActive]    = useState('All')
-  const [detail,   setDetail]    = useState(null)   // product detail modal
-  const [dQty,     setDQty]      = useState(1)
-  const [dAdding,  setDAdding]   = useState(false)
+  const [products,  setProducts]  = useState([])
+  const [loading,   setLoading]   = useState(true)
+  const [activecat, setActivecat] = useState('All')
+  const [detail,    setDetail]    = useState(null)
+  const [dQty,      setDQty]      = useState(1)
+  const [dAdding,   setDAdding]   = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -193,7 +192,12 @@ export default function Store() {
     setLoading(false)
   }
 
-  const filtered = active === 'All' ? products : products.filter(p => p.category?.toLowerCase() === active.toLowerCase())
+  const categories = ['All', ...new Set(products.flatMap(p => p.tags?.length ? p.tags : p.category ? [p.category] : []))]
+  const filtered   = activecat === 'All' ? products : products.filter(p => {
+    const cats = p.tags?.length ? p.tags : p.category ? [p.category] : []
+    return cats.some(c => c.toLowerCase() === activecat.toLowerCase())
+  })
+
   function inCart(id) { return cartItems.some(i => i.product_id === id) }
   const cartQty = cartItems.reduce((s, i) => s + i.quantity, 0)
 
@@ -245,26 +249,28 @@ export default function Store() {
           )}
         </div>
 
-        {/* ── Category tabs ─────────────────────── */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 16 }}>
-          {CATS.map(cat => {
-            const isActive = active === cat
-            const count = cat === 'All' ? products.length : products.filter(p => p.category?.toLowerCase() === cat.toLowerCase()).length
-            return (
-              <button key={cat} onClick={() => setActive(cat)} style={{
-                padding: '7px 16px', borderRadius: 8, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
-                fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, cursor: 'pointer',
-                background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
-                color: isActive ? '#C9A84C' : 'rgba(255,255,255,0.35)',
-                border: isActive ? '1px solid rgba(201,168,76,0.3)' : '1px solid transparent',
-                transition: 'all 0.18s',
-              }}>
-                {cat}
-                <span style={{ marginLeft: 5, fontSize: 9, opacity: 0.6 }}>({count})</span>
-              </button>
-            )
-          })}
-        </div>
+        {/* ── Category filters ──────────────────── */}
+        {categories.length > 1 && (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 32, borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 16, flexWrap: 'wrap' }}>
+            {categories.map(cat => {
+              const isActive = activecat === cat
+              const count = cat === 'All' ? products.length : products.filter(p => (p.tags?.length ? p.tags : p.category ? [p.category] : []).some(c => c.toLowerCase() === cat.toLowerCase())).length
+              return (
+                <button key={cat} onClick={() => setActivecat(cat)} style={{
+                  padding: '7px 16px', borderRadius: 8, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
+                  fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, cursor: 'pointer',
+                  background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
+                  color: isActive ? '#C9A84C' : 'rgba(255,255,255,0.35)',
+                  border: isActive ? '1px solid rgba(201,168,76,0.3)' : '1px solid transparent',
+                  transition: 'all 0.18s',
+                }}>
+                  {cat}
+                  <span style={{ marginLeft: 5, fontSize: 9, opacity: 0.6 }}>({count})</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         {/* ── Product grid ─────────────────────── */}
         {loading ? (
@@ -311,7 +317,7 @@ export default function Store() {
       <AnimatePresence>
         {detail && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={closeDetail}
+            onMouseDown={e => { if (e.target === e.currentTarget) closeDetail() }}
             style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
 
             <motion.div

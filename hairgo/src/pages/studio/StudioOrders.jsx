@@ -286,7 +286,7 @@ export default function StudioOrders() {
 
       {/* ── Delete modal ── */}
       {deleteTarget && (
-        <div onClick={closeDelete}
+        <div onMouseDown={e => { if (e.target === e.currentTarget) closeDelete() }}
           style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 400, background: '#12121c', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Calendar, ChevronLeft, ChevronRight, X, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import toast from 'react-hot-toast'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay,
@@ -26,11 +25,10 @@ const ALL_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled']
 const WDAYS_SHORT  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const WDAYS_SUN    = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const SLOTS        = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
-const PAGE_SIZE    = 3
 
 const card = { background: C.card, border: `1px solid ${C.border}`, borderRadius: 14 }
 
-const HOUR_HEIGHT = 80
+const HOUR_HEIGHT = 55
 const GRID_START  = 9
 const GRID_END    = 19
 const GRID_HOURS  = Array.from({ length: GRID_END - GRID_START }, (_, i) => GRID_START + i)
@@ -41,7 +39,7 @@ function timeToMin(t) {
   return h * 60 + m
 }
 function apptTop(time)   { return (timeToMin(time) - GRID_START * 60) * (HOUR_HEIGHT / 60) }
-function apptHeight(dur) { return Math.max((dur || 30) * (HOUR_HEIGHT / 60), 28) }
+function apptHeight(dur) { return Math.max((dur || 30) * (HOUR_HEIGHT / 60), 22) }
 
 function layoutAppts(appts) {
   if (!appts.length) return []
@@ -71,9 +69,7 @@ export default function StudioSchedule() {
   const [month,         setMonth]         = useState(new Date())
   const [weekDate,      setWeekDate]      = useState(new Date())
   const [dayDate,       setDayDate]       = useState(new Date())
-  const [selectedDay,   setSelectedDay]   = useState(null)
-  const [filter,        setFilter]        = useState('all')
-  const [page,          setPage]          = useState(0)
+  const [selectedAppt,  setSelectedAppt]  = useState(null)
 
   useEffect(() => { load() }, [])
 
@@ -90,46 +86,6 @@ export default function StudioSchedule() {
     setLoading(false)
   }
 
-  async function updateStatus(id, newStatus) {
-    const appt = appointments.find(a => a.id === id)
-    const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id)
-    if (error) return
-    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
-
-    if (newStatus === 'completed' && appt?.status !== 'completed' && appt?.user_id) {
-      const { data: prof } = await supabase.from('profiles').select('points').eq('id', appt.user_id).single()
-      const newCount = (prof?.points || 0) + 1
-      await supabase.from('profiles').update({ points: newCount }).eq('id', appt.user_id)
-
-      if (newCount % 5 === 0) {
-        const code = `REWARD${Math.random().toString(36).slice(2, 7).toUpperCase()}`
-        const expiry = new Date()
-        expiry.setMonth(expiry.getMonth() + 3)
-        const { data: coupon } = await supabase.from('coupons').insert({
-          code, discount_type: 'percentage', discount_value: 30,
-          min_points_required: 0, expiry_date: expiry.toISOString().split('T')[0],
-          max_uses: 1, active: true,
-        }).select().single()
-        if (coupon) {
-          await supabase.from('user_coupons').insert({ user_id: appt.user_id, coupon_id: coupon.id, used: false })
-          toast.success(`Visit ${newCount} — 30% reward sent to ${appt.profiles?.full_name || 'client'}`)
-        }
-      } else {
-        toast.success(`Visit ${newCount % 5}/5 — ${5 - (newCount % 5)} more to unlock 30% off`)
-      }
-    }
-  }
-
-  async function deleteAppt(id) {
-    const pass = window.prompt('Enter password to delete this appointment:')
-    if (pass === null) return
-    if (pass !== 'hairgo24') { toast.error('Incorrect password'); return }
-    const { error } = await supabase.from('appointments').delete().eq('id', id)
-    if (!error) setAppointments(prev => prev.filter(a => a.id !== id))
-  }
-
-  function openDay(day) { setSelectedDay(day); setFilter('all'); setPage(0) }
-
   // ── Derived ──
   const visibleAppts = stylistFilter ? appointments.filter(a => a.stylist_id === stylistFilter) : appointments
   const byDate = visibleAppts.reduce((acc, a) => {
@@ -144,12 +100,6 @@ export default function StudioSchedule() {
   const weekDays  = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
   const dayStr      = format(dayDate, 'yyyy-MM-dd')
   const dayApptList = (byDate[dayStr] || []).sort((a, b) => a.time.localeCompare(b.time))
-
-  const allDayAppts   = selectedDay ? (byDate[format(selectedDay, 'yyyy-MM-dd')] || []) : []
-  const filteredAppts = allDayAppts.filter(a => filter === 'all' || a.status === filter)
-  const totalPages    = Math.ceil(filteredAppts.length / PAGE_SIZE)
-  const modalAppts    = filteredAppts.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
-  const dayCounts     = ALL_STATUSES.reduce((acc, s) => { acc[s] = allDayAppts.filter(a => a.status === s).length; return acc }, {})
 
   const navLabel = view === 'monthly'
     ? format(month, 'MMMM yyyy')
@@ -176,16 +126,16 @@ export default function StudioSchedule() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
       {/* Header */}
-      <div style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}` }}>
-        <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Schedule</h1>
-        <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appointments.length} total appointments</p>
+      <div style={{ flexShrink: 0, marginBottom: '0.6rem', paddingBottom: '0.6rem', borderBottom: `1px solid ${C.border}` }}>
+        <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.1rem' }}>Schedule</h1>
+        <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appointments.length} total appointments</p>
       </div>
 
       {/* Calendar card */}
       <div style={{ ...card, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Toolbar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.875rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.5rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
           <button onClick={navPrev} className="d-nav"
             style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: C.muted, transition: 'all .18s' }}>
             <ChevronLeft size={13} />
@@ -215,7 +165,7 @@ export default function StudioSchedule() {
 
         {/* Stylist filter */}
         {stylists.length > 0 && (
-          <div style={{ display: 'flex', gap: 6, padding: '0.5rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, overflowX: 'auto' }}>
+          <div style={{ display: 'flex', gap: 6, padding: '0.35rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, overflowX: 'auto' }}>
             <button onClick={() => setStylistFilter(null)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, border: `1px solid ${!stylistFilter ? C.goldBorder : C.border}`, background: !stylistFilter ? C.goldBg : 'transparent', color: !stylistFilter ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
               All stylists
@@ -238,7 +188,7 @@ export default function StudioSchedule() {
 
         {/* ── MONTHLY ── */}
         {view === 'monthly' && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0.75rem 1rem 0', minHeight: 0 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0.4rem 0.75rem 0', minHeight: 0 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4, marginBottom: 4, flexShrink: 0 }}>
               {WDAYS_SUN.map((d, i) => (
                 <div key={i} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: i === 0 || i === 6 ? C.goldDim : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '3px 0' }}>{d}</div>
@@ -259,9 +209,9 @@ export default function StudioSchedule() {
                     return (
                       <div key={key} onClick={() => hasAppts && openDay(day)}
                         className={`d-cal-day ${hasAppts ? 'has-appts' : ''}`}
-                        style={{ minHeight: 72, borderRadius: 8, padding: '7px 7px 5px', border: `1.5px solid ${isToday ? C.goldBorder : C.border}`, background: isToday ? C.goldBg : isWeekend ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.02)', opacity: isPast && !hasAppts ? 0.35 : 1, cursor: hasAppts ? 'pointer' : 'default', display: 'flex', flexDirection: 'column', transition: 'all .18s ease' }}>
+                        style={{ minHeight: 54, borderRadius: 7, padding: '5px 5px 4px', border: `1.5px solid ${isToday ? C.goldBorder : C.border}`, background: isToday ? C.goldBg : isWeekend ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.02)', opacity: isPast && !hasAppts ? 0.35 : 1, cursor: hasAppts ? 'pointer' : 'default', display: 'flex', flexDirection: 'column', transition: 'all .18s ease' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 5 }}>
-                          <span className="font-display" style={{ fontSize: '1rem', color: isToday ? C.gold : isPast ? C.muted : C.white, fontWeight: 700, lineHeight: 1 }}>{format(day, 'd')}</span>
+                          <span className="font-display" style={{ fontSize: '0.85rem', color: isToday ? C.gold : isPast ? C.muted : C.white, fontWeight: 700, lineHeight: 1 }}>{format(day, 'd')}</span>
                           {hasAppts && <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 5px', lineHeight: 1.6 }}>{appts.length}</span>}
                         </div>
                         {hasAppts && (
@@ -284,7 +234,7 @@ export default function StudioSchedule() {
                   })
               }
             </div>
-            <div style={{ flexShrink: 0, display: 'flex', gap: 14, padding: '0.625rem 0.25rem', flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0, display: 'flex', gap: 14, padding: '0.3rem 0.25rem', flexWrap: 'wrap' }}>
               {ALL_STATUSES.map(st => (
                 <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: STATUS[st].color, flexShrink: 0 }} />
@@ -304,9 +254,9 @@ export default function StudioSchedule() {
               {weekDays.map((day, i) => {
                 const isToday = isSameDay(day, new Date())
                 return (
-                  <div key={i} style={{ flex: 1, textAlign: 'center', padding: '0.6rem 0.25rem', borderLeft: `1px solid ${C.border}`, background: isToday ? C.goldBg : 'transparent' }}>
-                    <p style={{ fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: isToday ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 3 }}>{WDAYS_SHORT[i]}</p>
-                    <p className="font-display" style={{ fontSize: '1.2rem', color: isToday ? C.gold : C.white, lineHeight: 1, fontWeight: 700 }}>{format(day, 'd')}</p>
+                  <div key={i} style={{ flex: 1, textAlign: 'center', padding: '0.35rem 0.25rem', borderLeft: `1px solid ${C.border}`, background: isToday ? C.goldBg : 'transparent' }}>
+                    <p style={{ fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase', color: isToday ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 2 }}>{WDAYS_SHORT[i]}</p>
+                    <p className="font-display" style={{ fontSize: '1rem', color: isToday ? C.gold : C.white, lineHeight: 1, fontWeight: 700 }}>{format(day, 'd')}</p>
                   </div>
                 )
               })}
@@ -343,7 +293,7 @@ export default function StudioSchedule() {
                         const h   = apptHeight(appt.services?.duration)
                         const pct = 100 / appt._n
                         return (
-                          <div key={appt.id} onClick={() => openDay(day)} className="d-week-chip"
+                          <div key={appt.id} onClick={() => setSelectedAppt(appt)} className="d-week-chip"
                             style={{ position: 'absolute', top: top + 1, height: h - 2, left: `calc(${appt._col * pct}% + 2px)`, width: `calc(${pct}% - 3px)`, borderRadius: 6, background: s.bg, border: `1px solid ${s.border}`, cursor: 'pointer', overflow: 'hidden', padding: '4px 5px', boxSizing: 'border-box', transition: 'filter .15s' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                               {appt.stylists?.photo_url
@@ -375,7 +325,7 @@ export default function StudioSchedule() {
             </div>
 
             {/* Legend */}
-            <div style={{ flexShrink: 0, display: 'flex', gap: 14, padding: '0.5rem 1.25rem', borderTop: `1px solid ${C.border}`, flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0, display: 'flex', gap: 14, padding: '0.3rem 1rem', borderTop: `1px solid ${C.border}`, flexWrap: 'wrap' }}>
               {ALL_STATUSES.map(st => (
                 <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: STATUS[st].color, flexShrink: 0 }} />
@@ -413,7 +363,7 @@ export default function StudioSchedule() {
                   const h   = apptHeight(appt.services?.duration)
                   const pct = 100 / appt._n
                   return (
-                    <div key={appt.id} onClick={() => openDay(dayDate)} className="d-day-chip"
+                    <div key={appt.id} onClick={() => setSelectedAppt(appt)} className="d-day-chip"
                       style={{ position: 'absolute', top: top + 1, height: h - 2, left: `calc(${appt._col * pct}% + 6px)`, width: `calc(${pct}% - 10px)`, borderRadius: 10, background: s.bg, border: `1px solid ${s.border}`, cursor: 'pointer', overflow: 'hidden', padding: '6px 10px', boxSizing: 'border-box', transition: 'filter .15s' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {appt.stylists?.photo_url
@@ -451,130 +401,73 @@ export default function StudioSchedule() {
         )}
       </div>
 
-      {/* Day modal */}
-      {selectedDay && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
-          onClick={() => setSelectedDay(null)}>
-          <div style={{ width: '100%', maxWidth: 580, maxHeight: '88vh', display: 'flex', flexDirection: 'column', background: '#12121a', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid rgba(201,168,76,0.2)` }}
-            onClick={e => e.stopPropagation()}>
-            <div style={{ padding: '1.75rem 1.75rem 1.25rem', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
-                <div>
-                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 6 }}>{format(selectedDay, 'MMMM yyyy')}</p>
-                  <h2 className="font-display font-light" style={{ fontSize: '2.4rem', color: C.white, lineHeight: 1, marginBottom: 6 }}>{format(selectedDay, 'EEEE d')}</h2>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
-                    <div style={{ width: 28, height: 1, background: `linear-gradient(90deg,${C.gold},transparent)` }} />
-                    <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{allDayAppts.length} appointment{allDayAppts.length !== 1 ? 's' : ''}</span>
+      {/* Appointment detail modal */}
+      {selectedAppt && (() => {
+        const a = selectedAppt
+        const s = STATUS[a.status] || STATUS.pending
+        const rows = [
+          { label: 'Date',     value: a.date ? format(new Date(a.date), 'EEEE, MMMM d, yyyy') : '—' },
+          { label: 'Time',     value: a.time?.slice(0, 5) || '—' },
+          { label: 'Client',   value: a.profiles?.full_name || '—' },
+          { label: 'Phone',    value: a.profiles?.phone || '—' },
+          { label: 'Service',  value: a.services?.name || '—' },
+          { label: 'Duration', value: a.services?.duration ? `${a.services.duration} min` : '—' },
+          { label: 'Price',    value: a.services?.price ? `€${a.services.price}` : '—', gold: true },
+          { label: 'Stylist',  value: a.stylists?.name || '—' },
+          ...(a.notes ? [{ label: 'Notes', value: a.notes }] : []),
+        ]
+        return (
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+            onMouseDown={e => { if (e.target === e.currentTarget) setSelectedAppt(null) }}>
+            <div
+              style={{ width: '100%', maxWidth: 420, background: '#12121a', borderRadius: 18, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid ${s.border}` }}
+              onClick={e => e.stopPropagation()}>
+
+              {/* Coloured top bar */}
+              <div style={{ height: 3, background: `linear-gradient(90deg, ${s.color}, transparent)` }} />
+
+              {/* Header */}
+              <div style={{ padding: '1.25rem 1.25rem 1rem', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  {a.stylists?.photo_url
+                    ? <img src={a.stylists.photo_url} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `2px solid ${s.border}` }} />
+                    : <div style={{ width: 44, height: 44, borderRadius: '50%', background: `${s.color}18`, border: `1.5px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '1.1rem', color: s.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{a.stylists?.name?.charAt(0) || '?'}</span>
+                      </div>
+                  }
+                  <div>
+                    <p className="font-display" style={{ color: C.white, fontSize: '1.3rem', lineHeight: 1.1, marginBottom: 4 }}>
+                      {a.profiles?.full_name || 'Client'}
+                    </p>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}` }}>
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={a.status === 'pending' ? 'dot-pulse' : ''} />
+                      <span style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.08em' }}>{a.status}</span>
+                    </div>
                   </div>
                 </div>
-                <button onClick={() => setSelectedDay(null)} className="modal-x"
-                  style={{ width: 32, height: 32, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
-                  <X size={14} />
+                <button onClick={() => setSelectedAppt(null)} className="modal-x"
+                  style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .2s' }}>
+                  <X size={13} />
                 </button>
               </div>
-              {allDayAppts.length > 0 && (
-                <div style={{ display: 'flex', gap: 5, marginTop: '1.1rem', flexWrap: 'wrap' }}>
-                  <button onClick={() => { setFilter('all'); setPage(0) }}
-                    style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${filter === 'all' ? C.goldBorder : C.border}`, background: filter === 'all' ? C.goldBg : 'transparent', color: filter === 'all' ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}
-                    className="filter-pill">All · {allDayAppts.length}</button>
-                  {ALL_STATUSES.filter(s => dayCounts[s] > 0).map(s => {
-                    const opt = STATUS[s]
-                    return (
-                      <button key={s} onClick={() => { setFilter(s); setPage(0) }}
-                        style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${filter === s ? opt.border : C.border}`, background: filter === s ? opt.bg : 'transparent', color: filter === s ? opt.color : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: 5 }}
-                        className="filter-pill">
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: filter === s ? opt.color : 'rgba(255,255,255,0.2)' }} />
-                        {s} · {dayCounts[s]}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-            <div style={{ height: 1, background: `linear-gradient(90deg, ${C.goldBorder}, transparent)`, flexShrink: 0 }} />
-            <div style={{ flex: 1, minHeight: 0, padding: '0.75rem' }}>
-              {modalAppts.length === 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 160, gap: 10 }}>
-                  <Calendar size={28} color={C.border} />
-                  <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>No appointments for this filter</p>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {modalAppts.map(appt => {
-                    const s = STATUS[appt.status] || STATUS.pending
-                    return (
-                      <div key={appt.id} style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem 1.1rem', transition: 'border-color .2s' }} className="appt-card-row">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '0.875rem' }}>
-                          {appt.stylists?.photo_url
-                            ? <img src={appt.stylists.photo_url} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1.5px solid ${C.goldBorder}` }} />
-                            : <div style={{ width: 38, height: 38, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <span style={{ fontSize: '0.88rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{appt.stylists?.name?.charAt(0) || '?'}</span>
-                              </div>
-                          }
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 2 }}>{appt.stylists?.name || 'Stylist'}</p>
-                            <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {[appt.services?.name, appt.profiles?.full_name].filter(Boolean).join(' · ')}
-                            </p>
-                          </div>
-                          <div style={{ padding: '4px 12px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, flexShrink: 0 }}>
-                            <span style={{ fontSize: '0.78rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{appt.time?.slice(0, 5)}</span>
-                          </div>
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 11px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, flexShrink: 0 }}>
-                            <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={appt.status === 'pending' ? 'dot-pulse' : ''} />
-                            <span style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
-                          </div>
-                        </div>
-                        {(appt.services?.duration || appt.services?.price || appt.profiles?.phone) && (
-                          <div style={{ display: 'flex', gap: 12, marginBottom: '0.875rem', paddingLeft: 50 }}>
-                            {appt.services?.duration && <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>⏱ {appt.services.duration} min</span>}
-                            {appt.services?.price && <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>€{appt.services.price}</span>}
-                            {appt.profiles?.phone && <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appt.profiles.phone}</span>}
-                          </div>
-                        )}
-                        <div style={{ display: 'flex', gap: 5, paddingLeft: 50, alignItems: 'center' }}>
-                          {ALL_STATUSES.map(st => {
-                            const opt = STATUS[st]; const isCurrent = appt.status === st
-                            return (
-                              <button key={st} disabled={isCurrent} onClick={() => updateStatus(appt.id, st)}
-                                style={{ padding: '5px 13px', borderRadius: 8, background: isCurrent ? C.subtle : opt.bg, border: `1px solid ${isCurrent ? C.border : opt.border}`, color: isCurrent ? 'rgba(255,255,255,0.18)' : opt.color, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: isCurrent ? 400 : 600, cursor: isCurrent ? 'default' : 'pointer', textTransform: 'capitalize', transition: 'all .15s' }}
-                                className={isCurrent ? '' : `st-btn-${st}`}>
-                                {st}
-                              </button>
-                            )
-                          })}
-                          <button onClick={() => deleteAppt(appt.id)} className="del-appt-btn"
-                            style={{ marginLeft: 'auto', width: 28, height: 28, borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .15s' }}>
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-            {totalPages > 1 && (
-              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '0.875rem 1.5rem', borderTop: `1px solid ${C.border}` }}>
-                <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-                  style={{ width: 32, height: 32, borderRadius: '50%', background: C.subtle, border: `1px solid ${page === 0 ? C.border : C.goldBorder}`, color: page === 0 ? C.muted : C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: page === 0 ? 'default' : 'pointer', opacity: page === 0 ? 0.35 : 1, transition: 'all .18s' }} className="pg-btn">
-                  <ChevronLeft size={14} />
-                </button>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <button key={i} onClick={() => setPage(i)} style={{ width: i === page ? 24 : 8, height: 8, borderRadius: 4, background: i === page ? C.gold : C.border, border: 'none', cursor: 'pointer', transition: 'all .2s', padding: 0 }} />
-                  ))}
-                </div>
-                <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
-                  style={{ width: 32, height: 32, borderRadius: '50%', background: C.subtle, border: `1px solid ${page === totalPages - 1 ? C.border : C.goldBorder}`, color: page === totalPages - 1 ? C.muted : C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: page === totalPages - 1 ? 'default' : 'pointer', opacity: page === totalPages - 1 ? 0.35 : 1, transition: 'all .18s' }} className="pg-btn">
-                  <ChevronRight size={14} />
-                </button>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: C.border, margin: '0 1.25rem' }} />
+
+              {/* Info rows */}
+              <div style={{ padding: '0.875rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {rows.map(({ label, value, gold }, i) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.45rem 0', borderBottom: i < rows.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+                    <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0, marginRight: 16 }}>{label}</span>
+                    <span style={{ fontSize: '0.82rem', color: gold ? C.gold : C.dim, fontFamily: 'Jost,sans-serif', fontWeight: gold ? 600 : 300, textAlign: 'right' }}>{value}</span>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       <style>{`
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }

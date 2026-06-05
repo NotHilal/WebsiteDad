@@ -192,7 +192,7 @@ export default function StudioAppointmentsList() {
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.6rem' }}>
       <style>{`
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -207,9 +207,9 @@ export default function StudioAppointmentsList() {
       `}</style>
 
       {/* ── Header ── */}
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: `1px solid ${C.border}` }}>
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', paddingBottom: '0.6rem', borderBottom: `1px solid ${C.border}` }}>
         <div>
-          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>
+          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>
             Appointments
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -225,26 +225,25 @@ export default function StudioAppointmentsList() {
       </div>
 
       {/* ── Stat cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.6rem', flexShrink: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.5rem', flexShrink: 0 }}>
         {statCards.map(({ s, label, cfg }) => (
           <button key={s} className="stat-card"
             onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
             style={{
               background: statusFilter === s ? cfg.bg : C.card,
               border: `1px solid ${statusFilter === s ? cfg.border : C.border}`,
-              borderRadius: 12, padding: '0.875rem 1rem', cursor: 'pointer',
+              borderRadius: 10, padding: '0.55rem 0.875rem', cursor: 'pointer',
               textAlign: 'left', transition: 'all .18s',
+              display: 'flex', alignItems: 'center', gap: 10,
             }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color }} className={s === 'pending' ? 'dot-pulse' : ''} />
-              {statusFilter === s && <X size={10} style={{ color: cfg.color, opacity: 0.7 }} />}
-            </div>
-            <div className="font-display" style={{ fontSize: '1.6rem', color: loading ? C.border : C.white, lineHeight: 1, marginBottom: 3 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} className={s === 'pending' ? 'dot-pulse' : ''} />
+            <div className="font-display" style={{ fontSize: '1.25rem', color: loading ? C.border : C.white, lineHeight: 1 }}>
               {loading ? '—' : counts[s]}
             </div>
-            <p style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: statusFilter === s ? cfg.color : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+            <p style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: statusFilter === s ? cfg.color : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, flex: 1 }}>
               {label}
             </p>
+            {statusFilter === s && <X size={9} style={{ color: cfg.color, opacity: 0.7, flexShrink: 0 }} />}
           </button>
         ))}
       </div>
@@ -256,9 +255,8 @@ export default function StudioAppointmentsList() {
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search by client name, phone, service or stylist…" autoComplete="off"
-            autoComplete="off"
             className="al-search"
-            style={{ width: '100%', background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.55rem 0.875rem 0.55rem 2.2rem', fontSize: '0.82rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'all .2s', boxSizing: 'border-box' }}
+            style={{ width: '100%', background: C.card, border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.42rem 0.875rem 0.42rem 2.1rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'all .2s', boxSizing: 'border-box' }}
           />
           {search && (
             <button onClick={() => setSearch('')}
@@ -324,7 +322,7 @@ export default function StudioAppointmentsList() {
         ) : (
           <>
             {/* Column headers */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr 1.1fr 140px 160px 40px', gap: 0, padding: '0.5rem 1.25rem', borderBottom: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.015)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr 1.1fr 100px 150px 36px', gap: 0, padding: '0.4rem 1rem', borderBottom: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.015)' }}>
               {['Date & Time', 'Client', 'Service & Stylist', 'Price', 'Status', ''].map(h => (
                 <span key={h} style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{h}</span>
               ))}
@@ -340,9 +338,9 @@ export default function StudioAppointmentsList() {
               return (
                 <div key={appt.id} className="al-row"
                   style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1.4fr 1.1fr 140px 160px 40px',
+                    display: 'grid', gridTemplateColumns: '1fr 1.4fr 1.1fr 100px 150px 36px',
                     alignItems: 'center', gap: 0,
-                    padding: '0.875rem 1.25rem',
+                    padding: '0.5rem 1rem',
                     borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none',
                     borderLeft: `3px solid ${accent ? cfg.color : 'transparent'}`,
                     transition: 'background .15s, border-left-color .15s',
@@ -351,35 +349,35 @@ export default function StudioAppointmentsList() {
 
                   {/* Date & Time */}
                   <div>
-                    <p style={{ fontSize: '0.8rem', color: accent ? C.gold : C.dim, fontFamily: 'Jost,sans-serif', fontWeight: accent ? 600 : 400, marginBottom: 3 }}>
+                    <p style={{ fontSize: '0.75rem', color: accent ? C.gold : C.dim, fontFamily: 'Jost,sans-serif', fontWeight: accent ? 600 : 400, marginBottom: 1 }}>
                       {dateText}
                     </p>
-                    <p style={{ fontSize: '0.72rem', color: isPastAppt && appt.status !== 'completed' ? 'rgba(248,113,113,0.6)' : C.muted, fontFamily: 'Jost,sans-serif' }}>
+                    <p style={{ fontSize: '0.68rem', color: isPastAppt && appt.status !== 'completed' ? 'rgba(248,113,113,0.6)' : C.muted, fontFamily: 'Jost,sans-serif' }}>
                       {appt.time?.slice(0, 5) || '—'}
                     </p>
                   </div>
 
                   {/* Client */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, ${cfg.color}22, ${cfg.color}11)`, border: `1px solid ${cfg.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: 11, color: cfg.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg, ${cfg.color}22, ${cfg.color}11)`, border: `1px solid ${cfg.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: 10, color: cfg.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ color: C.white, fontSize: '0.83rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>
+                      <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 1 }}>
                         {appt.profiles?.full_name || <span style={{ color: C.muted, fontStyle: 'italic' }}>Unknown</span>}
                       </p>
                       {appt.profiles?.phone && (
-                        <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appt.profiles.phone}</p>
+                        <p style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appt.profiles.phone}</p>
                       )}
                     </div>
                   </div>
 
                   {/* Service & Stylist */}
                   <div style={{ minWidth: 0 }}>
-                    <p style={{ color: C.dim, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>
+                    <p style={{ color: C.dim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 1 }}>
                       {appt.services?.name || '—'}
                     </p>
-                    <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {[appt.stylists?.name, appt.services?.duration ? `${appt.services.duration} min` : null].filter(Boolean).join(' · ')}
                     </p>
                   </div>
@@ -387,8 +385,8 @@ export default function StudioAppointmentsList() {
                   {/* Price */}
                   <div>
                     {appt.services?.price
-                      ? <span className="font-display" style={{ fontSize: '1.05rem', color: appt.status === 'completed' ? C.gold : C.dim }}>€{appt.services.price}</span>
-                      : <span style={{ color: C.faint, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>—</span>
+                      ? <span className="font-display" style={{ fontSize: '0.95rem', color: appt.status === 'completed' ? C.gold : C.dim }}>€{appt.services.price}</span>
+                      : <span style={{ color: C.faint, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>—</span>
                     }
                   </div>
 
@@ -400,8 +398,8 @@ export default function StudioAppointmentsList() {
                   {/* Delete */}
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <button onClick={() => openDelete(appt)} className="del-btn"
-                      style={{ width: 28, height: 28, borderRadius: 7, background: 'transparent', border: `1px solid transparent`, color: 'rgba(248,113,113,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
-                      <Trash2 size={12} />
+                      style={{ width: 24, height: 24, borderRadius: 6, background: 'transparent', border: `1px solid transparent`, color: 'rgba(248,113,113,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                      <Trash2 size={11} />
                     </button>
                   </div>
 

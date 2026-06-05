@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, Eye, EyeOff, ShieldAlert } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -13,7 +13,13 @@ const C = {
   red: '#f87171',   redBg:   'rgba(248,113,113,0.1)', redBorder:   'rgba(248,113,113,0.2)',
 }
 
-const EMPTY = { name: '', description: '', price: '', category: '', stock: '', available: true, image_url: '' }
+const EMPTY = { name: '', description: '', price: '', category: '', tags: [], stock: '', available: true, image_url: '' }
+
+const CATEGORIES = [
+  'Shampoo', 'Conditioner', 'Hair Mask', 'Styling Cream', 'Hair Oil',
+  'Color', 'Treatment', 'Spray', 'Serum', 'Wax', 'Tools', 'Accessories',
+  'Beard', 'Skincare', 'Gift Set',
+]
 const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
@@ -38,9 +44,14 @@ export default function StudioProducts() {
   const [saving,      setSaving]      = useState(false)
   const [file,        setFile]        = useState(null)
   const [filePreview, setFilePreview] = useState('')
-  const [catFilter,   setCatFilter]   = useState('All')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [adjusting,   setAdjusting]   = useState(null)
+  const [catFilter,     setCatFilter]     = useState('All')
+  const [statusFilter,  setStatusFilter]  = useState('all')
+  const [adjusting,     setAdjusting]     = useState(null)
+  const [deleteTarget,  setDeleteTarget]  = useState(null) // { id, name }
+  const [deletePwd,     setDeletePwd]     = useState('')
+  const [deleteErr,     setDeleteErr]     = useState('')
+  const [deleting,      setDeleting]      = useState(false)
+  const [showDeletePwd, setShowDeletePwd] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -67,8 +78,17 @@ export default function StudioProducts() {
 
   function openModal(mode, product = null) {
     setFile(null); setFilePreview('')
-    setForm(product ? { ...product } : EMPTY)
+    setForm(product ? { ...product, tags: product.tags || [] } : EMPTY)
     setModal(mode)
+  }
+
+  function toggleCat(cat) {
+    setForm(p => {
+      const tags = p.tags || []
+      if (tags.includes(cat)) return { ...p, tags: tags.filter(t => t !== cat) }
+      if (tags.length >= 3) return p
+      return { ...p, tags: [...tags, cat] }
+    })
   }
 
   function closeModal() { setModal(null); setFile(null); setFilePreview('') }
@@ -86,7 +106,8 @@ export default function StudioProducts() {
         const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(path)
         imageUrl = publicUrl
       }
-      const payload = { ...form, image_url: imageUrl, price: parseFloat(form.price) || 0, stock: parseInt(form.stock) || 0 }
+      const tags = form.tags || []
+      const payload = { ...form, image_url: imageUrl, price: parseFloat(form.price) || 0, stock: parseInt(form.stock) || 0, tags, category: tags[0] || '' }
       const { error } = modal === 'add'
         ? await supabase.from('products').insert(payload)
         : await supabase.from('products').update(payload).eq('id', form.id)
@@ -97,10 +118,21 @@ export default function StudioProducts() {
     finally { setSaving(false) }
   }
 
-  async function deleteProduct(id) {
-    if (!confirm('Delete this product?')) return
-    await supabase.from('products').delete().eq('id', id)
-    toast.success('Product deleted'); load()
+  function openDelete(p) {
+    setDeleteTarget({ id: p.id, name: p.name })
+    setDeletePwd(''); setDeleteErr(''); setShowDeletePwd(false)
+  }
+
+  async function confirmDelete() {
+    if (!deletePwd) { setDeleteErr('Enter the admin password'); return }
+    if (deletePwd !== 'hairgo24') { setDeleteErr('Incorrect admin password'); return }
+    setDeleting(true)
+    const { error } = await supabase.from('products').delete().eq('id', deleteTarget.id)
+    if (error) { setDeleteErr(error.message); setDeleting(false); return }
+    toast.success('Product deleted')
+    setDeleteTarget(null)
+    setDeleting(false)
+    load()
   }
 
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))
@@ -248,9 +280,11 @@ export default function StudioProducts() {
                           <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', flexShrink: 0 }}>Hidden</span>
                         )}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                         <span className="font-display" style={{ color: C.gold, fontSize: '1rem' }}>€{p.price}</span>
-                        {p.category && <span style={{ fontSize: 9, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'Jost,sans-serif' }}>{p.category}</span>}
+                        {(p.tags?.length ? p.tags : p.category ? [p.category] : []).map(tag => (
+                          <span key={tag} style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 500, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{tag}</span>
+                        ))}
                       </div>
                     </div>
                     {p.description && (
@@ -302,7 +336,7 @@ export default function StudioProducts() {
                           style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 11px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .2s' }}>
                           <Edit2 size={9} /> Edit
                         </button>
-                        <button onClick={() => deleteProduct(p.id)} className="prod-del-btn"
+                        <button onClick={() => openDelete(p)} className="prod-del-btn"
                           style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.45)', cursor: 'pointer', transition: 'all .2s' }}>
                           <Trash2 size={10} />
                         </button>
@@ -319,7 +353,7 @@ export default function StudioProducts() {
       {/* ── Modal ────────────────────────────────────────────── */}
       {modal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.78)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
-          onClick={closeModal}>
+          onMouseDown={e => { if (e.target === e.currentTarget) closeModal() }}>
           <div style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,.65)' }}
             onClick={e => e.stopPropagation()}>
 
@@ -344,13 +378,40 @@ export default function StudioProducts() {
                 <div><label style={lbl}>Name <span style={{ color: C.gold }}>*</span></label><input value={form.name || ''} onChange={set('name')} placeholder="Product name" className="m-inp" style={inp} /></div>
                 <div><label style={lbl}>Description</label><textarea value={form.description || ''} onChange={set('description')} rows={2} placeholder="Product description…" className="m-inp" style={{ ...inp, resize: 'none' }} /></div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div><label style={lbl}>Price (€)</label><input type="number" min="0" step="0.01" value={form.price || ''} onChange={set('price')} placeholder="0.00" className="m-inp" style={inp} /></div>
-                  <div>
-                    <label style={lbl}>Stock</label>
-                    <input type="number" min="0" value={form.stock || ''} onChange={set('stock')} placeholder="0" className="m-inp" style={inp} />
+                  <div><label style={lbl}>Stock</label><input type="number" min="0" value={form.stock || ''} onChange={set('stock')} placeholder="0" className="m-inp" style={inp} /></div>
+                </div>
+
+                {/* Category chips — multi-select up to 3 */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <label style={{ ...lbl, marginBottom: 0 }}>Category</label>
+                    <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', color: (form.tags || []).length >= 3 ? C.gold : C.muted }}>
+                      {(form.tags || []).length}/3
+                    </span>
                   </div>
-                  <div><label style={lbl}>Category</label><input value={form.category || ''} onChange={set('category')} placeholder="Shampoo…" className="m-inp" style={inp} /></div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {CATEGORIES.map(cat => {
+                      const selected = (form.tags || []).includes(cat)
+                      const maxed    = (form.tags || []).length >= 3 && !selected
+                      return (
+                        <button key={cat} type="button" onClick={() => toggleCat(cat)}
+                          style={{
+                            padding: '5px 13px', borderRadius: 9999,
+                            fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500,
+                            letterSpacing: '0.06em', cursor: maxed ? 'not-allowed' : 'pointer',
+                            transition: 'background .15s, border-color .15s, color .15s',
+                            border: `1px solid ${selected ? C.gold : 'rgba(255,255,255,0.1)'}`,
+                            background: selected ? C.goldBg : 'rgba(255,255,255,0.03)',
+                            color: selected ? C.gold : maxed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.38)',
+                            outline: 'none',
+                          }}>
+                          {cat}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
 
                 {/* Photo */}
@@ -383,7 +444,7 @@ export default function StudioProducts() {
                 {/* Available toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem', borderRadius: 10, background: C.subtle, border: `1px solid ${C.border}` }}>
                   <div>
-                    <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>Available for preorder</p>
+                    <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>Available to order</p>
                     <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Visible to customers in the store</p>
                   </div>
                   <div style={{ width: 42, height: 24, borderRadius: 12, background: form.available ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .25s', flexShrink: 0, cursor: 'pointer', boxShadow: form.available ? '0 0 12px rgba(201,168,76,0.35)' : 'none' }}
@@ -397,6 +458,68 @@ export default function StudioProducts() {
                 <button onClick={closeModal} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
                 <button onClick={save} disabled={saving} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1 }}>
                   {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Save size={13} /> {modal === 'add' ? 'Add Product' : 'Save Changes'}</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete confirmation modal ─────────────────────────── */}
+      {deleteTarget && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onMouseDown={e => { if (e.target === e.currentTarget) setDeleteTarget(null) }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 400, background: C.modal, border: '1px solid rgba(248,113,113,0.25)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
+
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#f87171,#ef4444,rgba(248,113,113,0.15))' }} />
+
+            <div style={{ padding: '1.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: C.redBg, border: `1px solid ${C.redBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <ShieldAlert size={22} color={C.red} strokeWidth={1.5} />
+                </div>
+                <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1.1, marginBottom: '0.4rem' }}>
+                  Delete Product
+                </h2>
+                <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
+                  You're about to permanently delete <span style={{ color: C.white }}>{deleteTarget.name}</span>.<br />
+                  Enter the admin password to confirm.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
+                  Admin Password
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showDeletePwd ? 'text' : 'password'}
+                    value={deletePwd}
+                    onChange={e => { setDeletePwd(e.target.value); setDeleteErr('') }}
+                    onKeyDown={e => e.key === 'Enter' && confirmDelete()}
+                    placeholder="Enter admin password…"
+                    autoFocus
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${deleteErr ? C.redBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }} />
+                  <button type="button" onClick={() => setShowDeletePwd(p => !p)}
+                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}>
+                    {showDeletePwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                {deleteErr && <p style={{ fontSize: '0.72rem', color: C.red, fontFamily: 'Jost,sans-serif', marginTop: 6 }}>{deleteErr}</p>}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.625rem' }}>
+                <button onClick={() => setDeleteTarget(null)}
+                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button onClick={confirmDelete} disabled={deleting}
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
+                  {deleting
+                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                    : <><Trash2 size={13} /> Delete Product</>
+                  }
                 </button>
               </div>
             </div>
