@@ -138,7 +138,7 @@ export default function Gallery() {
   }
 
   return (
-    <div style={{ minHeight:'100vh', paddingTop:120, paddingBottom:80 }}>
+    <div className="page-root" style={{ minHeight:'100vh', paddingTop:120, paddingBottom:80 }}>
       <div className="wrap">
 
         {/* Header */}
@@ -207,7 +207,7 @@ export default function Gallery() {
 
         {/* Skeleton while loading */}
         {loading && (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'1.25rem' }}>
+          <div className="gallery-grid">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="shimmer" style={{ aspectRatio:'4/3', borderRadius:20 }} />
             ))}
@@ -215,7 +215,7 @@ export default function Gallery() {
         )}
 
         {/* Grid */}
-        <motion.div layout style={{ display: loading ? 'none' : 'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'1.25rem' }}>
+        <motion.div layout className="gallery-grid" style={{ display: loading ? 'none' : 'grid' }}>
           <AnimatePresence>
             {paginated.map((item, i) => (
               <motion.div key={item.id}
@@ -323,8 +323,8 @@ export default function Gallery() {
               exit={{ opacity:0, scale:0.92, y:24 }}
               transition={{ type:'spring', damping:28, stiffness:300 }}
               onClick={e => e.stopPropagation()}
+              className="gallery-lightbox-modal"
               style={{
-                display:'grid', gridTemplateColumns:'1fr 1fr',
                 maxWidth:900, width:'100%', maxHeight:'88vh',
                 borderRadius:28, overflow:'hidden',
                 boxShadow:'0 48px 120px rgba(0,0,0,0.9)',
@@ -423,6 +423,24 @@ export default function Gallery() {
       <style>{`
         .gallery-item:hover .gallery-img { transform: scale(1.06); }
         .gallery-item:hover .gallery-overlay { opacity: 1 !important; }
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.25rem;
+        }
+        .gallery-lightbox-modal {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+        @media (max-width: 640px) {
+          .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 0.625rem; }
+          .gallery-lightbox-modal {
+            grid-template-columns: 1fr;
+            max-height: 92vh;
+            overflow-y: auto;
+          }
+          .gallery-lightbox-modal > div:first-child { min-height: 260px !important; }
+        }
       `}</style>
     </div>
   )

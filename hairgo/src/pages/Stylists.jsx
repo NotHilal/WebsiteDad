@@ -15,7 +15,7 @@ export default function Stylists() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: 140, paddingBottom: 140 }}>
+    <div className="page-root" style={{ minHeight: '100vh', paddingTop: 140, paddingBottom: 140 }}>
       <style>{`
         .team-grid {
           display: grid;

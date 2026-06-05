@@ -163,7 +163,30 @@ export default function Appointments() {
 
   /* ── Main layout ── */
   return (
-    <div style={{ minHeight:'100vh', display:'flex', paddingBottom:(sel.service||sel.stylist||sel.date)?88:0 }}>
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', paddingBottom:(sel.service||sel.stylist||sel.date)?88:0 }}>
+
+      {/* ── Mobile step bar (shown only when sidebar is hidden) ── */}
+      <div className="appt-mobile-steps" style={{ display:'none', padding:'1rem 1.25rem 0.75rem', borderBottom:'1px solid rgba(201,168,76,0.1)', background:'#0a0a12', position:'sticky', top:58, zIndex:20 }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:0 }}>
+          {STEPS.map((s, i) => {
+            const isActive = i===step, isDone = i<step
+            return (
+              <div key={s} style={{ display:'flex', alignItems:'center' }}>
+                <div onClick={() => isDone && setStep(i)}
+                  style={{ display:'flex', alignItems:'center', gap:6, cursor:isDone?'pointer':'default' }}>
+                  <div style={{ width:24, height:24, borderRadius:'50%', flexShrink:0, background:isActive?'linear-gradient(135deg,#C9A84C,#C4956A)':isDone?'rgba(201,168,76,0.12)':'rgba(255,255,255,0.05)', border:isActive?'none':isDone?'1px solid rgba(201,168,76,0.35)':'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .3s', boxShadow:isActive?'0 4px 14px rgba(201,168,76,0.45)':'none' }}>
+                    {isDone ? <Check size={10} color="#C9A84C"/> : <span style={{ fontSize:10, fontWeight:600, color:isActive?'#000':'rgba(255,255,255,0.25)', fontFamily:'Jost,sans-serif' }}>{i+1}</span>}
+                  </div>
+                  <span style={{ fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', color:isActive?'#fff':isDone?'rgba(201,168,76,0.55)':'rgba(255,255,255,0.2)', fontWeight:isActive?600:300 }}>{s}</span>
+                </div>
+                {i < STEPS.length - 1 && <div style={{ width:20, height:1, background:isDone?'rgba(201,168,76,0.3)':'rgba(255,255,255,0.07)', margin:'0 6px', flexShrink:0 }} />}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div style={{ display:'flex', flex:1 }}>
 
       {/* ── LEFT STEP PANEL ── */}
       <div className="appt-step-panel" style={{
@@ -252,7 +275,7 @@ export default function Appointments() {
 
       {/* ── CENTER CONTENT ── */}
       <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ maxWidth:720, margin:'0 auto', padding:'3.5rem 2rem' }}>
+        <div style={{ maxWidth:720, margin:'0 auto', padding:'3.5rem 2rem' }} className="appt-content-wrap">
           <AnimatePresence mode="wait">
 
             {/* ── STEP 0: Service ── */}
@@ -684,12 +707,15 @@ export default function Appointments() {
         @media (max-width:900px) {
           .appt-step-panel { display:none !important; }
           .appt-side-spacer { display:none !important; }
+          .appt-mobile-steps { display:block !important; }
         }
         .appt-step-panel::-webkit-scrollbar { display:none; }
         @media (max-width:600px) {
           .appt-svc-card { height:220px !important; }
+          .appt-content-wrap { padding: 1.5rem 1.25rem !important; }
         }
       `}</style>
+      </div>
     </div>
   )
 }

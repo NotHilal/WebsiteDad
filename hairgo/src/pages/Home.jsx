@@ -5,10 +5,18 @@ import { ArrowRight, Star, ChevronDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 
 const inView = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 16, filter: 'blur(6px)' },
   visible: (i = 0) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.85, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }
+    opacity: 1, y: 0, filter: 'blur(0px)',
+    transition: { duration: 0.9, delay: i * 0.11, ease: [0.25, 0.46, 0.45, 0.94] }
+  }),
+}
+
+const cardIn = {
+  hidden: { opacity: 0, y: 24, scale: 0.97, filter: 'blur(4px)' },
+  visible: (i = 0) => ({
+    opacity: 1, y: 0, scale: 1, filter: 'blur(0px)',
+    transition: { duration: 0.8, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }
   }),
 }
 
@@ -82,7 +90,7 @@ export default function Home() {
     <div>
 
       {/* ══ HERO ══════════════════════════════════════════════ */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop:'12vh', paddingBottom:'8vh' }}>
+      <section ref={heroRef} className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop:'12vh', paddingBottom:'8vh' }}>
 
         {/* Soft ambient light blobs */}
         <div className="absolute inset-0 pointer-events-none">
@@ -98,9 +106,9 @@ export default function Home() {
         <motion.div style={{ opacity }} className="relative z-10 wrap text-center">
           {/* Eyebrow badge */}
           <motion.div
-            initial={{ opacity:0, y:-18 }}
-            animate={{ opacity:1, y:0 }}
-            transition={{ duration:0.6, delay:0.15 }}
+            initial={{ opacity:0, y:-10, scale:0.88, filter:'blur(5px)' }}
+            animate={{ opacity:1, y:0, scale:1, filter:'blur(0px)' }}
+            transition={{ duration:0.75, delay:0.1, ease:[0.25,0.46,0.45,0.94] }}
             className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full glass-light mb-12"
           >
             <div style={{ width:6, height:6, borderRadius:'50%', background:'#C9A84C', animation:'pulse-gold 2.4s infinite' }} />
@@ -110,31 +118,34 @@ export default function Home() {
           </motion.div>
 
           {/* Headline */}
-          <motion.h1
-            initial={{ opacity:0, y:36 }}
-            animate={{ opacity:1, y:0 }}
-            transition={{ duration:1, delay:0.28, ease:[0.22,1,0.36,1] }}
-            className="font-display font-light"
-            style={{ fontSize:'clamp(4rem, 11vw, 8.5rem)', lineHeight:0.88, marginBottom:'2rem' }}
-          >
-            <span style={{ color:'#fff', display:'block' }}>Your hair,</span>
-            <span className="gold-gradient" style={{ fontStyle:'italic', display:'block' }}>your story.</span>
-          </motion.h1>
+          <h1 className="font-display font-light"
+            style={{ fontSize:'clamp(4rem, 11vw, 8.5rem)', lineHeight:0.88, marginBottom:'2rem' }}>
+            <motion.span
+              initial={{ opacity:0, y:32, filter:'blur(10px)' }}
+              animate={{ opacity:1, y:0, filter:'blur(0px)' }}
+              transition={{ duration:1.05, delay:0.22, ease:[0.16,1,0.3,1] }}
+              style={{ color:'#fff', display:'block' }}>Your hair,</motion.span>
+            <motion.span
+              initial={{ opacity:0, y:32, filter:'blur(10px)' }}
+              animate={{ opacity:1, y:0, filter:'blur(0px)' }}
+              transition={{ duration:1.05, delay:0.38, ease:[0.16,1,0.3,1] }}
+              className="gold-gradient" style={{ fontStyle:'italic', display:'block' }}>your story.</motion.span>
+          </h1>
 
           {/* Divider */}
           <motion.div
             initial={{ scaleX:0, opacity:0 }}
             animate={{ scaleX:1, opacity:1 }}
-            transition={{ duration:0.9, delay:0.5 }}
+            transition={{ duration:0.85, delay:0.54, ease:[0.25,0.46,0.45,0.94] }}
             className="gold-bar"
             style={{ margin:'0 auto 2.5rem auto' }}
           />
 
           {/* Subtitle */}
           <motion.p
-            initial={{ opacity:0, y:18 }}
-            animate={{ opacity:1, y:0 }}
-            transition={{ duration:0.7, delay:0.58 }}
+            initial={{ opacity:0, y:12, filter:'blur(5px)' }}
+            animate={{ opacity:1, y:0, filter:'blur(0px)' }}
+            transition={{ duration:0.85, delay:0.56, ease:[0.25,0.46,0.45,0.94] }}
             style={{ color:'rgba(255,255,255,0.45)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}
           >
             Expert stylists crafting looks that reflect who you truly are.
@@ -143,9 +154,9 @@ export default function Home() {
 
           {/* CTA buttons */}
           <motion.div
-            initial={{ opacity:0, y:18 }}
-            animate={{ opacity:1, y:0 }}
-            transition={{ duration:0.65, delay:0.72 }}
+            initial={{ opacity:0, y:10, filter:'blur(4px)' }}
+            animate={{ opacity:1, y:0, filter:'blur(0px)' }}
+            transition={{ duration:0.75, delay:0.7, ease:[0.25,0.46,0.45,0.94] }}
             style={{ display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'center', gap:'1rem' }}
           >
             <Link to="/appointments" className="btn-gold" style={{ gap:12 }}>
@@ -160,10 +171,10 @@ export default function Home() {
 
         {/* Stats */}
         <motion.div
-          initial={{ opacity:0, y:16 }}
-          animate={{ opacity:1, y:0 }}
-          transition={{ delay:1.1, duration:0.7 }}
-          style={{ position:'absolute', bottom:120, left:0, right:0, display:'flex', justifyContent:'center', gap:'clamp(2rem,6vw,6rem)' }}
+          initial={{ opacity:0, y:10, filter:'blur(4px)' }}
+          animate={{ opacity:1, y:0, filter:'blur(0px)' }}
+          transition={{ delay:1.05, duration:0.85, ease:[0.25,0.46,0.45,0.94] }}
+          style={{ position:'absolute', bottom:120, left:0, right:0, display:'flex', justifyContent:'center', flexWrap:'wrap', gap:'clamp(1.25rem,5vw,6rem)', padding:'0 1.5rem' }}
         >
           {stats.map(({ value, label }) => (
             <div key={label} style={{ textAlign:'center' }}>
@@ -188,7 +199,7 @@ export default function Home() {
       </section>
 
       {/* ══ SERVICES ════════════════════════════════════════════ */}
-      <section style={{ paddingTop:32, paddingBottom:32, position:'relative' }}>
+      <section className="home-section" style={{ position:'relative' }}>
         <div className="wrap">
 
           {/* Section header */}
@@ -206,7 +217,7 @@ export default function Home() {
             {displayedServices.map((svc, i) => (
               <motion.div key={svc.id}
                 initial="hidden" whileInView="visible" viewport={{ once:true, margin:'-40px' }}
-                custom={i} variants={inView}
+                custom={i} variants={cardIn}
                 className="glass-light service-card"
                 style={{ borderRadius:24, padding:0, textAlign:'center', transition:'all 0.5s cubic-bezier(0.22,1,0.36,1)', cursor:'default', position:'relative', overflow:'hidden', willChange:'transform', backfaceVisibility:'hidden' }}
                 whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(201,168,76,0.1)', borderColor:'rgba(201,168,76,0.2)' }}
@@ -244,7 +255,7 @@ export default function Home() {
       </section>
 
       {/* ══ GALLERY PREVIEW ═════════════════════════════════════ */}
-      <section style={{ paddingTop:32, paddingBottom:32, position:'relative' }}>
+      <section className="home-section" style={{ position:'relative' }}>
 
         <div className="wrap">
           {/* Header */}
@@ -258,13 +269,11 @@ export default function Home() {
           </motion.div>
 
           {/* Grid */}
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(5, 1fr)', gap:'1.25rem', marginBottom:'1.5rem' }}>
+          <div className="home-gallery-grid" style={{ marginBottom:'1.5rem' }}>
             {displayedGallery.map((item, i) => (
               <motion.div key={item.id}
-                initial={{ opacity:0, scale:0.95 }}
-                whileInView={{ opacity:1, scale:1 }}
-                viewport={{ once:true, margin:'-30px' }}
-                transition={{ duration:0.65, delay:i * 0.07 }}
+                initial="hidden" whileInView="visible" viewport={{ once:true, margin:'-30px' }}
+                custom={i} variants={cardIn}
                 className="gallery-item"
                 style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', position:'relative', cursor:'pointer' }}
                 whileHover={{ scale:1.02 }}
@@ -286,10 +295,9 @@ export default function Home() {
       </section>
 
       {/* ══ ABOUT ═══════════════════════════════════════════════ */}
-      <section style={{ paddingTop:16, paddingBottom:16 }}>
+      <section className="home-section home-section-sm">
         <div className="wrap">
-          <div style={{ display:'grid', gridTemplateColumns:'1fr', gap:'2rem', alignItems:'center' }}
-               className="lg:grid-cols-2">
+          <div className="home-about-grid">
 
             {/* Left */}
             <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView} style={{ textAlign:'center' }}>
@@ -318,10 +326,10 @@ export default function Home() {
                 <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
                   {displayedTeam.slice(0, 2).map((m, i) => (
                     <motion.div key={m.id}
-                      initial={{ opacity:0, x:-50 }}
-                      whileInView={{ opacity:1, x:0 }}
+                      initial={{ opacity:0, x:-28, filter:'blur(5px)' }}
+                      whileInView={{ opacity:1, x:0, filter:'blur(0px)' }}
                       viewport={{ once:true, margin:'-40px' }}
-                      transition={{ duration:0.75, delay:i * 0.15, ease:[0.22,1,0.36,1] }}
+                      transition={{ duration:0.85, delay:i * 0.13, ease:[0.16,1,0.3,1] }}
                     >
                       <div style={{
                         aspectRatio:'1/1', borderRadius:20, overflow:'hidden',
@@ -350,10 +358,10 @@ export default function Home() {
                 <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', paddingTop:'1rem' }}>
                   {displayedTeam.slice(2, 4).map((m, i) => (
                     <motion.div key={m.id}
-                      initial={{ opacity:0, x:50 }}
-                      whileInView={{ opacity:1, x:0 }}
+                      initial={{ opacity:0, x:28, filter:'blur(5px)' }}
+                      whileInView={{ opacity:1, x:0, filter:'blur(0px)' }}
                       viewport={{ once:true, margin:'-40px' }}
-                      transition={{ duration:0.75, delay:i * 0.15 + 0.1, ease:[0.22,1,0.36,1] }}
+                      transition={{ duration:0.85, delay:i * 0.13 + 0.1, ease:[0.16,1,0.3,1] }}
                     >
                       <div style={{
                         aspectRatio:'1/1', borderRadius:20, overflow:'hidden',
@@ -396,10 +404,10 @@ export default function Home() {
       </section>
 
       {/* ══ LOYALTY + CTA ═══════════════════════════════════════ */}
-      <section style={{ paddingTop:32, paddingBottom:32 }}>
+      <section className="home-section">
         <div className="wrap">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView}
-            style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.5rem' }}>
+            className="home-cta-grid">
 
             {/* Loyalty panel */}
             <div style={{
@@ -457,6 +465,48 @@ export default function Home() {
       <style>{`
         .service-card:hover .service-img { transform: scale(1.07); }
         .gallery-item:hover .gallery-img { transform: scale(1.08); }
+
+        .home-section    { padding-top: 56px; padding-bottom: 56px; }
+        .home-section-sm { padding-top: 32px; padding-bottom: 32px; }
+        @media (max-width: 640px) {
+          .home-section    { padding-top: 72px; padding-bottom: 72px; }
+          .home-section-sm { padding-top: 56px; padding-bottom: 56px; }
+        }
+
+        .home-gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 1.25rem;
+        }
+        .home-cta-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.5rem;
+        }
+        .home-about-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 2rem;
+          align-items: center;
+        }
+
+        @media (max-width: 860px) {
+          .home-about-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 700px) {
+          .home-gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+          .home-cta-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 480px) {
+          .home-gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 0.625rem; }
+        }
+        @media (max-width: 640px) {
+          .hero-section {
+            align-items: flex-start !important;
+            padding-top: 145px !important;
+            padding-bottom: 160px !important;
+          }
+        }
       `}</style>
     </div>
   )

@@ -218,7 +218,7 @@ export default function Store() {
   function closeDetail() { setDetail(null); setDQty(1) }
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: 96, paddingBottom: 80, background: '#0a0a0a' }}>
+    <div className="page-root" style={{ minHeight: '100vh', paddingTop: 96, paddingBottom: 80, background: '#0a0a0a' }}>
       <div className="wrap">
 
         {/* ── Header ─────────────────────────────── */}
@@ -326,6 +326,7 @@ export default function Store() {
               exit={{ opacity: 0, scale: 0.95, y: 8 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               onClick={e => e.stopPropagation()}
+              className="store-detail-modal"
               style={{ width: '100%', maxWidth: 780, background: '#111116', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.8)', display: 'grid', gridTemplateColumns: '1fr 1fr', maxHeight: '90vh' }}>
 
               {/* Image */}
@@ -409,6 +410,17 @@ export default function Store() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .product-card:hover .qv-btn { opacity: 1 !important; }
+        @media (max-width: 600px) {
+          .store-detail-modal {
+            grid-template-columns: 1fr !important;
+            max-height: 92vh;
+            overflow-y: auto;
+          }
+          .store-detail-modal > div:first-child {
+            min-height: 240px !important;
+            max-height: 260px;
+          }
+        }
       `}</style>
     </div>
   )

@@ -1,101 +1,88 @@
 import { Link } from 'react-router-dom'
-import { Scissors, MapPin, Phone, Mail, ArrowUpRight } from 'lucide-react'
+import { Scissors, MapPin, Phone, Mail, ArrowUpRight, ChevronRight } from 'lucide-react'
+
+const NAV_LINKS = [
+  { to: '/',             label: 'Home' },
+  { to: '/gallery',      label: 'Gallery' },
+  { to: '/appointments', label: 'Book Appointment' },
+  { to: '/store',        label: 'Shop Products' },
+  { to: '/stylists',     label: 'Our Team' },
+]
+
+const CONTACT = [
+  { icon: MapPin, text: <>123 Rue de la Beauté<br />Paris, 75001</> },
+  { icon: Phone,  text: '+33 1 23 45 67 89' },
+  { icon: Mail,   text: 'hello@hairgo.fr' },
+]
+
+const HOURS = [
+  { day: 'Mon – Fri', time: '9:00 – 19:00', open: true  },
+  { day: 'Saturday',  time: '10:00 – 18:00', open: true  },
+  { day: 'Sunday',    time: 'Closed',         open: false },
+]
 
 export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer style={{ position: 'relative', background: '#060606' }}>
+    <footer style={{ position: 'relative', background: '#060608', overflow: 'hidden' }}>
 
-      {/* ── Top gradient line ──────────────────────────── */}
-      <div style={{
-        height: 1,
-        background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.3) 30%, rgba(196,149,106,0.3) 70%, transparent)',
-      }} />
+      {/* ── Ambient glow ──────────────────────────────── */}
+      <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 900, height: 400, background: 'radial-gradient(ellipse at top, rgba(201,168,76,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: '10%', width: 500, height: 300, background: 'radial-gradient(ellipse, rgba(196,149,106,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      {/* ── Main grid ─────────────────────────────────── */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '72px 32px 0' }}>
-        <div className="footer-grid" style={{ display: 'grid', gap: 56 }}>
+      {/* ── Ghost watermark ───────────────────────────── */}
+      <div style={{ position: 'absolute', bottom: 40, right: -20, pointerEvents: 'none', userSelect: 'none', overflow: 'hidden' }}>
+        <span className="font-display" style={{ fontSize: 'clamp(6rem, 16vw, 14rem)', color: 'rgba(201,168,76,0.028)', lineHeight: 1, fontWeight: 300, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+          HairGo
+        </span>
+      </div>
 
-          {/* ── Brand column ───────────────────────────── */}
-          <div>
-            <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 20 }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: '50%',
-                background: 'linear-gradient(135deg, #C9A84C, #C4956A)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 20px rgba(201,168,76,0.3)',
-              }}>
-                <Scissors size={14} color="#000" style={{ transform: 'rotate(45deg)' }} />
-              </div>
-              <span className="font-display" style={{ fontSize: '1.5rem', color: '#fff', lineHeight: 1 }}>
-                Hair<span style={{ color: '#C9A84C' }}>Go</span>
-              </span>
-            </Link>
-            <p style={{
-              fontSize: 13, lineHeight: 1.85, color: 'rgba(255,255,255,0.25)',
-              maxWidth: 280, marginBottom: 28,
-              fontFamily: 'Jost, sans-serif', fontWeight: 300,
-            }}>
+      {/* ── Top accent line ───────────────────────────── */}
+      <div style={{ height: 1, background: 'linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.22) 25%, rgba(196,149,106,0.28) 50%, rgba(201,168,76,0.22) 75%, transparent 100%)' }} />
+
+      {/* ── Main content ──────────────────────────────── */}
+      <div className="footer-main" style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 32px 0', position: 'relative' }}>
+        <div className="footer-grid" style={{ display: 'grid', gap: 60 }}>
+
+          {/* ── Brand ─────────────────────────────────── */}
+          <div className="footer-brand">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+              <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 11, textDecoration: 'none' }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 24px rgba(201,168,76,0.35)', flexShrink: 0 }}>
+                  <Scissors size={14} color="#000" style={{ transform: 'rotate(45deg)' }} />
+                </div>
+                <span className="font-display" style={{ fontSize: '1.6rem', color: '#fff', lineHeight: 1, letterSpacing: '0.01em' }}>
+                  Hair<span style={{ color: '#C9A84C' }}>Go</span>
+                </span>
+              </Link>
+              <a href="#" aria-label="Instagram" className="footer-social"
+                style={{ width: 32, height: 32, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.28)', transition: 'all 0.3s ease', textDecoration: 'none', flexShrink: 0 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                </svg>
+              </a>
+            </div>
+
+            <p style={{ fontSize: 13, lineHeight: 2, color: 'rgba(255,255,255,0.22)', maxWidth: 260, marginBottom: 10, fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>
               Where elegance meets artistry. Premium hair care crafted for those who dare to stand out.
             </p>
 
-            {/* Social icons */}
-            <div style={{ display: 'flex', gap: 10 }}>
-              {[
-                { icon: () => (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                  </svg>
-                ), label: 'Instagram', href: '#' },
-                { icon: () => (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
-                  </svg>
-                ), label: 'TikTok', href: '#' },
-              ].map(({ icon: Icon, label, href }) => (
-                <a key={label} href={href} aria-label={label}
-                  className="footer-social-icon"
-                  style={{
-                    width: 38, height: 38, borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    color: 'rgba(255,255,255,0.3)',
-                    transition: 'all 0.35s ease',
-                    textDecoration: 'none',
-                  }}>
-                  <Icon size={15} />
-                </a>
-              ))}
-            </div>
+            <div style={{ width: 32, height: 1, background: 'linear-gradient(90deg,#C9A84C,transparent)' }} />
           </div>
 
-          {/* ── Navigate column ────────────────────────── */}
-          <div>
-            <h4 style={{
-              fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: '#C9A84C', marginBottom: 28, fontFamily: 'Jost, sans-serif', fontWeight: 500,
-            }}>Navigate</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {[
-                { to: '/', label: 'Home' },
-                { to: '/gallery', label: 'Gallery' },
-                { to: '/appointments', label: 'Book Appointment' },
-                { to: '/store', label: 'Shop Products' },
-                { to: '/stylists', label: 'Our Team' },
-              ].map(({ to, label }) => (
+          {/* ── Navigate ──────────────────────────────── */}
+          <div className="footer-navigate">
+            <div style={{ marginBottom: 28 }}>
+              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 10, fontFamily: 'Jost, sans-serif', fontWeight: 600 }}>Navigate</h4>
+              <div style={{ width: 20, height: 1, background: 'linear-gradient(90deg,rgba(201,168,76,0.5),transparent)' }} />
+            </div>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {NAV_LINKS.map(({ to, label }) => (
                 <li key={to}>
-                  <Link to={to}
-                    className="footer-link"
-                    style={{
-                      fontSize: 13, color: 'rgba(255,255,255,0.3)',
-                      textDecoration: 'none', transition: 'color 0.3s ease',
-                      fontFamily: 'Jost, sans-serif', fontWeight: 300,
-                      display: 'inline-flex', alignItems: 'center', gap: 6,
-                    }}>
+                  <Link to={to} className="footer-link"
+                    style={{ fontSize: 13, color: 'rgba(255,255,255,0.28)', textDecoration: 'none', fontFamily: 'Jost, sans-serif', fontWeight: 300, display: 'inline-flex', alignItems: 'center', gap: 0, transition: 'all 0.25s ease' }}>
+                    <ChevronRight size={11} className="footer-link-arrow" style={{ opacity: 0, marginRight: -4, transition: 'all 0.25s ease', color: '#C9A84C', flexShrink: 0 }} />
                     {label}
                   </Link>
                 </li>
@@ -103,157 +90,142 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* ── Contact column ─────────────────────────── */}
-          <div>
-            <h4 style={{
-              fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: '#C9A84C', marginBottom: 28, fontFamily: 'Jost, sans-serif', fontWeight: 500,
-            }}>Contact</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 18 }}>
-              {[
-                { icon: MapPin, text: <>123 Rue de la Beauté<br />Paris, 75001</> },
-                { icon: Phone, text: '+33 1 23 45 67 89' },
-                { icon: Mail, text: 'hello@hairgo.fr' },
-              ].map(({ icon: Icon, text }, i) => (
-                <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{
-                    width: 30, height: 30, borderRadius: 8,
-                    background: 'rgba(201,168,76,0.06)',
-                    border: '1px solid rgba(201,168,76,0.1)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, marginTop: 1,
-                  }}>
-                    <Icon size={13} color="#C9A84C" strokeWidth={1.5} />
+          {/* ── Contact ───────────────────────────────── */}
+          <div className="footer-contact">
+            <div style={{ marginBottom: 28 }}>
+              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 10, fontFamily: 'Jost, sans-serif', fontWeight: 600 }}>Contact</h4>
+              <div style={{ width: 20, height: 1, background: 'linear-gradient(90deg,rgba(201,168,76,0.5),transparent)' }} />
+            </div>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {CONTACT.map(({ icon: Icon, text }, i) => (
+                <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(201,168,76,0.05)', border: '1px solid rgba(201,168,76,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                    <Icon size={13} color="rgba(201,168,76,0.7)" strokeWidth={1.5} />
                   </div>
-                  <span style={{
-                    fontSize: 13, color: 'rgba(255,255,255,0.3)',
-                    lineHeight: 1.7, fontFamily: 'Jost, sans-serif', fontWeight: 300,
-                  }}>{text}</span>
+                  <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.28)', lineHeight: 1.75, fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>{text}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* ── Hours column ───────────────────────────── */}
-          <div>
-            <h4 style={{
-              fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: '#C9A84C', marginBottom: 28, fontFamily: 'Jost, sans-serif', fontWeight: 500,
-            }}>Hours</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {[
-                { day: 'Mon – Fri', time: '9:00 – 19:00' },
-                { day: 'Saturday', time: '10:00 – 18:00' },
-                { day: 'Sunday', time: 'Closed' },
-              ].map(({ day, time }) => (
-                <li key={day} style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  paddingBottom: 14,
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
-                }}>
-                  <span style={{
-                    fontSize: 13, color: 'rgba(255,255,255,0.3)',
-                    fontFamily: 'Jost, sans-serif', fontWeight: 300,
-                  }}>{day}</span>
-                  <span style={{
-                    fontSize: 12,
-                    color: time === 'Closed' ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.5)',
-                    fontFamily: 'Jost, sans-serif',
-                    fontWeight: time === 'Closed' ? 400 : 300,
-                    letterSpacing: time === 'Closed' ? '0.12em' : '0.04em',
-                    textTransform: time === 'Closed' ? 'uppercase' : 'none',
-                    fontSize: time === 'Closed' ? 10 : 13,
-                  }}>{time}</span>
-                </li>
-              ))}
-            </ul>
+          {/* ── Hours ─────────────────────────────────── */}
+          <div className="footer-hours">
+            <div style={{ marginBottom: 28 }}>
+              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 10, fontFamily: 'Jost, sans-serif', fontWeight: 600 }}>Hours</h4>
+              <div style={{ width: 20, height: 1, background: 'linear-gradient(90deg,rgba(201,168,76,0.5),transparent)' }} />
+            </div>
 
-            {/* Book CTA */}
-            <Link to="/appointments"
-              className="footer-cta"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                marginTop: 24, padding: '10px 20px',
-                borderRadius: 9999,
-                background: 'rgba(201,168,76,0.08)',
-                border: '1px solid rgba(201,168,76,0.15)',
-                fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase',
-                color: '#C9A84C', textDecoration: 'none',
-                fontFamily: 'Jost, sans-serif', fontWeight: 400,
-                transition: 'all 0.35s ease',
-              }}>
-              Book Now
-              <ArrowUpRight size={12} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.015)', marginBottom: 20, maxWidth: 220, width: '100%' }}>
+              {HOURS.map(({ day, time, open }, i) => (
+                <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 16px', borderBottom: i < HOURS.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: open ? 'rgba(52,211,153,0.6)' : 'rgba(239,68,68,0.4)', flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.32)', fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>{day}</span>
+                  </div>
+                  <span style={{ fontSize: open ? 12 : 10, color: open ? 'rgba(255,255,255,0.45)' : 'rgba(239,68,68,0.45)', fontFamily: 'Jost, sans-serif', fontWeight: open ? 300 : 500, letterSpacing: open ? '0.02em' : '0.12em', textTransform: open ? 'none' : 'uppercase' }}>{time}</span>
+                </div>
+              ))}
+            </div>
+
+            <Link to="/appointments" className="footer-cta"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 18px', borderRadius: 9999, background: 'linear-gradient(135deg,rgba(201,168,76,0.1),rgba(196,149,106,0.06))', border: '1px solid rgba(201,168,76,0.18)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9A84C', textDecoration: 'none', fontFamily: 'Jost, sans-serif', fontWeight: 500, transition: 'all 0.3s ease' }}>
+              Book Now <ArrowUpRight size={11} />
             </Link>
           </div>
+
         </div>
 
         {/* ── Bottom bar ──────────────────────────────── */}
-        <div style={{
-          marginTop: 64, paddingTop: 24, paddingBottom: 32,
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          display: 'flex', flexWrap: 'wrap', alignItems: 'center',
-          justifyContent: 'space-between', gap: 16,
-        }}>
-          <p style={{
-            fontSize: 11, color: 'rgba(255,255,255,0.15)',
-            letterSpacing: '0.06em', fontFamily: 'Jost, sans-serif', fontWeight: 300,
-          }}>
+        <div className="footer-bottom" style={{ marginTop: 64, paddingTop: 22, paddingBottom: 32, borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.13)', letterSpacing: '0.06em', fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>
             © {year} HairGo. All rights reserved.
           </p>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-            {['Privacy', 'Terms', 'Cookies'].map((item) => (
-              <a key={item} href="#"
-                className="footer-legal"
-                style={{
-                  fontSize: 11, color: 'rgba(255,255,255,0.15)',
-                  textDecoration: 'none', letterSpacing: '0.06em',
-                  fontFamily: 'Jost, sans-serif', fontWeight: 300,
-                  transition: 'color 0.3s ease',
-                }}>
-                {item}
-              </a>
+          <div className="footer-bottom-links" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {['Privacy', 'Terms', 'Cookies'].map((item, i) => (
+              <>
+                {i > 0 && <span key={`sep-${item}`} style={{ width: 1, height: 10, background: 'rgba(255,255,255,0.08)', display: 'inline-block' }} />}
+                <a key={item} href="#" className="footer-legal"
+                  style={{ fontSize: 11, color: 'rgba(255,255,255,0.13)', textDecoration: 'none', letterSpacing: '0.06em', fontFamily: 'Jost, sans-serif', fontWeight: 300, transition: 'color 0.3s ease', padding: '0 10px' }}>
+                  {item}
+                </a>
+              </>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── Hover styles ──────────────────────────────── */}
       <style>{`
-        .footer-grid {
-          grid-template-columns: 1.4fr 0.8fr 1fr 1fr;
-        }
+        .footer-grid { grid-template-columns: 1.4fr 0.7fr 1.1fr 1fr; align-items: start; }
+        .footer-contact { padding-left: 0; display: flex; flex-direction: column; align-items: center; }
+        .footer-navigate { display: flex; flex-direction: column; align-items: center; }
+        .footer-hours { display: flex; flex-direction: column; align-items: center; }
+
         @media (max-width: 1023px) {
+          .footer-grid { grid-template-columns: 1fr 1fr; gap: 44px !important; align-items: start; }
+        }
+
+        @media (max-width: 639px) {
+          .footer-main { padding: 44px 20px 0 !important; }
           .footer-grid {
             grid-template-columns: 1fr 1fr;
-            gap: 40px !important;
+            grid-template-areas:
+              "brand   brand"
+              "nav     contact"
+              "hours   hours";
+            gap: 32px !important;
+            align-items: start;
           }
+          .footer-brand    { grid-area: brand; }
+          .footer-navigate { grid-area: nav; }
+          .footer-contact  { grid-area: contact; }
+          .footer-hours    { grid-area: hours; }
+
+          .footer-brand p  { display: none; }
+          .footer-brand > a { margin-bottom: 14px !important; }
+
+          .footer-navigate h4,
+          .footer-contact h4,
+          .footer-hours h4  { margin-bottom: 10px !important; }
+          .footer-navigate > div:first-child,
+          .footer-contact  > div:first-child,
+          .footer-hours    > div:first-child { margin-bottom: 18px !important; }
+
+          .footer-navigate ul { gap: 11px !important; }
+          .footer-navigate a  { font-size: 12px !important; }
+
+          .footer-contact ul { gap: 14px !important; }
+          .footer-contact li > div { width: 28px !important; height: 28px !important; }
+          .footer-contact li span  { font-size: 12px !important; }
+
+          .footer-hours > div:last-of-type { display: none; }
+          .footer-cta { display: none !important; }
+
+          .footer-bottom { margin-top: 36px !important; padding-top: 18px !important; padding-bottom: 28px !important; flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+          .footer-bottom p, .footer-legal { font-size: 10px !important; }
         }
-        @media (max-width: 639px) {
-          .footer-grid {
-            grid-template-columns: 1fr;
-            gap: 36px !important;
-          }
-        }
-        .footer-social-icon:hover {
+
+        .footer-social:hover {
           background: rgba(201,168,76,0.1) !important;
-          border-color: rgba(201,168,76,0.25) !important;
+          border-color: rgba(201,168,76,0.28) !important;
           color: #C9A84C !important;
           transform: translateY(-2px);
+          box-shadow: 0 4px 16px rgba(201,168,76,0.12);
         }
         .footer-link:hover {
-          color: rgba(255,255,255,0.7) !important;
+          color: rgba(255,255,255,0.75) !important;
+          padding-left: 4px;
+        }
+        .footer-link:hover .footer-link-arrow {
+          opacity: 1 !important;
+          margin-right: 4px !important;
         }
         .footer-cta:hover {
-          background: rgba(201,168,76,0.14) !important;
-          border-color: rgba(201,168,76,0.3) !important;
+          background: linear-gradient(135deg,rgba(201,168,76,0.18),rgba(196,149,106,0.12)) !important;
+          border-color: rgba(201,168,76,0.35) !important;
+          box-shadow: 0 6px 24px rgba(201,168,76,0.15);
           transform: translateY(-1px);
-          box-shadow: 0 4px 20px rgba(201,168,76,0.12);
         }
-        .footer-legal:hover {
-          color: rgba(255,255,255,0.45) !important;
-        }
+        .footer-legal:hover { color: rgba(255,255,255,0.42) !important; }
       `}</style>
     </footer>
   )
