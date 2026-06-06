@@ -212,7 +212,7 @@ export default function Gallery() {
         {loading && (
           <div className="gallery-grid">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="shimmer" style={{ aspectRatio:'4/3', borderRadius:20 }} />
+              <div key={i} className="shimmer" style={{ aspectRatio:'4/5', borderRadius:4 }} />
             ))}
           </div>
         )}
@@ -230,7 +230,7 @@ export default function Gallery() {
                 onClick={() => setLightbox(item)}
                 className="gallery-item"
                 style={{
-                  aspectRatio:'4/3', borderRadius:20, overflow:'hidden',
+                  aspectRatio:'4/5', borderRadius:4, overflow:'hidden',
                   position:'relative', cursor:'pointer',
                   border:'1px solid rgba(255,255,255,0.05)',
                 }}

@@ -230,9 +230,9 @@ export default function Home() {
                 whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(201,168,76,0.1)', borderColor:'rgba(201,168,76,0.2)' }}
               >
                 {/* Photo */}
-                <div style={{ height:200, overflow:'hidden', position:'relative' }}>
+                <div style={{ aspectRatio:'4/5', overflow:'hidden', position:'relative' }}>
                   <img src={svc.image_url} alt={svc.name} className="service-img" loading="lazy" decoding="async"
-                    style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.65s ease', willChange:'transform', backfaceVisibility:'hidden' }} />
+                    style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease', willChange:'transform', backfaceVisibility:'hidden' }} />
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.75))' }} />
                 </div>
 
@@ -281,7 +281,7 @@ export default function Home() {
                 initial="hidden" whileInView="visible" viewport={{ once:true, margin:'-30px' }}
                 custom={i} variants={cardIn}
                 className="gallery-item"
-                style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', position:'relative', cursor:'pointer' }}
+                style={{ aspectRatio:'4/5', borderRadius:4, overflow:'hidden', position:'relative', cursor:'pointer' }}
                 whileHover={{ scale:1.02 }}
               >
                 <img src={item.image_url} alt={`Gallery ${i + 1}`} className="gallery-img" loading="lazy" decoding="async"
