@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, Eye, EyeOff, ShieldAlert } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
@@ -143,12 +144,15 @@ export default function StudioProducts() {
   const lowStock    = products.filter(p => (p.stock ?? 0) > 0 && (p.stock ?? 0) < 5)
   const maxStock    = Math.max(...products.map(p => p.stock ?? 0), 20)
 
+  const [page, setPage] = useState(0)
   const filtered = products.filter(p => {
     const catOk    = catFilter === 'All' || p.category === catFilter
     const level    = stockLevel(p.stock ?? 0).key
     const statusOk = statusFilter === 'all' || level === statusFilter
     return catOk && statusOk
   })
+  const paged = filtered.slice(page * 6, (page + 1) * 6)
+  useEffect(() => setPage(0), [catFilter, statusFilter])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
@@ -245,8 +249,9 @@ export default function StudioProducts() {
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>{products.length === 0 ? 'No products yet' : 'No products match the filter'}</p>
           </div>
         ) : (
+          <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {filtered.map(p => {
+            {paged.map(p => {
               const stock = p.stock ?? 0
               const level = stockLevel(stock)
               const barW  = Math.min(stock / maxStock, 1)
@@ -347,6 +352,8 @@ export default function StudioProducts() {
               )
             })}
           </div>
+          <Pager page={page} total={filtered.length} onChange={setPage} />
+          </>
         )}
       </div>
 

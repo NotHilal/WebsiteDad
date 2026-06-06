@@ -36,9 +36,13 @@ const adminNavItems = [
 ]
 
 const workerNavItems = [
-  { to: '/studio/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/studio/schedule',  icon: Calendar,        label: 'Schedule' },
-  { to: '/studio/timesheets', icon: Clock,          label: 'Timesheets' },
+  { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
+  { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
+  { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
+  { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
+  { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
+  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
 ]
 
 export default function StudioLayout() {
@@ -180,8 +184,8 @@ export default function StudioLayout() {
           </div>
         </header>
 
-        <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '1.75rem 2rem' }}>
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
+        <main className="studio-main" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '1.75rem 2rem' }}>
+          <div className="studio-outlet" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
             <Outlet />
           </div>
         </main>
@@ -193,6 +197,10 @@ export default function StudioLayout() {
         .s-signout:hover { color: ${C.danger} !important; border-color: rgba(248,113,113,0.28) !important; background: rgba(248,113,113,0.06) !important; }
         .s-menu-btn { display: flex !important; }
         @media (min-width: 1024px) { .s-menu-btn { display: none !important; } }
+        @media (max-width: 1023px) {
+          .studio-main { padding: 0.875rem !important; }
+          .studio-outlet { overflow-y: auto !important; }
+        }
       `}</style>
     </div>
   )

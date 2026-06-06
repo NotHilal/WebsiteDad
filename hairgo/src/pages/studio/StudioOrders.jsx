@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Search, Package, Check, X, Trash2, AlertTriangle } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Search, Package, Check, X, Trash2, AlertTriangle, ChevronRight, User } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -12,20 +13,21 @@ const C = {
 }
 
 const STATUS_STYLE = {
-  active:    { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',   border: 'rgba(201,168,76,0.22)'   },
-  retrieved: { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',   border: 'rgba(201,168,76,0.22)'   },
-  expired:   { color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)' },
-  cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)',  border: 'rgba(248,113,113,0.22)'  },
+  active:    { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',  border: 'rgba(201,168,76,0.22)',  label: 'Awaiting Pickup' },
+  retrieved: { color: '#34d399', bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.22)',  label: 'Retrieved'       },
+  expired:   { color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', label: 'Expired' },
+  cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)', label: 'Cancelled'      },
 }
 
 const STATUS_TABS = ['All', 'Active', 'Retrieved', 'Expired', 'Cancelled']
 
 export default function StudioOrders() {
-  const [orders,      setOrders]      = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [search,      setSearch]      = useState('')
-  const [tab,         setTab]         = useState('All')
-  const [updating,    setUpdating]    = useState(null)
+  const [orders,       setOrders]       = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [search,       setSearch]       = useState('')
+  const [tab,          setTab]          = useState('All')
+  const [updating,     setUpdating]     = useState(null)
+  const [details,      setDetails]      = useState(null)   // order shown in details modal
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deletePass,   setDeletePass]   = useState('')
   const [deleteError,  setDeleteError]  = useState(false)
@@ -44,28 +46,30 @@ export default function StudioOrders() {
     setLoading(false)
   }
 
-  async function markRetrieved(id) {
-    setUpdating(id)
-    const { error } = await supabase.from('preorders').update({ status: 'retrieved' }).eq('id', id)
+  async function markRetrieved(order) {
+    setUpdating(order.id)
+    const { error } = await supabase.from('preorders').update({ status: 'retrieved' }).eq('id', order.id)
     if (error) { toast.error('Update failed'); setUpdating(null); return }
     toast.success('Marked as retrieved')
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'retrieved' } : o))
+    const updated = { ...order, status: 'retrieved' }
+    setOrders(prev => prev.map(o => o.id === order.id ? updated : o))
+    setDetails(updated)
     setUpdating(null)
   }
 
-  async function cancelOrder(id) {
+  async function cancelOrder(order) {
     if (!confirm('Cancel this order? Refund the client manually via Stripe.')) return
-    setUpdating(id)
-    const order = orders.find(o => o.id === id)
-    const { error } = await supabase.from('preorders').update({ status: 'cancelled' }).eq('id', id)
+    setUpdating(order.id)
+    const { error } = await supabase.from('preorders').update({ status: 'cancelled' }).eq('id', order.id)
     if (error) { toast.error('Update failed'); setUpdating(null); return }
-    // restore stock
-    if (order?.product_id && order?.quantity) {
+    if (order.product_id && order.quantity) {
       const { data: prod } = await supabase.from('products').select('stock').eq('id', order.product_id).single()
       if (prod) await supabase.from('products').update({ stock: (prod.stock || 0) + order.quantity }).eq('id', order.product_id)
     }
     toast.success('Order cancelled')
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'cancelled' } : o))
+    const updated = { ...order, status: 'cancelled' }
+    setOrders(prev => prev.map(o => o.id === order.id ? updated : o))
+    setDetails(updated)
     setUpdating(null)
   }
 
@@ -78,6 +82,7 @@ export default function StudioOrders() {
     if (error) { toast.error('Delete failed'); return }
     toast.success('Order deleted')
     setOrders(prev => prev.filter(o => o.id !== deleteTarget.id))
+    setDetails(null)
     closeDelete()
   }
 
@@ -102,33 +107,27 @@ export default function StudioOrders() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .o-search:focus { border-color: ${C.goldBorder} !important; }
+        .o-row:hover { background: rgba(255,255,255,0.018) !important; }
+        .o-row:hover .o-details-btn { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
+        .o-retrieve:hover:not(:disabled) { background: rgba(52,211,153,0.2) !important; border-color: rgba(52,211,153,0.5) !important; }
+        .o-cancel:hover:not(:disabled) { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
+        .o-delete:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
+      `}</style>
 
       {/* ── Header ── */}
-      <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem' }}>
+      <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
         <div>
-          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>
-            Orders
-          </h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
-            All product orders
-          </p>
+          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Orders</h1>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>All product pre-orders</p>
         </div>
-
-        {/* Search */}
         <div style={{ position: 'relative' }}>
           <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name, phone, product, or order ID…" autoComplete="off"
-            style={{
-              background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`,
-              borderRadius: 9, padding: '0.45rem 0.875rem 0.45rem 2rem',
-              fontSize: '0.8rem', color: C.white, outline: 'none',
-              fontFamily: 'Jost,sans-serif', width: 320, transition: 'border-color .2s',
-            }}
-            className="o-search"
-          />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Search by name, phone, product…" autoComplete="off" className="o-search"
+            style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.875rem 0.45rem 2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', width: 280, maxWidth: '100%', transition: 'border-color .2s' }} />
         </div>
       </div>
 
@@ -136,224 +135,267 @@ export default function StudioOrders() {
       <div style={{ display: 'flex', gap: 4, flexShrink: 0, flexWrap: 'wrap' }}>
         {STATUS_TABS.map(t => (
           <button key={t} onClick={() => setTab(t)}
-            style={{
-              padding: '0.35rem 0.875rem', borderRadius: 20, fontSize: 11,
-              letterSpacing: '0.13em', textTransform: 'uppercase',
-              fontFamily: 'Jost,sans-serif', fontWeight: tab === t ? 600 : 400,
-              cursor: 'pointer', transition: 'all .18s', border: 'none',
-              background: tab === t ? C.goldBg : 'rgba(255,255,255,0.04)',
-              color: tab === t ? C.gold : C.muted,
-              outline: tab === t ? `1px solid ${C.goldBorder}` : '1px solid transparent',
-            }}>
-            {t}
-            <span style={{ marginLeft: 5, fontSize: 9, opacity: 0.7 }}>({counts[t] || 0})</span>
+            style={{ padding: '0.35rem 0.875rem', borderRadius: 20, fontSize: 11, letterSpacing: '0.13em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: tab === t ? 600 : 400, cursor: 'pointer', transition: 'all .18s', border: 'none', background: tab === t ? C.goldBg : 'rgba(255,255,255,0.04)', color: tab === t ? C.gold : C.muted, outline: tab === t ? `1px solid ${C.goldBorder}` : '1px solid transparent' }}>
+            {t}<span style={{ marginLeft: 5, fontSize: 9, opacity: 0.7 }}>({counts[t] || 0})</span>
           </button>
         ))}
       </div>
 
-      {/* ── Table ── */}
+      {/* ── List ── */}
       <div style={{ flex: 1, overflowY: 'auto', background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, minHeight: 0 }}>
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '0.75rem' }}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} style={{ height: 60, borderRadius: 8, background: 'rgba(255,255,255,0.04)' }} className="shimmer" />
+              <div key={i} style={{ height: 58, borderRadius: 8, background: 'rgba(255,255,255,0.04)' }} className="shimmer" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 220, gap: 10 }}>
-            <Package size={28} style={{ color: 'rgba(255,255,255,0.07)' }} />
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Package size={22} color="rgba(255,255,255,0.12)" strokeWidth={1} />
+            </div>
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>
               {search ? 'No orders match your search' : 'No orders yet'}
             </p>
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: `1px solid ${C.border}` }}>
-                {['Order ID', 'Product', 'Client', 'Qty', 'Total', 'Ordered', 'Status', ''].map(h => (
-                  <th key={h} style={{ padding: '0.625rem 1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((order, i) => {
-                const s = STATUS_STYLE[order.status] || STATUS_STYLE.active
-                const total = (parseFloat(order.products?.price) || 0) * (order.quantity || 1)
-                const isUpdating = updating === order.id
-                const isActive = order.status === 'active'
+          <>
+            {filtered.map((order, i) => {
+              const s = STATUS_STYLE[order.status] || STATUS_STYLE.active
+              const total = (parseFloat(order.products?.price) || 0) * (order.quantity || 1)
 
-                return (
-                  <tr key={order.id} style={{ borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none' }} className="o-row">
+              return (
+                <div key={order.id} className="o-row"
+                  style={{ padding: '0.875rem 1.25rem', borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none', transition: 'background .15s' }}>
 
-                    {/* Order ID */}
-                    <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.72rem', color: C.muted, whiteSpace: 'nowrap' }}>
+                  {/* Row 1: client + status + info btn */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <p style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>
+                      {order.profiles?.full_name || '—'}
+                    </p>
+                    <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                      {s.label}
+                    </span>
+                    <button onClick={() => setDetails(order)} className="o-details-btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
+                      Info <ChevronRight size={9} />
+                    </button>
+                  </div>
+
+                  {/* Row 2: metadata chips */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.04em' }}>
                       #{order.id.slice(0, 8).toUpperCase()}
-                    </td>
-
-                    {/* Product */}
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: 8, background: '#181818', border: `1px solid ${C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          {order.products?.image_url
-                            ? <img src={order.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            : <Package size={13} style={{ color: C.muted }} />
-                          }
-                        </div>
-                        <div>
-                          <p style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{order.products?.name || '—'}</p>
-                          {order.products?.category && (
-                            <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', textTransform: 'capitalize' }}>{order.products.category}</p>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Client */}
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <p style={{ color: C.dim, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{order.profiles?.full_name || '—'}</p>
-                      {order.profiles?.phone && (
-                        <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif' }}>{order.profiles.phone}</p>
-                      )}
-                    </td>
-
-                    {/* Qty */}
-                    <td style={{ padding: '0.75rem 1rem', color: C.dim, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
-                      ×{order.quantity || 1}
-                    </td>
-
-                    {/* Total */}
-                    <td style={{ padding: '0.75rem 1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.82rem', color: order.status === 'retrieved' ? C.gold : C.dim, fontWeight: order.status === 'retrieved' ? 600 : 400 }}>
+                    </span>
+                    <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
+                    <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: order.status === 'retrieved' ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: order.status === 'retrieved' ? 600 : 400 }}>
                       €{total.toFixed(2)}
-                    </td>
-
-                    {/* Ordered */}
-                    <td style={{ padding: '0.75rem 1rem', color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>
+                    </span>
+                    <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>
                       {format(new Date(order.created_at), 'MMM d, HH:mm')}
-                    </td>
-
-                    {/* Status */}
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'capitalize', whiteSpace: 'nowrap' }}>
-                        {order.status === 'active' ? 'Awaiting Pickup' : order.status}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {isActive && (
-                          <>
-                            <button
-                              onClick={() => markRetrieved(order.id)}
-                              disabled={isUpdating}
-                              title="Mark as picked up"
-                              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: isUpdating ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: isUpdating ? 0.5 : 1, whiteSpace: 'nowrap' }}
-                              className="o-retrieve-btn">
-                              {isUpdating
-                                ? <div style={{ width: 10, height: 10, border: '1.5px solid rgba(52,211,153,0.3)', borderTopColor: '#34d399', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-                                : <Check size={11} />
-                              }
-                              Picked Up
-                            </button>
-                            <button
-                              onClick={() => cancelOrder(order.id)}
-                              disabled={isUpdating}
-                              title="Cancel order"
-                              style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.18)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isUpdating ? 'not-allowed' : 'pointer', transition: 'all .18s', flexShrink: 0, opacity: isUpdating ? 0.5 : 1 }}
-                              className="o-cancel-btn">
-                              <X size={12} />
-                            </button>
-                          </>
-                        )}
-                        <button
-                          onClick={() => openDelete(order)}
-                          title="Delete order"
-                          style={{ width: 28, height: 28, borderRadius: 7, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.18)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}
-                          className="o-delete-btn">
-                          <Trash2 size={11} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+                    </span>
+                    {order.profiles?.phone && <>
+                      <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif' }}>{order.profiles.phone}</span>
+                    </>}
+                  </div>
+                </div>
+              )
+            })}
+          </>
         )}
       </div>
 
-      {/* ── Delete modal ── */}
-      {deleteTarget && (
-        <div onMouseDown={e => { if (e.target === e.currentTarget) closeDelete() }}
-          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
-          <div onClick={e => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: 400, background: '#12121c', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
-            <div style={{ height: 4, background: 'linear-gradient(90deg,#f87171,#ef4444)' }} />
-            <div style={{ padding: '1.75rem' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <AlertTriangle size={18} color="#f87171" />
+      {/* ── Details Modal ── */}
+      <AnimatePresence>
+        {details && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+            onMouseDown={e => { if (e.target === e.currentTarget) setDetails(null) }}>
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 8 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: 460, background: '#12121c', border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.75)' }}>
+
+              {/* Gold top bar */}
+              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#C4956A,rgba(201,168,76,0.15))` }} />
+
+              <div style={{ padding: '1.5rem' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                  <div>
+                    <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, fontWeight: 400, lineHeight: 1.1, marginBottom: 4 }}>Order Details</h2>
+                    <span style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: C.muted, letterSpacing: '0.06em' }}>
+                      #{details.id.slice(0, 8).toUpperCase()}
+                    </span>
+                  </div>
+                  <button onClick={() => setDetails(null)}
+                    style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                    <X size={13} />
+                  </button>
                 </div>
-                <div>
-                  <h3 style={{ color: C.white, fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete order?</h3>
-                  <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>This is permanent and cannot be undone.</p>
+
+                {/* Product card */}
+                <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 14, marginBottom: '1rem' }}>
+                  <div style={{ width: 72, height: 72, borderRadius: 12, background: '#181828', border: `1px solid ${C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {details.products?.image_url
+                      ? <img src={details.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <Package size={22} color="rgba(255,255,255,0.15)" strokeWidth={1} />
+                    }
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: C.white, fontSize: '0.92rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      {details.products?.name || '—'}
+                    </p>
+                    {details.products?.category && (
+                      <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', textTransform: 'capitalize', marginBottom: 8 }}>
+                        {details.products.category}
+                      </p>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>×{details.quantity || 1}</span>
+                      <span style={{ width: 1, height: 12, background: C.border }} />
+                      <span style={{ fontSize: '0.88rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                        €{((parseFloat(details.products?.price) || 0) * (details.quantity || 1)).toFixed(2)}
+                      </span>
+                      {details.products?.price && (
+                        <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>@ €{parseFloat(details.products.price).toFixed(2)} each</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Client + date row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem', marginBottom: '1rem' }}>
+                  <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Client</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(201,168,76,0.1)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 10, color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                          {(details.profiles?.full_name || '?')[0].toUpperCase()}
+                        </span>
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                          {details.profiles?.full_name || '—'}
+                        </p>
+                        {details.profiles?.phone && (
+                          <p style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{details.profiles.phone}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Ordered</p>
+                    <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif' }}>
+                      {format(new Date(details.created_at), 'MMM d, yyyy')}
+                    </p>
+                    <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+                      {format(new Date(details.created_at), 'HH:mm')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Status */}
+                {(() => {
+                  const s = STATUS_STYLE[details.status] || STATUS_STYLE.active
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.75rem 1rem', background: s.bg, border: `1px solid ${s.border}`, borderRadius: 10, marginBottom: '1.25rem' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, boxShadow: `0 0 8px ${s.color}88`, flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.8rem', color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, flex: 1 }}>{s.label}</span>
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.04em' }}>
+                        #{details.id.slice(0, 8).toUpperCase()}
+                      </span>
+                    </div>
+                  )
+                })()}
+
+                {/* Actions */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {details.status === 'active' && (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button onClick={() => markRetrieved(details)} disabled={updating === details.id} className="o-retrieve"
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '0.65rem', borderRadius: 10, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.28)', color: '#34d399', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1 }}>
+                        {updating === details.id
+                          ? <div style={{ width: 12, height: 12, border: '2px solid rgba(52,211,153,0.3)', borderTopColor: '#34d399', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                          : <Check size={14} />}
+                        Mark as Picked Up
+                      </button>
+                      <button onClick={() => cancelOrder(details)} disabled={updating === details.id} className="o-cancel"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.65rem 1rem', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                        <X size={13} /> Cancel
+                      </button>
+                    </div>
+                  )}
+                  <button onClick={() => { openDelete(details) }} className="o-delete"
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.6rem', borderRadius: 10, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.6)', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.06em' }}>
+                    <Trash2 size={12} /> Delete Order
+                  </button>
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.25rem' }}>
-                <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3 }}>
-                  {deleteTarget.products?.name || '—'}
-                </p>
-                <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
-                  {deleteTarget.profiles?.full_name} · ×{deleteTarget.quantity} · €{((parseFloat(deleteTarget.products?.price) || 0) * (deleteTarget.quantity || 1)).toFixed(2)}
-                </p>
+      {/* ── Delete confirmation modal ── */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 210, background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+            onMouseDown={e => { if (e.target === e.currentTarget) closeDelete() }}>
+            <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: 400, background: '#12121c', border: '1px solid rgba(248,113,113,0.22)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}>
+              <div style={{ height: 3, background: 'linear-gradient(90deg,#f87171,rgba(248,113,113,0.3))' }} />
+              <div style={{ padding: '1.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <AlertTriangle size={18} color="#f87171" />
+                  </div>
+                  <div>
+                    <h3 style={{ color: C.white, fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete order?</h3>
+                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>This is permanent and cannot be undone.</p>
+                  </div>
+                </div>
+                <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.25rem' }}>
+                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3 }}>{deleteTarget.products?.name || '—'}</p>
+                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
+                    {deleteTarget.profiles?.full_name} · ×{deleteTarget.quantity} · €{((parseFloat(deleteTarget.products?.price) || 0) * (deleteTarget.quantity || 1)).toFixed(2)}
+                  </p>
+                </div>
+                <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 8 }}>
+                  Enter password to confirm
+                </label>
+                <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
+                  <input type={showPass ? 'text' : 'password'} value={deletePass}
+                    onChange={e => { setDeletePass(e.target.value); setDeleteError(false) }}
+                    onKeyDown={e => e.key === 'Enter' && confirmDelete()}
+                    placeholder="••••••••" autoFocus
+                    style={{ width: '100%', boxSizing: 'border-box', background: deleteError ? 'rgba(248,113,113,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${deleteError ? 'rgba(248,113,113,0.45)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 10, padding: '0.7rem 2.5rem 0.7rem 0.9rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', transition: 'border-color .2s' }} />
+                  <button onClick={() => setShowPass(p => !p)}
+                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', fontSize: 10, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em' }}>
+                    {showPass ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {deleteError && <p style={{ color: '#f87171', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', marginBottom: '1rem' }}>Incorrect password</p>}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={closeDelete}
+                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: C.muted, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button onClick={confirmDelete}
+                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer' }}>
+                    Delete
+                  </button>
+                </div>
               </div>
-
-              <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 8 }}>
-                Enter password to confirm
-              </label>
-              <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-                <input
-                  type={showPass ? 'text' : 'password'}
-                  value={deletePass}
-                  onChange={e => { setDeletePass(e.target.value); setDeleteError(false) }}
-                  onKeyDown={e => e.key === 'Enter' && confirmDelete()}
-                  placeholder="••••••••"
-                  autoFocus
-                  style={{ width: '100%', boxSizing: 'border-box', background: deleteError ? 'rgba(248,113,113,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${deleteError ? 'rgba(248,113,113,0.45)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 10, padding: '0.7rem 2.5rem 0.7rem 0.9rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', transition: 'border-color .2s' }}
-                />
-                <button onClick={() => setShowPass(p => !p)}
-                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', fontSize: 10, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em' }}>
-                  {showPass ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              {deleteError && <p style={{ color: '#f87171', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', marginBottom: '1rem' }}>Incorrect password</p>}
-
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={closeDelete}
-                  style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: C.muted, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
-                  Cancel
-                </button>
-                <button onClick={confirmDelete}
-                  style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer' }}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .o-search:focus { border-color: ${C.goldBorder} !important; }
-        .o-row:hover { background: rgba(255,255,255,0.015); }
-        .o-retrieve-btn:hover { background: rgba(52,211,153,0.18) !important; border-color: rgba(52,211,153,0.45) !important; }
-        .o-cancel-btn:hover   { background: rgba(248,113,113,0.12) !important; border-color: rgba(248,113,113,0.35) !important; }
-        .o-delete-btn:hover   { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
-      `}</style>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

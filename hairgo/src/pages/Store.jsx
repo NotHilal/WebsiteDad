@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
 import { useNavigate } from 'react-router-dom'
+import { getOrFetch } from '../lib/cache'
 
 
 /* Per-card quantity state lives here so each card tracks its own qty */
@@ -44,7 +45,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail }) {
         style={{ position: 'relative', aspectRatio: '1/1', overflow: 'hidden', background: '#0d0d12', cursor: 'pointer', flexShrink: 0 }}
       >
         {p.image_url
-          ? <img src={p.image_url} alt={p.name}
+          ? <img src={p.image_url} alt={p.name} loading="lazy" decoding="async"
               style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.55s ease', display: 'block' }}
               onMouseEnter={e => { if (!outOfStock) e.currentTarget.style.transform = 'scale(1.05)' }}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
@@ -187,8 +188,11 @@ export default function Store() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const { data } = await supabase.from('products').select('*').eq('available', true).order('created_at', { ascending: false })
-    setProducts(data || [])
+    const data = await getOrFetch('products_available', async () => {
+      const { data } = await supabase.from('products').select('*').eq('available', true).order('created_at', { ascending: false })
+      return data || []
+    }, 2 * 60_000)
+    setProducts(data)
     setLoading(false)
   }
 

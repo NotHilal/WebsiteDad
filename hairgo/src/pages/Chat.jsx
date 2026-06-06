@@ -33,7 +33,9 @@ export default function Chat() {
   const [showNew,  setShowNew]  = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newMsg,   setNewMsg]   = useState('')
-  const [creating, setCreating] = useState(false)
+  const [creating,    setCreating]    = useState(false)
+  const [workers,     setWorkers]     = useState([])
+  const [recipientId, setRecipientId] = useState(null)
   const bottomRef  = useRef(null)
   const selectedRef = useRef(null)
 
@@ -42,6 +44,8 @@ export default function Chat() {
   useEffect(() => {
     if (!user) return
     loadTickets()
+    supabase.from('profiles').select('id, full_name').eq('role', 'employee').order('full_name')
+      .then(({ data }) => setWorkers(data || []))
     const sub = supabase.channel(`client-tickets-${user.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_messages' }, payload => {
         const msg = payload.new
@@ -66,7 +70,7 @@ export default function Chat() {
 
   async function loadTickets() {
     const { data: tkts } = await supabase
-      .from('tickets').select('*').eq('user_id', user.id)
+      .from('tickets').select('*, recipient:profiles!recipient_id(full_name)').eq('user_id', user.id)
       .order('updated_at', { ascending: false })
     if (!tkts?.length) { setTickets([]); setLoading(false); return }
 
@@ -101,7 +105,7 @@ export default function Chat() {
     setCreating(true)
     try {
       const { data: ticket, error } = await supabase
-        .from('tickets').insert({ user_id: user.id, title: newTitle.trim(), status: 'open' })
+        .from('tickets').insert({ user_id: user.id, title: newTitle.trim(), status: 'open', recipient_id: recipientId })
         .select().single()
       if (error) throw error
       if (newMsg.trim()) {
@@ -111,7 +115,7 @@ export default function Chat() {
         })
         await supabase.from('tickets').update({ updated_at: new Date().toISOString() }).eq('id', ticket.id)
       }
-      setShowNew(false); setNewTitle(''); setNewMsg('')
+      setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null)
       await loadTickets()
       setSelected(ticket)
       toast.success('Ticket created')
@@ -145,19 +149,26 @@ export default function Chat() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .tk-item:hover { background: rgba(255,255,255,0.025) !important; }
-        .msg-inp:focus { border-color: ${C.goldBorder} !important; outline: none; }
+        .msg-inp:focus { outline: none; }
         .msg-inp::placeholder { color: rgba(255,255,255,0.18); }
         .send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.35); }
         .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
         .new-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.07); outline: none; }
         .new-inp::placeholder { color: rgba(255,255,255,0.18); }
+        .chat-back { display: none; }
+        @media (max-width: 767px) {
+          .chat-layout { grid-template-columns: 1fr !important; }
+          .chat-has-thread .chat-list { display: none !important; }
+          .chat-layout:not(.chat-has-thread) .chat-thread { display: none !important; }
+          .chat-back { display: flex !important; }
+        }
       `}</style>
 
       {/* 2-panel */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1px', overflow: 'hidden', background: C.border }}>
+      <div className={`chat-layout${selected ? ' chat-has-thread' : ''}`} style={{ flex: 1, display: 'grid', gridTemplateColumns: '280px 1fr', gap: '1px', overflow: 'hidden', background: C.border }}>
 
         {/* ── LEFT: ticket list ────────────────────────────── */}
-        <div style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="chat-list" style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
@@ -193,29 +204,38 @@ export default function Chat() {
               </div>
             ) : tickets.map(tk => {
               const isActive = selected?.id === tk.id
+              const isOpen = tk.status === 'open'
               return (
                 <button key={tk.id} className="tk-item" onClick={() => setSelected(tk)}
-                  style={{ width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10, background: isActive ? C.goldBg : 'transparent', borderTopWidth: 0, borderRightWidth: 0, borderBottomWidth: 0, borderLeftWidth: 2, borderLeftStyle: 'solid', borderLeftColor: isActive ? C.gold : 'transparent', cursor: 'pointer', transition: 'background .15s' }}>
-                  {/* Status dot */}
-                  <div style={{ marginTop: 4, width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: tk.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.18)' }} />
+                  style={{ width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10, background: isActive ? 'rgba(201,168,76,0.06)' : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background .15s' }}>
+                  {/* Status indicator */}
+                  <div style={{ marginTop: 5, width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: isOpen ? '#34d399' : 'rgba(255,255,255,0.15)', boxShadow: isOpen ? '0 0 6px rgba(52,211,153,0.4)' : 'none' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 500 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
+                      <p style={{ fontSize: '0.8rem', color: isActive ? C.white : 'rgba(255,255,255,0.8)', fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, marginLeft: 6 }}>
                         {tk.unread > 0 && (
-                          <span style={{ width: 16, height: 16, borderRadius: '50%', background: '#ef4444', color: '#fff', fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                          <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: '#fff', fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 3px' }}>
                             {tk.unread}
                           </span>
                         )}
-                        {tk.lastTime && <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>{timeFmt(tk.lastTime)}</span>}
+                        {tk.lastTime && <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
                       </div>
                     </div>
-                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {tk.lastMsg || 'No messages yet'}
                     </p>
-                    <span style={{ marginTop: 4, display: 'inline-block', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', color: tk.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.25)', fontWeight: 600 }}>
-                      {tk.status}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 5 }}>
+                      <span style={{ fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'rgba(255,255,255,0.2)', fontWeight: 600 }}>
+                        {tk.status}
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 20, background: tk.recipient ? 'rgba(52,211,153,0.07)' : 'rgba(201,168,76,0.07)', border: `1px solid ${tk.recipient ? 'rgba(52,211,153,0.2)' : 'rgba(201,168,76,0.15)'}` }}>
+                        <div style={{ width: 4, height: 4, borderRadius: '50%', background: tk.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
+                        <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', fontWeight: 600, color: tk.recipient ? 'rgba(52,211,153,0.8)' : C.goldDim, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+                          {tk.recipient?.full_name || 'Store'}
+                        </span>
+                      </span>
+                    </div>
                   </div>
                 </button>
               )
@@ -235,7 +255,7 @@ export default function Chat() {
         </div>
 
         {/* ── RIGHT: thread ────────────────────────────────── */}
-        <div style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="chat-thread" style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {!selected ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, textAlign: 'center', padding: '2rem' }}>
               <div style={{ width: 52, height: 52, borderRadius: 14, background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -252,17 +272,26 @@ export default function Chat() {
           ) : (
             <>
               {/* Thread header */}
-              <div style={{ padding: '0.75rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{selected.title}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-                      <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? '#34d399' : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{selected.status}</span>
-                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif' }}>·</span>
-                      <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Opened {format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
-                    </div>
-                  </div>
+              <div style={{ padding: '0.875rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <button className="chat-back" onClick={() => setSelected(null)}
+                    style={{ alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', flexShrink: 0, padding: 0 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                  </button>
+                  <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1, margin: 0 }}>{selected.title}</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: selected.recipient ? 'rgba(52,211,153,0.1)' : 'rgba(201,168,76,0.1)', border: `1px solid ${selected.recipient ? 'rgba(52,211,153,0.3)' : 'rgba(201,168,76,0.22)'}` }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
+                    <span style={{ fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: selected.recipient ? '#34d399' : C.gold, letterSpacing: '0.04em' }}>
+                      {selected.recipient?.full_name || 'HairGo Store'}
+                    </span>
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: selected.status === 'open' ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selected.status === 'open' ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.07)'}` }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.2)', boxShadow: selected.status === 'open' ? '0 0 5px rgba(52,211,153,0.4)' : 'none', flexShrink: 0 }} />
+                    <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? 'rgba(52,211,153,0.8)' : 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{selected.status}</span>
+                  </span>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
                 </div>
               </div>
 
@@ -275,25 +304,33 @@ export default function Chat() {
                 ) : messages.map((msg, i) => {
                   const isMe = !msg.is_from_admin
                   const showDate = i === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[i - 1].created_at).toDateString()
+                  const prevSame = i > 0 && !messages[i-1].is_from_admin === !msg.is_from_admin
                   return (
-                    <div key={msg.id}>
+                    <div key={msg.id} style={{ marginBottom: 2 }}>
                       {showDate && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.5rem 0' }}>
-                          <div style={{ flex: 1, height: 1, background: C.border }} />
-                          <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.75rem 0' }}>
+                          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
+                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                             {isToday(new Date(msg.created_at)) ? 'Today' : isYesterday(new Date(msg.created_at)) ? 'Yesterday' : format(new Date(msg.created_at), 'MMMM d')}
                           </span>
-                          <div style={{ flex: 1, height: 1, background: C.border }} />
+                          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
                         </div>
                       )}
-                      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
-                        style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 3, maxWidth: '70%' }}>
-                          {!isMe && <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase' }}>HairGo Team</span>}
-                          <div style={{ padding: '0.5rem 0.875rem', borderRadius: isMe ? '12px 12px 3px 12px' : '12px 12px 12px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontWeight: 500 } : { background: 'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(196,149,106,0.06))', border: '1px solid rgba(201,168,76,0.2)', color: 'rgba(255,255,255,0.82)' }) }}>
+                      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}
+                        style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start', marginTop: prevSame ? 2 : 8 }}>
+                        {!isMe && (
+                          <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(196,149,106,0.12))', border: '1px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ fontSize: 9, color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '-0.01em' }}>HG</span>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
+                          {!isMe && !prevSame && (
+                            <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>HairGo Team</span>
+                          )}
+                          <div style={{ padding: '0.6rem 1rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontWeight: 500, boxShadow: '0 4px 16px rgba(201,168,76,0.22)' } : { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(6px)' }) }}>
                             {msg.content}
                           </div>
-                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
+                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
                         </div>
                       </motion.div>
                     </div>
@@ -309,13 +346,15 @@ export default function Chat() {
                   <p style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>This ticket has been closed by the team.</p>
                 </div>
               ) : (
-                <div style={{ padding: '0.75rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card }}>
-                  <form onSubmit={send} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <input value={input} onChange={e => setInput(e.target.value)} placeholder="Reply to HairGo team…" className="msg-inp"
-                      style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.55rem 0.875rem', fontSize: '0.84rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s' }} />
+                <div style={{ padding: '0.875rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card }}>
+                  <form onSubmit={send} style={{ display: 'flex', gap: '0.625rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.375rem 0.375rem 0.375rem 0.875rem', transition: 'border-color .2s' }}
+                    onFocus={e => e.currentTarget.style.borderColor = C.goldBorder}
+                    onBlur={e => e.currentTarget.style.borderColor = C.border}>
+                    <input value={input} onChange={e => setInput(e.target.value)} placeholder="Reply to the team…" className="msg-inp"
+                      style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.84rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300 }} />
                     <button type="submit" disabled={!input.trim() || sending} className="send-btn"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.55rem 1rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
-                      {sending ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Send size={12} /> Send</>}
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.45rem 0.875rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},#C4956A)` : 'rgba(255,255,255,0.06)', color: input.trim() ? '#000' : 'rgba(255,255,255,0.25)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', flexShrink: 0, letterSpacing: '0.08em' }}>
+                      {sending ? <div style={{ width: 12, height: 12, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Send size={11} /> Send</>}
                     </button>
                   </form>
                 </div>
@@ -330,7 +369,7 @@ export default function Chat() {
         {showNew && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
-            onClick={() => setShowNew(false)}>
+            onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }}>
             <motion.div initial={{ opacity: 0, scale: 0.94, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               onClick={e => e.stopPropagation()}
@@ -342,12 +381,23 @@ export default function Chat() {
                     <h2 className="font-display" style={{ fontSize: '1.4rem', color: C.white, marginBottom: 2 }}>New Ticket</h2>
                     <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Our team will reply as soon as possible</p>
                   </div>
-                  <button onClick={() => setShowNew(false)} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                     <X size={13} />
                   </button>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>Send to</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {[{ id: null, full_name: 'Store' }, ...workers].map(w => (
+                        <button key={w.id ?? 'store'} type="button" onClick={() => setRecipientId(w.id)}
+                          style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', border: `1px solid ${recipientId === w.id ? C.goldBorder : C.border}`, background: recipientId === w.id ? C.goldBg : 'transparent', color: recipientId === w.id ? C.gold : C.muted }}>
+                          {w.full_name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <div>
                     <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>Subject *</label>
                     <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. Question about my appointment…" className="new-inp"
@@ -361,7 +411,7 @@ export default function Chat() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem' }}>
-                  <button onClick={() => setShowNew(false)} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
                   <button onClick={createTicket} disabled={creating || !newTitle.trim()}
                     style={{ flex: 2, padding: '0.6rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: creating || !newTitle.trim() ? 'not-allowed' : 'pointer', opacity: creating || !newTitle.trim() ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     {creating ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : 'Create Ticket'}

@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 import StripeCheckout from '../components/payment/StripeCheckout'
 import { Copy, CheckCheck } from 'lucide-react'
 
-const TABS = ['Cart', 'Appointments', 'Orders', 'Rewards']
+const TABS = ['Appointments', 'Cart', 'Orders', 'Rewards']
 
 const STATUS_MAP = {
   pending:   { label: 'Pending',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
@@ -60,7 +60,7 @@ export default function Profile() {
   const { cartItems, cartTotal, removeFromCart, commitQtyUpdate, expireItem, clearCart } = useCart()
   const navigate = useNavigate()
 
-  const [tab, setTab]             = useState('Cart')
+  const [tab, setTab]             = useState('Appointments')
   const [appointments, setAppts]  = useState([])
   const [orders, setOrders]       = useState([])
   const [coupons, setCoupons]     = useState([])

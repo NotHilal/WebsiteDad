@@ -237,7 +237,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile burger */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }} className="show-mobile">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gridColumn: 3 }} className="show-mobile">
             <button onClick={() => setMenuOpen(!menuOpen)} style={{ padding: 8, color: 'rgba(255,255,255,0.55)', background: 'none', border: 'none', cursor: 'pointer' }}>
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>

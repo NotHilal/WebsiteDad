@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link2, Scissors, User } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getOrFetch } from '../lib/cache'
 
 export default function Stylists() {
   const [team,    setTeam]    = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.from('stylists').select('*').order('display_order').then(({ data }) => {
-      setTeam(data || [])
-      setLoading(false)
-    })
+    getOrFetch('stylists_all', async () => {
+      const { data } = await supabase.from('stylists').select('*').order('display_order')
+      return data || []
+    }, 5 * 60_000).then(data => { setTeam(data); setLoading(false) })
   }, [])
 
   return (
@@ -122,7 +123,7 @@ export default function Stylists() {
                 {/* Photo */}
                 <div className="team-photo-wrap" style={{ aspectRatio: '4/5', marginBottom: '1.25rem' }}>
                   {s.photo_url
-                    ? <img src={s.photo_url} alt={s.name} className="team-photo" />
+                    ? <img src={s.photo_url} alt={s.name} className="team-photo" loading="lazy" decoding="async" />
                     : <div className="team-placeholder" style={{ aspectRatio: '4/5' }}>
                         <User size={48} color="rgba(255,255,255,0.06)" strokeWidth={1} />
                       </div>

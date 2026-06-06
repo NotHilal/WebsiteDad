@@ -86,7 +86,7 @@ export default function StudioDashboard() {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem', flexShrink: 0 }}>
+      <div className="dash-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem', flexShrink: 0 }}>
         {statCards.map(c => (
           <button key={c.label} onClick={() => navigate(c.link)} className="d-stat"
             style={{ ...card, padding: '1.1rem 1.25rem', textAlign: 'left', cursor: 'pointer', transition: 'all .2s ease' }}>
@@ -257,6 +257,7 @@ export default function StudioDashboard() {
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
         .d-stat:hover { border-color: ${C.goldBorder} !important; background: #1a1a24 !important; }
+        @media (max-width: 639px) { .dash-stats { grid-template-columns: repeat(2,1fr) !important; } }
       `}</style>
     </div>
   )

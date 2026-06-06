@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Pager from '../../lib/Pager'
 import { Plus, Trash2, Image, X, Save } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
@@ -24,6 +25,7 @@ export default function StudioGallery() {
   const [images,     setImages]     = useState([])
   const [stylists,   setStylists]   = useState([])
   const [loading,    setLoading]    = useState(true)
+  const [page,       setPage]       = useState(0)
   const [modal,      setModal]      = useState(false)
   const [form,       setForm]       = useState({ image_url: '', title: '', category: 'cut', stylist_id: '' })
   const [saving,     setSaving]     = useState(false)
@@ -127,8 +129,9 @@ export default function StudioGallery() {
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>No photos yet</p>
           </div>
         ) : (
+          <>
           <div className="gal-cols" style={{ gap: '0.75rem' }}>
-            {images.map(img => {
+            {images.slice(page * 6, (page + 1) * 6).map(img => {
               const catStyle = CAT_STYLE[img.category] || { bg: C.subtle, color: C.muted }
               return (
                 <div key={img.id} className="gal-item"
@@ -158,6 +161,8 @@ export default function StudioGallery() {
               )
             })}
           </div>
+          <Pager page={page} total={images.length} onChange={setPage} />
+          </>
         )}
       </div>
 

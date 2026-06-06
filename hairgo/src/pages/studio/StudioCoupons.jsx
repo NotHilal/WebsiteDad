@@ -3,6 +3,7 @@ import { Plus, X, Save, Trash2, Edit2, Search, Scissors, AlertTriangle, ChevronR
 import { supabase } from '../../lib/supabase'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
+import Pager from '../../lib/Pager'
 
 const C = {
   card: '#161620', card2: '#1a1a26',
@@ -41,64 +42,94 @@ function TypeToggle({ value, onChange }) {
 function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign }) {
   const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `€${coupon.discount_value}`
   const used = !coupon.active
+  const sharedBorder = `1px solid ${used ? C.border : C.goldBorder}`
   return (
-    <div style={{ display: 'flex', borderRadius: 14, overflow: 'hidden', border: `1px solid ${used ? C.border : C.goldBorder}`, opacity: used ? 0.5 : 1, filter: used ? 'grayscale(0.35)' : 'none', transition: 'all .2s' }} className="uc-row">
-      <div style={{ flexShrink: 0, width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(255,255,255,0.02)' : C.goldBg, borderRight: `1px dashed ${used ? C.border : C.goldBorder}`, padding: '14px 6px', position: 'relative' }}>
-        <span className="font-display gold-gradient" style={{ fontSize: '1.75rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
-        <span style={{ fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 3 }}>OFF</span>
-        <div style={{ position: 'absolute', top: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
-        <div style={{ position: 'absolute', bottom: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
-      </div>
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: used ? 'rgba(255,255,255,0.01)' : C.card, minWidth: 0 }}>
-        <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.07)', border: `1px solid ${used ? C.border : 'rgba(201,168,76,0.18)'}` }}>
-          <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
+    <div>
+      {/* ── Desktop ── */}
+      <div className="uc-desktop-card" style={{ display: 'flex', borderRadius: 14, overflow: 'hidden', border: sharedBorder, opacity: used ? 0.5 : 1, filter: used ? 'grayscale(0.35)' : 'none', transition: 'all .2s' }}>
+        <div style={{ flexShrink: 0, width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(255,255,255,0.02)' : C.goldBg, borderRight: `1px dashed ${used ? C.border : C.goldBorder}`, padding: '14px 6px', position: 'relative' }}>
+          <span className="font-display gold-gradient" style={{ fontSize: '1.75rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
+          <span style={{ fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 3 }}>OFF</span>
+          <div style={{ position: 'absolute', top: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
+          <div style={{ position: 'absolute', bottom: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
         </div>
-        {/* Expiry */}
-        <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', flexShrink: 0 }}>
-          {coupon.expiry_date ? `Exp. ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
-        </span>
-
-        {/* Assignment info */}
-        {assignment ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: 8, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>
-                {assignment.name?.[0]?.toUpperCase() || '?'}
-              </span>
-            </div>
-            <p style={{ fontSize: '0.72rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-              {assignment.name}
-            </p>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: used ? 'rgba(255,255,255,0.01)' : C.card, minWidth: 0 }}>
+          <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.07)', border: `1px solid ${used ? C.border : 'rgba(201,168,76,0.18)'}` }}>
+            <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
           </div>
-        ) : (
-          <span style={{ flex: 1, fontSize: '0.7rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>
-            Not assigned
+          <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', flexShrink: 0 }}>
+            {coupon.expiry_date ? `Exp. ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
           </span>
-        )}
+          {assignment ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+              <div style={{ width: 20, height: 20, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 8, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{assignment.name?.[0]?.toUpperCase() || '?'}</span>
+              </div>
+              <p style={{ fontSize: '0.72rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{assignment.name}</p>
+            </div>
+          ) : (
+            <span style={{ flex: 1, fontSize: '0.7rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>Not assigned</span>
+          )}
+          <span style={{ fontSize: 9, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
+          {assignment && <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>Unassign</button>}
+          <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
+          <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
+        </div>
+      </div>
 
-        {/* 1. Status badge */}
-        <span style={{ fontSize: 9, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>
-          {used ? 'Used' : 'Active'}
-        </span>
-
-        {/* 2. Mark used / Mark active */}
-        <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
-          {used ? 'Mark active' : 'Mark used'}
-        </button>
-
-        {/* 3. Unassign (only if assigned) */}
-        {assignment && (
-          <button onClick={() => onUnassign(coupon.id)} className="btn-unassign"
-            style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>
-            Unassign
+      {/* ── Mobile card ── */}
+      <div className="uc-mobile-card" style={{ display: 'none', borderRadius: 14, overflow: 'hidden', border: sharedBorder, opacity: used ? 0.55 : 1, filter: used ? 'grayscale(0.35)' : 'none', transition: 'all .2s' }}>
+        {/* Top row: badge + code + status */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: used ? 'rgba(255,255,255,0.01)' : C.card }}>
+          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(255,255,255,0.03)' : C.goldBg, border: `1px dashed ${used ? C.border : C.goldBorder}`, borderRadius: 10, padding: '8px 12px', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: '#0e0e14' }} />
+            <div style={{ position: 'absolute', bottom: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: '#0e0e14' }} />
+            <span className="font-display gold-gradient" style={{ fontSize: '1.35rem', lineHeight: 1, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
+            <span style={{ fontSize: 7, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>OFF</span>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+              <div style={{ padding: '4px 10px', borderRadius: 7, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.08)', border: `1px solid ${used ? C.border : 'rgba(201,168,76,0.2)'}`, overflow: 'hidden' }}>
+                <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.88rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em' }}>{coupon.code}</span>
+              </div>
+              <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                {coupon.expiry_date ? `Exp. ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
+              </span>
+              {assignment && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <div style={{ width: 14, height: 14, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 7, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{assignment.name?.[0]?.toUpperCase() || '?'}</span>
+                  </div>
+                  <span style={{ fontSize: '0.68rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>{assignment.name}</span>
+                </div>
+              )}
+              {!assignment && <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>Not assigned</span>}
+            </div>
+          </div>
+        </div>
+        {/* Action row */}
+        <div style={{ display: 'flex', gap: 6, padding: '10px 14px', flexWrap: 'wrap', borderTop: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.01)' }}>
+          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'}
+            style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
+            {used ? 'Mark active' : 'Mark used'}
           </button>
-        )}
-
-        {/* 4. Edit */}
-        <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
-
-        {/* 5. Delete */}
-        <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
+          {assignment && (
+            <button onClick={() => onUnassign(coupon.id)} className="btn-unassign"
+              style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>
+              Unassign
+            </button>
+          )}
+          <div style={{ display: 'flex', gap: 5, marginLeft: 'auto' }}>
+            <button onClick={() => onEdit(coupon)} className="btn-edit-uc"
+              style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
+            <button onClick={() => onDelete(coupon)} className="btn-del-uc"
+              style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -140,6 +171,7 @@ export default function StudioCoupons() {
   const [saving,       setSaving]       = useState(false)
   const [search,       setSearch]       = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [page,         setPage]         = useState(0)
 
   // Delete confirmation
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -239,8 +271,11 @@ export default function StudioCoupons() {
   const filtered = useMemo(() => coupons.filter(c => {
     const matchStatus = statusFilter === 'all' || (statusFilter === 'used' ? !c.active : c.active)
     const q = search.toLowerCase()
-    return !q || c.code.toLowerCase().includes(q)
+    return matchStatus && (!q || c.code.toLowerCase().includes(q))
   }), [coupons, statusFilter, search])
+
+  useEffect(() => setPage(0), [statusFilter, search])
+  const paged = filtered.slice(page * 6, (page + 1) * 6)
 
   const filteredUsers = useMemo(() => {
     const q = userSearch.toLowerCase()
@@ -263,10 +298,18 @@ export default function StudioCoupons() {
         .btn-gold-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
         .sel-card:hover    { border-color: ${C.goldBorder} !important; background: rgba(201,168,76,0.04) !important; }
         .user-row:hover    { background: rgba(255,255,255,0.04) !important; }
+        .uc-mobile-card { display: none; }
+        @media (max-width: 767px) {
+          .uc-desktop-card { display: none !important; }
+          .uc-mobile-card  { display: block !important; }
+          .uc-hdr { flex-direction: column !important; align-items: flex-start !important; gap: 0.75rem !important; }
+          .uc-hdr-btns { display: flex; gap: 6px; width: 100%; }
+          .uc-hdr-btns > button { flex: 1; justify-content: center; }
+        }
       `}</style>
 
       {/* ── Header ── */}
-      <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+      <div className="uc-hdr" style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Coupons</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -275,7 +318,7 @@ export default function StudioCoupons() {
             {usedCount > 0 && <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, padding: '2px 8px', borderRadius: 20 }}>{usedCount} used</span>}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 7 }}>
+        <div className="uc-hdr-btns" style={{ display: 'flex', gap: 7 }}>
           <button onClick={() => {
             setAssignStep(1); setAssignCoupon(null); setAssignUser(null); setUserSearch(''); setModal('assign')
           }}
@@ -321,14 +364,17 @@ export default function StudioCoupons() {
             )}
           </div>
         ) : (
-          filtered.map(c => (
+          <>
+          {paged.map(c => (
             <CouponCard key={c.id} coupon={c}
               assignment={assignments[c.id] || null}
               onEdit={c => { setForm({ code: c.code, discount_type: c.discount_type, discount_value: c.discount_value?.toString(), expiry_date: c.expiry_date || '', id: c.id }); setModal('edit') }}
               onToggle={toggleActive}
               onUnassign={unassignCoupon}
               onDelete={setDeleteTarget} />
-          ))
+          ))}
+          <Pager page={page} total={filtered.length} onChange={setPage} />
+          </>
         )}
       </div>
 

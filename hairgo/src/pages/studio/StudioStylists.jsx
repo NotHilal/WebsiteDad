@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Edit2, Trash2, X, Save, User, AtSign, Upload, Link2 } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, User, AtSign, Upload, Link2, ChevronDown, Check } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
@@ -15,10 +16,58 @@ const EMPTY = { name: '', title: '', bio: '', photo_url: '', specialties: '', in
 const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
+function CustomSelect({ value, onChange, options }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  useEffect(() => {
+    if (!open) return
+    const close = e => { if (!ref.current?.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [open])
+  const selected = options.find(o => o.value === value)
+  const hasValue = !!value
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(p => !p)}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', background: hasValue ? 'rgba(52,211,153,0.05)' : 'rgba(255,255,255,0.05)', border: `1px solid ${hasValue ? C.greenBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, color: hasValue ? C.green : 'rgba(255,255,255,0.4)', fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: hasValue ? 500 : 300, cursor: 'pointer', transition: 'all .2s', textAlign: 'left', boxSizing: 'border-box' }}>
+        {hasValue && <div style={{ width: 7, height: 7, borderRadius: '50%', background: C.green, boxShadow: `0 0 6px ${C.green}88`, flexShrink: 0 }} />}
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {selected?.label || 'No account linked'}
+        </span>
+        <ChevronDown size={12} color={hasValue ? C.green : 'rgba(255,255,255,0.25)'} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .22s', flexShrink: 0 }} />
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 200, background: '#131320', border: `1px solid ${C.goldBorder}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03)' }}>
+          <div style={{ height: 2, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))' }} />
+          <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+            {options.map(opt => {
+              const isActive = opt.value === value
+              return (
+                <button key={opt.value || '__none__'} type="button"
+                  onClick={() => { if (!opt.disabled) { onChange(opt.value); setOpen(false) } }}
+                  disabled={opt.disabled}
+                  className={opt.disabled ? '' : 'csel-opt'}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: isActive ? 'rgba(52,211,153,0.06)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: opt.disabled ? 'not-allowed' : 'pointer', color: opt.disabled ? 'rgba(255,255,255,0.18)' : isActive ? C.green : 'rgba(255,255,255,0.55)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', textAlign: 'left', transition: 'background .12s' }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: isActive ? C.green : 'transparent', border: isActive ? 'none' : `1px solid rgba(255,255,255,0.15)`, flexShrink: 0, transition: 'all .15s' }} />
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                  {opt.sublabel && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'Jost,sans-serif', flexShrink: 0 }}>{opt.sublabel}</span>}
+                  {isActive && <Check size={10} color={C.green} style={{ flexShrink: 0 }} />}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function StudioStylists() {
   const [stylists,     setStylists]     = useState([])
   const [staff,        setStaff]        = useState([])
   const [loading,      setLoading]      = useState(true)
+  const [page,         setPage]         = useState(0)
   const [modal,        setModal]        = useState(null)
   const [form,         setForm]         = useState(EMPTY)
   const [saving,       setSaving]       = useState(false)
@@ -107,14 +156,19 @@ export default function StudioStylists() {
         .sty-card:hover { border-color: rgba(201,168,76,0.22) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35); }
         .sty-img        { transition: transform .5s ease; }
         .sty-card:hover .sty-img { transform: scale(1.05); }
-        .sty-edit:hover { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
+        .sty-edit:hover { background: rgba(201,168,76,0.16) !important; border-color: rgba(201,168,76,0.45) !important; color: ${C.gold} !important; }
         .sty-del:hover  { background: rgba(248,113,113,0.12) !important; border-color: rgba(248,113,113,0.3) !important; color: #f87171 !important; }
         .btn-g:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
         .drop-zone:hover { border-color: ${C.goldBorder} !important; background: ${C.goldBg} !important; }
+        .csel-opt:hover { background: rgba(255,255,255,0.04) !important; }
+        @media (max-width: 520px) {
+          .sty-2col { grid-template-columns: 1fr !important; }
+          .sty-hdr  { flex-wrap: wrap; gap: 0.75rem !important; }
+        }
       `}</style>
 
       {/* ── Header ──────────────────────────────────────────── */}
-      <div style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div className="sty-hdr" style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Stylists</h1>
@@ -156,8 +210,9 @@ export default function StudioStylists() {
             </button>
           </div>
         ) : (
+          <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.875rem' }}>
-            {stylists.map(s => {
+            {stylists.slice(page * 6, (page + 1) * 6).map(s => {
               const specs = Array.isArray(s.specialties) ? s.specialties : []
               return (
                 <div key={s.id} className="sty-card"
@@ -193,7 +248,7 @@ export default function StudioStylists() {
                       </div>
                       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                         <button onClick={() => openEdit(s)} className="sty-edit"
-                          style={{ width: 28, height: 28, borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                          style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.18)', color: 'rgba(201,168,76,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
                           <Edit2 size={11} />
                         </button>
                         <button onClick={() => del(s.id)} className="sty-del"
@@ -256,6 +311,8 @@ export default function StudioStylists() {
               )
             })}
           </div>
+          <Pager page={page} total={stylists.length} onChange={setPage} />
+          </>
         )}
       </div>
 
@@ -288,7 +345,7 @@ export default function StudioStylists() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
                 {/* Name + Title */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="sty-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div><label style={lbl}>Name <span style={{ color: C.gold }}>*</span></label><input value={form.name} onChange={set('name')} placeholder="Sophie Laurent" className="m-inp" style={inp} /></div>
                   <div><label style={lbl}>Title</label><input value={form.title || ''} onChange={set('title')} placeholder="Head Stylist" className="m-inp" style={inp} /></div>
                 </div>
@@ -358,7 +415,7 @@ export default function StudioStylists() {
                 </div>
 
                 {/* Specialties + Instagram */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div className="sty-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div>
                     <label style={lbl}>Specialties <span style={{ textTransform: 'none', letterSpacing: 0, color: C.muted, fontSize: 9 }}>(comma separated)</span></label>
                     <input value={form.specialties || ''} onChange={set('specialties')} placeholder="Balayage, Precision Cut" className="m-inp" style={inp} />
@@ -378,19 +435,22 @@ export default function StudioStylists() {
                   <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginBottom: 8 }}>
                     Link a staff account so they can clock in/out from their own login.
                   </p>
-                  <select value={form.profile_id || ''} onChange={set('profile_id')} className="m-inp"
-                    style={{ ...inp, appearance: 'none', borderColor: form.profile_id ? C.greenBorder : 'rgba(255,255,255,0.1)' }}>
-                    <option value="">No account linked</option>
-                    {staff.map(u => {
-                      const takenBy = stylists.find(s => s.profile_id === u.id && s.id !== form.id)
-                      return (
-                        <option key={u.id} value={u.id} disabled={!!takenBy}
-                          style={{ background: '#1a1a24', color: takenBy ? '#555' : '#f0f0f0' }}>
-                          {u.full_name || u.email}{takenBy ? ` — already linked to ${takenBy.name}` : ''}
-                        </option>
-                      )
-                    })}
-                  </select>
+                  <CustomSelect
+                    value={form.profile_id || ''}
+                    onChange={v => setForm(p => ({ ...p, profile_id: v }))}
+                    options={[
+                      { value: '', label: 'No account linked' },
+                      ...staff.map(u => {
+                        const takenBy = stylists.find(s => s.profile_id === u.id && s.id !== form.id)
+                        return {
+                          value: u.id,
+                          label: u.full_name || u.email,
+                          sublabel: takenBy ? `→ ${takenBy.name}` : null,
+                          disabled: !!takenBy,
+                        }
+                      })
+                    ]}
+                  />
                 </div>
 
               </div>

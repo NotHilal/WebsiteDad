@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, ZoomIn, Clock, User, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { getOrFetch } from '../lib/cache'
 
 const CATS    = ['All', 'Cut', 'Color', 'Style', 'Treatment']
 const GENDERS = ['All', 'Woman', 'Man']
@@ -105,8 +106,10 @@ export default function Gallery() {
   const PER_PAGE = 6
 
   useEffect(() => {
-    supabase.from('gallery').select('*, stylists(name)').order('display_order')
-      .then(({ data }) => { setImages(data || []); setLoading(false) })
+    getOrFetch('gallery_all', async () => {
+      const { data } = await supabase.from('gallery').select('*, stylists(name)').order('display_order')
+      return data || []
+    }, 5 * 60_000).then(data => { setImages(data); setLoading(false) })
   }, [])
 
   useEffect(() => {
@@ -233,7 +236,7 @@ export default function Gallery() {
                 }}
               >
                 <img src={item.image_url} alt={item.title || ''}
-                  className="gallery-img"
+                  className="gallery-img" loading="lazy" decoding="async"
                   style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.7s ease' }} />
 
                 {/* Hover overlay */}

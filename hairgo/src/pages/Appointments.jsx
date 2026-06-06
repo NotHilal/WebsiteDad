@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { getOrFetch } from '../lib/cache'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, isSameDay, isBefore, startOfDay, getDay, getHours
@@ -15,6 +16,18 @@ function fmtDur(min) {
   if (h && m) return `${h}h ${m}m`
   if (h)      return `${h}h`
   return `${m}m`
+}
+
+// Returns true if booking `slot` for `durationMins` would overlap any blocked hour
+function slotOverlapsBlocked(slot, durationMins, blockedSlots) {
+  const [sh, sm] = slot.split(':').map(Number)
+  const slotStart = sh * 60 + sm
+  const slotEnd   = slotStart + durationMins
+  return blockedSlots.some(bh => {
+    const [bh_h, bh_m] = bh.split(':').map(Number)
+    const blockedMin = bh_h * 60 + bh_m
+    return blockedMin >= slotStart && blockedMin < slotEnd
+  })
 }
 
 const STEPS = ['Service', 'Stylist', 'Date & Time', 'Confirm']
@@ -43,14 +56,24 @@ export default function Appointments() {
   const [clientSecret, setClientSecret] = useState(null)
 
   useEffect(() => {
+    const TTL = 5 * 60_000
     Promise.all([
-      supabase.from('services').select('*').order('category'),
-      supabase.from('stylists').select('*').order('display_order'),
-      supabase.from('blocked_dates').select('date'),
-    ]).then(([{data:svc},{data:sty},{data:blk}]) => {
-      setServices(svc || [])
-      setStylists(sty || [])
-      setBlocked((blk||[]).map(b => b.date))
+      getOrFetch('services_all', async () => {
+        const { data } = await supabase.from('services').select('*').order('category')
+        return data || []
+      }, TTL),
+      getOrFetch('stylists_all', async () => {
+        const { data } = await supabase.from('stylists').select('*').order('display_order')
+        return data || []
+      }, TTL),
+      getOrFetch('blocked_dates', async () => {
+        const { data } = await supabase.from('blocked_dates').select('date')
+        return (data || []).map(b => b.date)
+      }, 2 * 60_000),
+    ]).then(([svc, sty, blk]) => {
+      setServices(svc)
+      setStylists(sty)
+      setBlocked(blk)
     })
   }, [])
 
@@ -304,7 +327,7 @@ export default function Appointments() {
 
                         <div style={{ position:'absolute', inset:0 }}>
                           {svc.image_url
-                            ? <img src={svc.image_url} alt={svc.name} className="appt-svc-img"
+                            ? <img src={svc.image_url} alt={svc.name} className="appt-svc-img" loading="lazy" decoding="async"
                                 style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.7s cubic-bezier(0.22,1,0.36,1)' }} />
                             : <div style={{ width:'100%', height:'100%', background:'radial-gradient(ellipse at 25% 30%, rgba(201,168,76,0.14) 0%, rgba(201,168,76,0.04) 50%, #0d0d14 100%)' }}>
                                 {svc.name && <span className="font-display" style={{ position:'absolute', bottom:-10, right:14, fontSize:'8rem', color:'rgba(201,168,76,0.07)', lineHeight:1, userSelect:'none' }}>{svc.name.charAt(0)}</span>}
@@ -366,7 +389,7 @@ export default function Appointments() {
 
                         {preview.image_url ? (
                           <div style={{ height:200, position:'relative', overflow:'hidden' }}>
-                            <img src={preview.image_url} alt={preview.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                            <img src={preview.image_url} alt={preview.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,transparent 30%,rgba(14,14,20,0.95) 100%)' }}/>
                             <button onClick={() => setPreview(null)} style={{ position:'absolute', top:12, right:12, width:32, height:32, borderRadius:'50%', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.15)', color:'rgba(255,255,255,0.5)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }} className="preview-close"><X size={14}/></button>
                             <div style={{ position:'absolute', bottom:14, left:18, right:18 }}>
@@ -450,7 +473,7 @@ export default function Appointments() {
                                  position:'relative' }}>
                         <div style={{ height:190, background:'linear-gradient(135deg,rgba(201,168,76,0.08),rgba(196,149,106,0.04))', position:'relative', overflow:'hidden' }}>
                           {sty.photo_url
-                            ? <img src={sty.photo_url} alt={sty.name} style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
+                            ? <img src={sty.photo_url} alt={sty.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
                             : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
                                 <User size={40} color="rgba(201,168,76,0.18)" strokeWidth={1}/>
                               </div>
@@ -550,7 +573,7 @@ export default function Appointments() {
                               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                                 {slots.map(slot => {
                                   const isPast = sel.date && isSameDay(sel.date,new Date()) && parseInt(slot)<=getHours(new Date())
-                                  const tk = taken.includes(slot)||blockedSlots.includes(slot)||isPast
+                                  const tk = taken.includes(slot)||slotOverlapsBlocked(slot, sel.service?.duration||60, blockedSlots)||isPast
                                   const isSel = sel.time===slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
@@ -568,7 +591,7 @@ export default function Appointments() {
                               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5 }}>
                                 {slots.map(slot => {
                                   const isPast = sel.date && isSameDay(sel.date,new Date()) && parseInt(slot)<=getHours(new Date())
-                                  const tk = taken.includes(slot)||blockedSlots.includes(slot)||isPast
+                                  const tk = taken.includes(slot)||slotOverlapsBlocked(slot, sel.service?.duration||60, blockedSlots)||isPast
                                   const isSel = sel.time===slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
@@ -610,7 +633,7 @@ export default function Appointments() {
                 <div style={{ borderRadius:18, overflow:'hidden', border:'1px solid rgba(201,168,76,0.14)', marginBottom:20, position:'relative' }}>
                   {sel.service?.image_url ? (
                     <div style={{ height:140, position:'relative', overflow:'hidden' }}>
-                      <img src={sel.service.image_url} alt={sel.service.name} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                      <img src={sel.service.image_url} alt={sel.service.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                       <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(14,14,20,0.93) 100%)' }}/>
                       <div style={{ position:'absolute', bottom:14, left:20, right:20, display:'flex', alignItems:'flex-end', justifyContent:'space-between' }}>
                         <h3 className="font-display" style={{ color:'#fff', fontSize:'1.6rem', lineHeight:1 }}>{sel.service.name}</h3>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Check, UserCheck, Image, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
@@ -20,6 +21,10 @@ export default function StudioHomeDisplay() {
   const [services,  setServices]  = useState([])
   const [loading,   setLoading]   = useState(true)
   const [updating,  setUpdating]  = useState(null)
+  const [pgTeam,    setPgTeam]    = useState(0)
+  const [pgSvc,     setPgSvc]     = useState(0)
+  const [pgGal,     setPgGal]     = useState(0)
+  const PER = 6
 
   useEffect(() => { load() }, [])
 
@@ -71,7 +76,8 @@ export default function StudioHomeDisplay() {
   const serviceCount  = services.filter(s => s.featured).length
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto', height: '100%' }}>
+    <div className="hd-root" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto', height: '100%' }}>
+    <style>{`@media (max-width: 767px) { .hd-root { gap: 2.25rem !important; } }`}</style>
 
       {/* Header */}
       <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}` }}>
@@ -96,8 +102,9 @@ export default function StudioHomeDisplay() {
         ) : stylists.length === 0 ? (
           <Empty>No stylists found — add some in the Stylists page first.</Empty>
         ) : (
+          <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
-            {stylists.map(s => {
+            {stylists.slice(pgTeam * PER, (pgTeam + 1) * PER).map(s => {
               const locked = !s.featured && teamCount >= MAX_TEAM
               return (
                 <button key={s.id} onClick={() => toggleStylist(s)}
@@ -125,6 +132,8 @@ export default function StudioHomeDisplay() {
               )
             })}
           </div>
+          <Pager page={pgTeam} total={stylists.length} perPage={PER} onChange={setPgTeam} />
+          </>
         )}
       </Section>
 
@@ -147,7 +156,7 @@ export default function StudioHomeDisplay() {
               </p>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-              {services.map(svc => {
+              {services.slice(pgSvc * PER, (pgSvc + 1) * PER).map(svc => {
                 const noImage = !svc.image_url
                 const locked  = (!svc.featured && serviceCount >= MAX_SERVICES) || noImage
                 return (
@@ -179,6 +188,7 @@ export default function StudioHomeDisplay() {
                 )
               })}
             </div>
+            <Pager page={pgSvc} total={services.length} perPage={PER} onChange={setPgSvc} />
           </>
         )}
       </Section>
@@ -195,8 +205,9 @@ export default function StudioHomeDisplay() {
         ) : gallery.length === 0 ? (
           <Empty>No gallery images found — upload some in the Gallery page first.</Empty>
         ) : (
+          <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-            {gallery.map(item => {
+            {gallery.slice(pgGal * PER, (pgGal + 1) * PER).map(item => {
               const locked = !item.featured && galleryCount >= MAX_GALLERY
               return (
                 <button key={item.id} onClick={() => toggleGallery(item)}
@@ -222,6 +233,8 @@ export default function StudioHomeDisplay() {
               )
             })}
           </div>
+          <Pager page={pgGal} total={gallery.length} perPage={PER} onChange={setPgGal} />
+          </>
         )}
       </Section>
 

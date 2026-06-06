@@ -135,7 +135,7 @@ export default function StudioSchedule() {
       <div style={{ ...card, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Toolbar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.5rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.5rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, flexWrap: 'wrap' }}>
           <button onClick={navPrev} className="d-nav"
             style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: C.muted, transition: 'all .18s' }}>
             <ChevronLeft size={13} />
@@ -248,6 +248,8 @@ export default function StudioSchedule() {
         {/* ── WEEKLY ── */}
         {view === 'weekly' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+            {/* Horizontal scroll wrapper on mobile */}
+            <div className="week-scroll-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, minWidth: 0 }}>
             {/* Day headers */}
             <div style={{ display: 'flex', flexShrink: 0, borderBottom: `1px solid ${C.border}` }}>
               <div style={{ width: 48, flexShrink: 0 }} />
@@ -333,6 +335,7 @@ export default function StudioSchedule() {
                 </div>
               ))}
             </div>
+            </div>{/* end week-scroll-wrap */}
           </div>
         )}
 
@@ -487,6 +490,10 @@ export default function StudioSchedule() {
         .st-btn-cancelled:hover { background: rgba(248,113,113,0.2) !important; }
         .del-appt-btn:hover { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.4) !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }
+        @media (max-width: 767px) {
+          .week-scroll-wrap { overflow-x: auto !important; }
+          .week-scroll-wrap > div { min-width: 560px; }
+        }
       `}</style>
     </div>
   )

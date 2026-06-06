@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, Star, ChevronDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { getOrFetch } from '../lib/cache'
 
 const inView = {
   hidden: { opacity: 0, y: 16, filter: 'blur(6px)' },
@@ -59,27 +60,28 @@ export default function Home() {
   const [homeServices,  setHomeServices]  = useState([])
 
   useEffect(() => {
-    supabase.from('stylists').select('id, name, title, photo_url').eq('featured', true).order('display_order')
-      .then(async ({ data }) => {
-        if (data && data.length > 0) { setTeamMembers(data); return }
-        const { data: fallback } = await supabase.from('stylists').select('id, name, title, photo_url').order('display_order').limit(4)
-        if (fallback) setTeamMembers(fallback)
-      })
-    supabase.from('gallery').select('id, image_url').eq('featured', true).order('display_order')
-      .then(async ({ data }) => {
-        if (data && data.length > 0) { setGalleryImages(data); return }
-        const { data: fallback } = await supabase.from('gallery').select('id, image_url').order('display_order').limit(5)
-        if (fallback) setGalleryImages(fallback)
-      })
-    supabase.from('services').select('id, name, description, price, image_url').eq('featured', true).order('name')
-      .then(async ({ data }) => {
-        if (data && data.length > 0) {
-          setHomeServices(data.map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' })))
-          return
-        }
-        const { data: fallback } = await supabase.from('services').select('id, name, description, price, image_url').order('name').limit(4)
-        if (fallback) setHomeServices(fallback.map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' })))
-      })
+    const TTL = 5 * 60_000
+
+    getOrFetch('home_stylists', async () => {
+      const { data } = await supabase.from('stylists').select('id, name, title, photo_url').eq('featured', true).order('display_order')
+      if (data?.length) return data
+      const { data: fb } = await supabase.from('stylists').select('id, name, title, photo_url').order('display_order').limit(4)
+      return fb || []
+    }, TTL).then(setTeamMembers)
+
+    getOrFetch('home_gallery', async () => {
+      const { data } = await supabase.from('gallery').select('id, image_url').eq('featured', true).order('display_order')
+      if (data?.length) return data
+      const { data: fb } = await supabase.from('gallery').select('id, image_url').order('display_order').limit(5)
+      return fb || []
+    }, TTL).then(setGalleryImages)
+
+    getOrFetch('home_services', async () => {
+      const { data } = await supabase.from('services').select('id, name, description, price, image_url').eq('featured', true).order('name')
+      if (data?.length) return data.map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' }))
+      const { data: fb } = await supabase.from('services').select('id, name, description, price, image_url').order('name').limit(4)
+      return (fb || []).map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' }))
+    }, TTL).then(setHomeServices)
   }, [])
 
   const displayedTeam     = [...teamMembers,  ...FALLBACK_TEAM.slice(teamMembers.length)].slice(0, 4)
@@ -90,7 +92,7 @@ export default function Home() {
     <div>
 
       {/* ══ HERO ══════════════════════════════════════════════ */}
-      <section ref={heroRef} className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop:'12vh', paddingBottom:'8vh' }}>
+      <section ref={heroRef} className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop:'6vh', paddingBottom:'8vh' }}>
 
         {/* Soft ambient light blobs */}
         <div className="absolute inset-0 pointer-events-none">
@@ -109,11 +111,16 @@ export default function Home() {
             initial={{ opacity:0, y:-10, scale:0.88, filter:'blur(5px)' }}
             animate={{ opacity:1, y:0, scale:1, filter:'blur(0px)' }}
             transition={{ duration:0.75, delay:0.1, ease:[0.25,0.46,0.45,0.94] }}
-            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full glass-light mb-12"
+            style={{ display:'inline-flex', alignItems:'center', gap:10, marginBottom:'2.5rem',
+              padding:'8px 20px 8px 10px', borderRadius:9999,
+              background:'rgba(201,168,76,0.07)',
+              border:'1px solid rgba(201,168,76,0.22)',
+              boxShadow:'0 0 24px rgba(201,168,76,0.08)',
+            }}
           >
             <div style={{ width:6, height:6, borderRadius:'50%', background:'#C9A84C', animation:'pulse-gold 2.4s infinite' }} />
-            <span style={{ fontSize:10, letterSpacing:'0.24em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>
-              Premium Hair Studio &nbsp;·&nbsp; Doha, Qatar
+            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)', fontFamily:'Jost,sans-serif', fontWeight:400 }}>
+              Premium Hair Studio &nbsp;<span style={{ color:'rgba(201,168,76,0.5)' }}>·</span>&nbsp; Doha, Qatar
             </span>
           </motion.div>
 
@@ -224,7 +231,7 @@ export default function Home() {
               >
                 {/* Photo */}
                 <div style={{ height:200, overflow:'hidden', position:'relative' }}>
-                  <img src={svc.image_url} alt={svc.name} className="service-img"
+                  <img src={svc.image_url} alt={svc.name} className="service-img" loading="lazy" decoding="async"
                     style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.65s ease', willChange:'transform', backfaceVisibility:'hidden' }} />
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.75))' }} />
                 </div>
@@ -244,12 +251,11 @@ export default function Home() {
           </div>
 
           {/* CTA */}
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} custom={5} variants={inView}
-            style={{ textAlign:'center', marginTop:20 }}>
+          <div style={{ textAlign:'center', marginTop:20 }}>
             <Link to="/appointments" className="btn-gold">
               Book Your Service <ArrowRight size={15} />
             </Link>
-          </motion.div>
+          </div>
         </div>
 
       </section>
@@ -278,7 +284,7 @@ export default function Home() {
                 style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', position:'relative', cursor:'pointer' }}
                 whileHover={{ scale:1.02 }}
               >
-                <img src={item.image_url} alt={`Gallery ${i + 1}`} className="gallery-img"
+                <img src={item.image_url} alt={`Gallery ${i + 1}`} className="gallery-img" loading="lazy" decoding="async"
                   style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.65s ease' }} />
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 55%, rgba(10,10,10,0.5))', transition:'opacity 0.4s' }} />
               </motion.div>
@@ -338,7 +344,7 @@ export default function Home() {
                         marginBottom:'0.4rem',
                       }}>
                         {m.photo_url
-                          ? <img src={m.photo_url} alt={m.name}
+                          ? <img src={m.photo_url} alt={m.name} loading="lazy" decoding="async"
                               style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
@@ -370,7 +376,7 @@ export default function Home() {
                         marginBottom:'0.4rem',
                       }}>
                         {m.photo_url
-                          ? <img src={m.photo_url} alt={m.name}
+                          ? <img src={m.photo_url} alt={m.name} loading="lazy" decoding="async"
                               style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
@@ -499,6 +505,7 @@ export default function Home() {
         }
         @media (max-width: 480px) {
           .home-gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 0.625rem; }
+          .home-gallery-grid > div:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; width: 100%; }
         }
         @media (max-width: 640px) {
           .hero-section {

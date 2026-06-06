@@ -304,6 +304,15 @@ export default function StudioUsers() {
         .usr-unlink-btn:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .emp-sty-card:hover { border-color: rgba(96,165,250,0.4) !important; background: rgba(96,165,250,0.05) !important; }
         .emp-sty-card:hover .emp-sty-img { transform: scale(1.05); }
+        .usr-mobile-cards { display: none; }
+        @media (max-width: 767px) {
+          .usr-desktop-table { display: none !important; }
+          .usr-mobile-cards  { display: block !important; }
+          .usr-top-row { flex-direction: column !important; align-items: stretch !important; gap: 0.5rem !important; }
+          .usr-tabs { flex-wrap: wrap !important; }
+          .usr-search-box { width: 100% !important; }
+          .usr-search-box input { width: 100% !important; }
+        }
       `}</style>
 
       {/* ── Header ─────────────────────────────────────────────── */}
@@ -319,8 +328,8 @@ export default function StudioUsers() {
       </div>
 
       {/* ── Tabs + Search ───────────────────────────────────────── */}
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.875rem' }}>
-        <div style={{ display: 'flex', gap: 4 }}>
+      <div className="usr-top-row" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.875rem' }}>
+        <div className="usr-tabs" style={{ display: 'flex', gap: 4 }}>
           {TABS.map(({ key, label }) => {
             const rs     = ROLE_STYLE[key]
             const active = tab === key
@@ -333,7 +342,7 @@ export default function StudioUsers() {
             )
           })}
         </div>
-        <div style={{ position: 'relative' }}>
+        <div className="usr-search-box" style={{ position: 'relative' }}>
           <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Name, email or phone…"
             style={{ width: 220, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.75rem 0.45rem 1.9rem', fontSize: '0.78rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
@@ -341,8 +350,11 @@ export default function StudioUsers() {
         </div>
       </div>
 
-      {/* ── Table ──────────────────────────────────────────────── */}
+      {/* ── Table / Cards ──────────────────────────────────────── */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+
+        {/* Desktop table */}
+        <div className="usr-desktop-table">
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -459,6 +471,86 @@ export default function StudioUsers() {
             </tbody>
           </table>
         </div>
+        </div>{/* end desktop table */}
+
+        {/* Mobile cards */}
+        <div className="usr-mobile-cards">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem', marginBottom: 8 }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+                  <div>
+                    <div style={{ height: 11, width: 130, background: 'rgba(255,255,255,0.06)', borderRadius: 4, marginBottom: 5 }} />
+                    <div style={{ height: 9, width: 170, background: 'rgba(255,255,255,0.04)', borderRadius: 4 }} />
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : list.length === 0 ? (
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '3rem', textAlign: 'center' }}>
+              <Users size={24} style={{ margin: '0 auto 0.5rem', color: C.border, display: 'block' }} />
+              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>
+                {search ? 'No results for your search' : `No ${TABS.find(t => t.key === tab)?.label.toLowerCase()} yet`}
+              </p>
+            </div>
+          ) : list.map(u => {
+            const rs = ROLE_STYLE[u.role] || ROLE_STYLE.user
+            return (
+              <div key={u.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', marginBottom: 8 }}>
+                {/* Top */}
+                <div style={{ padding: '0.875rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: rs.bg, border: `1px solid ${rs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: 14, color: rs.color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{u.full_name?.[0]?.toUpperCase() || '?'}</span>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 3 }}>
+                      <p style={{ color: u.full_name ? C.white : C.muted, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontStyle: u.full_name ? 'normal' : 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{u.full_name || 'No name'}</p>
+                      <RoleSelector value={u.role || 'user'} onChange={newRole => changeRole(u.id, newRole)} />
+                    </div>
+                    <p style={{ fontSize: '0.7rem', color: u.email ? C.muted : 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', fontStyle: u.email ? 'normal' : 'italic', marginBottom: 3 }}>{u.email || 'no email on file'}</p>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                      {u.phone && <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{u.phone}</span>}
+                      {isUsers && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.68rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>
+                          <Star size={9} color={C.goldDim} /> {u.points || 0} visits
+                        </span>
+                      )}
+                      {u.created_at && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif' }}>Joined {format(new Date(u.created_at), 'MMM d, yyyy')}</span>}
+                    </div>
+                  </div>
+                </div>
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: 5, padding: '0.625rem 1rem', borderTop: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.01)', flexWrap: 'wrap' }}>
+                  {isUsers && (
+                    <>
+                      <button onClick={() => adjustVisits(u.id, 1, u.points)} className="usr-pts-add"
+                        style={{ padding: '5px 12px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>+1</button>
+                      <button onClick={() => adjustVisits(u.id, -1, u.points)} className="usr-pts-sub"
+                        style={{ padding: '5px 12px', borderRadius: 7, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
+                      <div style={{ width: 1, height: 18, background: C.border, alignSelf: 'center', flexShrink: 0 }} />
+                    </>
+                  )}
+                  <button onClick={() => openMsg(u)} className="usr-msg-btn"
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+                    <MessageCircle size={11} /> Message
+                  </button>
+                  <button onClick={() => sendEmail(u)} className="usr-mail-btn"
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)', color: '#34d399', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', opacity: u.email ? 1 : 0.3 }}>
+                    <Mail size={11} /> Email
+                  </button>
+                  {tab === 'employee' && (
+                    <button onClick={() => unlinkStylist(u.id, u.full_name)} className="usr-unlink-btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+                      <Scissors size={9} /> Unlink
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
         <p style={{ fontSize: '0.68rem', color: C.muted, textAlign: 'center', marginTop: '0.75rem', fontFamily: 'Jost,sans-serif', opacity: 0.5 }}>
           Role changes take effect after the user's next sign-in. · Email only available for accounts registered after the email field was added.
         </p>

@@ -31,13 +31,6 @@ export default function Footer() {
       <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 900, height: 400, background: 'radial-gradient(ellipse at top, rgba(201,168,76,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', bottom: 0, left: '10%', width: 500, height: 300, background: 'radial-gradient(ellipse, rgba(196,149,106,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-      {/* ── Ghost watermark ───────────────────────────── */}
-      <div style={{ position: 'absolute', bottom: 40, right: -20, pointerEvents: 'none', userSelect: 'none', overflow: 'hidden' }}>
-        <span className="font-display" style={{ fontSize: 'clamp(6rem, 16vw, 14rem)', color: 'rgba(201,168,76,0.028)', lineHeight: 1, fontWeight: 300, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-          HairGo
-        </span>
-      </div>
-
       {/* ── Top accent line ───────────────────────────── */}
       <div style={{ height: 1, background: 'linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.22) 25%, rgba(196,149,106,0.28) 50%, rgba(201,168,76,0.22) 75%, transparent 100%)' }} />
 

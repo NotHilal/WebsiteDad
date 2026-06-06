@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Lock, Unlock, X, BanIcon, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay
@@ -19,12 +20,13 @@ const C = {
 const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
 
 export default function StudioBlockedDates() {
+  const { isAdmin }                     = useAuth()
   const [dates,        setDates]        = useState([])
   const [blockedHours, setBlockedHours] = useState([])
   const [loading,      setLoading]      = useState(true)
   const [month,        setMonth]        = useState(new Date())
   const [selected,     setSelected]     = useState(null)
-  const [blockTab,     setBlockTab]     = useState('day')
+  const [blockTab,     setBlockTab]     = useState('hours')
   const [reason,       setReason]       = useState('')
   const [selHours,     setSelHours]     = useState([])
   const [saving,       setSaving]       = useState(false)
@@ -61,7 +63,7 @@ export default function StudioBlockedDates() {
     setSelected({ day, key, blocked: blockedMap[key] || null })
     setReason(blockedMap[key]?.reason || '')
     setSelHours(existingHours)
-    setBlockTab(blockedMap[key] ? 'day' : existingHours.length > 0 ? 'hours' : 'day')
+    setBlockTab(!isAdmin ? 'hours' : blockedMap[key] ? 'day' : existingHours.length > 0 ? 'hours' : 'day')
   }
 
   function closeModal() {
@@ -137,6 +139,10 @@ export default function StudioBlockedDates() {
         .unblock-btn:hover { background: rgba(248,113,113,0.08) !important; }
         .bd-item:hover { border-color: ${C.dangerBorder} !important; }
         .bd-partial-item:hover { border-color: ${C.warnBorder} !important; }
+        @media (max-width: 767px) {
+          .bd-main-layout { grid-template-columns: 1fr !important; }
+          .bd-main-layout > div:last-child { display: none !important; }
+        }
       `}</style>
 
       {/* Header */}
@@ -150,7 +156,7 @@ export default function StudioBlockedDates() {
       </div>
 
       {/* Main layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '1.25rem', flex: 1, minHeight: 0 }}>
+      <div className="bd-main-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '1.25rem', flex: 1, minHeight: 0 }}>
 
         {/* ── Calendar ── */}
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -349,25 +355,27 @@ export default function StudioBlockedDates() {
                 </button>
               </div>
 
-              {/* Tabs */}
-              <div style={{ display: 'flex', background: C.subtle, borderRadius: 10, padding: 3, marginBottom: '1.25rem', gap: 3 }}>
-                {[
-                  { id: 'day',   label: 'Full Day',    icon: BanIcon  },
-                  { id: 'hours', label: 'By Hours',    icon: Clock    },
-                ].map(({ id, label, icon: Icon }) => (
-                  <button key={id} onClick={() => setBlockTab(id)} className={`block-tab-btn${blockTab === id ? ' active' : ''}`}
-                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.55rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, transition: 'all .18s',
-                      background: blockTab === id ? C.goldBg : 'transparent',
-                      color: blockTab === id ? C.gold : C.muted,
-                      outline: blockTab === id ? `1px solid ${C.goldBorder}` : 'none',
-                    }}>
-                    <Icon size={12} /> {label}
-                  </button>
-                ))}
-              </div>
+              {/* Tabs — workers only see hours tab */}
+              {isAdmin && (
+                <div style={{ display: 'flex', background: C.subtle, borderRadius: 10, padding: 3, marginBottom: '1.25rem', gap: 3 }}>
+                  {[
+                    { id: 'day',   label: 'Full Day',    icon: BanIcon  },
+                    { id: 'hours', label: 'By Hours',    icon: Clock    },
+                  ].map(({ id, label, icon: Icon }) => (
+                    <button key={id} onClick={() => setBlockTab(id)} className={`block-tab-btn${blockTab === id ? ' active' : ''}`}
+                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.55rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, transition: 'all .18s',
+                        background: blockTab === id ? C.goldBg : 'transparent',
+                        color: blockTab === id ? C.gold : C.muted,
+                        outline: blockTab === id ? `1px solid ${C.goldBorder}` : 'none',
+                      }}>
+                      <Icon size={12} /> {label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-              {/* ── Tab: Full Day ── */}
-              {blockTab === 'day' && (
+              {/* ── Tab: Full Day — admin only ── */}
+              {isAdmin && blockTab === 'day' && (
                 selected.blocked ? (
                   <>
                     {selected.blocked.reason && (

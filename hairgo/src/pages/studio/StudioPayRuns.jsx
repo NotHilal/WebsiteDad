@@ -191,10 +191,16 @@ export default function StudioPayRuns() {
         .period-opt:hover { background: rgba(255,255,255,0.04) !important; }
         .m-inp:focus     { border-color: ${C.goldBorder} !important; }
         .pr-edit:hover   { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
+        .pr-mobile-cards { display: none; }
+        @media (max-width: 767px) {
+          .pr-stats { grid-template-columns: 1fr 1fr !important; }
+          .pr-desktop-table { display: none !important; }
+          .pr-mobile-cards  { display: block !important; }
+        }
       `}</style>
 
       {/* ── Header ── */}
-      <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
+      <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
         <div>
           <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem,3vw,2.4rem)', color: C.white, lineHeight: 1.1 }}>Pay Runs</h1>
@@ -226,7 +232,7 @@ export default function StudioPayRuns() {
       </div>
 
       {/* ── Summary bar ── */}
-      <div style={{ flexShrink: 0, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
+      <div className="pr-stats" style={{ flexShrink: 0, display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
         {[
           { label: 'Earnings', value: summary.earnings, color: C.gold,                                    sub: 'Hours × rate'    },
           { label: 'Extras',   value: summary.extras,   color: '#a78bfa',                                 sub: 'Tips + more'     },
@@ -252,21 +258,18 @@ export default function StudioPayRuns() {
 
       {/* ── Table ── */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
 
-          {/* Header row */}
+        {/* ── Desktop grid table ── */}
+        <div className="pr-desktop-table" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           <div style={{ display: 'grid', gridTemplateColumns: COLS, padding: '0.65rem 1.25rem', borderBottom: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', gap: '0.5rem', alignItems: 'center' }}>
             {['Team Member', 'Hours', 'Rate', 'Earnings', 'Extras', 'Total', 'Paid', 'To Pay', ''].map(h => (
               <div key={h} style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, fontFamily: 'Jost,sans-serif' }}>{h}</div>
             ))}
           </div>
-
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} style={{ display: 'grid', gridTemplateColumns: COLS, padding: '1rem 1.25rem', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
-                {Array.from({ length: 8 }).map((_, j) => (
-                  <div key={j} style={{ height: 11, borderRadius: 4, width: j === 0 ? 120 : 55, background: C.subtle }} />
-                ))}
+                {Array.from({ length: 8 }).map((_, j) => <div key={j} style={{ height: 11, borderRadius: 4, width: j === 0 ? 120 : 55, background: C.subtle }} />)}
                 <div />
               </div>
             ))
@@ -275,19 +278,13 @@ export default function StudioPayRuns() {
               <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No team members found</p>
             </div>
           ) : filtered.map(stylist => {
-            const totals  = calcTotals(stylist)
-            const isPaid  = totals.total > 0 && totals.toPay === 0
-            const noRate  = !stylist.hourly_rate && totals.netMins > 0
+            const totals    = calcTotals(stylist)
+            const isPaid    = totals.total > 0 && totals.toPay === 0
+            const noRate    = !stylist.hourly_rate && totals.netMins > 0
             const isEditing = editing === stylist.id
-
             return (
               <div key={stylist.id} style={{ borderBottom: `1px solid ${C.border}` }}>
-
-                {/* Main row */}
-                <div className="pr-row"
-                  style={{ display: 'grid', gridTemplateColumns: COLS, padding: '0.875rem 1.25rem', gap: '0.5rem', alignItems: 'center', transition: 'background .15s' }}>
-
-                  {/* Member */}
+                <div className="pr-row" style={{ display: 'grid', gridTemplateColumns: COLS, padding: '0.875rem 1.25rem', gap: '0.5rem', alignItems: 'center', transition: 'background .15s' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {stylist.photo_url
                       ? <img src={stylist.photo_url} alt={stylist.name} style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1px solid ${C.border}` }} />
@@ -298,57 +295,22 @@ export default function StudioPayRuns() {
                     <div>
                       <p style={{ color: C.white, fontSize: '0.83rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{stylist.name}</p>
                       <div style={{ display: 'flex', gap: 5, marginTop: 3, flexWrap: 'wrap' }}>
-                        {isPaid && (
-                          <span style={{ fontSize: 8, padding: '1px 7px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Paid</span>
-                        )}
-                        {noRate && (
-                          <span style={{ fontSize: 8, padding: '1px 7px', borderRadius: 9999, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>No rate set</span>
-                        )}
+                        {isPaid && <span style={{ fontSize: 8, padding: '1px 7px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Paid</span>}
+                        {noRate  && <span style={{ fontSize: 8, padding: '1px 7px', borderRadius: 9999, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase' }}>No rate set</span>}
                       </div>
                     </div>
                   </div>
-
-                  {/* Hours */}
-                  <div style={{ color: totals.netMins > 0 ? C.dim : 'rgba(255,255,255,0.18)', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: totals.netMins > 0 ? 600 : 400 }}>
-                    {fmtMins(totals.netMins)}
-                  </div>
-
-                  {/* Rate */}
-                  <div style={{ color: stylist.hourly_rate ? C.goldDim : 'rgba(255,255,255,0.18)', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>
-                    {stylist.hourly_rate ? `€${parseFloat(stylist.hourly_rate).toFixed(2)}` : '—'}
-                  </div>
-
-                  {/* Earnings */}
-                  <div style={{ color: totals.earnings > 0 ? C.gold : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
-                    {fmt(totals.earnings)}
-                  </div>
-
-                  {/* Extras */}
-                  <div style={{ color: totals.extras > 0 ? '#a78bfa' : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: totals.extras > 0 ? 600 : 400 }}>
-                    {fmt(totals.extras)}
-                  </div>
-
-                  {/* Total */}
-                  <div style={{ color: totals.total > 0 ? C.white : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
-                    {fmt(totals.total)}
-                  </div>
-
-                  {/* Paid */}
-                  <div style={{ color: totals.paid > 0 ? C.green : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
-                    {fmt(totals.paid)}
-                  </div>
-
-                  {/* To Pay */}
-                  <div style={{ color: totals.toPay > 0 ? C.red : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: totals.toPay > 0 ? 700 : 400 }}>
-                    {fmt(totals.toPay)}
-                  </div>
-
-                  {/* Actions */}
+                  <div style={{ color: totals.netMins > 0 ? C.dim : 'rgba(255,255,255,0.18)', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: totals.netMins > 0 ? 600 : 400 }}>{fmtMins(totals.netMins)}</div>
+                  <div style={{ color: stylist.hourly_rate ? C.goldDim : 'rgba(255,255,255,0.18)', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>{stylist.hourly_rate ? `€${parseFloat(stylist.hourly_rate).toFixed(2)}` : '—'}</div>
+                  <div style={{ color: totals.earnings > 0 ? C.gold : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{fmt(totals.earnings)}</div>
+                  <div style={{ color: totals.extras > 0 ? '#a78bfa' : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: totals.extras > 0 ? 600 : 400 }}>{fmt(totals.extras)}</div>
+                  <div style={{ color: totals.total > 0 ? C.white : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{fmt(totals.total)}</div>
+                  <div style={{ color: totals.paid > 0 ? C.green : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{fmt(totals.paid)}</div>
+                  <div style={{ color: totals.toPay > 0 ? C.red : 'rgba(255,255,255,0.18)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: totals.toPay > 0 ? 700 : 400 }}>{fmt(totals.toPay)}</div>
                   <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
                     <button onClick={() => isEditing ? setEditing(null) : openEdit(stylist)} className="pr-edit"
                       style={{ padding: '4px 10px', borderRadius: 7, background: isEditing ? C.goldBg : C.subtle, border: `1px solid ${isEditing ? C.goldBorder : C.border}`, color: isEditing ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, transition: 'all .15s' }}>
-                      {isEditing ? <X size={10} /> : <Edit2 size={10} />}
-                      {isEditing ? 'Close' : 'Extras'}
+                      {isEditing ? <X size={10} /> : <Edit2 size={10} />}{isEditing ? 'Close' : 'Extras'}
                     </button>
                     {totals.toPay > 0 && (
                       <button onClick={() => markPaid(stylist)} className="pr-pay"
@@ -358,26 +320,16 @@ export default function StudioPayRuns() {
                     )}
                   </div>
                 </div>
-
-                {/* Extras edit panel */}
                 {isEditing && (
                   <div style={{ padding: '0.875rem 1.25rem 1rem', background: 'rgba(201,168,76,0.04)', borderTop: `1px solid ${C.goldBorder}` }}>
-                    <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.75rem' }}>
-                      Add Extras for {stylist.name}
-                    </p>
+                    <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.75rem' }}>Add Extras for {stylist.name}</p>
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                       {[['Tips', 'tips'], ['Commissions', 'commissions'], ['Other', 'other']].map(([label, key]) => (
                         <div key={key} style={{ minWidth: 130 }}>
                           <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>{label}</label>
                           <div style={{ position: 'relative' }}>
                             <span style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: C.goldDim, pointerEvents: 'none', fontFamily: 'Jost,sans-serif' }}>€</span>
-                            <input
-                              type="number" min="0" step="0.01"
-                              value={editVals[key]}
-                              onChange={e => setEditVals(p => ({ ...p, [key]: e.target.value }))}
-                              className="m-inp"
-                              style={inp}
-                            />
+                            <input type="number" min="0" step="0.01" value={editVals[key]} onChange={e => setEditVals(p => ({ ...p, [key]: e.target.value }))} className="m-inp" style={inp} />
                           </div>
                         </div>
                       ))}
@@ -386,15 +338,121 @@ export default function StudioPayRuns() {
                         <Check size={12} /> Save
                       </button>
                     </div>
-                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', marginTop: '0.625rem' }}>
-                      Earnings are auto-calculated from hours. These are added on top.
-                    </p>
+                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', marginTop: '0.625rem' }}>Earnings are auto-calculated from hours. These are added on top.</p>
                   </div>
                 )}
               </div>
             )
           })}
         </div>
+
+        {/* ── Mobile cards ── */}
+        <div className="pr-mobile-cards" style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: C.subtle, flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ height: 12, borderRadius: 4, width: 120, background: C.subtle, marginBottom: 6 }} />
+                    <div style={{ height: 9, borderRadius: 4, width: 80, background: C.subtle }} />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {[0,1,2,3].map(j => <div key={j} style={{ height: 52, borderRadius: 10, background: C.subtle }} />)}
+                </div>
+              </div>
+            ))
+          ) : filtered.length === 0 ? (
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '3rem', textAlign: 'center' }}>
+              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No team members found</p>
+            </div>
+          ) : filtered.map(stylist => {
+            const totals    = calcTotals(stylist)
+            const isPaid    = totals.total > 0 && totals.toPay === 0
+            const noRate    = !stylist.hourly_rate && totals.netMins > 0
+            const isEditing = editing === stylist.id
+            return (
+              <div key={stylist.id} style={{ background: C.card, border: `1px solid ${isPaid ? C.greenBorder : totals.toPay > 0 ? 'rgba(248,113,113,0.2)' : C.border}`, borderRadius: 14, overflow: 'hidden', transition: 'border-color .2s' }}>
+                <div style={{ padding: '0.875rem 1rem' }}>
+
+                  {/* Header: avatar + name + subtitle */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.75rem' }}>
+                    {stylist.photo_url
+                      ? <img src={stylist.photo_url} alt={stylist.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1px solid ${C.border}` }} />
+                      : <div style={{ width: 40, height: 40, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ color: C.gold, fontSize: 15, fontWeight: 700, fontFamily: 'Jost,sans-serif' }}>{stylist.name[0]}</span>
+                        </div>
+                    }
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, lineHeight: 1.2 }}>{stylist.name}</p>
+                      <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+                        {totals.netMins > 0 ? fmtMins(totals.netMins) : '0h'}{stylist.hourly_rate ? ` × €${parseFloat(stylist.hourly_rate).toFixed(0)}/h` : ''}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-end', flexShrink: 0 }}>
+                      {isPaid && <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Paid</span>}
+                      {noRate  && <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase' }}>No rate</span>}
+                    </div>
+                  </div>
+
+                  {/* 2×2 number grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    {[
+                      { label: 'Earnings', value: fmt(totals.earnings), color: totals.earnings > 0 ? C.gold : 'rgba(255,255,255,0.18)' },
+                      { label: 'Extras',   value: fmt(totals.extras),   color: totals.extras > 0 ? '#a78bfa' : 'rgba(255,255,255,0.18)' },
+                      { label: 'Paid',     value: fmt(totals.paid),     color: totals.paid > 0 ? C.green : 'rgba(255,255,255,0.18)' },
+                      { label: 'To Pay',   value: fmt(totals.toPay),    color: totals.toPay > 0 ? C.red : 'rgba(255,255,255,0.18)' },
+                    ].map(({ label, value, color }) => (
+                      <div key={label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '0.5rem 0.75rem', border: `1px solid ${C.border}` }}>
+                        <div style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>{label}</div>
+                        <div className="font-display" style={{ fontSize: '1.05rem', color, lineHeight: 1 }}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => isEditing ? setEditing(null) : openEdit(stylist)} className="pr-edit"
+                      style={{ flex: 1, padding: '0.5rem', borderRadius: 9, background: isEditing ? C.goldBg : C.subtle, border: `1px solid ${isEditing ? C.goldBorder : C.border}`, color: isEditing ? C.gold : C.muted, fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
+                      {isEditing ? <X size={11} /> : <Edit2 size={11} />}{isEditing ? 'Close' : '+ Extras'}
+                    </button>
+                    {totals.toPay > 0 && (
+                      <button onClick={() => markPaid(stylist)} className="pr-pay"
+                        style={{ flex: 1, padding: '0.5rem', borderRadius: 9, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'background .15s' }}>
+                        <Check size={11} /> Mark Paid
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Extras edit panel */}
+                {isEditing && (
+                  <div style={{ padding: '0.875rem 1rem 1rem', background: 'rgba(201,168,76,0.04)', borderTop: `1px solid ${C.goldBorder}` }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.75rem' }}>Add Extras for {stylist.name}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                      {[['Tips', 'tips'], ['Commissions', 'commissions'], ['Other', 'other']].map(([label, key]) => (
+                        <div key={key}>
+                          <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>{label}</label>
+                          <div style={{ position: 'relative' }}>
+                            <span style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: C.goldDim, pointerEvents: 'none', fontFamily: 'Jost,sans-serif' }}>€</span>
+                            <input type="number" min="0" step="0.01" value={editVals[key]} onChange={e => setEditVals(p => ({ ...p, [key]: e.target.value }))} className="m-inp" style={inp} />
+                          </div>
+                        </div>
+                      ))}
+                      <button onClick={() => saveExtras(stylist)} disabled={saving}
+                        style={{ padding: '0.55rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},#C4956A)`, border: 'none', color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                        <Check size={12} /> Save Extras
+                      </button>
+                    </div>
+                    <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', marginTop: '0.625rem' }}>Earnings are auto-calculated from hours. These are added on top.</p>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
       </div>
     </div>
   )

@@ -74,13 +74,13 @@ export default function App() {
             <Route path="appointments" element={<AdminRoute><StudioAppointmentsList /></AdminRoute>} />
             <Route path="schedule"     element={<StudioSchedule />} />
             <Route path="sales"        element={<AdminOnlyRoute><StudioSales /></AdminOnlyRoute>} />
-            <Route path="blocked-dates" element={<AdminOnlyRoute><StudioBlockedDates /></AdminOnlyRoute>} />
+            <Route path="blocked-dates" element={<AdminRoute><StudioBlockedDates /></AdminRoute>} />
             <Route path="services"  element={<AdminOnlyRoute><StudioServices /></AdminOnlyRoute>} />
             <Route path="stylists"  element={<AdminOnlyRoute><StudioStylists /></AdminOnlyRoute>} />
             <Route path="products"  element={<AdminOnlyRoute><StudioProducts /></AdminOnlyRoute>} />
-            <Route path="orders"    element={<AdminOnlyRoute><StudioOrders /></AdminOnlyRoute>} />
+            <Route path="orders"    element={<AdminRoute><StudioOrders /></AdminRoute>} />
             <Route path="gallery"   element={<AdminOnlyRoute><StudioGallery /></AdminOnlyRoute>} />
-            <Route path="messages"  element={<AdminOnlyRoute><StudioMessages /></AdminOnlyRoute>} />
+            <Route path="messages"  element={<AdminRoute><StudioMessages /></AdminRoute>} />
             <Route path="coupons"   element={<AdminOnlyRoute><StudioCoupons /></AdminOnlyRoute>} />
             <Route path="users"        element={<AdminOnlyRoute><StudioUsers /></AdminOnlyRoute>} />
             <Route path="home-display" element={<AdminOnlyRoute><StudioHomeDisplay /></AdminOnlyRoute>} />
