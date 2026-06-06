@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Edit2, Trash2, X, Save, User, AtSign, Upload, Link2, ChevronDown, Check } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch, invalidate } from '../../lib/cache'
 import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
@@ -79,12 +80,15 @@ export default function StudioStylists() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const [{ data: stylistData }, { data: staffData }] = await Promise.all([
-      supabase.from('stylists').select('*').order('display_order'),
-      supabase.from('profiles').select('id, full_name, email').in('role', ['admin', 'employee']).order('full_name'),
-    ])
-    setStylists(stylistData || [])
-    setStaff(staffData || [])
+    const [stylistData, staffData] = await getOrFetch('studio_stylists', async () => {
+      const [{ data: stys }, { data: staff }] = await Promise.all([
+        supabase.from('stylists').select('*').order('display_order'),
+        supabase.from('profiles').select('id, full_name, email').in('role', ['admin', 'employee']).order('full_name'),
+      ])
+      return [stys || [], staff || []]
+    }, 5 * 60_000)
+    setStylists(stylistData)
+    setStaff(staffData)
     setLoading(false)
   }
 
@@ -127,7 +131,7 @@ export default function StudioStylists() {
         : await supabase.from('stylists').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Stylist added' : 'Stylist updated')
-      setModal(null); setLocalPreview(null); load()
+      setModal(null); setLocalPreview(null); invalidate('studio_stylists'); invalidate('studio_home_display'); invalidate('studio_gallery'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }
@@ -135,7 +139,7 @@ export default function StudioStylists() {
   async function del(id) {
     if (!confirm('Delete this team member?')) return
     await supabase.from('stylists').delete().eq('id', id)
-    toast.success('Team member removed'); load()
+    toast.success('Team member removed'); invalidate('studio_stylists'); invalidate('studio_home_display'); invalidate('studio_gallery'); load()
   }
 
   function openEdit(s) {

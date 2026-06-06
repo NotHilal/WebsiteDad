@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Plus, X, Save, Trash2, Edit2, Search, Scissors, AlertTriangle, ChevronRight, ChevronLeft, UserPlus } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch, invalidate } from '../../lib/cache'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
@@ -185,23 +186,25 @@ export default function StudioCoupons() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const { data: c } = await supabase.from('coupons').select('*').order('created_at', { ascending: false })
-    setCoupons(c || [])
+    const result = await getOrFetch('studio_coupons', async () => {
+      const [{ data: c }, { data: uc }, { data: u }] = await Promise.all([
+        supabase.from('coupons').select('*').order('created_at', { ascending: false }),
+        supabase.from('user_coupons').select('*, profiles(full_name)').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+      ])
+      const map = {}
+      const ids = new Set()
+      ;(uc || []).forEach(r => {
+        map[r.coupon_id] = { name: r.profiles?.full_name || 'Unknown', used: r.used }
+        ids.add(r.coupon_id)
+      })
+      return { coupons: c || [], assignments: map, assignedIds: ids, users: u || [] }
+    }, 2 * 60_000)
+    setCoupons(result.coupons)
+    setAssignments(result.assignments)
+    setAssignedIds(result.assignedIds)
+    setUsers(result.users)
     setLoading(false)
-
-    // Load separately to avoid RLS recursion
-    const { data: uc } = await supabase.from('user_coupons').select('*, profiles(full_name)').order('created_at', { ascending: false })
-    const map = {}
-    const ids = new Set()
-    ;(uc || []).forEach(r => {
-      map[r.coupon_id] = { name: r.profiles?.full_name || 'Unknown', used: r.used }
-      ids.add(r.coupon_id)
-    })
-    setAssignments(map)
-    setAssignedIds(ids)
-
-    const { data: u } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
-    setUsers(u || [])
   }
 
   async function save() {
@@ -215,7 +218,7 @@ export default function StudioCoupons() {
         : await supabase.from('coupons').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Coupon created' : 'Coupon updated')
-      setModal(null); setForm(EMPTY); load()
+      setModal(null); setForm(EMPTY); invalidate('studio_coupons'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }

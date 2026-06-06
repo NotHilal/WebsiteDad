@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns'
 import toast from 'react-hot-toast'
+import Pager from '../../lib/Pager'
 
 const C = {
   bg:     '#0e0e14',
@@ -80,6 +81,7 @@ export default function StudioAppointmentsList() {
   const [deleteError,  setDeleteError]  = useState(false)
   const [showPass,     setShowPass]     = useState(false)
   const [deleting,     setDeleting]     = useState(false)
+  const [page,         setPage]         = useState(0)
 
   useEffect(() => { load() }, [user])
 
@@ -170,6 +172,9 @@ export default function StudioAppointmentsList() {
     return matchStatus && matchSearch
   }), [appointments, search, statusFilter])
 
+  const PER_PAGE = window.innerWidth < 768 ? 6 : 10
+  const paged = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+
   const statCards = [
     { s: 'confirmed', label: 'Confirmed', cfg: STATUS_CFG.confirmed },
     { s: 'completed', label: 'Completed', cfg: STATUS_CFG.completed },
@@ -207,7 +212,7 @@ export default function StudioAppointmentsList() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.5rem', flexShrink: 0 }}>
         {statCards.map(({ s, label, cfg }) => (
           <button key={s} className="stat-card"
-            onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
+            onClick={() => { setStatusFilter(statusFilter === s ? 'all' : s); setPage(0) }}
             style={{ background: statusFilter === s ? cfg.bg : C.card, border: `1px solid ${statusFilter === s ? cfg.border : C.border}`, borderRadius: 10, padding: '0.55rem 0.875rem', cursor: 'pointer', textAlign: 'left', transition: 'all .18s', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
             <div className="font-display stat-num" style={{ fontSize: '1.25rem', color: loading ? C.border : C.white, lineHeight: 1 }}>{loading ? '—' : counts[s]}</div>
@@ -221,18 +226,18 @@ export default function StudioAppointmentsList() {
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search size={13} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }}
             placeholder="Search by client, phone, service or stylist…" autoComplete="off" className="al-search"
             style={{ width: '100%', background: C.card, border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.42rem 0.875rem 0.42rem 2.1rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'all .2s', boxSizing: 'border-box' }} />
           {search && (
-            <button onClick={() => setSearch('')}
+            <button onClick={() => { setSearch(''); setPage(0) }}
               style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center' }}>
               <X size={13} />
             </button>
           )}
         </div>
         {(search || statusFilter !== 'all') && (
-          <button onClick={() => { setSearch(''); setStatusFilter('all') }} className="al-pill"
+          <button onClick={() => { setSearch(''); setStatusFilter('all'); setPage(0) }} className="al-pill"
             style={{ padding: '0.48rem 1rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .15s' }}>
             Clear all
           </button>
@@ -271,14 +276,14 @@ export default function StudioAppointmentsList() {
               {search || statusFilter !== 'all' ? 'No appointments match your search' : 'No appointments yet'}
             </p>
             {(search || statusFilter !== 'all') && (
-              <button onClick={() => { setSearch(''); setStatusFilter('all') }}
+              <button onClick={() => { setSearch(''); setStatusFilter('all'); setPage(0) }}
                 style={{ padding: '6px 18px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em' }}>
                 Clear filters
               </button>
             )}
           </div>
         ) : (
-          filtered.map((appt, i) => {
+          <>{paged.map((appt, i) => {
             const { text: dateText, accent } = dateLabel(appt.date)
             const initials = appt.profiles?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
             const isPastAppt = isPast(parseISO(`${appt.date}T${appt.time || '23:59'}`))
@@ -286,7 +291,7 @@ export default function StudioAppointmentsList() {
 
             return (
               <div key={appt.id} className="al-row"
-                style={{ padding: '0.875rem 1.25rem', borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${accent ? cfg.color : 'transparent'}`, transition: 'background .15s' }}>
+                style={{ padding: '0.875rem 1.25rem', borderBottom: i < paged.length - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${accent ? cfg.color : 'transparent'}`, transition: 'background .15s' }}>
 
                 {/* Line 1: avatar + name + status + info btn */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
@@ -325,7 +330,7 @@ export default function StudioAppointmentsList() {
                 </div>
               </div>
             )
-          })
+          })}<Pager page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} /></>
         )}
       </div>
 

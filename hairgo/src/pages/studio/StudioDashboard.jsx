@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Calendar, Package, Users, MessageSquare } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch } from '../../lib/cache'
 import { format, getHours } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 
@@ -41,24 +42,31 @@ export default function StudioDashboard() {
 
   async function load() {
     const today = format(new Date(), 'yyyy-MM-dd')
-    const [
-      { count: apptCount }, { count: pending }, { count: preorders },
-      { count: users }, { count: msgs }, { data: todayList }, { data: stylistList },
-    ] = await Promise.all([
-      supabase.from('appointments').select('*', { count: 'exact', head: true }),
-      supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('preorders').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'user'),
-      supabase.from('messages').select('*', { count: 'exact', head: true }).eq('read', false),
-      supabase.from('appointments')
-        .select('*, profiles(full_name), services(name, price, duration), stylists(name, photo_url)')
-        .eq('date', today)
-        .order('time'),
-      supabase.from('stylists').select('id, name, photo_url').order('display_order'),
-    ])
-    setStats({ appointments: apptCount || 0, pending: pending || 0, preorders: preorders || 0, users: users || 0, msgs: msgs || 0 })
-    setTodayAppts(todayList || [])
-    setStylists(stylistList || [])
+    const result = await getOrFetch(`studio_dashboard_${today}`, async () => {
+      const [
+        { count: apptCount }, { count: pending }, { count: preorders },
+        { count: users }, { count: msgs }, { data: todayList }, { data: stylistList },
+      ] = await Promise.all([
+        supabase.from('appointments').select('*', { count: 'exact', head: true }),
+        supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('preorders').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'user'),
+        supabase.from('messages').select('*', { count: 'exact', head: true }).eq('read', false),
+        supabase.from('appointments')
+          .select('*, profiles(full_name), services(name, price, duration), stylists(name, photo_url)')
+          .eq('date', today)
+          .order('time'),
+        supabase.from('stylists').select('id, name, photo_url').order('display_order'),
+      ])
+      return {
+        stats: { appointments: apptCount || 0, pending: pending || 0, preorders: preorders || 0, users: users || 0, msgs: msgs || 0 },
+        todayAppts: todayList || [],
+        stylists: stylistList || [],
+      }
+    }, 60_000)
+    setStats(result.stats)
+    setTodayAppts(result.todayAppts)
+    setStylists(result.stylists)
     setLoading(false)
   }
 

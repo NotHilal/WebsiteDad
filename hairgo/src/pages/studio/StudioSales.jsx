@@ -220,24 +220,24 @@ export default function StudioSales() {
       </div>
 
       {/* ── Chart + revenue split ── */}
-      <div style={{ ...card, flexShrink: 0, padding: '0.875rem 1.25rem' }}>
-        <div className="sales-chart-row" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+      <div className="sales-chart-card" style={{ ...card, flexShrink: 0, padding: '1rem 1.5rem' }}>
+        <div className="sales-chart-row" style={{ display: 'flex', gap: '1.75rem', alignItems: 'flex-start' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.6rem' }}>
+            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.75rem' }}>
               {mode === 'day' ? 'Appointments by Hour' : 'Revenue by Day'}
             </p>
             {loading
-              ? <div className="sk" style={{ height: 72, borderRadius: 8 }} />
+              ? <div className="sk chart-bars" style={{ borderRadius: 8 }} />
               : mode === 'day'
                 ? <HourlyChart appointments={appointments} hours={HOURS} />
                 : <PeriodChart appointments={appointments} preorders={preorders} start={start} end={end} mode={mode} />
             }
           </div>
           {!loading && totalRevenue > 0 && (
-            <div style={{ width: 190, flexShrink: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+            <div style={{ width: 200, flexShrink: 0, paddingLeft: '1.75rem', borderLeft: `1px solid ${C.border}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Revenue Split</p>
-                <span className="font-display" style={{ color: C.gold, fontSize: '0.9rem' }}>€{totalRevenue.toFixed(2)}</span>
+                <span className="font-display" style={{ color: C.gold, fontSize: '1rem' }}>€{totalRevenue.toFixed(2)}</span>
               </div>
               <RevenueSplit servicesRevenue={servicesRevenue} productsRevenue={productsRevenue} total={totalRevenue} />
             </div>
@@ -340,7 +340,7 @@ export default function StudioSales() {
                 {Array.from({ length: MOBILE_PER_PAGE }).map((_, i) => {
                   const appt = mobileAppts[i]
                   if (!appt) return (
-                    <div key={`empty-${i}`} style={{ padding: '0.875rem 1rem', borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: '3px solid transparent', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div key={`empty-${i}`} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: '3px solid transparent', display: 'flex', flexDirection: 'column', gap: 8 }}>
                       <div style={{ height: 14, width: '45%', borderRadius: 4, background: 'rgba(255,255,255,0.03)' }} />
                       <div style={{ height: 10, width: '65%', borderRadius: 4, background: 'rgba(255,255,255,0.02)' }} />
                     </div>
@@ -348,7 +348,7 @@ export default function StudioSales() {
                   const s = STATUS_APPT[appt.status] || STATUS_APPT.pending
                   const paid = appt.payment_status === 'paid'
                   return (
-                    <div key={appt.id} style={{ padding: '0.875rem 1rem', borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${s.color}` }}>
+                    <div key={appt.id} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${s.color}` }}>
                       {/* Line 1 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
                         <p style={{ flex: 1, color: C.white, fontSize: '0.84rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>
@@ -447,7 +447,7 @@ export default function StudioSales() {
                 {Array.from({ length: MOBILE_PER_PAGE }).map((_, i) => {
                   const order = mobileOrders[i]
                   if (!order) return (
-                    <div key={`empty-${i}`} style={{ padding: '0.875rem 1rem', borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: '3px solid transparent', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div key={`empty-${i}`} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: '3px solid transparent', display: 'flex', flexDirection: 'column', gap: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ width: 26, height: 26, borderRadius: 5, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />
                         <div style={{ height: 14, flex: 1, borderRadius: 4, background: 'rgba(255,255,255,0.03)' }} />
@@ -459,7 +459,7 @@ export default function StudioSales() {
                   const paid = order.payment_status === 'paid'
                   const lineTotal = (parseFloat(order.products?.price) || 0) * (order.quantity || 1)
                   return (
-                    <div key={order.id} style={{ padding: '0.875rem 1rem', borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${s.color}` }}>
+                    <div key={order.id} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${s.color}` }}>
                       {/* Line 1 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
                         <div style={{ width: 26, height: 26, borderRadius: 5, background: '#181818', border: `1px solid ${C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -511,10 +511,13 @@ export default function StudioSales() {
         .bar-col:hover .bar-fill  { filter: brightness(1.3); }
         .bar-col:hover .bar-label { color: rgba(255,255,255,0.6) !important; }
         .s-mobile-list { display: none; flex-direction: column; }
+        .chart-bars { height: 120px; }
         @media (max-width: 767px) {
           .sales-kpi { grid-template-columns: 1fr 1fr !important; }
-          .sales-chart-row { flex-direction: column !important; }
+          .sales-chart-card { padding: 0.75rem !important; }
+          .sales-chart-row { flex-direction: column !important; align-items: stretch !important; }
           .sales-chart-row > div:last-child { width: 100% !important; }
+          .chart-bars { height: 140px !important; }
           .s-table { display: none !important; }
           .s-mobile-list { display: flex !important; }
           .sales-tab-bar { padding: 0 0.75rem !important; }
@@ -557,41 +560,46 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
   const isToday = (day) => format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: mode === 'month' ? 2 : 5, height: 72 }}>
-        {data.map(({ day, total, apptRev }, i) => {
-          const heightPct = total === 0 ? 0 : Math.max(5, (total / maxVal) * 100)
-          const today = isToday(day)
-          return (
-            <div key={i} className="bar-col" title={`€${total.toFixed(2)}`}
-              style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end', cursor: 'default' }}>
-              <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
-                {total === 0
-                  ? <div style={{ width: '100%', height: 3, background: today ? 'rgba(201,168,76,0.2)' : 'rgba(255,255,255,0.05)', borderRadius: 2 }} />
-                  : (
-                    <motion.div className="bar-fill"
-                      initial={{ height: 0 }}
-                      animate={{ height: `${heightPct}%` }}
-                      transition={{ duration: 0.55, delay: i * 0.02, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ width: '100%', background: today ? `linear-gradient(to top, ${C.gold}, ${C.gold}88)` : 'linear-gradient(to top, #34d399, #34d39966)', borderRadius: '3px 3px 0 0', position: 'relative', transition: 'filter .2s' }}>
-                      {total > 0 && mode !== 'month' && (
-                        <span style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', fontSize: 8, color: today ? C.gold : '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                          €{total.toFixed(0)}
-                        </span>
-                      )}
-                    </motion.div>
-                  )
-                }
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ position: 'relative' }}>
+        {[25, 50, 75].map(pct => (
+          <div key={pct} style={{ position: 'absolute', bottom: `${pct}%`, left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.04)', pointerEvents: 'none', zIndex: 0 }} />
+        ))}
+        <div className="chart-bars" style={{ display: 'flex', alignItems: 'flex-end', gap: mode === 'month' ? 2 : 5, position: 'relative', zIndex: 1 }}>
+          {data.map(({ day, total, apptRev }, i) => {
+            const heightPct = total === 0 ? 0 : Math.max(5, (total / maxVal) * 100)
+            const today = isToday(day)
+            return (
+              <div key={i} className="bar-col" title={`€${total.toFixed(2)}`}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end', cursor: 'default' }}>
+                <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
+                  {total === 0
+                    ? <div style={{ width: '100%', height: 2, background: today ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', borderRadius: 2 }} />
+                    : (
+                      <motion.div className="bar-fill"
+                        initial={{ height: 0 }}
+                        animate={{ height: `${heightPct}%` }}
+                        transition={{ duration: 0.55, delay: i * 0.02, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ width: '100%', background: today ? `linear-gradient(to top, ${C.gold}, ${C.gold}66)` : 'linear-gradient(to top, #34d399, #34d39944)', borderRadius: '4px 4px 0 0', position: 'relative', transition: 'filter .2s' }}>
+                        {total > 0 && mode !== 'month' && (
+                          <span style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)', fontSize: 9, color: today ? C.gold : '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            €{total.toFixed(0)}
+                          </span>
+                        )}
+                      </motion.div>
+                    )
+                  }
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
       <div style={{ display: 'flex', gap: mode === 'month' ? 2 : 5 }}>
         {data.map(({ day, label, total }, i) => {
           const today = isToday(day)
           return (
-            <div key={i} className="bar-label" style={{ flex: 1, textAlign: 'center', fontSize: mode === 'month' ? 7 : 8, color: today ? C.goldDim : total > 0 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)', fontFamily: 'Jost,sans-serif', transition: 'color .2s', fontWeight: today ? 700 : 400 }}>
+            <div key={i} className="bar-label" style={{ flex: 1, textAlign: 'center', fontSize: mode === 'month' ? 8 : 10, color: today ? C.goldDim : total > 0 ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)', fontFamily: 'Jost,sans-serif', transition: 'color .2s', fontWeight: today ? 700 : 400 }}>
               {label}
             </div>
           )
@@ -611,41 +619,46 @@ function HourlyChart({ appointments, hours }) {
   const maxCount = Math.max(1, ...counts.map(c => c.total))
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 72 }}>
-        {counts.map(({ h, total, completed, confirmed, pending }, i) => {
-          const heightPct = total === 0 ? 0 : Math.max(6, (total / maxCount) * 100)
-          const color = completed > 0 ? C.gold : confirmed > 0 ? '#34d399' : pending > 0 ? '#f59e0b' : null
-          return (
-            <div key={h} className="bar-col" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'default', height: '100%', justifyContent: 'flex-end' }}>
-              <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
-                {total === 0
-                  ? <div style={{ width: '100%', height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }} />
-                  : (
-                    <motion.div className="bar-fill"
-                      initial={{ height: 0 }}
-                      animate={{ height: `${heightPct}%` }}
-                      transition={{ duration: 0.55, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                      style={{ width: '100%', background: color ? `linear-gradient(to top, ${color}, ${color}88)` : 'rgba(255,255,255,0.12)', borderRadius: '3px 3px 0 0', position: 'relative', transition: 'filter .2s' }}>
-                      {total > 0 && <span style={{ position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%)', fontSize: 9, color: color || C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>{total}</span>}
-                    </motion.div>
-                  )
-                }
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ position: 'relative' }}>
+        {[25, 50, 75].map(pct => (
+          <div key={pct} style={{ position: 'absolute', bottom: `${pct}%`, left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.04)', pointerEvents: 'none', zIndex: 0 }} />
+        ))}
+        <div className="chart-bars" style={{ display: 'flex', alignItems: 'flex-end', gap: 5, position: 'relative', zIndex: 1 }}>
+          {counts.map(({ h, total, completed, confirmed, pending }, i) => {
+            const heightPct = total === 0 ? 0 : Math.max(6, (total / maxCount) * 100)
+            const color = completed > 0 ? C.gold : confirmed > 0 ? '#34d399' : pending > 0 ? '#f59e0b' : null
+            return (
+              <div key={h} className="bar-col" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'default', height: '100%', justifyContent: 'flex-end' }}>
+                <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
+                  {total === 0
+                    ? <div style={{ width: '100%', height: 2, background: 'rgba(255,255,255,0.04)', borderRadius: 2 }} />
+                    : (
+                      <motion.div className="bar-fill"
+                        initial={{ height: 0 }}
+                        animate={{ height: `${heightPct}%` }}
+                        transition={{ duration: 0.55, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ width: '100%', background: color ? `linear-gradient(to top, ${color}, ${color}66)` : 'rgba(255,255,255,0.12)', borderRadius: '4px 4px 0 0', position: 'relative', transition: 'filter .2s' }}>
+                        {total > 0 && <span style={{ position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%)', fontSize: 10, color: color || C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>{total}</span>}
+                      </motion.div>
+                    )
+                  }
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
       <div style={{ display: 'flex', gap: 5 }}>
         {counts.map(({ h, total }) => (
-          <div key={h} className="bar-label" style={{ flex: 1, textAlign: 'center', fontSize: 8, color: total > 0 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)', fontFamily: 'Jost,sans-serif', transition: 'color .2s' }}>{h}h</div>
+          <div key={h} className="bar-label" style={{ flex: 1, textAlign: 'center', fontSize: 10, color: total > 0 ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)', fontFamily: 'Jost,sans-serif', transition: 'color .2s' }}>{h}h</div>
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 12, marginTop: 2 }}>
+      <div style={{ display: 'flex', gap: 14, marginTop: 2 }}>
         {[['completed', C.gold], ['confirmed', '#34d399'], ['pending', '#f59e0b']].map(([s, col]) => (
-          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: 6, height: 6, borderRadius: 1, background: col }} />
-            <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', textTransform: 'capitalize', letterSpacing: '0.1em' }}>{s}</span>
+          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ width: 7, height: 7, borderRadius: 2, background: col }} />
+            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', textTransform: 'capitalize', letterSpacing: '0.1em' }}>{s}</span>
           </div>
         ))}
       </div>

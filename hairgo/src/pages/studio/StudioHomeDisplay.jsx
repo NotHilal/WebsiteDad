@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Check, UserCheck, Image, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch } from '../../lib/cache'
 import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
@@ -29,14 +30,17 @@ export default function StudioHomeDisplay() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const [{ data: s }, { data: g }, { data: svc }] = await Promise.all([
-      supabase.from('stylists').select('id, name, title, photo_url, featured').order('display_order'),
-      supabase.from('gallery').select('id, image_url, title, category, featured').order('display_order'),
-      supabase.from('services').select('id, name, category, price, image_url, featured').order('name'),
-    ])
-    setStylists(s || [])
-    setGallery(g || [])
-    setServices(svc || [])
+    const [s, g, svc] = await getOrFetch('studio_home_display', async () => {
+      const [{ data: s }, { data: g }, { data: svc }] = await Promise.all([
+        supabase.from('stylists').select('id, name, title, photo_url, featured').order('display_order'),
+        supabase.from('gallery').select('id, image_url, title, category, featured').order('display_order'),
+        supabase.from('services').select('id, name, category, price, image_url, featured').order('name'),
+      ])
+      return [s || [], g || [], svc || []]
+    }, 5 * 60_000)
+    setStylists(s)
+    setGallery(g)
+    setServices(svc)
     setLoading(false)
   }
 

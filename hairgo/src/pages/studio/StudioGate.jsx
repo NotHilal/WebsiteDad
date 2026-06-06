@@ -12,12 +12,11 @@ export default function StudioGate() {
   const [studioPass, setStudioPass] = useState('')
   const [showPass,   setShowPass]   = useState(false)
   const [loading,    setLoading]    = useState(false)
-  const { user, isAdmin, signIn, fetchProfile, loading: authLoading, profile } = useAuth()
+  const { user, signIn, fetchProfile, loading: authLoading, profile } = useAuth()
   const navigate = useNavigate()
 
   const STUDIO_PASSWORD = import.meta.env.VITE_STUDIO_PASSWORD || 'hairgo24'
 
-  // Already passed the gate this session — go straight in
   useEffect(() => {
     if (!authLoading && user && sessionStorage.getItem('studio_access') === 'true' && (profile?.role === 'admin' || profile?.role === 'employee')) {
       navigate('/studio/dashboard')
@@ -51,15 +50,14 @@ export default function StudioGate() {
     }
   }
 
-  // Show nothing while auth is loading
   if (authLoading) return null
 
   const inputStyle = {
     width: '100%',
     background: 'rgba(255,255,255,0.03)',
     border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 16,
-    padding: '18px 20px 18px 52px',
+    borderRadius: 14,
+    padding: '16px 18px 16px 48px',
     fontSize: '0.95rem',
     color: '#fff',
     outline: 'none',
@@ -81,7 +79,7 @@ export default function StudioGate() {
 
   const iconStyle = {
     position: 'absolute',
-    left: 20,
+    left: 18,
     top: '50%',
     transform: 'translateY(-50%)',
     color: 'rgba(255,255,255,0.2)',
@@ -89,11 +87,10 @@ export default function StudioGate() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', overflow: 'hidden' }}>
+    <div className="sg-outer" style={{ minHeight: '100vh', background: '#080808', display: 'flex', overflow: 'hidden' }}>
 
-      {/* ── Left panel ─────────────────────────────────── */}
-      <div style={{ width: 400, flexShrink: 0, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 52px', borderRight: '1px solid rgba(255,255,255,0.05)' }}
-        className="hidden lg:flex">
+      {/* ── Left panel — hidden on mobile ── */}
+      <div className="sg-left" style={{ width: 400, flexShrink: 0, position: 'relative', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 52px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(201,168,76,0.04) 0%, transparent 60%)' }} />
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 320, height: 320, background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: 'linear-gradient(rgba(201,168,76,1) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,1) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
@@ -125,21 +122,30 @@ export default function StudioGate() {
         </div>
       </div>
 
-      {/* ── Right panel ────────────────────────────────── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 48px' }}>
+      {/* ── Right panel ── */}
+      <div className="sg-right" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className="sg-card"
           style={{ width: '100%', maxWidth: 480 }}
         >
+          {/* Mobile logo — only visible on small screens */}
+          <div className="sg-mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(201,168,76,0.3)' }}>
+              <Scissors size={14} color="#000" style={{ transform: 'rotate(45deg)' }} />
+            </div>
+            <span className="font-display" style={{ fontSize: '1.45rem', color: '#fff' }}>Hair<span style={{ color: '#C9A84C' }}>Go</span></span>
+          </div>
+
           {/* Header */}
-          <div style={{ marginBottom: 52 }}>
-            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 16, fontFamily: 'Jost, sans-serif' }}>
+          <div className="sg-header" style={{ marginBottom: 44 }}>
+            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 14, fontFamily: 'Jost, sans-serif' }}>
               Studio Access
             </p>
-            <h1 className="font-display font-light" style={{ color: '#fff', fontSize: '2.6rem', lineHeight: 1.1, marginBottom: 0 }}>
-              {user ? `Welcome back` : 'Sign in to continue'}
+            <h1 className="font-display font-light sg-title" style={{ color: '#fff', lineHeight: 1.1, marginBottom: 0 }}>
+              {user ? 'Welcome back' : 'Sign in to continue'}
             </h1>
             {user && (
               <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', fontFamily: 'Jost, sans-serif', marginTop: 8 }}>
@@ -153,10 +159,10 @@ export default function StudioGate() {
             {/* Email + Password — only when not signed in */}
             {!user && (
               <>
-                <div style={{ marginBottom: 28 }}>
+                <div style={{ marginBottom: 22 }}>
                   <label style={labelStyle}>Email</label>
                   <div style={{ position: 'relative' }}>
-                    <Mail size={16} style={iconStyle} />
+                    <Mail size={15} style={iconStyle} />
                     <input
                       type="email"
                       value={email}
@@ -170,26 +176,26 @@ export default function StudioGate() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: 12 }}>
+                <div style={{ marginBottom: 10 }}>
                   <label style={labelStyle}>Password</label>
                   <div style={{ position: 'relative' }}>
-                    <Lock size={16} style={iconStyle} />
+                    <Lock size={15} style={iconStyle} />
                     <input
                       type={showPass ? 'text' : 'password'}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="••••••••"
                       required
-                      style={{ ...inputStyle, paddingRight: 52 }}
+                      style={{ ...inputStyle, paddingRight: 50 }}
                       onFocus={e => { e.target.style.borderColor = 'rgba(201,168,76,0.45)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
                       onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.03)' }}
                     />
                     <button type="button" onClick={() => setShowPass(!showPass)}
-                      style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
+                      style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
                       onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
                       onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}
                     >
-                      {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
                 </div>
@@ -197,7 +203,7 @@ export default function StudioGate() {
             )}
 
             {/* Divider */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: user ? '0 0 36px 0' : '36px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: user ? '0 0 28px 0' : '28px 0' }}>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
               <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost, sans-serif', whiteSpace: 'nowrap' }}>
                 Studio Verification
@@ -206,10 +212,10 @@ export default function StudioGate() {
             </div>
 
             {/* Studio code */}
-            <div style={{ marginBottom: 44 }}>
+            <div style={{ marginBottom: 36 }}>
               <label style={labelStyle}>Studio Access Code</label>
               <div style={{ position: 'relative' }}>
-                <KeyRound size={16} style={{ ...iconStyle, color: 'rgba(201,168,76,0.4)' }} />
+                <KeyRound size={15} style={{ ...iconStyle, color: 'rgba(201,168,76,0.4)' }} />
                 <input
                   type="password"
                   value={studioPass}
@@ -230,10 +236,10 @@ export default function StudioGate() {
             <button
               type="submit"
               disabled={loading}
+              className="sg-submit"
               style={{
                 width: '100%',
-                padding: '20px 32px',
-                borderRadius: 16,
+                borderRadius: 14,
                 background: 'linear-gradient(135deg,#C9A84C 0%,#E8D5A3 50%,#C4956A 100%)',
                 color: '#000',
                 fontSize: 11,
@@ -262,15 +268,55 @@ export default function StudioGate() {
 
           </form>
 
-          {/* Footer note */}
-          <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.1)', marginTop: 36, fontFamily: 'Jost, sans-serif', letterSpacing: '0.08em' }}>
+          <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.1)', marginTop: 28, fontFamily: 'Jost, sans-serif', letterSpacing: '0.08em' }}>
             Unauthorised access is strictly prohibited
           </p>
 
         </motion.div>
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg) } }
+
+        /* ── Left panel: hidden by default, shown on large screens ── */
+        .sg-left { display: none; }
+        @media (min-width: 1024px) {
+          .sg-left { display: flex; }
+        }
+
+        /* ── Mobile logo: shown on mobile, hidden on large screens ── */
+        .sg-mobile-logo { display: flex; }
+        @media (min-width: 1024px) {
+          .sg-mobile-logo { display: none; }
+        }
+
+        /* ── Right panel padding ── */
+        .sg-right { padding: 40px 24px; }
+        @media (min-width: 640px) {
+          .sg-right { padding: 60px 48px; }
+        }
+
+        /* ── Title size ── */
+        .sg-title { font-size: 2rem; }
+        @media (min-width: 480px) {
+          .sg-title { font-size: 2.4rem; }
+        }
+        @media (min-width: 1024px) {
+          .sg-title { font-size: 2.6rem; }
+        }
+
+        /* ── Header margin ── */
+        .sg-header { margin-bottom: 32px !important; }
+        @media (min-width: 640px) {
+          .sg-header { margin-bottom: 44px !important; }
+        }
+
+        /* ── Submit button padding ── */
+        .sg-submit { padding: 16px 24px; }
+        @media (min-width: 640px) {
+          .sg-submit { padding: 18px 32px; }
+        }
+      `}</style>
     </div>
   )
 }

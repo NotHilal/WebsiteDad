@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, Edit2, Trash2, X, Save, Scissors, Clock, Upload, ImageIcon } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch, invalidate } from '../../lib/cache'
 import toast from 'react-hot-toast'
 
 const C = {
@@ -58,8 +59,11 @@ export default function StudioServices() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const { data } = await supabase.from('services').select('*').order('category').order('name')
-    setServices(data || [])
+    const data = await getOrFetch('studio_services', async () => {
+      const { data } = await supabase.from('services').select('*').order('category').order('name')
+      return data || []
+    }, 5 * 60_000)
+    setServices(data)
     setLoading(false)
   }
 
@@ -84,7 +88,7 @@ export default function StudioServices() {
         : await supabase.from('services').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Service added' : 'Service updated')
-      closeModal(); load()
+      closeModal(); invalidate('studio_services'); invalidate('studio_home_display'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }
@@ -92,7 +96,7 @@ export default function StudioServices() {
   async function del(id) {
     if (!confirm('Delete this service?')) return
     await supabase.from('services').delete().eq('id', id)
-    toast.success('Service deleted'); load()
+    toast.success('Service deleted'); invalidate('studio_services'); invalidate('studio_home_display'); load()
   }
 
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))

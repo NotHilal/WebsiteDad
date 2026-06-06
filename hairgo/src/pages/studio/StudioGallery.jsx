@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Pager from '../../lib/Pager'
 import { Plus, Trash2, Image, X, Save } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch, invalidate } from '../../lib/cache'
 import toast from 'react-hot-toast'
 
 const C = {
@@ -35,11 +36,14 @@ export default function StudioGallery() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const [{ data: imgs }, { data: stys }] = await Promise.all([
-      supabase.from('gallery').select('*, stylists(name)').order('display_order'),
-      supabase.from('stylists').select('id, name'),
-    ])
-    setImages(imgs || []); setStylists(stys || []); setLoading(false)
+    const [imgs, stys] = await getOrFetch('studio_gallery', async () => {
+      const [{ data: imgs }, { data: stys }] = await Promise.all([
+        supabase.from('gallery').select('*, stylists(name)').order('display_order'),
+        supabase.from('stylists').select('id, name'),
+      ])
+      return [imgs || [], stys || []]
+    }, 5 * 60_000)
+    setImages(imgs); setStylists(stys); setLoading(false)
   }
 
   function handleFile(e) {
@@ -75,7 +79,7 @@ export default function StudioGallery() {
       if (error) throw error
       toast.success('Photo added')
       closeModal()
-      load()
+      invalidate('studio_gallery'); invalidate('studio_home_display'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }
@@ -83,7 +87,7 @@ export default function StudioGallery() {
   async function remove(id) {
     if (!confirm('Delete this photo?')) return
     await supabase.from('gallery').delete().eq('id', id)
-    toast.success('Photo removed'); load()
+    toast.success('Photo removed'); invalidate('studio_gallery'); invalidate('studio_home_display'); load()
   }
 
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))

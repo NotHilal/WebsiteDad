@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { format } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import Pager from '../../lib/Pager'
 
 const C = {
   card: '#161620', modal: '#1a1a24',
@@ -121,6 +122,7 @@ export default function StudioUsers() {
   const [empErr,        setEmpErr]        = useState('')
   const [empSaving,     setEmpSaving]     = useState(false)
   const [stylists,      setStylists]      = useState([])
+  const [page,          setPage]          = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => { load() }, [])
@@ -288,6 +290,8 @@ export default function StudioUsers() {
   )
 
   const isUsers = tab === 'user'
+  const PER_PAGE = window.innerWidth < 768 ? 6 : 10
+  const paged = list.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -334,7 +338,7 @@ export default function StudioUsers() {
             const rs     = ROLE_STYLE[key]
             const active = tab === key
             return (
-              <button key={key} onClick={() => { setTab(key); setSearch('') }}
+              <button key={key} onClick={() => { setTab(key); setSearch(''); setPage(0) }}
                 style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: active ? 600 : 400, cursor: 'pointer', transition: 'all .15s', border: active ? `1px solid ${rs.border}` : `1px solid ${C.border}`, background: active ? rs.bg : 'transparent', color: active ? rs.color : C.muted }}>
                 <span style={{ fontSize: 11, fontWeight: 700 }}>{byRole(key).length}</span>
                 {label}
@@ -344,7 +348,7 @@ export default function StudioUsers() {
         </div>
         <div className="usr-search-box" style={{ position: 'relative' }}>
           <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Name, email or phone…"
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }} placeholder="Name, email or phone…"
             style={{ width: 220, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.75rem 0.45rem 1.9rem', fontSize: '0.78rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
             className="usr-search" />
         </div>
@@ -382,7 +386,7 @@ export default function StudioUsers() {
                     {search ? 'No results for your search' : `No ${TABS.find(t => t.key === tab)?.label.toLowerCase()} yet`}
                   </p>
                 </td></tr>
-              ) : list.map(u => {
+              ) : paged.map(u => {
                 const rs = ROLE_STYLE[u.role] || ROLE_STYLE.user
                 return (
                   <tr key={u.id} style={{ borderBottom: `1px solid ${C.border}` }} className="usr-row">
@@ -494,7 +498,7 @@ export default function StudioUsers() {
                 {search ? 'No results for your search' : `No ${TABS.find(t => t.key === tab)?.label.toLowerCase()} yet`}
               </p>
             </div>
-          ) : list.map(u => {
+          ) : paged.map(u => {
             const rs = ROLE_STYLE[u.role] || ROLE_STYLE.user
             return (
               <div key={u.id} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', marginBottom: 8 }}>
@@ -550,6 +554,8 @@ export default function StudioUsers() {
             )
           })}
         </div>
+
+        {!loading && <Pager page={page} total={list.length} perPage={PER_PAGE} onChange={setPage} />}
 
         <p style={{ fontSize: '0.68rem', color: C.muted, textAlign: 'center', marginTop: '0.75rem', fontFamily: 'Jost,sans-serif', opacity: 0.5 }}>
           Role changes take effect after the user's next sign-in. · Email only available for accounts registered after the email field was added.

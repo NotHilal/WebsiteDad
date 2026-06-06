@@ -157,7 +157,8 @@ export default function StudioSchedule() {
                   color: view === v ? C.gold : C.muted,
                   outline: view === v ? `1px solid ${C.goldBorder}` : 'none',
                 }}>
-                {v.charAt(0).toUpperCase() + v.slice(1)}
+                <span className="sched-view-label-full">{v.charAt(0).toUpperCase() + v.slice(1)}</span>
+                <span className="sched-view-label-short">{{ daily: 'Day', weekly: 'Wk', monthly: 'Mo' }[v]}</span>
               </button>
             ))}
           </div>
@@ -342,7 +343,7 @@ export default function StudioSchedule() {
         {/* ── DAILY ── */}
         {view === 'daily' && (
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-            <div style={{ display: 'flex', height: (GRID_END - GRID_START) * HOUR_HEIGHT }}>
+            <div className="sched-day-grid" style={{ height: (GRID_END - GRID_START) * HOUR_HEIGHT }}>
 
               {/* Time axis */}
               <div style={{ width: 48, flexShrink: 0, position: 'relative' }}>
@@ -399,6 +400,74 @@ export default function StudioSchedule() {
                   )
                 })}
               </div>
+            </div>
+
+            {/* ── Mobile daily list (hidden on desktop) ── */}
+            <div className="sched-day-mobile" style={{ flexDirection: 'column', gap: '0.5rem', padding: '0.75rem' }}>
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} style={{ height: 84, borderRadius: 12, background: C.subtle, border: `1px solid ${C.border}`, animationDelay: `${i * 0.08}s` }} className="sched-shimmer" />
+                ))
+              ) : dayApptList.length === 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem', gap: 10 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 14, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '1.4rem', color: C.muted }}>📅</span>
+                  </div>
+                  <p style={{ color: C.muted, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif' }}>No appointments today</p>
+                </div>
+              ) : dayApptList.map(appt => {
+                const s = STATUS[appt.status] || STATUS.pending
+                return (
+                  <div key={appt.id} onClick={() => setSelectedAppt(appt)} className="sched-mobile-card"
+                    style={{ background: s.bg, border: `1px solid ${s.border}`, borderLeft: `3px solid ${s.color}`, borderRadius: 12, padding: '0.875rem 1rem', cursor: 'pointer', transition: 'all .15s' }}>
+
+                    {/* Top row: avatar + stylist + time + status */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                      {appt.stylists?.photo_url
+                        ? <img src={appt.stylists.photo_url} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1.5px solid ${s.border}` }} />
+                        : <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${s.color}22`, border: `1.5px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: s.color, fontWeight: 700, flexShrink: 0 }}>{appt.stylists?.name?.charAt(0) || '?'}</div>
+                      }
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {appt.stylists?.name || 'Stylist'}
+                        </p>
+                        {appt.services?.name && (
+                          <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {appt.services.name}
+                          </p>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+                        <span style={{ fontSize: '1.15rem', color: s.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 700, lineHeight: 1 }}>
+                          {appt.time?.slice(0, 5)}
+                        </span>
+                        <div style={{ padding: '2px 8px', borderRadius: 20, background: `${s.color}18`, border: `1px solid ${s.border}` }}>
+                          <span style={{ fontSize: 8, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{appt.status}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom row: client + duration + price */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: '0.5rem', borderTop: `1px solid ${s.color}28` }}>
+                      {appt.profiles?.full_name && (
+                        <span style={{ flex: 1, fontSize: '0.75rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {appt.profiles.full_name}
+                        </span>
+                      )}
+                      {appt.services?.duration && (
+                        <span style={{ fontSize: '0.7rem', color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>
+                          ⏱ {appt.services.duration} min
+                        </span>
+                      )}
+                      {appt.services?.price && (
+                        <span style={{ fontSize: '0.75rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, flexShrink: 0 }}>
+                          €{appt.services.price}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
@@ -490,9 +559,31 @@ export default function StudioSchedule() {
         .st-btn-cancelled:hover { background: rgba(248,113,113,0.2) !important; }
         .del-appt-btn:hover { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.4) !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }
+        /* Daily view: grid (desktop) vs card list (mobile) */
+        .sched-day-grid  { display: flex; }
+        .sched-day-mobile { display: none; }
+        .sched-mobile-card:hover { filter: brightness(1.1); transform: translateX(2px); }
+        @keyframes sched-shimmer {
+          0%   { background-position: -400px 0 }
+          100% { background-position:  400px 0 }
+        }
+        .sched-shimmer {
+          background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+          background-size: 400px 100%;
+          animation: sched-shimmer 1.6s ease-in-out infinite;
+        }
         @media (max-width: 767px) {
           .week-scroll-wrap { overflow-x: auto !important; }
-          .week-scroll-wrap > div { min-width: 560px; }
+          .week-scroll-wrap > div { min-width: 600px; }
+          .sched-day-grid   { display: none; }
+          .sched-day-mobile { display: flex; }
+          /* Toolbar: hide full labels, show short ones */
+          .sched-view-label-full { display: none; }
+          .sched-view-label-short { display: inline; }
+        }
+        @media (min-width: 768px) {
+          .sched-view-label-full { display: inline; }
+          .sched-view-label-short { display: none; }
         }
       `}</style>
     </div>

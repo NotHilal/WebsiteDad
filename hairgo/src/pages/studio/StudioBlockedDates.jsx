@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Lock, Unlock, X, BanIcon, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch, invalidate } from '../../lib/cache'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
@@ -34,12 +35,15 @@ export default function StudioBlockedDates() {
   useEffect(() => { load() }, [])
 
   async function load() {
-    const [{ data: d }, { data: h }] = await Promise.all([
-      supabase.from('blocked_dates').select('*').order('date'),
-      supabase.from('blocked_hours').select('*').order('date'),
-    ])
-    setDates(d || [])
-    setBlockedHours(h || [])
+    const [d, h] = await getOrFetch('studio_blocked', async () => {
+      const [{ data: d }, { data: h }] = await Promise.all([
+        supabase.from('blocked_dates').select('*').order('date'),
+        supabase.from('blocked_hours').select('*').order('date'),
+      ])
+      return [d || [], h || []]
+    }, 2 * 60_000)
+    setDates(d)
+    setBlockedHours(h)
     setLoading(false)
   }
 
@@ -81,7 +85,7 @@ export default function StudioBlockedDates() {
       const { error } = await supabase.from('blocked_dates').insert({ date: selected.key, reason: reason.trim() || null })
       if (error) throw error
       toast.success('Day blocked')
-      closeModal(); load()
+      closeModal(); invalidate('studio_blocked'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }
@@ -90,7 +94,7 @@ export default function StudioBlockedDates() {
     setSaving(true)
     await supabase.from('blocked_dates').delete().eq('id', selected.blocked.id)
     toast.success('Day unblocked')
-    setSaving(false); closeModal(); load()
+    setSaving(false); closeModal(); invalidate('studio_blocked'); load()
   }
 
   // ── Hour block ──
@@ -107,7 +111,7 @@ export default function StudioBlockedDates() {
         if (error) throw error
       }
       toast.success(selHours.length > 0 ? `${selHours.length} hour${selHours.length !== 1 ? 's' : ''} blocked` : 'Hours unblocked')
-      closeModal(); load()
+      closeModal(); invalidate('studio_blocked'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
   }

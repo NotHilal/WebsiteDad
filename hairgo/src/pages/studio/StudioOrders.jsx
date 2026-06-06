@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Search, Package, Check, X, Trash2, AlertTriangle, ChevronRight, User } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { getOrFetch } from '../../lib/cache'
+import Pager from '../../lib/Pager'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -32,17 +34,21 @@ export default function StudioOrders() {
   const [deletePass,   setDeletePass]   = useState('')
   const [deleteError,  setDeleteError]  = useState(false)
   const [showPass,     setShowPass]     = useState(false)
+  const [page,         setPage]         = useState(0)
 
   useEffect(() => { load() }, [])
 
   async function load() {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('preorders')
-      .select('*, products(name, price, image_url, category), profiles(full_name, phone)')
-      .order('created_at', { ascending: false })
-    if (error) toast.error('Failed to load orders')
-    setOrders(data || [])
+    const data = await getOrFetch('studio_orders', async () => {
+      const { data, error } = await supabase
+        .from('preorders')
+        .select('*, products(name, price, image_url, category), profiles(full_name, phone)')
+        .order('created_at', { ascending: false })
+      if (error) toast.error('Failed to load orders')
+      return data || []
+    }, 60_000)
+    setOrders(data)
     setLoading(false)
   }
 
@@ -105,6 +111,9 @@ export default function StudioOrders() {
     return c
   }, [orders])
 
+  const PER_PAGE = window.innerWidth < 768 ? 6 : 10
+  const paged = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
       <style>{`
@@ -125,7 +134,7 @@ export default function StudioOrders() {
         </div>
         <div style={{ position: 'relative' }}>
           <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }}
             placeholder="Search by name, phone, product…" autoComplete="off" className="o-search"
             style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.875rem 0.45rem 2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', width: 280, maxWidth: '100%', transition: 'border-color .2s' }} />
         </div>
@@ -134,7 +143,7 @@ export default function StudioOrders() {
       {/* ── Status tabs ── */}
       <div style={{ display: 'flex', gap: 4, flexShrink: 0, flexWrap: 'wrap' }}>
         {STATUS_TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)}
+          <button key={t} onClick={() => { setTab(t); setPage(0) }}
             style={{ padding: '0.35rem 0.875rem', borderRadius: 20, fontSize: 11, letterSpacing: '0.13em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: tab === t ? 600 : 400, cursor: 'pointer', transition: 'all .18s', border: 'none', background: tab === t ? C.goldBg : 'rgba(255,255,255,0.04)', color: tab === t ? C.gold : C.muted, outline: tab === t ? `1px solid ${C.goldBorder}` : '1px solid transparent' }}>
             {t}<span style={{ marginLeft: 5, fontSize: 9, opacity: 0.7 }}>({counts[t] || 0})</span>
           </button>
@@ -160,13 +169,13 @@ export default function StudioOrders() {
           </div>
         ) : (
           <>
-            {filtered.map((order, i) => {
+            {paged.map((order, i) => {
               const s = STATUS_STYLE[order.status] || STATUS_STYLE.active
               const total = (parseFloat(order.products?.price) || 0) * (order.quantity || 1)
 
               return (
                 <div key={order.id} className="o-row"
-                  style={{ padding: '0.875rem 1.25rem', borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none', transition: 'background .15s' }}>
+                  style={{ padding: '0.875rem 1.25rem', borderBottom: i < paged.length - 1 ? `1px solid ${C.border}` : 'none', transition: 'background .15s' }}>
 
                   {/* Row 1: client + status + info btn */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -203,6 +212,7 @@ export default function StudioOrders() {
                 </div>
               )
             })}
+            <Pager page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} />
           </>
         )}
       </div>
