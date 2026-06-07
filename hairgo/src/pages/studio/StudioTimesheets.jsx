@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, Trash2, CalendarDays } from 'lucide-react'
+import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, Trash2, CalendarDays, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Pager from '../../lib/Pager'
 import { useAuth } from '../../contexts/AuthContext'
@@ -30,6 +30,7 @@ export default function StudioTimesheets() {
   const [linkedStylist, setLinkedStylist] = useState(null)
   const [activeEntry,   setActiveEntry]   = useState(null)
   const [loading,      setLoading]      = useState(true)
+  const [error,        setError]        = useState(null)
   const [page,         setPage]         = useState(0)
   const [showPicker,     setShowPicker]     = useState(false)
   const [pickerMonth,    setPickerMonth]    = useState(startOfMonth(new Date()))
@@ -49,10 +50,10 @@ export default function StudioTimesheets() {
 
   async function load() {
     setLoading(true)
+    setError(null)
 
     if (isAdmin) {
-      // Admin sees everything
-      const [{ data: stys }, { data: ents }] = await Promise.all([
+      const [{ data: stys, error: e1 }, { data: ents, error: e2 }] = await Promise.all([
         supabase.from('stylists').select('id, name, photo_url').order('display_order'),
         supabase.from('timesheets')
           .select('*, stylists(name, photo_url)')
@@ -60,30 +61,30 @@ export default function StudioTimesheets() {
           .lte('clock_in', weekEnd.toISOString())
           .order('clock_in', { ascending: false }),
       ])
+      if (e1 || e2) { setError('Could not load timesheets — check your connection.'); setLoading(false); return }
       setStylists(stys || [])
       setEntries(ents || [])
       setLinkedStylist(null)
     } else {
-      // Employee sees only their own linked stylist
       const { data: linked } = await supabase
         .from('stylists').select('id, name, photo_url').eq('profile_id', user.id).single()
       setLinkedStylist(linked || null)
       if (linked) {
         setStylists([linked])
-        const [{ data: ents }, { data: openEntry }] = await Promise.all([
+        const [{ data: ents, error: e1 }, { data: openEntry }] = await Promise.all([
           supabase.from('timesheets')
             .select('*, stylists(name, photo_url)')
             .eq('stylist_id', linked.id)
             .gte('clock_in', weekStart.toISOString())
             .lte('clock_in', weekEnd.toISOString())
             .order('clock_in', { ascending: false }),
-          // Separate query — no date restriction — to reliably detect active clock-in across devices/timezones
           supabase.from('timesheets')
             .select('id, clock_in, stylist_id')
             .eq('stylist_id', linked.id)
             .is('clock_out', null)
             .maybeSingle(),
         ])
+        if (e1) { setError('Could not load timesheets — check your connection.'); setLoading(false); return }
         setEntries(ents || [])
         setActiveEntry(openEntry || null)
       } else {
@@ -130,6 +131,14 @@ export default function StudioTimesheets() {
   const filtered = filterStylist ? entries.filter(e => e.stylist_id === filterStylist.id) : entries
   const PER_PAGE = window.innerWidth < 768 ? 4 : 10
   const paged    = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+
+  if (error) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+      <AlertCircle size={28} color={C.red} />
+      <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
+      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
+    </div>
+  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>

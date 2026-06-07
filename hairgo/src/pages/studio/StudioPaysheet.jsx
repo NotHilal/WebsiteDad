@@ -306,6 +306,7 @@ export default function StudioPaysheet() {
   const [stylist,    setStylist]    = useState(null)
   const [sheets,     setSheets]     = useState([])
   const [loading,    setLoading]    = useState(true)
+  const [error,      setError]      = useState(null)
   const [notLinked,  setNotLinked]  = useState(false)
   const [activeTab,  setActiveTab]  = useState('calendar')
   const [unpaidOnly, setUnpaidOnly] = useState(false)
@@ -323,17 +324,19 @@ export default function StudioPaysheet() {
   async function load() {
     if (!user) return
     setLoading(true)
+    setError(null)
     const { data: linked } = await supabase
       .from('stylists').select('id, name, hourly_rate').eq('profile_id', user.id).single()
     if (!linked) { setNotLinked(true); setLoading(false); return }
     setStylist(linked)
     setNotLinked(false)
-    const { data } = await supabase
+    const { data, error: e } = await supabase
       .from('timesheets')
       .select('id, clock_in, clock_out, break_minutes, paid_at')
       .eq('stylist_id', linked.id)
       .not('clock_out', 'is', null)
       .order('clock_in', { ascending: false })
+    if (e) { setError('Could not load sessions — check your connection.'); setLoading(false); return }
     setSheets(data || [])
     setLoading(false)
   }
@@ -355,6 +358,14 @@ export default function StudioPaysheet() {
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid rgba(201,168,76,0.18)', borderTopColor: '#C9A84C', animation: 'spin 0.7s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
+
+  if (error) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+      <AlertCircle size={28} color={C.red} />
+      <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
+      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
     </div>
   )
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Check, Edit2, X, ArrowLeft, Clock, ChevronRight, ChevronLeft, Info } from 'lucide-react'
+import { Check, Edit2, X, ArrowLeft, Clock, ChevronRight, ChevronLeft, Info, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import {
   format, differenceInMinutes,
@@ -309,6 +309,7 @@ export default function StudioPayRuns() {
   const [timesheets,    setTimesheets]    = useState([])
   const [payRuns,       setPayRuns]       = useState([])
   const [loading,       setLoading]       = useState(true)
+  const [error,         setError]         = useState(null)
   const [selected,      setSelected]      = useState(null)
   const [editing,       setEditing]       = useState(false)
   const [editVals,      setEditVals]      = useState({ tips: '0', commissions: '0', other: '0' })
@@ -336,7 +337,8 @@ export default function StudioPayRuns() {
 
   async function load() {
     setLoading(true)
-    const [{ data: stys }, { data: sheets }, { data: runs }] = await Promise.all([
+    setError(null)
+    const [{ data: stys, error: e1 }, { data: sheets, error: e2 }, { data: runs, error: e3 }] = await Promise.all([
       supabase.from('stylists').select('id, name, photo_url, hourly_rate').order('display_order'),
       supabase.from('timesheets')
         .select('id, stylist_id, clock_in, clock_out, break_minutes, paid_at')
@@ -344,6 +346,7 @@ export default function StudioPayRuns() {
         .order('clock_in', { ascending: false }),
       supabase.from('pay_runs').select('id, stylist_id, tips, commissions, other'),
     ])
+    if (e1 || e2 || e3) { setError('Could not load pay data — check your connection.'); setLoading(false); return }
     setStylists(stys || [])
     setTimesheets(sheets || [])
     setPayRuns(runs || [])
@@ -419,6 +422,14 @@ export default function StudioPayRuns() {
     }
     return { owed, paid, pending }
   }, [totalsMap, loading])
+
+  if (error) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+      <AlertCircle size={28} color={C.red} />
+      <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
+      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
+    </div>
+  )
 
   // ── EMPLOYEE DETAIL ──────────────────────────────────────────────
   if (selected) {

@@ -573,11 +573,11 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
           <div key={pct} style={{ position: 'absolute', bottom: `${pct}%`, left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.04)', pointerEvents: 'none', zIndex: 0 }} />
         ))}
         <div className="chart-bars" style={{ display: 'flex', alignItems: 'flex-end', gap: mode === 'month' ? 2 : 5, position: 'relative', zIndex: 1 }}>
-          {data.map(({ day, total, apptRev }, i) => {
+          {data.map(({ day, total, apptRev, ordRev }, i) => {
             const heightPct = total === 0 ? 0 : Math.max(5, (total / maxVal) * 100)
             const today = isToday(day)
             return (
-              <div key={i} className="bar-col" title={`€${total.toFixed(2)}`}
+              <div key={i} className="bar-col" title={`Services €${apptRev.toFixed(2)} · Products €${ordRev.toFixed(2)}`}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end', cursor: 'default' }}>
                 <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
                   {total === 0
@@ -587,7 +587,13 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
                         initial={{ height: 0 }}
                         animate={{ height: `${heightPct}%` }}
                         transition={{ duration: 0.55, delay: i * 0.02, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ width: '100%', background: today ? `linear-gradient(to top, ${C.gold}, ${C.gold}66)` : 'linear-gradient(to top, #34d399, #34d39944)', borderRadius: '4px 4px 0 0', position: 'relative', transition: 'filter .2s' }}>
+                        style={{ width: '100%', borderRadius: '4px 4px 0 0', position: 'relative', transition: 'filter .2s', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                        {ordRev > 0 && (
+                          <div style={{ flex: ordRev, background: today ? 'linear-gradient(to top, #c4b5fd, #a78bfa66)' : 'linear-gradient(to top, #a78bfa, #a78bfa44)' }} />
+                        )}
+                        {apptRev > 0 && (
+                          <div style={{ flex: apptRev, background: today ? `linear-gradient(to top, ${C.gold}, ${C.gold}66)` : 'linear-gradient(to top, #34d399, #34d39944)' }} />
+                        )}
                         {total > 0 && mode !== 'month' && (
                           <span style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)', fontSize: 9, color: today ? C.gold : '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>
                             €{total.toFixed(0)}
@@ -612,6 +618,14 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
           )
         })}
       </div>
+      <div style={{ display: 'flex', gap: 12, marginTop: 2 }}>
+        {[['#34d399', 'Services'], ['#a78bfa', 'Products']].map(([col, lbl]) => (
+          <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 7, height: 7, borderRadius: 2, background: col }} />
+            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>{lbl}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -620,47 +634,44 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
 function AllTimeChart({ appointments, preorders }) {
   const [hovered, setHovered] = useState(null)
 
-  // group paid revenue by month (yyyy-MM)
-  const byMonth = {}
+  const byS = {}, byP = {}
   appointments.forEach(a => {
     if (a.payment_status !== 'paid' || !a.created_at) return
     const k = a.created_at.slice(0, 7)
-    byMonth[k] = (byMonth[k] || 0) + (parseFloat(a.services?.price) || 0)
+    byS[k] = (byS[k] || 0) + (parseFloat(a.services?.price) || 0)
   })
   preorders.forEach(p => {
     if (p.payment_status !== 'paid' || !p.created_at) return
     const k = p.created_at.slice(0, 7)
-    byMonth[k] = (byMonth[k] || 0) + (parseFloat(p.products?.price) || 0) * (p.quantity || 1)
+    byP[k] = (byP[k] || 0) + (parseFloat(p.products?.price) || 0) * (p.quantity || 1)
   })
 
-  const keys = Object.keys(byMonth).sort()
-  if (keys.length === 0) return (
+  const allKeys = [...new Set([...Object.keys(byS), ...Object.keys(byP)])].sort()
+  if (allKeys.length === 0) return (
     <div style={{ height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>No paid revenue yet</p>
     </div>
   )
 
-  // fill every month from first to now
   const months = []
-  let cur = parseISO(keys[0] + '-01')
+  let cur = parseISO(allKeys[0] + '-01')
   const last = parseISO(format(new Date(), 'yyyy-MM') + '-01')
   while (cur <= last) {
     const k = format(cur, 'yyyy-MM')
-    months.push({ k, rev: byMonth[k] || 0, label: format(cur, 'MMM yy') })
+    months.push({ k, sRev: byS[k] || 0, pRev: byP[k] || 0, label: format(cur, 'MMM yy') })
     cur = addMonths(cur, 1)
   }
 
   const W = 500, H = 130, PL = 4, PR = 4, PT = 18, PB = 0
-  const maxRev = Math.max(1, ...months.map(m => m.rev))
+  const maxRev = Math.max(1, ...months.map(m => Math.max(m.sRev, m.pRev)))
   const n = months.length
 
-  const pts = months.map((m, i) => ({
-    x: PL + (n === 1 ? (W - PL - PR) / 2 : (i / (n - 1)) * (W - PL - PR)),
-    y: PT + ((1 - m.rev / maxRev) * (H - PT - PB)),
-    ...m,
-  }))
+  const xFor = i => PL + (n === 1 ? (W - PL - PR) / 2 : (i / (n - 1)) * (W - PL - PR))
+  const yFor = v => PT + ((1 - v / maxRev) * (H - PT - PB))
 
-  // cubic bezier smooth path
+  const ptsS = months.map((m, i) => ({ x: xFor(i), y: yFor(m.sRev), ...m }))
+  const ptsP = months.map((m, i) => ({ x: xFor(i), y: yFor(m.pRev), ...m }))
+
   function curvePath(points) {
     if (points.length === 1) return `M ${points[0].x} ${points[0].y}`
     let d = `M ${points[0].x} ${points[0].y}`
@@ -672,66 +683,87 @@ function AllTimeChart({ appointments, preorders }) {
     return d
   }
 
-  const linePath = curvePath(pts)
-  const areaPath = linePath + ` L ${pts[pts.length - 1].x} ${H} L ${pts[0].x} ${H} Z`
+  const lineS = curvePath(ptsS)
+  const lineP = curvePath(ptsP)
+  const areaS = lineS + ` L ${ptsS[ptsS.length - 1].x} ${H} L ${ptsS[0].x} ${H} Z`
+  const areaP = lineP + ` L ${ptsP[ptsP.length - 1].x} ${H} L ${ptsP[0].x} ${H} Z`
 
-  // label every Nth month to avoid crowding
   const step = n <= 6 ? 1 : n <= 12 ? 2 : n <= 24 ? 3 : 6
 
   return (
     <div style={{ position: 'relative' }}>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', display: 'block' }} preserveAspectRatio="none">
         <defs>
-          <linearGradient id="at-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor={C.gold} stopOpacity="0.22" />
-            <stop offset="100%" stopColor={C.gold} stopOpacity="0"    />
+          <linearGradient id="at-grad-s" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#34d399" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="#34d399" stopOpacity="0"    />
+          </linearGradient>
+          <linearGradient id="at-grad-p" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#a78bfa" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="#a78bfa" stopOpacity="0"    />
           </linearGradient>
         </defs>
-        {/* grid lines */}
         {[0.25, 0.5, 0.75].map(f => (
           <line key={f} x1={PL} y1={PT + (1 - f) * (H - PT - PB)} x2={W - PR} y2={PT + (1 - f) * (H - PT - PB)}
             stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
         ))}
-        {/* area fill */}
-        <path d={areaPath} fill="url(#at-grad)" />
-        {/* curve */}
-        <path d={linePath} fill="none" stroke={C.gold} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        {/* invisible hit targets + dots */}
-        {pts.map((pt, i) => (
-          <g key={i}>
-            <rect x={pt.x - (W / n / 2)} y={0} width={W / n} height={H}
-              fill="transparent"
-              onMouseEnter={() => setHovered(i)}
-              onMouseLeave={() => setHovered(null)} />
-            {(hovered === i || pt.rev > 0) && (
-              <circle cx={pt.x} cy={pt.y} r={hovered === i ? 4.5 : 2.5}
-                fill={hovered === i ? C.gold : `${C.gold}99`}
-                stroke={hovered === i ? 'rgba(0,0,0,0.4)' : 'none'} strokeWidth="1"
-                style={{ transition: 'r .12s' }} />
-            )}
-            {hovered === i && (
-              <g>
-                <rect x={Math.min(pt.x - 38, W - 80)} y={pt.y - 28} width={76} height={22} rx="5"
-                  fill="#1e1e2e" stroke={C.goldBorder} strokeWidth="1" />
-                <text x={Math.min(pt.x - 38, W - 80) + 38} y={pt.y - 13}
-                  textAnchor="middle" fill={C.gold}
-                  style={{ fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
-                  €{pt.rev.toFixed(0)}
-                </text>
-              </g>
-            )}
-          </g>
-        ))}
+        <path d={areaS} fill="url(#at-grad-s)" />
+        <path d={areaP} fill="url(#at-grad-p)" />
+        <path d={lineS} fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={lineP} fill="none" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        {ptsS.map((ptS, i) => {
+          const ptP = ptsP[i]
+          return (
+            <g key={i}>
+              <rect x={ptS.x - (W / n / 2)} y={0} width={W / n} height={H}
+                fill="transparent"
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)} />
+              {(hovered === i || ptS.sRev > 0) && (
+                <circle cx={ptS.x} cy={ptS.y} r={hovered === i ? 4 : 2.5}
+                  fill={hovered === i ? '#34d399' : '#34d39999'}
+                  stroke={hovered === i ? 'rgba(0,0,0,0.4)' : 'none'} strokeWidth="1" />
+              )}
+              {(hovered === i || ptP.pRev > 0) && (
+                <circle cx={ptP.x} cy={ptP.y} r={hovered === i ? 4 : 2.5}
+                  fill={hovered === i ? '#a78bfa' : '#a78bfa99'}
+                  stroke={hovered === i ? 'rgba(0,0,0,0.4)' : 'none'} strokeWidth="1" />
+              )}
+              {hovered === i && (
+                <g>
+                  <rect x={Math.min(ptS.x - 46, W - 96)} y={ptS.y - 46} width={92} height={40} rx="5"
+                    fill="#1e1e2e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+                  <text x={Math.min(ptS.x - 46, W - 96) + 8} y={ptS.y - 30}
+                    fill="#34d399" style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                    S €{ptS.sRev.toFixed(0)}
+                  </text>
+                  <text x={Math.min(ptS.x - 46, W - 96) + 8} y={ptS.y - 15}
+                    fill="#a78bfa" style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                    P €{ptP.pRev.toFixed(0)}
+                  </text>
+                </g>
+              )}
+            </g>
+          )
+        })}
       </svg>
 
-      {/* X-axis labels */}
       <div style={{ display: 'flex', marginTop: 6, paddingLeft: PL, paddingRight: PR }}>
         {months.map((m, i) => (
           <div key={m.k} style={{ flex: 1, textAlign: 'center', fontSize: 8,
-            color: hovered === i ? C.goldDim : 'rgba(255,255,255,0.22)',
+            color: hovered === i ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)',
             fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap',
             transition: 'color .15s', fontWeight: hovered === i ? 700 : 400 }}>
             {i % step === 0 ? m.label : ''}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
+        {[['#34d399', 'Services'], ['#a78bfa', 'Products']].map(([col, lbl]) => (
+          <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 18, height: 2, borderRadius: 1, background: col }} />
+            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>{lbl}</span>
           </div>
         ))}
       </div>
