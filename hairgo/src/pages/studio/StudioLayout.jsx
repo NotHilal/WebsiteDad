@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
-  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote
+  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote, QrCode
 } from 'lucide-react'
 import AppointmentAlert from '../../components/AppointmentAlert'
 import { useAuth } from '../../contexts/AuthContext'
@@ -26,6 +26,7 @@ const adminNavItems = [
   { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
   { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
   { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
+  { to: '/studio/kiosk',         icon: QrCode,          label: 'Kiosk' },
   { to: '/studio/pay-runs',      icon: Banknote,        label: 'Pay Runs' },
   { to: '/studio/home-display',  icon: Sparkles,        label: 'Home Display' },
   { to: '/studio/services',      icon: Scissors,        label: 'Services' },

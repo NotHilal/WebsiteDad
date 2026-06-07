@@ -31,6 +31,8 @@ import StudioHomeDisplay from './pages/studio/StudioHomeDisplay'
 import StudioTimesheets  from './pages/studio/StudioTimesheets'
 import StudioPayRuns     from './pages/studio/StudioPayRuns'
 import StudioPaysheet    from './pages/studio/StudioPaysheet'
+import StudioKiosk       from './pages/studio/StudioKiosk'
+import ClockIn           from './pages/ClockIn'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
 import AdminOnlyRoute from './components/auth/AdminOnlyRoute'
@@ -67,6 +69,12 @@ export default function App() {
             <Route path="chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           </Route>
+
+          {/* Public clock-in page (scanned from kiosk QR) */}
+          <Route path="/clockin" element={<ClockIn />} />
+
+          {/* Kiosk — full screen, no sidebar, admin only */}
+          <Route path="/studio/kiosk" element={<AdminRoute><StudioKiosk /></AdminRoute>} />
 
           {/* Studio (admin) routes */}
           <Route path="/studio" element={<StudioGate />} />

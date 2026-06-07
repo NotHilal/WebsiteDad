@@ -21,7 +21,7 @@ export default function Register() {
     setLoad(true)
     try {
       await signUp(form.email, form.password, form.fullName, form.phone)
-      toast.success('Account created! Check your email to verify.')
+      toast.success('Account created!')
       navigate('/')
     } catch (err) {
       toast.error(err.message || 'Failed to create account')

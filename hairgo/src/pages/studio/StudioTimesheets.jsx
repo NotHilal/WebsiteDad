@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
-import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, Trash2, CalendarDays, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, CalendarDays, AlertCircle, ScanLine, X } from 'lucide-react'
+import _jsQR from 'jsqr'
+const jsQR = _jsQR.default ?? _jsQR
 import { supabase } from '../../lib/supabase'
 import Pager from '../../lib/Pager'
 import { useAuth } from '../../contexts/AuthContext'
@@ -22,6 +24,83 @@ function fmtMins(mins) {
   return `${h}h ${m.toString().padStart(2, '0')}m`
 }
 
+function QrScanner({ onScan, onCancel }) {
+  const videoRef  = useRef(null)
+  const canvasRef = useRef(null)
+  const aliveRef  = useRef(true)
+
+  useEffect(() => {
+    let stream
+    async function start() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        if (!videoRef.current) return
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+        tick()
+      } catch { onCancel() }
+    }
+
+    function tick() {
+      if (!aliveRef.current) return
+      const video = videoRef.current, canvas = canvasRef.current
+      if (!video || !canvas || video.readyState < 2) { requestAnimationFrame(tick); return }
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(video, 0, 0)
+      try {
+        const img  = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const code = jsQR(img.data, img.width, img.height)
+        if (code?.data) {
+          const t = new URL(code.data).searchParams.get('t')
+          if (t) { stop(); onScan(t); return }
+        }
+      } catch (e) { console.error('QR scan error:', e) }
+      requestAnimationFrame(tick)
+    }
+
+    function stop() { aliveRef.current = false; stream?.getTracks().forEach(tr => tr.stop()) }
+    start()
+    return () => stop()
+  }, [onScan, onCancel])
+
+  const GOLD = '#C9A84C'
+  const br   = { position: 'absolute', width: 22, height: 22 }
+  const line = `2.5px solid ${GOLD}`
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.96)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
+      <button onClick={onCancel}
+        style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <X size={16} />
+      </button>
+
+      <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', letterSpacing: '0.04em' }}>
+        Point at the kiosk QR code
+      </p>
+
+      <div style={{ position: 'relative', width: 260, height: 260, borderRadius: 16, overflow: 'hidden' }}>
+        <video ref={videoRef} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        {/* Corner brackets */}
+        <div style={{ ...br, top: 8,    left: 8,   borderTop: line, borderLeft: line,   borderRadius: '4px 0 0 0' }} />
+        <div style={{ ...br, top: 8,    right: 8,  borderTop: line, borderRight: line,  borderRadius: '0 4px 0 0' }} />
+        <div style={{ ...br, bottom: 8, left: 8,   borderBottom: line, borderLeft: line,  borderRadius: '0 0 0 4px' }} />
+        <div style={{ ...br, bottom: 8, right: 8,  borderBottom: line, borderRight: line, borderRadius: '0 0 4px 0' }} />
+        {/* Scan line animation */}
+        <div style={{ position: 'absolute', left: 8, right: 8, height: 2, background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)`, animation: 'scanline 2s ease-in-out infinite', top: '50%' }} />
+      </div>
+
+      <button onClick={onCancel}
+        style={{ padding: '0.6rem 1.5rem', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', fontSize: '0.82rem', cursor: 'pointer' }}>
+        Cancel
+      </button>
+
+      <style>{`@keyframes scanline { 0%,100%{top:15%} 50%{top:85%} }`}</style>
+    </div>
+  )
+}
+
 export default function StudioTimesheets() {
   const { user, isAdmin } = useAuth()
   const [week,         setWeek]         = useState(new Date())
@@ -36,6 +115,8 @@ export default function StudioTimesheets() {
   const [pickerMonth,    setPickerMonth]    = useState(startOfMonth(new Date()))
   const [filterStylist,  setFilterStylist]  = useState(null)
   const [showFilter,     setShowFilter]     = useState(false)
+  const [showScanner,    setShowScanner]    = useState(false)
+  const [scanStylistId,  setScanStylistId]  = useState(null)
 
   const weekStart = startOfWeek(week, { weekStartsOn: 1 })
   const weekEnd   = endOfWeek(week,   { weekStartsOn: 1 })
@@ -97,30 +178,27 @@ export default function StudioTimesheets() {
     setLoading(false)
   }
 
-  async function clockIn(stylistId) {
-    const { data, error } = await supabase.from('timesheets').insert({ stylist_id: stylistId, clock_in: new Date().toISOString() }).select('id, clock_in, stylist_id').single()
-    if (error) return toast.error(error.message)
-    setActiveEntry(data)
-    toast.success('Clocked in')
+  function openScanner(stylistId) {
+    setScanStylistId(stylistId)
+    setShowScanner(true)
+  }
+
+  async function handleScan(token) {
+    setShowScanner(false)
+    const { data, error } = await supabase.rpc('clock_action', {
+      p_stylist_id: scanStylistId,
+      p_token: token,
+    })
+    if (error || data?.error) {
+      if (data?.error === 'invalid_token') toast.error('QR code expired — scan again')
+      else toast.error('Something went wrong')
+      return
+    }
+    toast.success(data.action === 'clock_in' ? 'Clocked in!' : 'Clocked out!')
     load()
   }
 
-  async function clockOut(entry) {
-    const { error } = await supabase.from('timesheets').update({ clock_out: new Date().toISOString() }).eq('id', entry.id)
-    if (error) return toast.error(error.message)
-    setActiveEntry(null)
-    toast.success('Clocked out')
-    load()
-  }
-
-  async function deleteEntry(id) {
-    if (!confirm('Delete this timesheet entry?')) return
-    await supabase.from('timesheets').delete().eq('id', id)
-    toast.success('Entry deleted')
-    load()
-  }
-
-  const todayEntries  = entries.filter(e => isToday(new Date(e.clock_in)))
+const todayEntries  = entries.filter(e => isToday(new Date(e.clock_in)))
   const clockedInNow  = todayEntries.filter(e => !e.clock_out)
   const totalWeekMins = entries.reduce((acc, e) => {
     if (!e.clock_out) return acc
@@ -142,11 +220,16 @@ export default function StudioTimesheets() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
+      {showScanner && (
+        <QrScanner
+          onScan={handleScan}
+          onCancel={() => setShowScanner(false)}
+        />
+      )}
       <style>{`
         @keyframes blink        { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
         .ts-row:hover           { background: rgba(255,255,255,0.02) !important; }
-        .ts-del:hover           { color: ${C.red} !important; border-color: rgba(248,113,113,0.3) !important; background: rgba(248,113,113,0.06) !important; }
-        .week-nav:hover         { background: rgba(201,168,76,0.08) !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
+.week-nav:hover         { background: rgba(201,168,76,0.08) !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .clk-in:hover           { background: rgba(52,211,153,0.18)  !important; }
         .clk-out:hover          { background: rgba(248,113,113,0.18) !important; }
         .ts-date-btn:hover      { background: rgba(255,255,255,0.05) !important; }
@@ -376,13 +459,13 @@ export default function StudioTimesheets() {
                     : <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', padding: '3px 9px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
                 ) : (
                   active
-                    ? <button onClick={() => clockOut(active)} className="clk-out"
+                    ? <button onClick={() => openScanner(s.id)} className="clk-out"
                         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
-                        <StopCircle size={9} /> Out
+                        <ScanLine size={9} /> Out
                       </button>
-                    : <button onClick={() => clockIn(s.id)} className="clk-in"
+                    : <button onClick={() => openScanner(s.id)} className="clk-in"
                         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
-                        <Play size={9} /> In
+                        <ScanLine size={9} /> In
                       </button>
                 )}
               </div>
@@ -396,15 +479,15 @@ export default function StudioTimesheets() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
 
           {/* Column headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px 28px', padding: '0.5rem 0.875rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
-            {['Member', 'In', 'Out', 'Net', ''].map((h, i) => (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.5rem 0.875rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
+            {['Member', 'In', 'Out', 'Net'].map((h, i) => (
               <div key={i} style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, textAlign: i > 0 ? 'center' : 'left' }}>{h}</div>
             ))}
           </div>
 
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px 28px', padding: '0.75rem 0.875rem', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.75rem 0.875rem', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.subtle, flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
@@ -412,7 +495,7 @@ export default function StudioTimesheets() {
                     <div style={{ height: 8, borderRadius: 4, width: 60, background: C.subtle }} />
                   </div>
                 </div>
-                {[1,1,1,1].map((_, j) => <div key={j} style={{ height: 10, borderRadius: 4, background: C.subtle, margin: '0 auto', width: 36 }} />)}
+                {[1,1,1].map((_, j) => <div key={j} style={{ height: 10, borderRadius: 4, background: C.subtle, margin: '0 auto', width: 36 }} />)}
               </div>
             ))
           ) : filtered.length === 0 ? (
@@ -426,7 +509,7 @@ export default function StudioTimesheets() {
             const isLast = idx === paged.length - 1
             return (
               <div key={e.id} className="ts-row"
-                style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px 28px', padding: '0.6rem 0.875rem', borderBottom: isLast ? 'none' : `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center', transition: 'background .12s' }}>
+                style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.6rem 0.875rem', borderBottom: isLast ? 'none' : `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center', transition: 'background .12s' }}>
 
                 {/* Member + date */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
@@ -464,15 +547,6 @@ export default function StudioTimesheets() {
                   </span>
                 </div>
 
-                {/* Delete (admin only) */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {isAdmin && (
-                    <button onClick={() => deleteEntry(e.id)} className="ts-del"
-                      style={{ width: 22, height: 22, borderRadius: 5, background: 'transparent', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
-                      <Trash2 size={9} />
-                    </button>
-                  )}
-                </div>
               </div>
             )
           })}
