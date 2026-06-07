@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Search, X, ChevronDown, Trash2, AlertTriangle, Eye, EyeOff, ChevronRight, Calendar, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
-import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns'
+import { format, isToday, isTomorrow, isPast, parseISO, startOfWeek, endOfWeek, isSameMonth } from 'date-fns'
 import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
 
@@ -75,6 +75,7 @@ export default function StudioAppointmentsList() {
   const [loading,      setLoading]      = useState(true)
   const [search,       setSearch]       = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [periodFilter, setPeriodFilter] = useState('all')
   const [details,      setDetails]      = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deletePass,   setDeletePass]   = useState('')
@@ -161,16 +162,29 @@ export default function StudioAppointmentsList() {
     [appointments]
   )
 
-  const filtered = useMemo(() => appointments.filter(a => {
-    const matchStatus = statusFilter === 'all' || a.status === statusFilter
-    const q = search.toLowerCase()
-    const matchSearch = !q ||
-      a.profiles?.full_name?.toLowerCase().includes(q) ||
-      a.profiles?.phone?.includes(q) ||
-      a.services?.name?.toLowerCase().includes(q) ||
-      a.stylists?.name?.toLowerCase().includes(q)
-    return matchStatus && matchSearch
-  }), [appointments, search, statusFilter])
+  const filtered = useMemo(() => {
+    const now = new Date()
+    const todayStr = format(now, 'yyyy-MM-dd')
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
+    const weekEnd   = endOfWeek(now,   { weekStartsOn: 1 })
+    return appointments.filter(a => {
+      const matchStatus = statusFilter === 'all' || a.status === statusFilter
+      const q = search.toLowerCase()
+      const matchSearch = !q ||
+        a.profiles?.full_name?.toLowerCase().includes(q) ||
+        a.profiles?.phone?.includes(q) ||
+        a.services?.name?.toLowerCase().includes(q) ||
+        a.stylists?.name?.toLowerCase().includes(q)
+      let matchPeriod = true
+      if (periodFilter === 'day')   matchPeriod = a.date === todayStr
+      else if (periodFilter === 'week') {
+        const d = parseISO(a.date)
+        matchPeriod = d >= weekStart && d <= weekEnd
+      }
+      else if (periodFilter === 'month') matchPeriod = isSameMonth(parseISO(a.date), now)
+      return matchStatus && matchSearch && matchPeriod
+    })
+  }, [appointments, search, statusFilter, periodFilter])
 
   const PER_PAGE = window.innerWidth < 768 ? 6 : 10
   const paged = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
@@ -222,6 +236,25 @@ export default function StudioAppointmentsList() {
         ))}
       </div>
 
+      {/* ── Period filter ── */}
+      <div style={{ flexShrink: 0, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+        {[
+          { key: 'all',   label: 'All time'   },
+          { key: 'day',   label: 'Today'      },
+          { key: 'week',  label: 'This week'  },
+          { key: 'month', label: 'This month' },
+        ].map(({ key, label }) => {
+          const active = periodFilter === key
+          return (
+            <button key={key} onClick={() => { setPeriodFilter(key); setPage(0) }}
+              className="al-pill"
+              style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : 'rgba(255,255,255,0.12)'}`, background: active ? C.goldBg : 'rgba(255,255,255,0.04)', color: active ? C.gold : 'rgba(255,255,255,0.55)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em' }}>
+              {label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* ── Search ── */}
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ position: 'relative', flex: 1 }}>
@@ -236,15 +269,15 @@ export default function StudioAppointmentsList() {
             </button>
           )}
         </div>
-        {(search || statusFilter !== 'all') && (
-          <button onClick={() => { setSearch(''); setStatusFilter('all'); setPage(0) }} className="al-pill"
+        {(search || statusFilter !== 'all' || periodFilter !== 'all') && (
+          <button onClick={() => { setSearch(''); setStatusFilter('all'); setPeriodFilter('all'); setPage(0) }} className="al-pill"
             style={{ padding: '0.48rem 1rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .15s' }}>
             Clear all
           </button>
         )}
       </div>
 
-      {!loading && (search || statusFilter !== 'all') && (
+      {!loading && (search || statusFilter !== 'all' || periodFilter !== 'all') && (
         <p style={{ flexShrink: 0, fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: -4 }}>
           {filtered.length} result{filtered.length !== 1 ? 's' : ''}
           {statusFilter !== 'all' && <span style={{ color: STATUS_CFG[statusFilter]?.color }}> · {STATUS_CFG[statusFilter]?.label}</span>}
@@ -275,8 +308,8 @@ export default function StudioAppointmentsList() {
             <p style={{ color: C.dim, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif' }}>
               {search || statusFilter !== 'all' ? 'No appointments match your search' : 'No appointments yet'}
             </p>
-            {(search || statusFilter !== 'all') && (
-              <button onClick={() => { setSearch(''); setStatusFilter('all'); setPage(0) }}
+            {(search || statusFilter !== 'all' || periodFilter !== 'all') && (
+              <button onClick={() => { setSearch(''); setStatusFilter('all'); setPeriodFilter('all'); setPage(0) }}
                 style={{ padding: '6px 18px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em' }}>
                 Clear filters
               </button>
@@ -306,6 +339,12 @@ export default function StudioAppointmentsList() {
                     style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
                     Info <ChevronRight size={9} />
                   </button>
+                  {isAdmin && (
+                    <button onClick={() => openDelete(appt)} className="del-row-btn"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, background: 'transparent', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.4)', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
+                      <Trash2 size={11} />
+                    </button>
+                  )}
                 </div>
 
                 {/* Line 2: metadata chips */}

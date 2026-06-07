@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, Eye, EyeOff, ShieldAlert, Search } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, Eye, EyeOff, ShieldAlert, Search, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
 import Pager from '../../lib/Pager'
@@ -15,13 +15,14 @@ const C = {
   red: '#f87171',   redBg:   'rgba(248,113,113,0.1)', redBorder:   'rgba(248,113,113,0.2)',
 }
 
+const COLOR_PRESETS = [
+  '#60a5fa', '#818cf8', '#c084fc', '#f472b6', '#fb7185',
+  '#f87171', '#fb923c', '#f59e0b', '#C9A84C', '#a3e635',
+  '#34d399', '#2dd4bf', '#22d3ee', '#38bdf8', '#94a3b8',
+]
+
 const EMPTY = { name: '', description: '', price: '', category: '', tags: [], stock: '', available: true, image_url: '' }
 
-const CATEGORIES = [
-  'Shampoo', 'Conditioner', 'Hair Mask', 'Styling Cream', 'Hair Oil',
-  'Color', 'Treatment', 'Spray', 'Serum', 'Wax', 'Tools', 'Accessories',
-  'Beard', 'Skincare', 'Gift Set',
-]
 const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
@@ -39,13 +40,13 @@ const STATUS_FILTERS = [
 ]
 
 export default function StudioProducts() {
-  const [products,    setProducts]    = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [modal,       setModal]       = useState(null)
-  const [form,        setForm]        = useState(EMPTY)
-  const [saving,      setSaving]      = useState(false)
-  const [file,        setFile]        = useState(null)
-  const [filePreview, setFilePreview] = useState('')
+  const [products,      setProducts]      = useState([])
+  const [loading,       setLoading]       = useState(true)
+  const [modal,         setModal]         = useState(null)
+  const [form,          setForm]          = useState(EMPTY)
+  const [saving,        setSaving]        = useState(false)
+  const [file,          setFile]          = useState(null)
+  const [filePreview,   setFilePreview]   = useState('')
   const [search,        setSearch]        = useState('')
   const [catFilter,     setCatFilter]     = useState('All')
   const [statusFilter,  setStatusFilter]  = useState('all')
@@ -56,7 +57,19 @@ export default function StudioProducts() {
   const [deleting,      setDeleting]      = useState(false)
   const [showDeletePwd, setShowDeletePwd] = useState(false)
 
-  useEffect(() => { load() }, [])
+  // categories management
+  const [prodCats,      setProdCats]      = useState([])
+  const [catModal,      setCatModal]      = useState(false)
+  const [newCatName,    setNewCatName]    = useState('')
+  const [newCatColor,   setNewCatColor]   = useState(COLOR_PRESETS[0])
+  const [addingCat,     setAddingCat]     = useState(false)
+  const [catDelId,      setCatDelId]      = useState(null)
+  const [catDelPwd,     setCatDelPwd]     = useState('')
+  const [catDelErr,     setCatDelErr]     = useState('')
+  const [catDeleting,   setCatDeleting]   = useState(false)
+  const [showCatDelPwd, setShowCatDelPwd] = useState(false)
+
+  useEffect(() => { load(); loadCategories() }, [])
 
   async function load() {
     const data = await getOrFetch('studio_products', async () => {
@@ -65,6 +78,39 @@ export default function StudioProducts() {
     }, 5 * 60_000)
     setProducts(data)
     setLoading(false)
+  }
+
+  async function loadCategories() {
+    const { data } = await supabase.from('product_categories').select('*').order('name')
+    setProdCats(data || [])
+  }
+
+  async function saveCategory() {
+    if (!newCatName.trim()) return toast.error('Category name is required')
+    setAddingCat(true)
+    const { error } = await supabase.from('product_categories').insert({ name: newCatName.trim(), color: newCatColor })
+    setAddingCat(false)
+    if (error) { toast.error(error.message); return }
+    toast.success('Category added')
+    setNewCatName('')
+    setNewCatColor(COLOR_PRESETS[0])
+    loadCategories()
+  }
+
+  async function deleteCategory() {
+    if (catDelPwd !== 'hairgo24') { setCatDelErr('Incorrect password'); return }
+    setCatDeleting(true)
+    const { error } = await supabase.from('product_categories').delete().eq('id', catDelId)
+    setCatDeleting(false)
+    if (error) { setCatDelErr(error.message); return }
+    toast.success('Category deleted')
+    setCatDelId(null); setCatDelPwd(''); setCatDelErr('')
+    loadCategories()
+  }
+
+  function closeCatModal() {
+    setCatModal(false); setCatDelId(null); setCatDelPwd(''); setCatDelErr('')
+    setNewCatName(''); setNewCatColor(COLOR_PRESETS[0])
   }
 
   async function adjustStock(id, delta, current) {
@@ -89,12 +135,12 @@ export default function StudioProducts() {
     setModal(mode)
   }
 
-  function toggleCat(cat) {
+  function toggleCat(catName) {
     setForm(p => {
       const tags = p.tags || []
-      if (tags.includes(cat)) return { ...p, tags: tags.filter(t => t !== cat) }
+      if (tags.includes(catName)) return { ...p, tags: tags.filter(t => t !== catName) }
       if (tags.length >= 3) return p
-      return { ...p, tags: [...tags, cat] }
+      return { ...p, tags: [...tags, catName] }
     })
   }
 
@@ -148,7 +194,6 @@ export default function StudioProducts() {
   const outOfStock = products.filter(p => (p.stock ?? 0) === 0 && p.available)
   const lowStock   = products.filter(p => (p.stock ?? 0) > 0 && (p.stock ?? 0) < 5)
 
-
   const [page, setPage] = useState(0)
   const [perPage, setPerPage] = useState(() => window.innerWidth <= 640 ? 3 : 6)
   useEffect(() => {
@@ -179,6 +224,7 @@ export default function StudioProducts() {
         .prod-img { transition: transform .4s ease; }
         .prod-card:hover .prod-img { transform: scale(1.07); }
         .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .btn-cat:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.08) !important; }
         .cat-chip:hover  { border-color: ${C.goldBorder} !important; color: ${C.white} !important; }
         .stat-chip:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.dim} !important; }
         .stock-minus:not(:disabled):hover { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.5) !important; color: ${C.red} !important; }
@@ -189,7 +235,10 @@ export default function StudioProducts() {
         .sp-search::placeholder { color: rgba(255,255,255,0.2); }
         .sp-filters { display: flex; gap: 5px; flex-wrap: wrap; }
         .sp-modal-close:hover { background: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.6) !important; }
-        .sp-tag-btn:hover:not(:disabled) { border-color: ${C.gold} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
+        .sp-tag-btn:hover:not(:disabled) { border-color: var(--tag-color, ${C.gold}) !important; color: var(--tag-color, ${C.gold}) !important; }
+        .sp-newcat-btn:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
+        .cat-del-row-btn:hover { background: rgba(248,113,113,0.18) !important; border-color: rgba(248,113,113,0.45) !important; color: ${C.red} !important; }
+        .color-swatch:hover { transform: scale(1.18); }
         @media (max-width: 480px) {
           .sp-header { flex-direction: column; align-items: flex-start !important; gap: 10px; }
           .sp-header-btns { align-self: flex-end; }
@@ -216,7 +265,11 @@ export default function StudioProducts() {
             {lowStock.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: C.amber, fontWeight: 600 }}>{lowStock.length}</span> low stock</span>}
           </div>
         </div>
-        <div className="sp-header-btns">
+        <div className="sp-header-btns" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <button onClick={() => setCatModal(true)} className="btn-cat"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            <Tag size={13} /> Categories
+          </button>
           <button onClick={() => openModal('add')} className="btn-g"
             style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Plus size={14} /> Add Product
@@ -237,14 +290,8 @@ export default function StudioProducts() {
       {/* ── Search ──────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, position: 'relative' }}>
         <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
-        <input
-          type="text"
-          placeholder="Search by name, category or tag…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="sp-search"
-          style={{ width: '100%', boxSizing: 'border-box', padding: '0.6rem 36px 0.6rem 38px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 11, color: C.white, fontSize: '0.83rem', fontFamily: 'Jost,sans-serif', outline: 'none', transition: 'border-color .2s, background .2s' }}
-        />
+        <input type="text" placeholder="Search by name, category or tag…" value={search} onChange={e => setSearch(e.target.value)} className="sp-search"
+          style={{ width: '100%', boxSizing: 'border-box', padding: '0.6rem 36px 0.6rem 38px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 11, color: C.white, fontSize: '0.83rem', fontFamily: 'Jost,sans-serif', outline: 'none', transition: 'border-color .2s, background .2s' }} />
         {search && (
           <button onClick={() => setSearch('')}
             style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.09)', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -273,12 +320,17 @@ export default function StudioProducts() {
         </div>
         {categories.length > 2 && (
           <div className="sp-filters">
-            {categories.map(cat => (
-              <button key={cat} onClick={() => setCatFilter(cat)} className="cat-chip"
-                style={{ padding: '3px 9px', borderRadius: 20, fontSize: 8.5, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${catFilter === cat ? C.goldBorder : C.border}`, background: catFilter === cat ? C.goldBg : 'transparent', color: catFilter === cat ? C.gold : C.muted, flexShrink: 0 }}>
-                {cat}
-              </button>
-            ))}
+            {categories.map(cat => {
+              const catDef = prodCats.find(c => c.name === cat)
+              const activeColor = catDef?.color || C.gold
+              return (
+                <button key={cat} onClick={() => setCatFilter(cat)} className="cat-chip"
+                  style={{ padding: '3px 9px', borderRadius: 20, fontSize: 8.5, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${catFilter === cat ? activeColor + '55' : C.border}`, background: catFilter === cat ? activeColor + '18' : 'transparent', color: catFilter === cat ? activeColor : C.muted, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  {cat !== 'All' && <span style={{ width: 5, height: 5, borderRadius: '50%', background: catFilter === cat ? activeColor : C.muted, display: 'inline-block', transition: 'background .15s' }} />}
+                  {cat}
+                </button>
+              )
+            })}
           </div>
         )}
       </div>
@@ -313,14 +365,10 @@ export default function StudioProducts() {
                 const stock = p.stock ?? 0
                 const level = stockLevel(stock)
                 const isAdj = adjusting === p.id
-
                 return (
                   <div key={p.id} className="prod-card"
                     style={{ background: C.card, border: `1px solid ${stock === 0 && p.available ? C.redBorder : C.border}`, borderRadius: 14, overflow: 'hidden' }}>
-
-                    {/* ── Top: image + info ── */}
                     <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                      {/* Thumbnail */}
                       <div style={{ width: 76, height: 76, flexShrink: 0, background: '#0d0d12', position: 'relative', overflow: 'hidden' }}>
                         {p.image_url
                           ? <img src={p.image_url} alt={p.name} className="prod-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -334,29 +382,29 @@ export default function StudioProducts() {
                           </div>
                         )}
                       </div>
-
-                      {/* Info */}
                       <div style={{ flex: 1, padding: '10px 13px', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
-                        {/* Name + price */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                           <p style={{ color: C.white, fontSize: '0.875rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{p.name}</p>
                           <span className="font-display" style={{ color: C.gold, fontSize: '0.92rem', flexShrink: 0 }}>€{p.price}</span>
                         </div>
-                        {/* Tags + stock badge */}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
                           <div style={{ display: 'flex', gap: 4, flexWrap: 'nowrap', overflow: 'hidden', minWidth: 0 }}>
-                            {(p.tags?.length ? p.tags : p.category ? [p.category] : []).map(tag => (
-                              <span key={tag} style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 500, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{tag}</span>
-                            ))}
+                            {(p.tags?.length ? p.tags : p.category ? [p.category] : []).map(tag => {
+                              const tagDef = prodCats.find(c => c.name === tag)
+                              const tagColor = tagDef?.color || C.goldDim
+                              return (
+                                <span key={tag} style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: tagColor + '22', border: `1px solid ${tagColor}44`, color: tagColor, fontFamily: 'Jost,sans-serif', fontWeight: 500, letterSpacing: '0.06em', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: tagColor, display: 'inline-block' }} />
+                                  {tag}
+                                </span>
+                              )
+                            })}
                           </div>
                           <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: level.bg, border: `1px solid ${level.border}`, color: level.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>{level.label}</span>
                         </div>
                       </div>
                     </div>
-
-                    {/* ── Footer: stock controls + actions ── */}
-                    <div style={{ borderTop: `1px solid ${C.border}`, padding: '7px 10px 7px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.14)' }}>
-                      {/* − count + */}
+                    <div style={{ borderTop: `1px solid ${C.border}`, padding: '7px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.14)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                         <button onClick={() => adjustStock(p.id, -1, stock)} disabled={stock === 0 || isAdj} className="stock-minus"
                           style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${stock === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(248,113,113,0.25)'}`, background: stock === 0 ? 'transparent' : 'rgba(248,113,113,0.07)', color: stock === 0 ? 'rgba(255,255,255,0.15)' : C.red, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'Jost,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>−</button>
@@ -367,8 +415,6 @@ export default function StudioProducts() {
                         <button onClick={() => adjustStock(p.id, 1, stock)} disabled={isAdj} className="stock-plus"
                           style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.gold, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'Jost,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>+</button>
                       </div>
-
-                      {/* Edit + Delete */}
                       <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                         <button onClick={() => openModal('edit', p)} className="prod-edit-btn"
                           style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s' }}>
@@ -380,7 +426,6 @@ export default function StudioProducts() {
                         </button>
                       </div>
                     </div>
-
                   </div>
                 )
               })}
@@ -390,17 +435,15 @@ export default function StudioProducts() {
         )}
       </div>
 
-      {/* ── Add / Edit Modal ─────────────────────────────────── */}
+      {/* ── Add / Edit Product Modal ─────────────────────────── */}
       {modal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,.82)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
           onMouseDown={e => { if (e.target === e.currentTarget) closeModal() }}>
           <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 24, overflow: 'hidden', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 48px 120px rgba(0,0,0,.7)', animation: 'modalIn .2s ease' }}
             onClick={e => e.stopPropagation()}>
 
-            {/* Gold accent bar */}
             <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))', flexShrink: 0 }} />
 
-            {/* Header */}
             <div className="sp-modal-head" style={{ padding: '1.5rem 1.75rem 1.25rem', flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
                 <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
@@ -418,7 +461,6 @@ export default function StudioProducts() {
 
             <div style={{ height: 1, background: C.border, flexShrink: 0 }} />
 
-            {/* Body */}
             <div className="sp-modal-body" style={{ overflowY: 'auto', flex: 1, padding: '1.5rem 1.75rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
@@ -438,7 +480,7 @@ export default function StudioProducts() {
                         }
                       </div>
                     </label>
-                    <p className="sp-photo-hint" style={{ marginTop: 5, fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', textAlign: 'center', display: 'block', letterSpacing: '0.03em', lineHeight: 1.4 }}>
+                    <p style={{ marginTop: 5, fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', textAlign: 'center', display: 'block', letterSpacing: '0.03em', lineHeight: 1.4 }}>
                       {(filePreview || form.image_url) ? 'Tap to change' : 'Tap to add photo'}
                     </p>
                     {filePreview && (
@@ -477,16 +519,28 @@ export default function StudioProducts() {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
                     <label style={{ ...lbl, marginBottom: 0 }}>Category</label>
-                    <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', color: (form.tags || []).length >= 3 ? C.gold : C.muted }}>{(form.tags || []).length}/3 selected</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', color: (form.tags || []).length >= 3 ? C.gold : C.muted }}>{(form.tags || []).length}/3 selected</span>
+                      <button type="button" onClick={() => setCatModal(true)} className="sp-newcat-btn"
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>
+                        <Plus size={9} /> New
+                      </button>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {CATEGORIES.map(cat => {
-                      const selected = (form.tags || []).includes(cat)
+                    {prodCats.length === 0 ? (
+                      <button type="button" onClick={() => setCatModal(true)}
+                        style={{ padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer', border: `1px dashed ${C.border}`, background: 'transparent', color: C.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <Plus size={9} /> Add your first category
+                      </button>
+                    ) : prodCats.map(cat => {
+                      const selected = (form.tags || []).includes(cat.name)
                       const maxed    = (form.tags || []).length >= 3 && !selected
                       return (
-                        <button key={cat} type="button" onClick={() => toggleCat(cat)} disabled={maxed} className="sp-tag-btn"
-                          style={{ padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500, letterSpacing: '0.05em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? C.gold : 'rgba(255,255,255,0.1)'}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.03)', color: selected ? C.gold : maxed ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.38)', outline: 'none' }}>
-                          {cat}
+                        <button key={cat.id} type="button" onClick={() => toggleCat(cat.name)} disabled={maxed} className="sp-tag-btn"
+                          style={{ '--tag-color': cat.color, padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500, letterSpacing: '0.05em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? cat.color + '88' : 'rgba(255,255,255,0.1)'}`, background: selected ? cat.color + '22' : 'rgba(255,255,255,0.03)', color: selected ? cat.color : maxed ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.38)', outline: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? cat.color : 'rgba(255,255,255,0.2)', flexShrink: 0, display: 'inline-block', transition: 'background .15s' }} />
+                          {cat.name}
                         </button>
                       )
                     })}
@@ -508,11 +562,10 @@ export default function StudioProducts() {
               </div>
             </div>
 
-            {/* Footer */}
             <div style={{ height: 1, background: C.border, flexShrink: 0 }} />
             <div className="sp-modal-foot" style={{ padding: '1.1rem 1.75rem 1.5rem', flexShrink: 0, display: 'flex', gap: '0.75rem' }}>
               <button onClick={closeModal}
-                style={{ flex: 1, padding: '0.72rem', borderRadius: 12, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'border-color .18s, color .18s' }}>
+                style={{ flex: 1, padding: '0.72rem', borderRadius: 12, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
                 Cancel
               </button>
               <button onClick={save} disabled={saving}
@@ -522,17 +575,142 @@ export default function StudioProducts() {
                   : <><Save size={13} /> {modal === 'add' ? 'Add Product' : 'Save Changes'}</>}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Manage Categories Modal ──────────────────────────── */}
+      {catModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 55, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onMouseDown={e => { if (e.target === e.currentTarget) closeCatModal() }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 22, overflow: 'hidden', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 40px 100px rgba(0,0,0,.75)', animation: 'modalIn .2s ease' }}>
+
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))', flexShrink: 0 }} />
+
+            {/* Header */}
+            <div style={{ padding: '1.25rem 1.5rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}` }}>
+              <div>
+                <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 3 }}>Products</p>
+                <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1 }}>Categories</h2>
+              </div>
+              <button onClick={closeCatModal} className="sp-modal-close"
+                style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .18s' }}>
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* Category list */}
+            <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+              {prodCats.length === 0 ? (
+                <div style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
+                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No categories yet — add one below.</p>
+                </div>
+              ) : (
+                <div style={{ padding: '0.375rem 0' }}>
+                  {prodCats.map(cat => (
+                    <div key={cat.id}>
+                      {/* Row */}
+                      <div style={{ display: 'flex', alignItems: 'center', padding: '0.625rem 1.5rem', gap: 10 }}>
+                        <div style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color, flexShrink: 0, boxShadow: `0 0 8px ${cat.color}66` }} />
+                        <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{cat.name}</span>
+                        {catDelId !== cat.id && (
+                          <button onClick={() => { setCatDelId(cat.id); setCatDelPwd(''); setCatDelErr(''); setShowCatDelPwd(false) }}
+                            className="cat-del-row-btn"
+                            style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .15s' }}>
+                            <Trash2 size={11} />
+                          </button>
+                        )}
+                      </div>
+                      {/* Inline delete confirmation */}
+                      {catDelId === cat.id && (
+                        <div style={{ margin: '0 1rem 0.75rem', background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 11, padding: '0.875rem' }}>
+                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', marginBottom: 8, lineHeight: 1.5 }}>
+                            Enter admin password to delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>
+                          </p>
+                          <div style={{ position: 'relative', marginBottom: catDelErr ? 6 : 8 }}>
+                            <input type={showCatDelPwd ? 'text' : 'password'} value={catDelPwd}
+                              onChange={e => { setCatDelPwd(e.target.value); setCatDelErr('') }}
+                              onKeyDown={e => e.key === 'Enter' && deleteCategory()}
+                              placeholder="Admin password…" autoFocus
+                              style={{ ...inp, borderColor: catDelErr ? 'rgba(248,113,113,0.5)' : undefined, paddingRight: '2.5rem' }} className="m-inp" />
+                            <button type="button" onClick={() => setShowCatDelPwd(p => !p)}
+                              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', padding: 0 }}>
+                              {showCatDelPwd ? <EyeOff size={13} /> : <Eye size={13} />}
+                            </button>
+                          </div>
+                          {catDelErr && <p style={{ fontSize: '0.7rem', color: C.red, fontFamily: 'Jost,sans-serif', marginBottom: 7 }}>{catDelErr}</p>}
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button onClick={() => { setCatDelId(null); setCatDelPwd(''); setCatDelErr('') }}
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                              Cancel
+                            </button>
+                            <button onClick={deleteCategory} disabled={catDeleting || !catDelPwd}
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: catDelPwd ? 'rgba(248,113,113,0.15)' : 'transparent', border: `1px solid ${catDelPwd ? 'rgba(248,113,113,0.35)' : 'rgba(248,113,113,0.15)'}`, color: catDelPwd ? C.red : 'rgba(248,113,113,0.3)', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: (catDeleting || !catDelPwd) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
+                              {catDeleting
+                                ? <div style={{ width: 12, height: 12, border: '2px solid rgba(248,113,113,0.3)', borderTopColor: C.red, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                                : <><Trash2 size={11} /> Delete</>}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Add category form */}
+            <div style={{ borderTop: `1px solid ${C.border}`, padding: '1.25rem 1.5rem 1.5rem', flexShrink: 0 }}>
+              <label style={{ ...lbl, marginBottom: 10 }}>New Category</label>
+
+              {/* Color swatches */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
+                {COLOR_PRESETS.map(color => (
+                  <button key={color} type="button" onClick={() => setNewCatColor(color)} className="color-swatch"
+                    style={{ width: 22, height: 22, borderRadius: '50%', background: color, border: newCatColor === color ? '2.5px solid #fff' : '2.5px solid transparent', cursor: 'pointer', flexShrink: 0, boxShadow: newCatColor === color ? `0 0 10px ${color}99` : 'none', transition: 'all .15s', outline: 'none' }} />
+                ))}
+              </div>
+
+              {/* Name + Add button */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ position: 'absolute', left: 10, width: 10, height: 10, borderRadius: '50%', background: newCatColor, boxShadow: `0 0 6px ${newCatColor}99`, pointerEvents: 'none', flexShrink: 0 }} />
+                  <input value={newCatName} onChange={e => setNewCatName(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && saveCategory()}
+                    placeholder="Category name…" className="m-inp"
+                    style={{ ...inp, paddingLeft: '1.75rem' }} />
+                </div>
+                <button onClick={saveCategory} disabled={addingCat || !newCatName.trim()}
+                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#C4956A)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  {addingCat
+                    ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    : <><Plus size={12} /> Add</>}
+                </button>
+              </div>
+
+              {/* Preview chip */}
+              {newCatName.trim() && (
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Preview:</span>
+                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500, border: `1px solid ${newCatColor}55`, background: newCatColor + '22', color: newCatColor, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: newCatColor, display: 'inline-block' }} />
+                    {newCatName}
+                  </span>
+                </div>
+              )}
+            </div>
 
           </div>
         </div>
       )}
 
-      {/* ── Delete confirmation ───────────────────────────────── */}
+      {/* ── Delete Product confirmation ───────────────────────── */}
       {deleteTarget && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
           onMouseDown={e => { if (e.target === e.currentTarget) setDeleteTarget(null) }}>
           <div onClick={e => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: 400, background: C.modal, border: '1px solid rgba(248,113,113,0.25)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
+            style={{ width: '100%', maxWidth: 400, background: C.modal, border: '1px solid rgba(248,113,113,0.25)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', animation: 'modalIn .2s ease' }}>
             <div style={{ height: 3, background: 'linear-gradient(90deg,#f87171,#ef4444,rgba(248,113,113,0.15))' }} />
             <div style={{ padding: '1.75rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '1.5rem' }}>

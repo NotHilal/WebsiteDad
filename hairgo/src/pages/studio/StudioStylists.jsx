@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Plus, Edit2, Trash2, X, Save, User, AtSign, Upload, Link2, ChevronDown, Check } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, User, Upload, Link2, ChevronDown, Check } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
 import Pager from '../../lib/Pager'
@@ -13,7 +13,7 @@ const C = {
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.18)',
 }
 
-const EMPTY = { name: '', title: '', bio: '', photo_url: '', specialties: '', instagram: '', profile_id: '', hourly_rate: '' }
+const EMPTY = { name: '', bio: '', photo_url: '', profile_id: '', hourly_rate: '' }
 const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
@@ -124,8 +124,7 @@ export default function StudioStylists() {
         photo_url = url
       }
       const { _pendingFile, ...rest } = form
-      const specialtiesArr = rest.specialties ? rest.specialties.split(',').map(s => s.trim()).filter(Boolean) : []
-      const payload = { ...rest, photo_url, specialties: specialtiesArr, profile_id: rest.profile_id || null }
+      const payload = { ...rest, photo_url, profile_id: rest.profile_id || null }
       const { error } = modal === 'add'
         ? await supabase.from('stylists').insert({ ...payload, display_order: stylists.length })
         : await supabase.from('stylists').update(payload).eq('id', form.id)
@@ -143,7 +142,7 @@ export default function StudioStylists() {
   }
 
   function openEdit(s) {
-    setForm({ ...s, specialties: Array.isArray(s.specialties) ? s.specialties.join(', ') : (s.specialties || ''), profile_id: s.profile_id || '' })
+    setForm({ ...s, profile_id: s.profile_id || '' })
     setLocalPreview(null)
     setModal('edit')
   }
@@ -217,7 +216,6 @@ export default function StudioStylists() {
           <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '0.875rem' }}>
             {stylists.slice(page * 6, (page + 1) * 6).map(s => {
-              const specs = Array.isArray(s.specialties) ? s.specialties : []
               return (
                 <div key={s.id} className="sty-card"
                   style={{ background: C.card, border: `1px solid ${s.profile_id ? C.greenBorder : C.border}`, borderRadius: 16, overflow: 'hidden', display: 'flex', minHeight: 120 }}>
@@ -246,9 +244,6 @@ export default function StudioStylists() {
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
                       <div style={{ minWidth: 0 }}>
                         <p className="font-display" style={{ color: C.white, fontSize: '1.1rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
-                        {s.title && (
-                          <p style={{ color: C.goldDim, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em', marginTop: 1 }}>{s.title}</p>
-                        )}
                       </div>
                       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                         <button onClick={() => openEdit(s)} className="sty-edit"
@@ -272,27 +267,10 @@ export default function StudioStylists() {
                       </p>
                     )}
 
-                    {/* Specialties */}
-                    {specs.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                        {specs.slice(0, 3).map(sp => (
-                          <span key={sp} style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{sp}</span>
-                        ))}
-                        {specs.length > 3 && (
-                          <span style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', alignSelf: 'center' }}>+{specs.length - 3}</span>
-                        )}
-                      </div>
-                    )}
 
                     {/* Footer: instagram + rate + linked */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 2, gap: 4, flexWrap: 'wrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        {s.instagram && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <AtSign size={10} color={C.muted} strokeWidth={1.5} />
-                            <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{s.instagram}</span>
-                          </div>
-                        )}
                         {s.hourly_rate != null && s.hourly_rate !== '' && (
                           <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.06em' }}>
                             €{parseFloat(s.hourly_rate).toFixed(2)}/hr
@@ -348,11 +326,8 @@ export default function StudioStylists() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-                {/* Name + Title */}
-                <div className="sty-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div><label style={lbl}>Name <span style={{ color: C.gold }}>*</span></label><input value={form.name} onChange={set('name')} placeholder="Sophie Laurent" className="m-inp" style={inp} /></div>
-                  <div><label style={lbl}>Title</label><input value={form.title || ''} onChange={set('title')} placeholder="Head Stylist" className="m-inp" style={inp} /></div>
-                </div>
+                {/* Name */}
+                <div><label style={lbl}>Name <span style={{ color: C.gold }}>*</span></label><input value={form.name} onChange={set('name')} placeholder="Sophie Laurent" className="m-inp" style={inp} /></div>
 
                 {/* Hourly rate */}
                 <div style={{ padding: '1rem', borderRadius: 12, background: C.goldBg, border: `1px solid ${C.goldBorder}` }}>
@@ -418,17 +393,6 @@ export default function StudioStylists() {
                   )}
                 </div>
 
-                {/* Specialties + Instagram */}
-                <div className="sty-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                  <div>
-                    <label style={lbl}>Specialties <span style={{ textTransform: 'none', letterSpacing: 0, color: C.muted, fontSize: 9 }}>(comma separated)</span></label>
-                    <input value={form.specialties || ''} onChange={set('specialties')} placeholder="Balayage, Precision Cut" className="m-inp" style={inp} />
-                  </div>
-                  <div>
-                    <label style={lbl}>Instagram</label>
-                    <input value={form.instagram || ''} onChange={set('instagram')} placeholder="username" className="m-inp" style={inp} />
-                  </div>
-                </div>
 
                 {/* Linked account */}
                 <div style={{ padding: '1rem', borderRadius: 12, background: 'rgba(52,211,153,0.04)', border: `1px solid ${C.greenBorder}` }}>

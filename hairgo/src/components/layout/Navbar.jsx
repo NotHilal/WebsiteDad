@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, User, LogOut, Scissors, MessageCircle, Star, ChevronDown, ShoppingCart } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCart } from '../../contexts/CartContext'
+import AppointmentAlert from '../AppointmentAlert'
 import toast from 'react-hot-toast'
 
 const BASE_LINKS = [
@@ -148,6 +149,12 @@ export default function Navbar() {
 
           {/* Auth — right */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 14 }} className="hidden-mobile">
+            <AppointmentAlert />
+            {(profile?.role === 'admin' || profile?.role === 'employee') && (
+              <button onClick={() => { sessionStorage.removeItem('studio_access'); navigate('/studio') }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', color: '#C9A84C', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
+                <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
+              </button>
+            )}
             {user && (
               <Link to="/profile" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cartCount > 0 ? 'rgba(201,168,76,0.3)' : 'rgba(255,255,255,0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
                 onClick={() => {}}>
@@ -277,6 +284,12 @@ export default function Navbar() {
                     {label}
                   </NavLink>
                 ))}
+                {(profile?.role === 'admin' || profile?.role === 'employee') && (
+                  <button onClick={() => { sessionStorage.removeItem('studio_access'); setMenuOpen(false); navigate('/studio') }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9A84C', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)', cursor: 'pointer', fontFamily: 'Jost,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
+                    <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
+                  </button>
+                )}
               </nav>
 
               <div style={{ padding: '1.25rem 1rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: 10 }}>

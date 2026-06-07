@@ -250,7 +250,9 @@ export default function StudioSchedule() {
         {view === 'weekly' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
             {/* Horizontal scroll wrapper on mobile */}
-            <div className="week-scroll-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, minWidth: 0 }}>
+            <div className="week-scroll-wrap" style={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+            {/* Inner div — min-width forces horizontal scroll on mobile */}
+            <div className="week-inner" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Day headers */}
             <div style={{ display: 'flex', flexShrink: 0, borderBottom: `1px solid ${C.border}` }}>
               <div style={{ width: 48, flexShrink: 0 }} />
@@ -336,6 +338,7 @@ export default function StudioSchedule() {
                 </div>
               ))}
             </div>
+            </div>{/* end week-inner */}
             </div>{/* end week-scroll-wrap */}
           </div>
         )}
@@ -573,8 +576,8 @@ export default function StudioSchedule() {
           animation: sched-shimmer 1.6s ease-in-out infinite;
         }
         @media (max-width: 767px) {
-          .week-scroll-wrap { overflow-x: auto !important; }
-          .week-scroll-wrap > div { min-width: 600px; }
+          .week-scroll-wrap { overflow-x: auto !important; overflow-y: hidden !important; height: 100%; }
+          .week-inner { min-width: 600px; }
           .sched-day-grid   { display: none; }
           .sched-day-mobile { display: flex; }
           /* Toolbar: hide full labels, show short ones */

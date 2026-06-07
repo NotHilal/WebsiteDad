@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Pager from '../../lib/Pager'
-import { Plus, Trash2, Image, X, Save, Edit2, Eye, EyeOff, ShieldAlert, ChevronDown, Check } from 'lucide-react'
+import { Plus, Trash2, Image, X, Save, Edit2, Eye, EyeOff, ShieldAlert, ChevronDown, Check, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
 import toast from 'react-hot-toast'
@@ -13,29 +13,19 @@ const C = {
   red: '#f87171', redBg: 'rgba(248,113,113,0.1)', redBorder: 'rgba(248,113,113,0.2)',
 }
 
-const CATEGORIES = ['cut', 'color', 'treatment', 'style']
-const CAT = {
-  cut:       { bg: 'rgba(96,165,250,.15)',  color: '#60a5fa', label: 'Cut'       },
-  color:     { bg: 'rgba(192,132,252,.15)', color: '#c084fc', label: 'Color'     },
-  treatment: { bg: 'rgba(52,211,153,.15)',  color: '#34d399', label: 'Treatment' },
-  style:     { bg: 'rgba(201,168,76,.15)',  color: '#C9A84C', label: 'Style'     },
-}
-const FILTERS = [
-  { key: 'all',    label: 'All'       },
-  { key: 'cut',    label: 'Cut'       },
-  { key: 'color',  label: 'Color'     },
-  { key: 'treatment', label: 'Treatment' },
-  { key: 'style',  label: 'Style'     },
-  { key: 'hidden', label: 'Hidden'    },
+const COLOR_PRESETS = [
+  '#60a5fa', '#818cf8', '#c084fc', '#f472b6', '#fb7185',
+  '#f87171', '#fb923c', '#f59e0b', '#C9A84C', '#a3e635',
+  '#34d399', '#2dd4bf', '#22d3ee', '#38bdf8', '#94a3b8',
 ]
 
 const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
-const EMPTY = { image_url: '', title: '', category: 'cut', stylist_id: '', visible: true }
+const EMPTY = { image_url: '', title: '', category: '', stylist_id: '', visible: true }
 
 function Select({ value, onChange, options }) {
-  const [open, setOpen]   = useState(false)
-  const [rect, setRect]   = useState(null)
+  const [open, setOpen] = useState(false)
+  const [rect, setRect] = useState(null)
   const btnRef  = useRef(null)
   const panelRef = useRef(null)
 
@@ -94,7 +84,7 @@ export default function StudioGallery() {
   const [stylists,    setStylists]    = useState([])
   const [loading,     setLoading]     = useState(true)
   const [filter,      setFilter]      = useState('all')
-  const [modal,       setModal]       = useState(null)   // null | 'add' | 'edit'
+  const [modal,       setModal]       = useState(null)
   const [editing,     setEditing]     = useState(null)
   const [form,        setForm]        = useState(EMPTY)
   const [saving,      setSaving]      = useState(false)
@@ -108,8 +98,21 @@ export default function StudioGallery() {
   const [page,        setPage]        = useState(0)
   const [perPage,     setPerPage]     = useState(() => window.innerWidth <= 640 ? 6 : 12)
 
+  // categories management
+  const [galCats,      setGalCats]      = useState([])
+  const [catModal,     setCatModal]     = useState(false)
+  const [newCatName,   setNewCatName]   = useState('')
+  const [newCatColor,  setNewCatColor]  = useState(COLOR_PRESETS[0])
+  const [addingCat,    setAddingCat]    = useState(false)
+  const [catDelId,     setCatDelId]     = useState(null)
+  const [catDelPwd,    setCatDelPwd]    = useState('')
+  const [catDelErr,    setCatDelErr]    = useState('')
+  const [catDeleting,  setCatDeleting]  = useState(false)
+  const [showCatDelPwd,setShowCatDelPwd]= useState(false)
+
   useEffect(() => {
     load()
+    loadGalCats()
     const handler = () => setPerPage(window.innerWidth <= 640 ? 6 : 12)
     window.addEventListener('resize', handler)
     return () => window.removeEventListener('resize', handler)
@@ -126,6 +129,43 @@ export default function StudioGallery() {
     setImages(imgs); setStylists(stys); setLoading(false)
   }
 
+  async function loadGalCats() {
+    const { data } = await supabase.from('gallery_categories').select('*').order('name')
+    const sorted = (data || []).sort((a, b) => {
+      if (a.name === 'Other') return 1
+      if (b.name === 'Other') return -1
+      return a.name.localeCompare(b.name)
+    })
+    setGalCats(sorted)
+  }
+
+  async function saveGalCat() {
+    if (!newCatName.trim()) return toast.error('Category name is required')
+    setAddingCat(true)
+    const { error } = await supabase.from('gallery_categories').insert({ name: newCatName.trim(), color: newCatColor })
+    setAddingCat(false)
+    if (error) { toast.error(error.message); return }
+    toast.success('Category added')
+    setNewCatName(''); setNewCatColor(COLOR_PRESETS[0])
+    loadGalCats()
+  }
+
+  async function deleteGalCat() {
+    if (catDelPwd !== 'hairgo24') { setCatDelErr('Incorrect password'); return }
+    setCatDeleting(true)
+    const { error } = await supabase.from('gallery_categories').delete().eq('id', catDelId)
+    setCatDeleting(false)
+    if (error) { setCatDelErr(error.message); return }
+    toast.success('Category deleted')
+    setCatDelId(null); setCatDelPwd(''); setCatDelErr('')
+    loadGalCats()
+  }
+
+  function closeCatModal() {
+    setCatModal(false); setCatDelId(null); setCatDelPwd(''); setCatDelErr('')
+    setNewCatName(''); setNewCatColor(COLOR_PRESETS[0])
+  }
+
   function handleFile(e) {
     const f = e.target.files[0]
     if (!f) return
@@ -133,13 +173,14 @@ export default function StudioGallery() {
   }
 
   function openAdd() {
-    setEditing(null); setFile(null); setFilePreview(''); setForm(EMPTY); setModal('add')
+    setEditing(null); setFile(null); setFilePreview('')
+    setForm({ ...EMPTY, category: galCats[0]?.name || '' })
+    setModal('add')
   }
 
   function openEdit(img) {
-    setEditing(img)
-    setFile(null); setFilePreview('')
-    setForm({ image_url: img.image_url || '', title: img.title || '', category: img.category || 'cut', stylist_id: img.stylist_id || '', visible: img.visible !== false })
+    setEditing(img); setFile(null); setFilePreview('')
+    setForm({ image_url: img.image_url || '', title: img.title || '', category: img.category || '', stylist_id: img.stylist_id || '', visible: img.visible !== false })
     setModal('edit')
   }
 
@@ -158,7 +199,7 @@ export default function StudioGallery() {
         const { data: { publicUrl } } = supabase.storage.from('gallery').getPublicUrl(path)
         imageUrl = publicUrl
       }
-      const payload = { ...form, image_url: imageUrl }
+      const payload = { ...form, image_url: imageUrl, stylist_id: form.stylist_id || null }
       const { error } = modal === 'add'
         ? await supabase.from('gallery').insert({ ...payload, display_order: images.length })
         : await supabase.from('gallery').update(payload).eq('id', editing.id)
@@ -201,8 +242,8 @@ export default function StudioGallery() {
 
   const hidden = images.filter(img => img.visible === false)
   const filtered = useMemo(() => {
-    if (filter === 'hidden') return images.filter(img => img.visible === false)
-    if (filter === 'all')    return images
+    if (filter === 'archived') return images.filter(img => img.visible === false)
+    if (filter === 'all')      return images
     return images.filter(img => img.category === filter)
   }, [images, filter])
 
@@ -221,6 +262,7 @@ export default function StudioGallery() {
         .gal-img   { transition: transform .45s ease; }
         .gal-card:hover .gal-img { transform: scale(1.05); }
         .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .btn-cat:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.08) !important; }
         .gal-filter:hover { border-color: rgba(255,255,255,0.2) !important; color: rgba(255,255,255,0.55) !important; }
         .sp-modal-close:hover { background: rgba(255,255,255,0.1) !important; }
         .gal-vis-btn  { transition: all .18s; }
@@ -229,6 +271,9 @@ export default function StudioGallery() {
         .gal-vis-btn:hover  { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .gal-edit-btn:hover { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .gal-del-btn:hover  { background: rgba(248,113,113,0.18) !important; border-color: rgba(248,113,113,0.5) !important; color: ${C.red} !important; }
+        .cat-del-row-btn:hover { background: rgba(248,113,113,0.18) !important; border-color: rgba(248,113,113,0.45) !important; color: ${C.red} !important; }
+        .gal-newcat-btn:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
+        .color-swatch:hover { transform: scale(1.18); }
         @media (max-width: 640px) {
           .gal-grid    { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; }
           .gal-hdr     { flex-direction: column; align-items: flex-start !important; gap: 10px; }
@@ -248,10 +293,14 @@ export default function StudioGallery() {
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Gallery</h1>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: C.white, fontWeight: 600 }}>{images.length}</span> photos</span>
-            {hidden.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{hidden.length}</span> hidden</span>}
+            {hidden.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{hidden.length}</span> archived</span>}
           </div>
         </div>
-        <div className="gal-hdr-btn">
+        <div className="gal-hdr-btn" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <button onClick={() => setCatModal(true)} className="btn-cat"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            <Tag size={13} /> Categories
+          </button>
           <button onClick={openAdd} className="btn-g"
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Plus size={14} /> Add Photo
@@ -261,17 +310,34 @@ export default function StudioGallery() {
 
       {/* ── Filters ────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-        {FILTERS.map(f => {
-          const active = filter === f.key
-          const cat    = CAT[f.key]
+        {/* All */}
+        <button onClick={() => setFilter('all')} className="gal-filter"
+          style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${filter === 'all' ? C.goldBorder : C.border}`, background: filter === 'all' ? C.goldBg : 'transparent', color: filter === 'all' ? C.gold : C.muted, flexShrink: 0 }}>
+          All
+        </button>
+
+        {/* Dynamic category filters */}
+        {galCats.map(cat => {
+          const active = filter === cat.name
+          const count  = images.filter(i => i.category === cat.name).length
+          if (count === 0) return null
           return (
-            <button key={f.key} onClick={() => setFilter(f.key)} className="gal-filter"
-              style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${active ? (cat?.color ? cat.color + '55' : C.goldBorder) : C.border}`, background: active ? (cat?.bg || C.goldBg) : 'transparent', color: active ? (cat?.color || C.gold) : C.muted, flexShrink: 0 }}>
-              {f.label}
-              {f.key !== 'all' && <span style={{ marginLeft: 4, opacity: 0.65 }}>{f.key === 'hidden' ? hidden.length : images.filter(i => i.category === f.key).length}</span>}
+            <button key={cat.id} onClick={() => setFilter(cat.name)} className="gal-filter"
+              style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${active ? cat.color + '55' : C.border}`, background: active ? cat.color + '18' : 'transparent', color: active ? cat.color : C.muted, flexShrink: 0 }}>
+              {cat.name}
+              <span style={{ marginLeft: 4, opacity: 0.65 }}>{count}</span>
             </button>
           )
         })}
+
+        {/* Archived */}
+        {hidden.length > 0 && (
+          <button onClick={() => setFilter('archived')} className="gal-filter"
+            style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${filter === 'archived' ? 'rgba(248,113,113,0.45)' : C.border}`, background: filter === 'archived' ? 'rgba(248,113,113,0.1)' : 'transparent', color: filter === 'archived' ? C.red : C.muted, flexShrink: 0 }}>
+            Archived
+            <span style={{ marginLeft: 4, opacity: 0.65 }}>{hidden.length}</span>
+          </button>
+        )}
       </div>
 
       {/* ── Grid ───────────────────────────────────────────── */}
@@ -288,7 +354,7 @@ export default function StudioGallery() {
               <Image size={20} color="rgba(255,255,255,0.12)" strokeWidth={1} />
             </div>
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>
-              {filter === 'hidden' ? 'No hidden photos' : filter === 'all' ? 'No photos yet' : `No ${filter} photos`}
+              {filter === 'archived' ? 'No archived photos' : filter === 'all' ? 'No photos yet' : `No ${filter} photos`}
             </p>
           </div>
         ) : (
@@ -296,12 +362,12 @@ export default function StudioGallery() {
             <div className="gal-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
               {paged.map(img => {
                 const isHidden = img.visible === false
-                const cat = CAT[img.category]
+                const catDef   = galCats.find(c => c.name === img.category)
+                const catColor = catDef?.color || C.goldDim
                 return (
                   <div key={img.id} className="gal-card"
                     style={{ borderRadius: 14, overflow: 'hidden', border: `1px solid ${isHidden ? 'rgba(255,255,255,0.05)' : C.border}`, background: C.card }}>
 
-                    {/* Image */}
                     <div style={{ aspectRatio: '4/5', overflow: 'hidden', position: 'relative' }}>
                       {img.image_url
                         ? <img src={img.image_url} alt={img.title || ''} className="gal-img"
@@ -315,16 +381,15 @@ export default function StudioGallery() {
                           <EyeOff size={26} color="rgba(255,255,255,0.22)" />
                         </div>
                       )}
-                      {img.category && cat && (
+                      {img.category && catDef && (
                         <div style={{ position: 'absolute', top: 8, left: 8 }}>
-                          <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{cat.label}</span>
+                          <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', color: catColor, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{img.category}</span>
                         </div>
                       )}
                     </div>
 
-                    {/* ── Permanent action bar ── */}
+                    {/* Action bar */}
                     <div className="gal-act-bar" style={{ padding: '8px 9px', borderTop: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.18)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      {/* Info */}
                       <div style={{ flex: 1, minWidth: 0, marginRight: 4 }}>
                         {img.title
                           ? <p style={{ color: C.dim, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{img.title}</p>
@@ -332,24 +397,15 @@ export default function StudioGallery() {
                         }
                         {img.stylists?.name && <p style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>{img.stylists.name}</p>}
                       </div>
-
-                      {/* Visibility toggle */}
-                      <button onClick={() => toggleVisible(img.id, img.visible !== false)} className="gal-vis-btn"
-                        title={isHidden ? 'Make visible' : 'Hide'}
+                      <button onClick={() => toggleVisible(img.id, img.visible !== false)} className="gal-vis-btn" title={isHidden ? 'Make visible' : 'Archive'}
                         style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${isHidden ? C.goldBorder : C.border}`, background: isHidden ? C.goldBg : 'rgba(255,255,255,0.04)', color: isHidden ? C.gold : C.muted }}>
                         {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
                       </button>
-
-                      {/* Edit */}
-                      <button onClick={() => openEdit(img)} className="gal-edit-btn"
-                        title="Edit"
+                      <button onClick={() => openEdit(img)} className="gal-edit-btn" title="Edit"
                         style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.04)', color: C.muted }}>
                         <Edit2 size={14} />
                       </button>
-
-                      {/* Delete */}
-                      <button onClick={() => openDelete(img)} className="gal-del-btn"
-                        title="Delete"
+                      <button onClick={() => openDelete(img)} className="gal-del-btn" title="Delete"
                         style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid rgba(248,113,113,0.2)', background: 'rgba(248,113,113,0.06)', color: 'rgba(248,113,113,0.5)' }}>
                         <Trash2 size={14} />
                       </button>
@@ -372,7 +428,6 @@ export default function StudioGallery() {
 
             <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))', flexShrink: 0 }} />
 
-            {/* Header */}
             <div style={{ padding: '1.5rem 1.75rem 1.25rem', flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
                 <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
@@ -390,7 +445,6 @@ export default function StudioGallery() {
 
             <div style={{ height: 1, background: C.border, flexShrink: 0 }} />
 
-            {/* Body */}
             <div style={{ overflowY: 'auto', flex: 1, padding: '1.5rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
               {/* Photo upload */}
@@ -424,11 +478,17 @@ export default function StudioGallery() {
               {/* Category + Stylist */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div>
-                  <label style={lbl}>Category</label>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <label style={{ ...lbl, marginBottom: 0 }}>Category</label>
+                    <button type="button" onClick={() => setCatModal(true)} className="gal-newcat-btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 6, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>
+                      <Plus size={8} /> New
+                    </button>
+                  </div>
                   <Select
                     value={form.category}
                     onChange={v => setForm(p => ({ ...p, category: v }))}
-                    options={CATEGORIES.map(c => ({ value: c, label: c.charAt(0).toUpperCase() + c.slice(1), dot: CAT[c]?.color }))}
+                    options={galCats.map(c => ({ value: c.name, label: c.name, dot: c.color }))}
                   />
                 </div>
                 <div>
@@ -455,7 +515,6 @@ export default function StudioGallery() {
 
             </div>
 
-            {/* Footer */}
             <div style={{ height: 1, background: C.border, flexShrink: 0 }} />
             <div style={{ padding: '1.1rem 1.75rem 1.5rem', flexShrink: 0, display: 'flex', gap: '0.75rem' }}>
               <button onClick={closeModal}
@@ -473,7 +532,127 @@ export default function StudioGallery() {
         </div>
       )}
 
-      {/* ── Delete confirmation ───────────────────────────── */}
+      {/* ── Manage Categories Modal ──────────────────────────── */}
+      {catModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 55, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onMouseDown={e => { if (e.target === e.currentTarget) closeCatModal() }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 22, overflow: 'hidden', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 40px 100px rgba(0,0,0,.75)', animation: 'modalIn .2s ease' }}>
+
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))', flexShrink: 0 }} />
+
+            <div style={{ padding: '1.25rem 1.5rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}` }}>
+              <div>
+                <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 3 }}>Gallery</p>
+                <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1 }}>Categories</h2>
+              </div>
+              <button onClick={closeCatModal} className="sp-modal-close"
+                style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .18s' }}>
+                <X size={14} />
+              </button>
+            </div>
+
+            {/* Category list */}
+            <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+              {galCats.length === 0 ? (
+                <div style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
+                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No categories yet — add one below.</p>
+                </div>
+              ) : (
+                <div style={{ padding: '0.375rem 0' }}>
+                  {galCats.map(cat => (
+                    <div key={cat.id}>
+                      <div style={{ display: 'flex', alignItems: 'center', padding: '0.625rem 1.5rem', gap: 10 }}>
+                        <div style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color, flexShrink: 0, boxShadow: `0 0 8px ${cat.color}66` }} />
+                        <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{cat.name}</span>
+                        <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', marginRight: 6 }}>{images.filter(i => i.category === cat.name).length} photos</span>
+                        {catDelId !== cat.id && (
+                          <button onClick={() => { setCatDelId(cat.id); setCatDelPwd(''); setCatDelErr(''); setShowCatDelPwd(false) }}
+                            className="cat-del-row-btn"
+                            style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .15s' }}>
+                            <Trash2 size={11} />
+                          </button>
+                        )}
+                      </div>
+                      {catDelId === cat.id && (
+                        <div style={{ margin: '0 1rem 0.75rem', background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 11, padding: '0.875rem' }}>
+                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', marginBottom: 8, lineHeight: 1.5 }}>
+                            Enter admin password to delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>
+                          </p>
+                          <div style={{ position: 'relative', marginBottom: catDelErr ? 6 : 8 }}>
+                            <input type={showCatDelPwd ? 'text' : 'password'} value={catDelPwd}
+                              onChange={e => { setCatDelPwd(e.target.value); setCatDelErr('') }}
+                              onKeyDown={e => e.key === 'Enter' && deleteGalCat()}
+                              placeholder="Admin password…" autoFocus
+                              style={{ ...inp, borderColor: catDelErr ? 'rgba(248,113,113,0.5)' : undefined, paddingRight: '2.5rem' }} className="m-inp" />
+                            <button type="button" onClick={() => setShowCatDelPwd(p => !p)}
+                              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', padding: 0 }}>
+                              {showCatDelPwd ? <EyeOff size={13} /> : <Eye size={13} />}
+                            </button>
+                          </div>
+                          {catDelErr && <p style={{ fontSize: '0.7rem', color: C.red, fontFamily: 'Jost,sans-serif', marginBottom: 7 }}>{catDelErr}</p>}
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button onClick={() => { setCatDelId(null); setCatDelPwd(''); setCatDelErr('') }}
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                              Cancel
+                            </button>
+                            <button onClick={deleteGalCat} disabled={catDeleting || !catDelPwd}
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: catDelPwd ? 'rgba(248,113,113,0.15)' : 'transparent', border: `1px solid ${catDelPwd ? 'rgba(248,113,113,0.35)' : 'rgba(248,113,113,0.15)'}`, color: catDelPwd ? C.red : 'rgba(248,113,113,0.3)', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: (catDeleting || !catDelPwd) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
+                              {catDeleting
+                                ? <div style={{ width: 12, height: 12, border: '2px solid rgba(248,113,113,0.3)', borderTopColor: C.red, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                                : <><Trash2 size={11} /> Delete</>}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Add category form */}
+            <div style={{ borderTop: `1px solid ${C.border}`, padding: '1.25rem 1.5rem 1.5rem', flexShrink: 0 }}>
+              <label style={{ ...lbl, marginBottom: 10 }}>New Category</label>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
+                {COLOR_PRESETS.map(color => (
+                  <button key={color} type="button" onClick={() => setNewCatColor(color)} className="color-swatch"
+                    style={{ width: 22, height: 22, borderRadius: '50%', background: color, border: newCatColor === color ? '2.5px solid #fff' : '2.5px solid transparent', cursor: 'pointer', flexShrink: 0, boxShadow: newCatColor === color ? `0 0 10px ${color}99` : 'none', transition: 'all .15s', outline: 'none' }} />
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ position: 'absolute', left: 10, width: 10, height: 10, borderRadius: '50%', background: newCatColor, boxShadow: `0 0 6px ${newCatColor}99`, pointerEvents: 'none' }} />
+                  <input value={newCatName} onChange={e => setNewCatName(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && saveGalCat()}
+                    placeholder="Category name…" className="m-inp"
+                    style={{ ...inp, paddingLeft: '1.75rem' }} />
+                </div>
+                <button onClick={saveGalCat} disabled={addingCat || !newCatName.trim()}
+                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#C4956A)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  {addingCat
+                    ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    : <><Plus size={12} /> Add</>}
+                </button>
+              </div>
+
+              {newCatName.trim() && (
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Preview:</span>
+                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500, border: `1px solid ${newCatColor}55`, background: newCatColor + '22', color: newCatColor, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: newCatColor, display: 'inline-block' }} />
+                    {newCatName}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Photo confirmation ─────────────────────────── */}
       {deleteTarget && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
           onMouseDown={e => { if (e.target === e.currentTarget) setDeleteTarget(null) }}>

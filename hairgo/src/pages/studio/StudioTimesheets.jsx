@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, Coffee, Trash2, CalendarDays } from 'lucide-react'
+import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, Trash2, CalendarDays } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Pager from '../../lib/Pager'
 import { useAuth } from '../../contexts/AuthContext'
@@ -28,8 +28,8 @@ export default function StudioTimesheets() {
   const [stylists,     setStylists]     = useState([])
   const [entries,      setEntries]      = useState([])
   const [linkedStylist, setLinkedStylist] = useState(null)
+  const [activeEntry,   setActiveEntry]   = useState(null)
   const [loading,      setLoading]      = useState(true)
-  const [breakEdit,    setBreakEdit]    = useState({})
   const [page,         setPage]         = useState(0)
   const [showPicker,     setShowPicker]     = useState(false)
   const [pickerMonth,    setPickerMonth]    = useState(startOfMonth(new Date()))
@@ -40,6 +40,12 @@ export default function StudioTimesheets() {
   const weekEnd   = endOfWeek(week,   { weekStartsOn: 1 })
 
   useEffect(() => { load() }, [week, user])
+
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [week, user])
 
   async function load() {
     setLoading(true)
@@ -64,17 +70,26 @@ export default function StudioTimesheets() {
       setLinkedStylist(linked || null)
       if (linked) {
         setStylists([linked])
-        const { data: ents } = await supabase
-          .from('timesheets')
-          .select('*, stylists(name, photo_url)')
-          .eq('stylist_id', linked.id)
-          .gte('clock_in', weekStart.toISOString())
-          .lte('clock_in', weekEnd.toISOString())
-          .order('clock_in', { ascending: false })
+        const [{ data: ents }, { data: openEntry }] = await Promise.all([
+          supabase.from('timesheets')
+            .select('*, stylists(name, photo_url)')
+            .eq('stylist_id', linked.id)
+            .gte('clock_in', weekStart.toISOString())
+            .lte('clock_in', weekEnd.toISOString())
+            .order('clock_in', { ascending: false }),
+          // Separate query — no date restriction — to reliably detect active clock-in across devices/timezones
+          supabase.from('timesheets')
+            .select('id, clock_in, stylist_id')
+            .eq('stylist_id', linked.id)
+            .is('clock_out', null)
+            .maybeSingle(),
+        ])
         setEntries(ents || [])
+        setActiveEntry(openEntry || null)
       } else {
         setStylists([])
         setEntries([])
+        setActiveEntry(null)
       }
     }
 
@@ -82,8 +97,9 @@ export default function StudioTimesheets() {
   }
 
   async function clockIn(stylistId) {
-    const { error } = await supabase.from('timesheets').insert({ stylist_id: stylistId, clock_in: new Date().toISOString() })
+    const { data, error } = await supabase.from('timesheets').insert({ stylist_id: stylistId, clock_in: new Date().toISOString() }).select('id, clock_in, stylist_id').single()
     if (error) return toast.error(error.message)
+    setActiveEntry(data)
     toast.success('Clocked in')
     load()
   }
@@ -91,16 +107,9 @@ export default function StudioTimesheets() {
   async function clockOut(entry) {
     const { error } = await supabase.from('timesheets').update({ clock_out: new Date().toISOString() }).eq('id', entry.id)
     if (error) return toast.error(error.message)
+    setActiveEntry(null)
     toast.success('Clocked out')
     load()
-  }
-
-  async function saveBreak(entry, mins) {
-    const { error } = await supabase.from('timesheets').update({ break_minutes: parseInt(mins) || 0 }).eq('id', entry.id)
-    if (error) return toast.error(error.message)
-    setEntries(prev => prev.map(e => e.id === entry.id ? { ...e, break_minutes: parseInt(mins) || 0 } : e))
-    setBreakEdit(prev => { const n = { ...prev }; delete n[entry.id]; return n })
-    toast.success('Break updated')
   }
 
   async function deleteEntry(id) {
@@ -114,7 +123,8 @@ export default function StudioTimesheets() {
   const clockedInNow  = todayEntries.filter(e => !e.clock_out)
   const totalWeekMins = entries.reduce((acc, e) => {
     if (!e.clock_out) return acc
-    return acc + Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in)) - (e.break_minutes || 0))
+    const raw = Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in)))
+    return acc + (raw >= 360 ? raw - 45 : raw)
   }, 0)
 
   const filtered = filterStylist ? entries.filter(e => e.stylist_id === filterStylist.id) : entries
@@ -125,8 +135,8 @@ export default function StudioTimesheets() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
       <style>{`
         @keyframes blink        { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
-        .ts-row:hover           { background: rgba(255,255,255,0.02); }
-        .ts-del:hover           { color: ${C.red} !important; border-color: rgba(248,113,113,0.3) !important; }
+        .ts-row:hover           { background: rgba(255,255,255,0.02) !important; }
+        .ts-del:hover           { color: ${C.red} !important; border-color: rgba(248,113,113,0.3) !important; background: rgba(248,113,113,0.06) !important; }
         .week-nav:hover         { background: rgba(201,168,76,0.08) !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .clk-in:hover           { background: rgba(52,211,153,0.18)  !important; }
         .clk-out:hover          { background: rgba(248,113,113,0.18) !important; }
@@ -134,11 +144,6 @@ export default function StudioTimesheets() {
         .ts-picker-week:hover   { background: rgba(201,168,76,0.1) !important; border-color: rgba(201,168,76,0.15) !important; }
         .ts-filter-btn:hover    { background: rgba(255,255,255,0.05) !important; }
         .ts-stylist-row:hover   { background: rgba(255,255,255,0.04) !important; }
-        .ts-mobile-cards        { display: none; }
-        @media (max-width: 767px) {
-          .ts-desktop-table { display: none !important; }
-          .ts-mobile-cards  { display: block !important; }
-        }
       `}</style>
 
       {/* ── Header ──────────────────────────────────────────── */}
@@ -325,7 +330,9 @@ export default function StudioTimesheets() {
       {!isAdmin && stylists.length > 0 && (
         <div style={{ flexShrink: 0, display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
           {stylists.map(s => {
-            const active    = todayEntries.find(e => e.stylist_id === s.id && !e.clock_out)
+            const active    = isAdmin
+              ? todayEntries.find(e => e.stylist_id === s.id && !e.clock_out)
+              : activeEntry
             const todayMins = todayEntries
               .filter(e => e.stylist_id === s.id && e.clock_out)
               .reduce((acc, e) => acc + Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in)) - (e.break_minutes || 0)), 0)
@@ -377,188 +384,90 @@ export default function StudioTimesheets() {
 
       {/* ── Log table ────────────────────────────────────────── */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
 
-        {/* ── Desktop table ── */}
-        <div className="ts-desktop-table" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${C.border}` }}>
-                {['Team Member', 'Date', 'Clock In', 'Clock Out', 'Break', 'Net Hours', ''].map(h => (
-                  <th key={h} style={{ padding: '0.65rem 1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} style={{ borderBottom: `1px solid ${C.border}` }}>
-                    {Array.from({ length: 7 }).map((_, j) => (
-                      <td key={j} style={{ padding: '0.75rem 1rem' }}>
-                        <div style={{ height: 10, borderRadius: 4, width: j === 0 ? 110 : 55, background: C.subtle }} />
-                      </td>
-                    ))}
-                  </tr>
-                ))
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center' }}>
-                  <Clock size={28} style={{ margin: '0 auto 0.6rem', color: C.border, display: 'block' }} />
-                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No entries this week</p>
-                </td></tr>
-              ) : paged.map(e => {
-                const net       = e.clock_out ? Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in)) - (e.break_minutes || 0)) : null
-                const isEditing = breakEdit[e.id] !== undefined
-                return (
-                  <tr key={e.id} style={{ borderBottom: `1px solid ${C.border}` }} className="ts-row">
-                    <td style={{ padding: '0.65rem 1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {e.stylists?.photo_url
-                          ? <img src={e.stylists.photo_url} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0 }} />
-                          : <div style={{ width: 26, height: 26, borderRadius: '50%', background: C.subtle, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>{e.stylists?.name?.[0]}</span>
-                            </div>
-                        }
-                        <span style={{ color: C.white, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>{e.stylists?.name}</span>
-                      </div>
-                    </td>
-                    <td style={{ padding: '0.65rem 1rem', color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{format(new Date(e.clock_in), 'EEE, MMM d')}</td>
-                    <td style={{ padding: '0.65rem 1rem', whiteSpace: 'nowrap' }}>
-                      <span style={{ color: C.green, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_in), 'HH:mm')}</span>
-                    </td>
-                    <td style={{ padding: '0.65rem 1rem', whiteSpace: 'nowrap' }}>
-                      {e.clock_out
-                        ? <span style={{ color: C.red, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_out), 'HH:mm')}</span>
-                        : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '3px 9px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
-                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> Active
-                          </span>
-                      }
-                    </td>
-                    <td style={{ padding: '0.65rem 1rem' }}>
-                      {isEditing
-                        ? <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <input type="number" min="0" value={breakEdit[e.id]}
-                              onChange={ev => setBreakEdit(p => ({ ...p, [e.id]: ev.target.value }))}
-                              style={{ width: 50, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.goldBorder}`, borderRadius: 6, padding: '2px 6px', fontSize: '0.75rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif' }} />
-                            <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>min</span>
-                            <button onClick={() => saveBreak(e, breakEdit[e.id])} style={{ padding: '2px 7px', borderRadius: 5, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: 10, cursor: 'pointer' }}>✓</button>
-                          </div>
-                        : <button onClick={() => setBreakEdit(p => ({ ...p, [e.id]: String(e.break_minutes || 0) }))}
-                            style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', padding: 0 }}>
-                            <Coffee size={10} />{e.break_minutes ? `${e.break_minutes}m` : '—'}
-                          </button>
-                      }
-                    </td>
-                    <td style={{ padding: '0.65rem 1rem' }}>
-                      <span style={{ color: net !== null ? C.gold : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: net !== null ? 600 : 400 }}>
-                        {net !== null ? fmtMins(net) : '—'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '0.65rem 1rem' }}>
-                      {isAdmin && (
-                        <button onClick={() => deleteEntry(e.id)} className="ts-del"
-                          style={{ padding: '3px 8px', borderRadius: 6, background: 'transparent', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.35)', fontSize: 9, fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
-                          Delete
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+          {/* Column headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px 28px', padding: '0.5rem 0.875rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
+            {['Member', 'In', 'Out', 'Net', ''].map((h, i) => (
+              <div key={i} style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, textAlign: i > 0 ? 'center' : 'left' }}>{h}</div>
+            ))}
+          </div>
 
-        {/* ── Mobile cards ── */}
-        <div className="ts-mobile-cards" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}` }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: C.subtle, flexShrink: 0 }} />
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px 28px', padding: '0.75rem 0.875rem', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.subtle, flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ height: 11, borderRadius: 4, width: 120, background: C.subtle, marginBottom: 6 }} />
-                    <div style={{ height: 9, borderRadius: 4, width: 80, background: C.subtle }} />
+                    <div style={{ height: 10, borderRadius: 4, width: 90, background: C.subtle, marginBottom: 5 }} />
+                    <div style={{ height: 8, borderRadius: 4, width: 60, background: C.subtle }} />
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
-                  {[1,1,1].map((_, j) => <div key={j} style={{ flex: 1, height: 32, borderRadius: 8, background: C.subtle }} />)}
-                </div>
+                {[1,1,1,1].map((_, j) => <div key={j} style={{ height: 10, borderRadius: 4, background: C.subtle, margin: '0 auto', width: 36 }} />)}
               </div>
             ))
-          ) : entries.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center' }}>
               <Clock size={28} style={{ margin: '0 auto 0.6rem', color: C.border, display: 'block' }} />
               <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No entries this week</p>
             </div>
-          ) : paged.map(e => {
-            const net       = e.clock_out ? Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in)) - (e.break_minutes || 0)) : null
-            const isEditing = breakEdit[e.id] !== undefined
+          ) : paged.map((e, idx) => {
+            const raw    = e.clock_out ? Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in))) : null
+            const net    = raw !== null ? (raw >= 360 ? raw - 45 : raw) : null
+            const isLast = idx === paged.length - 1
             return (
-              <div key={e.id} style={{ padding: '0.65rem 0.875rem', borderBottom: `1px solid ${C.border}` }}>
+              <div key={e.id} className="ts-row"
+                style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px 28px', padding: '0.6rem 0.875rem', borderBottom: isLast ? 'none' : `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center', transition: 'background .12s' }}>
 
-                {/* Name + date */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '0.42rem' }}>
+                {/* Member + date */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                   {e.stylists?.photo_url
-                    ? <img src={e.stylists.photo_url} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1px solid ${C.border}` }} />
-                    : <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>{e.stylists?.name?.[0]}</span>
+                    ? <img src={e.stylists.photo_url} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1px solid ${C.border}` }} />
+                    : <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.subtle, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>{e.stylists?.name?.[0]}</span>
                       </div>
                   }
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: C.white, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, lineHeight: 1.2 }}>{e.stylists?.name}</p>
-                    <p style={{ color: C.muted, fontSize: '0.67rem', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{format(new Date(e.clock_in), 'EEE, MMM d')}</p>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.stylists?.name}</p>
+                    <p style={{ color: C.muted, fontSize: '0.67rem', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{format(new Date(e.clock_in), 'EEE d MMM')}</p>
                   </div>
-                  {isAdmin && (
-                    <button onClick={() => deleteEntry(e.id)} className="ts-del"
-                      style={{ width: 26, height: 26, borderRadius: 7, background: 'transparent', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
-                      <Trash2 size={10} />
-                    </button>
-                  )}
                 </div>
 
-                {/* Clock in / out / break */}
-                <div style={{ display: 'flex', alignItems: 'center', paddingTop: '0.38rem', borderTop: `1px solid ${C.border}`, gap: 0 }}>
-                  {[
-                    { label: 'In',  content: <span style={{ color: C.green, fontSize: '0.86rem', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{format(new Date(e.clock_in), 'HH:mm')}</span> },
-                    { label: 'Out', content: e.clock_out
-                      ? <span style={{ color: C.red, fontSize: '0.86rem', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{format(new Date(e.clock_out), 'HH:mm')}</span>
-                      : <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.86rem', fontFamily: 'Jost,sans-serif' }}>—</span>
-                    },
-                  ].map(({ label, content }, idx) => (
-                    <div key={label} style={{ flex: 1, textAlign: 'center', paddingRight: idx === 0 ? 0 : 0, borderRight: `1px solid ${C.border}` }}>
-                      <div style={{ fontSize: 7, color: C.muted, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 2 }}>{label}</div>
-                      {content}
-                    </div>
-                  ))}
-                  <div style={{ flex: 1, textAlign: 'center', borderRight: `1px solid ${C.border}` }}>
-                    <div style={{ fontSize: 7, color: C.muted, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 2 }}>Break</div>
-                    {isEditing
-                      ? <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
-                          <input type="number" min="0" value={breakEdit[e.id]}
-                            onChange={ev => setBreakEdit(p => ({ ...p, [e.id]: ev.target.value }))}
-                            style={{ width: 38, background: 'rgba(255,255,255,0.06)', border: `1px solid ${C.goldBorder}`, borderRadius: 5, padding: '2px 3px', fontSize: '0.68rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', textAlign: 'center' }} />
-                          <button onClick={() => saveBreak(e, breakEdit[e.id])} style={{ padding: '2px 5px', borderRadius: 4, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: 9, cursor: 'pointer' }}>✓</button>
-                        </div>
-                      : <button onClick={() => setBreakEdit(p => ({ ...p, [e.id]: String(e.break_minutes || 0) }))}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: e.break_minutes ? C.goldDim : 'rgba(255,255,255,0.2)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: e.break_minutes ? 600 : 400, padding: 0 }}>
-                          {e.break_minutes ? `${e.break_minutes}m` : '—'}
-                        </button>
-                    }
-                  </div>
-                  <div style={{ flex: 1, textAlign: 'center' }}>
-                    <div style={{ fontSize: 7, color: C.muted, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 2 }}>Net</div>
-                    {net !== null
-                      ? <span style={{ color: C.gold, fontSize: '0.86rem', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{fmtMins(net)}</span>
-                      : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 8, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '2px 6px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
-                          <span style={{ width: 4, height: 4, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> Active
-                        </span>
-                    }
-                  </div>
+                {/* Clock in */}
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ color: C.green, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_in), 'HH:mm')}</span>
+                </div>
+
+                {/* Clock out */}
+                <div style={{ textAlign: 'center' }}>
+                  {e.clock_out
+                    ? <span style={{ color: C.red, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_out), 'HH:mm')}</span>
+                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 8, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '2px 5px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, whiteSpace: 'nowrap' }}>
+                        <span style={{ width: 4, height: 4, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> On
+                      </span>
+                  }
+                </div>
+
+                {/* Net hours */}
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ color: net !== null ? C.gold : C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: net !== null ? 600 : 400 }}>
+                    {net !== null ? fmtMins(net) : '—'}
+                  </span>
+                </div>
+
+                {/* Delete (admin only) */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {isAdmin && (
+                    <button onClick={() => deleteEntry(e.id)} className="ts-del"
+                      style={{ width: 22, height: 22, borderRadius: 5, background: 'transparent', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
+                      <Trash2 size={9} />
+                    </button>
+                  )}
                 </div>
               </div>
             )
           })}
         </div>
-
       </div>
 
       {!loading && <Pager page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} />}

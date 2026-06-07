@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, X, Calendar, User } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
-  eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay
+  eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay,
+  parseISO, startOfWeek, endOfWeek, isSameMonth,
 } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -31,8 +32,11 @@ export default function StudioAppointments() {
   const [selectedDay,  setSelectedDay]  = useState(null)
   const [filter,       setFilter]       = useState('all')
   const [page,         setPage]         = useState(0)
+  const [periodFilter, setPeriodFilter] = useState(null) // null | 'day' | 'week' | 'month' | 'all'
+  const [listPage,     setListPage]     = useState(0)
 
-  const PAGE_SIZE = 3
+  const PAGE_SIZE      = 3
+  const LIST_PAGE_SIZE = 5
 
   useEffect(() => { load() }, [])
 
@@ -108,11 +112,35 @@ export default function StudioAppointments() {
     return acc
   }, {})
 
-  const totalAppts = appointments.length
+  const totalAppts   = appointments.length
   const pendingCount = appointments.filter(a => a.status === 'pending').length
 
+  // period list filtering
+  const periodAppts = (() => {
+    if (!periodFilter) return []
+    const now = new Date()
+    if (periodFilter === 'all')   return [...appointments]
+    if (periodFilter === 'day')   return appointments.filter(a => a.date === format(now, 'yyyy-MM-dd'))
+    if (periodFilter === 'week') {
+      const ws = startOfWeek(now, { weekStartsOn: 1 })
+      const we = endOfWeek(now,   { weekStartsOn: 1 })
+      return appointments.filter(a => { const d = parseISO(a.date); return d >= ws && d <= we })
+    }
+    if (periodFilter === 'month') return appointments.filter(a => isSameMonth(parseISO(a.date), now))
+    return []
+  })()
+  const listTotalPages = Math.ceil(periodAppts.length / LIST_PAGE_SIZE)
+  const listPageAppts  = periodAppts.slice(listPage * LIST_PAGE_SIZE, (listPage + 1) * LIST_PAGE_SIZE)
+
+  const PERIOD_TABS = [
+    { key: 'day',   label: 'Today'      },
+    { key: 'week',  label: 'This Week'  },
+    { key: 'month', label: 'This Month' },
+    { key: 'all',   label: 'All Time'   },
+  ]
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: periodFilter ? 'auto' : 'hidden' }}>
       <style>{`
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
@@ -128,6 +156,16 @@ export default function StudioAppointments() {
         .filter-pill:hover { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
         .modal-x:hover { background: rgba(255,255,255,0.08) !important; color: ${C.white} !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }
+        .period-tab:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
+        @media (max-width: 640px) {
+          .cal-day-appt { min-height: 54px !important; padding: 5px 4px 4px !important; border-radius: 7px !important; }
+          .cal-appt-preview { display: none !important; }
+          .cal-appt-badge { padding: 1px 4px !important; font-size: 7px !important; }
+          .cal-day-num { font-size: 0.82rem !important; }
+          .cal-month-header { flex-wrap: wrap !important; gap: 8px !important; }
+          .cal-month-label { font-size: 0.9rem !important; min-width: 110px !important; }
+          .cal-today-btn { display: none !important; }
+        }
       `}</style>
 
       {/* Header */}
@@ -141,12 +179,12 @@ export default function StudioAppointments() {
         </div>
 
         {/* Month nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="cal-month-header" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <button onClick={() => setMonth(subMonths(month, 1))} className="bd-nav"
             style={{ width: 34, height: 34, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: C.muted, transition: 'all .18s' }}>
             <ChevronLeft size={14} />
           </button>
-          <span className="font-display" style={{ fontSize: '1.15rem', color: C.white, minWidth: 160, textAlign: 'center' }}>
+          <span className="font-display cal-month-label" style={{ fontSize: '1.15rem', color: C.white, minWidth: 160, textAlign: 'center' }}>
             {format(month, 'MMMM yyyy')}
           </span>
           <button onClick={() => setMonth(addMonths(month, 1))} className="bd-nav"
@@ -155,10 +193,35 @@ export default function StudioAppointments() {
           </button>
           <button onClick={() => setMonth(new Date())}
             style={{ padding: '5px 14px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .18s' }}
-            className="bd-nav">
+            className="bd-nav cal-today-btn">
             Today
           </button>
         </div>
+      </div>
+
+      {/* Period filter bar */}
+      <div style={{ flexShrink: 0, display: 'flex', gap: 6, marginBottom: '0.875rem', flexWrap: 'wrap', padding: '2px 0' }}>
+        {PERIOD_TABS.map(({ key, label }) => {
+          const active = periodFilter === key
+          return (
+            <button key={key}
+              onClick={() => { setPeriodFilter(active ? null : key); setListPage(0) }}
+              className="period-tab"
+              style={{
+                padding: '7px 16px', borderRadius: 20,
+                border: `1px solid ${active ? C.goldBorder : 'rgba(255,255,255,0.14)'}`,
+                background: active ? C.goldBg : 'rgba(255,255,255,0.05)',
+                color: active ? C.gold : 'rgba(255,255,255,0.6)',
+                fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: active ? 700 : 500,
+                cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em',
+              }}>
+              {label}
+              {active && periodAppts.length > 0 && (
+                <span style={{ marginLeft: 6, fontSize: 10, opacity: 0.8 }}>· {periodAppts.length}</span>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {/* Calendar */}
@@ -211,11 +274,11 @@ export default function StudioAppointments() {
 
                     {/* Day number + count */}
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span className="font-display" style={{ fontSize: '1.05rem', color: isToday ? C.gold : isPast ? C.muted : C.white, fontWeight: 700, lineHeight: 1 }}>
+                      <span className="font-display cal-day-num" style={{ fontSize: '1.05rem', color: isToday ? C.gold : isPast ? C.muted : C.white, fontWeight: 700, lineHeight: 1 }}>
                         {format(day, 'd')}
                       </span>
                       {hasAppts && (
-                        <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 6px', lineHeight: 1.6 }}>
+                        <span className="cal-appt-badge" style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 6px', lineHeight: 1.6 }}>
                           {appts.length}
                         </span>
                       )}
@@ -238,7 +301,7 @@ export default function StudioAppointments() {
 
                     {/* First appointment preview */}
                     {hasAppts && appts[0] && (
-                      <p style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p className="cal-appt-preview" style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {appts[0].time?.slice(0, 5)} {appts[0].profiles?.full_name?.split(' ')[0] || ''}
                       </p>
                     )}
@@ -258,6 +321,77 @@ export default function StudioAppointments() {
           </div>
         ))}
       </div>
+
+      {/* ── Period list ── */}
+      {periodFilter && (
+        <div style={{ flexShrink: 0, marginTop: '1rem', borderTop: `1px solid ${C.goldBorder}`, paddingTop: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+            <h3 className="font-display font-light" style={{ fontSize: '1.1rem', color: C.white, lineHeight: 1 }}>
+              {PERIOD_TABS.find(t => t.key === periodFilter)?.label}
+              <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 400, marginLeft: 10 }}>
+                {periodAppts.length} appointment{periodAppts.length !== 1 ? 's' : ''}
+              </span>
+            </h3>
+          </div>
+
+          {periodAppts.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 80, gap: 8 }}>
+              <Calendar size={22} color={C.border} />
+              <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>No appointments for this period</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              {listPageAppts.map(appt => {
+                const s        = STATUS[appt.status] || STATUS.pending
+                const initials = appt.profiles?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+                return (
+                  <div key={appt.id} className="appt-card-row"
+                    style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: 12, transition: 'border-color .2s' }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: '0.72rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{initials}</span>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 2 }}>{appt.profiles?.full_name || 'Unknown'}</p>
+                      <p style={{ color: C.muted, fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {[appt.date && format(parseISO(appt.date), 'MMM d'), appt.time?.slice(0,5), appt.services?.name].filter(Boolean).join(' · ')}
+                      </p>
+                    </div>
+                    {appt.services?.price && (
+                      <span style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>€{appt.services.price}</span>
+                    )}
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, flexShrink: 0 }}>
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={appt.status === 'pending' ? 'dot-pulse' : ''} />
+                      <span style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* List pagination */}
+          {listTotalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, paddingTop: '0.75rem' }}>
+              <button onClick={() => setListPage(p => Math.max(0, p - 1))} disabled={listPage === 0}
+                style={{ width: 28, height: 28, borderRadius: '50%', background: C.subtle, border: `1px solid ${listPage === 0 ? C.border : C.goldBorder}`, color: listPage === 0 ? C.muted : C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: listPage === 0 ? 'default' : 'pointer', opacity: listPage === 0 ? 0.35 : 1, transition: 'all .18s' }}
+                className="pg-btn">
+                <ChevronLeft size={13} />
+              </button>
+              <div style={{ display: 'flex', gap: 5 }}>
+                {Array.from({ length: listTotalPages }).map((_, i) => (
+                  <button key={i} onClick={() => setListPage(i)}
+                    style={{ width: i === listPage ? 20 : 7, height: 7, borderRadius: 4, background: i === listPage ? C.gold : C.border, border: 'none', cursor: 'pointer', transition: 'all .2s ease', padding: 0 }} />
+                ))}
+              </div>
+              <button onClick={() => setListPage(p => Math.min(listTotalPages - 1, p + 1))} disabled={listPage === listTotalPages - 1}
+                style={{ width: 28, height: 28, borderRadius: '50%', background: C.subtle, border: `1px solid ${listPage === listTotalPages - 1 ? C.border : C.goldBorder}`, color: listPage === listTotalPages - 1 ? C.muted : C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: listPage === listTotalPages - 1 ? 'default' : 'pointer', opacity: listPage === listTotalPages - 1 ? 0.35 : 1, transition: 'all .18s' }}
+                className="pg-btn">
+                <ChevronRight size={13} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Day modal ── */}
       {selectedDay && (

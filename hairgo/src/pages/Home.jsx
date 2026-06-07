@@ -165,6 +165,7 @@ export default function Home() {
             animate={{ opacity:1, y:0, filter:'blur(0px)' }}
             transition={{ duration:0.75, delay:0.7, ease:[0.25,0.46,0.45,0.94] }}
             style={{ display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'center', gap:'1rem' }}
+            className="hero-cta-btns"
           >
             <Link to="/appointments" className="btn-gold" style={{ gap:12 }}>
               Book Appointment
@@ -301,7 +302,7 @@ export default function Home() {
       </section>
 
       {/* ══ ABOUT ═══════════════════════════════════════════════ */}
-      <section className="home-section home-section-sm">
+      <section className="home-section home-section-sm" style={{ overflow: 'hidden' }}>
         <div className="wrap">
           <div className="home-about-grid">
 
@@ -512,6 +513,9 @@ export default function Home() {
             align-items: flex-start !important;
             padding-top: 145px !important;
             padding-bottom: 160px !important;
+          }
+          .hero-cta-btns {
+            margin-top: -40px;
           }
         }
       `}</style>

@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS gallery (
   category TEXT CHECK (category IN ('cut', 'color', 'treatment', 'style')),
   stylist_id UUID REFERENCES stylists(id) ON DELETE SET NULL,
   display_order INTEGER DEFAULT 0,
+  visible BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

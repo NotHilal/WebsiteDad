@@ -40,7 +40,7 @@ function TypeToggle({ value, onChange }) {
   )
 }
 
-function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign }) {
+function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign, onAssign }) {
   const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `€${coupon.discount_value}`
   const used = !coupon.active
   const sharedBorder = `1px solid ${used ? C.border : C.goldBorder}`
@@ -73,7 +73,10 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
           )}
           <span style={{ fontSize: 9, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
           <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
-          {assignment && <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>Unassign</button>}
+          {assignment
+            ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>Unassign</button>
+            : <button onClick={() => onAssign(coupon)} className="btn-assign-uc" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>Assign</button>
+          }
           <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
           <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
         </div>
@@ -118,12 +121,16 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
             style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
             {used ? 'Mark active' : 'Mark used'}
           </button>
-          {assignment && (
-            <button onClick={() => onUnassign(coupon.id)} className="btn-unassign"
-              style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>
-              Unassign
-            </button>
-          )}
+          {assignment
+            ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign"
+                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>
+                Unassign
+              </button>
+            : <button onClick={() => onAssign(coupon)} className="btn-assign-uc"
+                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>
+                Assign
+              </button>
+          }
           <div style={{ display: 'flex', gap: 5, marginLeft: 'auto' }}>
             <button onClick={() => onEdit(coupon)} className="btn-edit-uc"
               style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
@@ -232,6 +239,14 @@ export default function StudioCoupons() {
     setDeleteTarget(null)
   }
 
+  function openAssignForCoupon(coupon) {
+    setAssignCoupon(coupon)
+    setAssignStep(2)
+    setAssignUser(null)
+    setUserSearch('')
+    setModal('assign')
+  }
+
   async function unassignCoupon(couponId) {
     const { error } = await supabase.from('user_coupons').delete().eq('coupon_id', couponId)
     if (error) { toast.error(error.message); return }
@@ -322,13 +337,6 @@ export default function StudioCoupons() {
           </div>
         </div>
         <div className="uc-hdr-btns" style={{ display: 'flex', gap: 7 }}>
-          <button onClick={() => {
-            setAssignStep(1); setAssignCoupon(null); setAssignUser(null); setUserSearch(''); setModal('assign')
-          }}
-            className="btn-pill"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 0.875rem', borderRadius: 9, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s' }}>
-            <UserPlus size={13} /> Assign Coupon
-          </button>
           <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-gold-sm"
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
             <Plus size={13} /> New Coupon
@@ -374,6 +382,7 @@ export default function StudioCoupons() {
               onEdit={c => { setForm({ code: c.code, discount_type: c.discount_type, discount_value: c.discount_value?.toString(), expiry_date: c.expiry_date || '', id: c.id }); setModal('edit') }}
               onToggle={toggleActive}
               onUnassign={unassignCoupon}
+              onAssign={openAssignForCoupon}
               onDelete={setDeleteTarget} />
           ))}
           <Pager page={page} total={filtered.length} onChange={setPage} />

@@ -67,6 +67,7 @@ export default function StudioMessages() {
       .select('*, user:profiles!user_id(full_name), recipient:profiles!recipient_id(full_name)')
       .order('updated_at', { ascending: false })
     if (role === 'employee') query = query.or(`recipient_id.is.null,recipient_id.eq.${user.id}`)
+    else query = query.is('recipient_id', null)
     const { data: tkts } = await query
     if (!tkts?.length) { setTickets([]); setLoading(false); return }
 

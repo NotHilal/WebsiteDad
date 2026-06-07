@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Plus, Edit2, Trash2, X, Save, Scissors, Clock, Upload, ImageIcon } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, Scissors, Clock, Upload, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
 import toast from 'react-hot-toast'
@@ -41,6 +41,11 @@ export default function StudioServices() {
   const [catFilter,   setCatFilter]   = useState('all')
   const [file,        setFile]        = useState(null)
   const [filePreview, setFilePreview] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deletePass,   setDeletePass]   = useState('')
+  const [deleteError,  setDeleteError]  = useState(false)
+  const [showPass,     setShowPass]     = useState(false)
+  const [deleting,     setDeleting]     = useState(false)
 
   function handleFile(e) {
     const f = e.target.files[0]
@@ -93,18 +98,37 @@ export default function StudioServices() {
     finally { setSaving(false) }
   }
 
-  async function del(id) {
-    if (!confirm('Delete this service?')) return
-    await supabase.from('services').delete().eq('id', id)
-    toast.success('Service deleted'); invalidate('studio_services'); invalidate('studio_home_display'); load()
+  function openDelete(s)  { setDeleteTarget(s); setDeletePass(''); setDeleteError(false); setShowPass(false) }
+  function closeDelete()  { setDeleteTarget(null); setDeletePass(''); setDeleteError(false) }
+
+  async function confirmDelete() {
+    if (deletePass !== 'hairgo24') { setDeleteError(true); return }
+    setDeleting(true)
+    const { error } = await supabase.from('services').delete().eq('id', deleteTarget.id)
+    setDeleting(false)
+    if (error) { toast.error(error.message); return }
+    toast.success('Service deleted')
+    invalidate('studio_services'); invalidate('studio_home_display'); load()
+    closeDelete()
+  }
+
+  async function toggleActive(s) {
+    await supabase.from('services').update({ active: !s.active }).eq('id', s.id)
+    toast.success(s.active ? 'Service archived' : 'Service restored')
+    invalidate('studio_services'); invalidate('studio_home_display'); load()
   }
 
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))
 
-  const filtered = catFilter === 'all' ? services : services.filter(s => s.category === catFilter)
+  const archivedCount = services.filter(s => !s.active).length
+  const filtered = catFilter === 'archived'
+    ? services.filter(s => !s.active)
+    : catFilter === 'all'
+      ? services
+      : services.filter(s => s.active && s.category === catFilter)
 
   const catCounts = CATS.reduce((acc, c) => {
-    acc[c] = services.filter(s => s.category === c).length
+    acc[c] = services.filter(s => s.active && s.category === c).length
     return acc
   }, {})
 
@@ -117,10 +141,9 @@ export default function StudioServices() {
         .svc-card { transition: transform .35s cubic-bezier(0.22,1,0.36,1), box-shadow .35s ease; }
         .svc-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 28px 64px rgba(0,0,0,0.6) !important; }
         .svc-card:hover .svc-img { transform: scale(1.08) !important; }
-        .svc-card:hover .svc-actions { opacity: 1 !important; }
-        .svc-card:hover .svc-overlay { opacity: 1 !important; }
-        .svc-edit-btn:hover { background: rgba(255,255,255,0.18) !important; color: #fff !important; border-color: rgba(255,255,255,0.25) !important; }
-        .svc-del-btn:hover  { background: rgba(248,113,113,0.25) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.4) !important; }
+        .svc-edit-btn:hover   { background: rgba(255,255,255,0.22) !important; color: #fff !important; border-color: rgba(255,255,255,0.3) !important; }
+        .svc-arc-btn:hover    { background: rgba(201,168,76,0.22) !important; color: #C9A84C !important; border-color: rgba(201,168,76,0.4) !important; }
+        .svc-del-btn:hover    { background: rgba(248,113,113,0.25) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.4) !important; }
         .cat-filter:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.dim} !important; }
         .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,168,76,0.3); }
         .modal-close:hover { background: rgba(255,255,255,0.1) !important; }
@@ -132,7 +155,10 @@ export default function StudioServices() {
       <div style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Services</h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{services.length} services · {services.filter(s => s.active).length} active</p>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+            {services.filter(s => s.active).length} active
+            {archivedCount > 0 && <span style={{ color: 'rgba(248,113,113,0.5)', marginLeft: 8 }}>· {archivedCount} archived</span>}
+          </p>
         </div>
         <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-g"
           style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', letterSpacing: '0.04em' }}>
@@ -147,6 +173,14 @@ export default function StudioServices() {
           className="cat-filter">
           All · {services.length}
         </button>
+        {archivedCount > 0 && (
+          <button onClick={() => setCatFilter('archived')}
+            style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${catFilter === 'archived' ? 'rgba(248,113,113,0.4)' : C.border}`, background: catFilter === 'archived' ? 'rgba(248,113,113,0.1)' : 'transparent', color: catFilter === 'archived' ? '#f87171' : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}
+            className="cat-filter">
+            <EyeOff size={9} />
+            Archived · {archivedCount}
+          </button>
+        )}
         {CATS.filter(c => catCounts[c] > 0).map(c => {
           const cat = CAT[c]
           return (
@@ -181,36 +215,55 @@ export default function StudioServices() {
               const cat = CAT[s.category] || CAT.other
               return (
                 <div key={s.id} className="svc-card"
-                  style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', height: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.45)', border: `1px solid rgba(255,255,255,0.06)`, filter: s.active ? 'none' : 'saturate(0.35) brightness(0.75)' }}>
+                  style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', height: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.45)', border: `1px solid ${s.active ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)'}` }}>
 
                   {/* ── Background: full-bleed image or gradient ── */}
                   <div style={{ position: 'absolute', inset: 0 }}>
                     {s.image_url
                       ? <img src={s.image_url} alt={s.name} className="svc-img"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.7s cubic-bezier(0.22,1,0.36,1)' }} />
-                      : <div style={{ width: '100%', height: '100%', background: `radial-gradient(ellipse at 25% 25%, ${cat.color}28 0%, ${cat.color}08 55%, #0d0d14 100%)` }}>
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.7s cubic-bezier(0.22,1,0.36,1)', filter: s.active ? 'none' : 'brightness(0.3) saturate(0.4)' }} />
+                      : <div style={{ width: '100%', height: '100%', background: `radial-gradient(ellipse at 25% 25%, ${cat.color}28 0%, ${cat.color}08 55%, #0d0d14 100%)`, filter: s.active ? 'none' : 'brightness(0.3) saturate(0.4)' }}>
                           <span className="font-display" style={{ position: 'absolute', bottom: -10, right: 12, fontSize: '9rem', color: `${cat.color}12`, lineHeight: 1, fontWeight: 700, userSelect: 'none', letterSpacing: '-0.04em' }}>
                             {s.name.charAt(0)}
                           </span>
                         </div>
                     }
+                    {/* Archived overlay icon */}
+                    {!s.active && (
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                        <EyeOff size={32} color="rgba(255,255,255,0.22)" />
+                      </div>
+                    )}
                     {/* Deep gradient overlay — readable text at bottom */}
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.04) 0%, rgba(8,8,12,0.5) 40%, rgba(8,8,12,0.97) 100%)' }} />
                     {/* Category colour top-edge accent */}
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${cat.color}, ${cat.color}33)` }} />
                   </div>
 
-                  {/* ── Top row: category badge + inactive ── */}
-                  <div style={{ position: 'absolute', top: 14, left: 14, right: 14, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', zIndex: 2 }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(10px)', color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${cat.color}35` }}>
+                  {/* ── Top row: category badge (left) + action buttons (right) ── */}
+                  <div style={{ position: 'absolute', top: 12, left: 12, right: 12, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', zIndex: 3 }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${cat.color}35` }}>
                       <div style={{ width: 5, height: 5, borderRadius: '50%', background: cat.color }} />
                       {cat.label}
                     </span>
-                    {!s.active && (
-                      <span style={{ fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(10px)', color: '#f87171', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: '1px solid rgba(248,113,113,0.3)' }}>
-                        Inactive
-                      </span>
-                    )}
+                    <div style={{ display: 'flex', gap: 5 }}>
+                      <button onClick={() => { setForm({ ...s }); setFilePreview(s.image_url || ''); setFile(null); setModal('edit') }}
+                        className="svc-edit-btn"
+                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: '1px solid rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
+                        <Edit2 size={12} />
+                      </button>
+                      <button onClick={() => toggleActive(s)}
+                        className="svc-arc-btn"
+                        title={s.active ? 'Archive' : 'Restore'}
+                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: `1px solid ${s.active ? 'rgba(201,168,76,0.22)' : 'rgba(201,168,76,0.45)'}`, color: s.active ? 'rgba(201,168,76,0.55)' : '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
+                        {s.active ? <EyeOff size={12} /> : <Eye size={12} />}
+                      </button>
+                      <button onClick={() => openDelete(s)}
+                        className="svc-del-btn"
+                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: '1px solid rgba(248,113,113,0.25)', color: 'rgba(248,113,113,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </div>
 
                   {/* ── Bottom content ── */}
@@ -247,18 +300,6 @@ export default function StudioServices() {
                     </div>
                   </div>
 
-                  {/* ── Hover: edit / delete ── */}
-                  <div className="svc-actions"
-                    style={{ position: 'absolute', top: 14, right: 14, display: 'flex', gap: 5, opacity: 0, transition: 'opacity .22s', zIndex: 3 }}>
-                    <button onClick={() => { setForm({ ...s }); setFilePreview(s.image_url || ''); setFile(null); setModal('edit') }} className="svc-edit-btn"
-                      style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all .15s' }}>
-                      <Edit2 size={13} />
-                    </button>
-                    <button onClick={() => del(s.id)} className="svc-del-btn"
-                      style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(248,113,113,0.22)', color: 'rgba(248,113,113,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)', transition: 'all .15s' }}>
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
 
                 </div>
               )
@@ -385,17 +426,6 @@ export default function StudioServices() {
                     </div>
                   </div>
 
-                  {/* Active toggle */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1rem', borderRadius: 10, background: C.subtle, border: `1px solid ${C.border}` }}>
-                    <div>
-                      <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>Active</p>
-                      <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Visible in the booking wizard</p>
-                    </div>
-                    <div style={{ width: 42, height: 24, borderRadius: 12, background: form.active ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .25s', flexShrink: 0, cursor: 'pointer', boxShadow: form.active ? `0 0 12px rgba(201,168,76,0.35)` : 'none' }}
-                      onClick={() => setForm(p => ({ ...p, active: !p.active }))}>
-                      <div style={{ position: 'absolute', top: 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.3)', transition: 'left .25s', left: form.active ? 21 : 3 }} />
-                    </div>
-                  </div>
                 </div>
 
                 {/* Buttons */}
@@ -409,6 +439,73 @@ export default function StudioServices() {
                     {saving
                       ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><Save size={14} /> {modal === 'add' ? 'Add Service' : 'Save Changes'}</>
+                    }
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Delete confirmation modal ── */}
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+            onMouseDown={e => { if (e.target === e.currentTarget) closeDelete() }}>
+            <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: 420, background: '#12121c', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+              <div style={{ height: 4, background: 'linear-gradient(90deg,#f87171,#ef4444)' }} />
+              <div style={{ padding: '1.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <AlertTriangle size={18} color="#f87171" />
+                  </div>
+                  <div>
+                    <h3 style={{ color: C.white, fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete service?</h3>
+                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
+                  </div>
+                </div>
+
+                <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem' }}>
+                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>{deleteTarget.name}</p>
+                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
+                    {[deleteTarget.category && (CAT[deleteTarget.category]?.label), deleteTarget.price && `€${deleteTarget.price}`].filter(Boolean).join(' · ')}
+                  </p>
+                </div>
+
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 8 }}>
+                    Enter password to confirm
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input type={showPass ? 'text' : 'password'} value={deletePass}
+                      onChange={e => { setDeletePass(e.target.value); setDeleteError(false) }}
+                      onKeyDown={e => e.key === 'Enter' && confirmDelete()}
+                      placeholder="••••••" autoComplete="new-password" autoFocus
+                      style={{ width: '100%', boxSizing: 'border-box', background: deleteError ? 'rgba(248,113,113,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${deleteError ? 'rgba(248,113,113,0.45)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.875rem', fontSize: '0.88rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', transition: 'border-color .15s', letterSpacing: showPass ? 'normal' : '0.2em' }} />
+                    <button onClick={() => setShowPass(v => !v)}
+                      style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center' }}>
+                      {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
+                  {deleteError && <p style={{ marginTop: 6, fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif' }}>Incorrect password. Try again.</p>}
+                </div>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={closeDelete}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}
+                    className="modal-cancel">
+                    Cancel
+                  </button>
+                  <button onClick={confirmDelete} disabled={deleting || !deletePass}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting || !deletePass ? 'not-allowed' : 'pointer', background: deletePass ? 'linear-gradient(135deg,#f87171,#ef4444)' : 'rgba(248,113,113,0.15)', color: deletePass ? '#fff' : 'rgba(248,113,113,0.4)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
+                    {deleting
+                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                      : <><Trash2 size={13} /> Delete</>
                     }
                   </button>
                 </div>

@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
   Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote
 } from 'lucide-react'
+import AppointmentAlert from '../../components/AppointmentAlert'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 
@@ -43,11 +44,12 @@ const workerNavItems = [
   { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
   { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
   { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
+  { to: '/studio/paysheet',      icon: Banknote,        label: 'Paysheet' },
 ]
 
 export default function StudioLayout() {
-  const [open, setOpen] = useState(false)
-  const [unread, setUnread] = useState(0)
+  const [open,         setOpen]         = useState(false)
+  const [unread,       setUnread]       = useState(0)
   const { signOut, profile, isAdmin } = useAuth()
 
   useEffect(() => {
@@ -81,14 +83,14 @@ export default function StudioLayout() {
   const Sidebar = () => (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Brand */}
-      <div style={{ padding: '1.5rem 1.25rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+      <div className="s-brand-wrap" style={{ padding: '1.5rem 1.25rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
         <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', opacity: 1, transition: 'opacity .18s' }}
           className="s-brand">
-          <div style={{ width: 32, height: 32, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},#C4956A)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 16px rgba(201,168,76,0.3)` }}>
+          <div className="s-logo-circle" style={{ width: 32, height: 32, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},#C4956A)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 16px rgba(201,168,76,0.3)` }}>
             <Scissors size={13} color="#000" style={{ transform: 'rotate(45deg)' }} />
           </div>
           <div>
-            <span className="font-display" style={{ fontSize: '1.15rem', color: C.white, lineHeight: 1 }}>
+            <span className="font-display s-brand-name" style={{ fontSize: '1.15rem', color: C.white, lineHeight: 1 }}>
               Hair<span style={{ color: C.gold }}>Go</span>
             </span>
             <span style={{ display: 'block', fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
@@ -99,7 +101,7 @@ export default function StudioLayout() {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '0.75rem 0.625rem', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
+      <nav className="s-nav-list" style={{ flex: 1, padding: '0.75rem 0.625rem', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink key={to} to={to} onClick={() => setOpen(false)}
             style={({ isActive }) => ({
@@ -128,7 +130,7 @@ export default function StudioLayout() {
       </nav>
 
       {/* Footer */}
-      <div style={{ padding: '0.75rem 0.625rem', borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
+      <div className="s-footer-wrap" style={{ padding: '0.75rem 0.625rem', borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
         <div style={{ padding: '0.5rem 0.875rem', marginBottom: 6 }}>
           <p style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {profile?.full_name || 'Admin'}
@@ -178,9 +180,12 @@ export default function StudioLayout() {
             </button>
             <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.14)' }}>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
-            <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#34d399', fontFamily: 'Jost,sans-serif' }}>Live</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <AppointmentAlert />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.14)' }}>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
+              <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#34d399', fontFamily: 'Jost,sans-serif' }}>Live</span>
+            </div>
           </div>
         </header>
 
@@ -200,6 +205,12 @@ export default function StudioLayout() {
         @media (max-width: 1023px) {
           .studio-main { padding: 0.875rem !important; }
           .studio-outlet { overflow-y: auto !important; }
+          .s-brand-wrap { padding: 0.75rem 1rem !important; }
+          .s-logo-circle { width: 26px !important; height: 26px !important; }
+          .s-brand-name { font-size: 1rem !important; }
+          .s-nav-list { padding: 0.4rem 0.5rem !important; gap: 1px !important; }
+          .s-nav { padding: 0.38rem 0.75rem !important; font-size: 0.78rem !important; }
+          .s-footer-wrap { padding: 0.5rem 0.5rem !important; }
         }
       `}</style>
     </div>

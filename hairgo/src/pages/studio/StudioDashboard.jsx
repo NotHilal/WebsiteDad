@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Calendar, Package, Users, MessageSquare } from 'lucide-react'
+import { Calendar, ShoppingBag, Users, MessageSquare, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch } from '../../lib/cache'
 import { format, getHours } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
 const C = {
   card: '#161620',
@@ -36,7 +37,9 @@ export default function StudioDashboard() {
   const [stylists,      setStylists]      = useState([])
   const [stylistFilter, setStylistFilter] = useState(null)
   const [loading,       setLoading]       = useState(true)
+  const [activeClockIn, setActiveClockIn] = useState(undefined) // undefined = not yet fetched
   const navigate = useNavigate()
+  const { isAdmin, user } = useAuth()
 
   useEffect(() => { load() }, [])
 
@@ -68,12 +71,27 @@ export default function StudioDashboard() {
     setTodayAppts(result.todayAppts)
     setStylists(result.stylists)
     setLoading(false)
+
+    if (!isAdmin && user) {
+      const { data: linked } = await supabase
+        .from('stylists').select('id').eq('profile_id', user.id).single()
+      if (linked) {
+        const { data: open } = await supabase
+          .from('timesheets').select('id, clock_in')
+          .eq('stylist_id', linked.id).is('clock_out', null).maybeSingle()
+        setActiveClockIn(open || null)
+      } else {
+        setActiveClockIn(null)
+      }
+    }
   }
 
   const statCards = [
     { icon: Calendar,      label: 'Appointments', value: stats.appointments, sub: `${stats.pending} pending`, link: '/studio/schedule', color: C.gold },
-    { icon: Package,       label: 'Preorders',    value: stats.preorders,    sub: 'Awaiting pickup',          link: '/studio/products',  color: '#a78bfa' },
-    { icon: Users,         label: 'Clients',      value: stats.users,        sub: 'Registered',               link: '/studio/users',     color: '#34d399' },
+    { icon: ShoppingBag,   label: 'Orders',       value: stats.preorders,    sub: 'Awaiting pickup',          link: '/studio/orders',      color: '#a78bfa' },
+    isAdmin
+      ? { icon: Users,  label: 'Clients',    value: stats.users, sub: 'Registered',    link: '/studio/users',       color: '#34d399' }
+      : { icon: Clock,  label: 'Timesheets', value: null,        sub: 'My time logs',  link: '/studio/timesheets',  color: '#34d399' },
     { icon: MessageSquare, label: 'Messages',     value: stats.msgs,         sub: 'Unread',                   link: '/studio/messages',  color: '#60a5fa' },
   ]
 
@@ -95,19 +113,41 @@ export default function StudioDashboard() {
 
       {/* Stat cards */}
       <div className="dash-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem', flexShrink: 0 }}>
-        {statCards.map(c => (
-          <button key={c.label} onClick={() => navigate(c.link)} className="d-stat"
-            style={{ ...card, padding: '1.1rem 1.25rem', textAlign: 'left', cursor: 'pointer', transition: 'all .2s ease' }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: `${c.color}14`, border: `1px solid ${c.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.875rem' }}>
-              <c.icon size={15} color={c.color} strokeWidth={1.5} />
-            </div>
-            <div className="font-display" style={{ fontSize: '2rem', color: loading ? C.border : C.white, lineHeight: 1, marginBottom: '0.2rem' }}>
-              {loading ? '—' : c.value}
-            </div>
-            <p style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.1rem' }}>{c.label}</p>
-            <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>{c.sub}</p>
-          </button>
-        ))}
+        {statCards.map(c => {
+          const isClockCard = !isAdmin && c.label === 'Timesheets'
+          const clockedIn   = isClockCard && !!activeClockIn
+          const elapsed     = clockedIn ? Math.floor((Date.now() - new Date(activeClockIn.clock_in)) / 60000) : 0
+          const elapsedStr  = elapsed >= 60 ? `${Math.floor(elapsed/60)}h ${elapsed%60}m` : `${elapsed}m`
+          const dotColor    = clockedIn ? '#34d399' : 'rgba(255,255,255,0.18)'
+          return (
+            <button key={c.label} onClick={() => navigate(c.link)} className="d-stat"
+              style={{ ...card, padding: '1.1rem 1.25rem', textAlign: 'left', cursor: 'pointer', transition: 'all .2s ease', borderColor: isClockCard && clockedIn ? 'rgba(52,211,153,0.2)' : undefined }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: `${isClockCard && clockedIn ? '#34d399' : c.color}14`, border: `1px solid ${isClockCard && clockedIn ? '#34d399' : c.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.875rem' }}>
+                <c.icon size={15} color={isClockCard && clockedIn ? '#34d399' : c.color} strokeWidth={1.5} />
+              </div>
+              {isClockCard ? (
+                activeClockIn === undefined ? (
+                  <div className="font-display" style={{ fontSize: '2rem', color: C.border, lineHeight: 1, marginBottom: '0.2rem' }}>—</div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '0.2rem' }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: dotColor, flexShrink: 0, animation: clockedIn ? 'dash-pulse 2s infinite' : 'none' }} />
+                    <span className="font-display" style={{ fontSize: '1.35rem', color: clockedIn ? '#34d399' : C.muted, lineHeight: 1 }}>
+                      {clockedIn ? 'In' : 'Out'}
+                    </span>
+                  </div>
+                )
+              ) : (
+                <div className="font-display" style={{ fontSize: '2rem', color: loading ? C.border : C.white, lineHeight: 1, marginBottom: '0.2rem' }}>
+                  {loading ? '—' : c.value}
+                </div>
+              )}
+              <p style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.1rem' }}>{c.label}</p>
+              <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>
+                {isClockCard ? (clockedIn ? `Since ${elapsedStr} ago` : 'Not clocked in') : c.sub}
+              </p>
+            </button>
+          )
+        })}
       </div>
 
       {/* Today's schedule */}
@@ -262,7 +302,8 @@ export default function StudioDashboard() {
       </div>
 
       <style>{`
-        @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+        @keyframes dot-pulse  { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+        @keyframes dash-pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(52,211,153,0.5)} 50%{opacity:.8;box-shadow:0 0 0 4px rgba(52,211,153,0)} }
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
         .d-stat:hover { border-color: ${C.goldBorder} !important; background: #1a1a24 !important; }
         @media (max-width: 639px) { .dash-stats { grid-template-columns: repeat(2,1fr) !important; } }
