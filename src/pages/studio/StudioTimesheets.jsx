@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, CalendarDays, AlertCircle, ScanLine, X } from 'lucide-react'
-import _jsQR from 'jsqr'
-const jsQR = _jsQR.default ?? _jsQR
+import { useState, useEffect } from 'react'
+import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, CalendarDays, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Pager from '../../lib/Pager'
 import { useAuth } from '../../contexts/AuthContext'
@@ -24,82 +22,6 @@ function fmtMins(mins) {
   return `${h}h ${m.toString().padStart(2, '0')}m`
 }
 
-function QrScanner({ onScan, onCancel }) {
-  const videoRef  = useRef(null)
-  const canvasRef = useRef(null)
-  const aliveRef  = useRef(true)
-
-  useEffect(() => {
-    let stream
-    async function start() {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        if (!videoRef.current) return
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-        tick()
-      } catch { onCancel() }
-    }
-
-    function tick() {
-      if (!aliveRef.current) return
-      const video = videoRef.current, canvas = canvasRef.current
-      if (!video || !canvas || video.readyState < 2) { requestAnimationFrame(tick); return }
-      canvas.width = video.videoWidth; canvas.height = video.videoHeight
-      const ctx = canvas.getContext('2d')
-      ctx.drawImage(video, 0, 0)
-      try {
-        const img  = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        const code = jsQR(img.data, img.width, img.height)
-        if (code?.data) {
-          const t = new URL(code.data).searchParams.get('t')
-          if (t) { stop(); onScan(t); return }
-        }
-      } catch (e) { console.error('QR scan error:', e) }
-      requestAnimationFrame(tick)
-    }
-
-    function stop() { aliveRef.current = false; stream?.getTracks().forEach(tr => tr.stop()) }
-    start()
-    return () => stop()
-  }, [onScan, onCancel])
-
-  const GOLD = '#C9A84C'
-  const br   = { position: 'absolute', width: 22, height: 22 }
-  const line = `2.5px solid ${GOLD}`
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.96)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
-      <button onClick={onCancel}
-        style={{ position: 'absolute', top: 20, right: 20, width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <X size={16} />
-      </button>
-
-      <p style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', letterSpacing: '0.04em' }}>
-        Point at the kiosk QR code
-      </p>
-
-      <div style={{ position: 'relative', width: 260, height: 260, borderRadius: 16, overflow: 'hidden' }}>
-        <video ref={videoRef} playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-        <canvas ref={canvasRef} style={{ display: 'none' }} />
-        {/* Corner brackets */}
-        <div style={{ ...br, top: 8,    left: 8,   borderTop: line, borderLeft: line,   borderRadius: '4px 0 0 0' }} />
-        <div style={{ ...br, top: 8,    right: 8,  borderTop: line, borderRight: line,  borderRadius: '0 4px 0 0' }} />
-        <div style={{ ...br, bottom: 8, left: 8,   borderBottom: line, borderLeft: line,  borderRadius: '0 0 0 4px' }} />
-        <div style={{ ...br, bottom: 8, right: 8,  borderBottom: line, borderRight: line, borderRadius: '0 0 4px 0' }} />
-        {/* Scan line animation */}
-        <div style={{ position: 'absolute', left: 8, right: 8, height: 2, background: `linear-gradient(90deg, transparent, ${GOLD}, transparent)`, animation: 'scanline 2s ease-in-out infinite', top: '50%' }} />
-      </div>
-
-      <button onClick={onCancel}
-        style={{ padding: '0.6rem 1.5rem', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', fontSize: '0.82rem', cursor: 'pointer' }}>
-        Cancel
-      </button>
-
-      <style>{`@keyframes scanline { 0%,100%{top:15%} 50%{top:85%} }`}</style>
-    </div>
-  )
-}
 
 export default function StudioTimesheets() {
   const { user, isAdmin } = useAuth()
@@ -115,8 +37,6 @@ export default function StudioTimesheets() {
   const [pickerMonth,    setPickerMonth]    = useState(startOfMonth(new Date()))
   const [filterStylist,  setFilterStylist]  = useState(null)
   const [showFilter,     setShowFilter]     = useState(false)
-  const [showScanner,    setShowScanner]    = useState(false)
-  const [scanStylistId,  setScanStylistId]  = useState(null)
 
   const weekStart = startOfWeek(week, { weekStartsOn: 1 })
   const weekEnd   = endOfWeek(week,   { weekStartsOn: 1 })
@@ -178,27 +98,24 @@ export default function StudioTimesheets() {
     setLoading(false)
   }
 
-  function openScanner(stylistId) {
-    setScanStylistId(stylistId)
-    setShowScanner(true)
-  }
-
-  async function handleScan(token) {
-    setShowScanner(false)
-    const { data, error } = await supabase.rpc('clock_action', {
-      p_stylist_id: scanStylistId,
-      p_token: token,
-    })
-    if (error || data?.error) {
-      if (data?.error === 'invalid_token') toast.error('QR code expired — scan again')
-      else toast.error('Something went wrong')
-      return
-    }
-    toast.success(data.action === 'clock_in' ? 'Clocked in!' : 'Clocked out!')
+  async function clockIn(stylistId) {
+    const { error } = await supabase.from('timesheets').insert({ stylist_id: stylistId, clock_in: new Date().toISOString() })
+    if (error) { toast.error('Could not clock in'); return }
+    toast.success('Clocked in!')
     load()
   }
 
-const todayEntries  = entries.filter(e => isToday(new Date(e.clock_in)))
+  async function clockOut(stylistId) {
+    const { error } = await supabase.from('timesheets')
+      .update({ clock_out: new Date().toISOString() })
+      .eq('stylist_id', stylistId)
+      .is('clock_out', null)
+    if (error) { toast.error('Could not clock out'); return }
+    toast.success('Clocked out!')
+    load()
+  }
+
+  const todayEntries  = entries.filter(e => isToday(new Date(e.clock_in)))
   const clockedInNow  = todayEntries.filter(e => !e.clock_out)
   const totalWeekMins = entries.reduce((acc, e) => {
     if (!e.clock_out) return acc
@@ -220,12 +137,6 @@ const todayEntries  = entries.filter(e => isToday(new Date(e.clock_in)))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
-      {showScanner && (
-        <QrScanner
-          onScan={handleScan}
-          onCancel={() => setShowScanner(false)}
-        />
-      )}
       <style>{`
         @keyframes blink        { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
         .ts-row:hover           { background: rgba(255,255,255,0.02) !important; }
@@ -459,13 +370,13 @@ const todayEntries  = entries.filter(e => isToday(new Date(e.clock_in)))
                     : <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', padding: '3px 9px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
                 ) : (
                   active
-                    ? <button onClick={() => openScanner(s.id)} className="clk-out"
+                    ? <button onClick={() => clockOut(s.id)} className="clk-out"
                         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
-                        <ScanLine size={9} /> Out
+                        <StopCircle size={9} /> Out
                       </button>
-                    : <button onClick={() => openScanner(s.id)} className="clk-in"
+                    : <button onClick={() => clockIn(s.id)} className="clk-in"
                         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
-                        <ScanLine size={9} /> In
+                        <Play size={9} /> In
                       </button>
                 )}
               </div>
