@@ -1,21 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Lock, Eye, EyeOff, Scissors, Mail, KeyRound, ArrowRight } from 'lucide-react'
+import { Lock, Eye, EyeOff, Scissors, Mail, Smartphone, ArrowRight } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
 export default function StudioGate() {
-  const [email,      setEmail]      = useState('')
-  const [password,   setPassword]   = useState('')
-  const [studioPass, setStudioPass] = useState('')
-  const [showPass,   setShowPass]   = useState(false)
-  const [loading,    setLoading]    = useState(false)
-  const { user, signIn, fetchProfile, loading: authLoading, profile } = useAuth()
+  const [email,    setEmail]    = useState('')
+  const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
+  const [digits,   setDigits]   = useState(['', '', '', '', '', ''])
+  const [loading,  setLoading]  = useState(false)
+  const inputRefs = useRef([])
+  const { user, signIn, loading: authLoading, profile } = useAuth()
   const navigate = useNavigate()
-
-  const STUDIO_PASSWORD = import.meta.env.VITE_STUDIO_PASSWORD || 'hairgo24'
 
   useEffect(() => {
     if (!authLoading && user && sessionStorage.getItem('studio_access') === 'true' && (profile?.role === 'admin' || profile?.role === 'employee')) {
@@ -23,9 +22,33 @@ export default function StudioGate() {
     }
   }, [authLoading, user, profile])
 
+  function handleDigit(i, val) {
+    const v = val.replace(/\D/g, '').slice(-1)
+    const next = [...digits]
+    next[i] = v
+    setDigits(next)
+    if (v && i < 5) inputRefs.current[i + 1]?.focus()
+  }
+
+  function handleDigitKey(i, e) {
+    if (e.key === 'Backspace' && !digits[i] && i > 0) {
+      inputRefs.current[i - 1]?.focus()
+    }
+    if (e.key === 'Enter') handleSubmit(e)
+  }
+
+  function handlePaste(e) {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (pasted.length === 6) {
+      setDigits(pasted.split(''))
+      inputRefs.current[5]?.focus()
+    }
+  }
+
   async function handleSubmit(e) {
-    e.preventDefault()
-    if (studioPass.trim() !== STUDIO_PASSWORD.trim()) return toast.error('Incorrect studio access code')
+    e?.preventDefault()
+    const otp = digits.join('')
+    if (otp.length < 6) return toast.error('Enter the 6-digit code from your authenticator app')
     setLoading(true)
     try {
       let currentUser = user
@@ -41,6 +64,18 @@ export default function StudioGate() {
         setLoading(false)
         return
       }
+
+      const { data, error } = await supabase.functions.invoke('verify-studio-otp', {
+        body: { token: otp },
+      })
+      if (error || !data?.valid) {
+        toast.error('Invalid code — check your authenticator app')
+        setDigits(['', '', '', '', '', ''])
+        inputRefs.current[0]?.focus()
+        setLoading(false)
+        return
+      }
+
       sessionStorage.setItem('studio_access', 'true')
       navigate('/studio/dashboard')
     } catch (err) {
@@ -89,7 +124,7 @@ export default function StudioGate() {
   return (
     <div className="sg-outer" style={{ minHeight: '100vh', background: '#080808', display: 'flex', overflow: 'hidden' }}>
 
-      {/* ── Left panel — hidden on mobile ── */}
+      {/* ── Left panel ── */}
       <div className="sg-left" style={{ width: 400, flexShrink: 0, position: 'relative', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 52px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(201,168,76,0.04) 0%, transparent 60%)' }} />
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 320, height: 320, background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -131,7 +166,7 @@ export default function StudioGate() {
           className="sg-card"
           style={{ width: '100%', maxWidth: 480 }}
         >
-          {/* Mobile logo — only visible on small screens */}
+          {/* Mobile logo */}
           <div className="sg-mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
             <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(201,168,76,0.3)' }}>
               <Scissors size={14} color="#000" style={{ transform: 'rotate(45deg)' }} />
@@ -206,36 +241,50 @@ export default function StudioGate() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: user ? '0 0 28px 0' : '28px 0' }}>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
               <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost, sans-serif', whiteSpace: 'nowrap' }}>
-                Studio Verification
+                Authenticator Code
               </span>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
             </div>
 
-            {/* Studio code */}
+            {/* OTP boxes */}
             <div style={{ marginBottom: 36 }}>
-              <label style={labelStyle}>Studio Access Code</label>
-              <div style={{ position: 'relative' }}>
-                <KeyRound size={15} style={{ ...iconStyle, color: 'rgba(201,168,76,0.4)' }} />
-                <input
-                  type="password"
-                  value={studioPass}
-                  onChange={e => setStudioPass(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  style={{ ...inputStyle, borderColor: 'rgba(201,168,76,0.15)' }}
-                  onFocus={e => { e.target.style.borderColor = 'rgba(201,168,76,0.5)'; e.target.style.background = 'rgba(201,168,76,0.04)' }}
-                  onBlur={e => { e.target.style.borderColor = 'rgba(201,168,76,0.15)'; e.target.style.background = 'rgba(255,255,255,0.03)' }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
+                <Smartphone size={13} color="rgba(201,168,76,0.6)" />
+                <label style={{ ...labelStyle, marginBottom: 0 }}>6-digit code from your authenticator app</label>
               </div>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.22)', marginTop: 10, fontFamily: 'Jost, sans-serif', letterSpacing: '0.02em' }}>
-                Unique code issued to studio administrators
-              </p>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }} onPaste={handlePaste}>
+                {digits.map((d, i) => (
+                  <input
+                    key={i}
+                    ref={el => inputRefs.current[i] = el}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={d}
+                    onChange={e => handleDigit(i, e.target.value)}
+                    onKeyDown={e => handleDigitKey(i, e)}
+                    style={{
+                      width: 52, height: 62, textAlign: 'center',
+                      fontSize: '1.6rem', fontWeight: 600, fontFamily: 'Jost, sans-serif',
+                      background: d ? 'rgba(201,168,76,0.07)' : 'rgba(255,255,255,0.03)',
+                      border: d ? '1px solid rgba(201,168,76,0.45)' : '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 14, color: '#C9A84C', outline: 'none',
+                      transition: 'all 0.2s', caretColor: '#C9A84C',
+                    }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(201,168,76,0.6)'; e.target.style.background = 'rgba(201,168,76,0.06)' }}
+                    onBlur={e => {
+                      e.target.style.borderColor = d ? 'rgba(201,168,76,0.45)' : 'rgba(255,255,255,0.1)'
+                      e.target.style.background = d ? 'rgba(201,168,76,0.07)' : 'rgba(255,255,255,0.03)'
+                    }}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || digits.join('').length < 6}
               className="sg-submit"
               style={{
                 width: '100%',
@@ -248,8 +297,8 @@ export default function StudioGate() {
                 textTransform: 'uppercase',
                 fontFamily: 'Jost, sans-serif',
                 border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.5 : 1,
+                cursor: (loading || digits.join('').length < 6) ? 'not-allowed' : 'pointer',
+                opacity: (loading || digits.join('').length < 6) ? 0.5 : 1,
                 boxShadow: '0 12px 40px rgba(201,168,76,0.25)',
                 display: 'flex',
                 alignItems: 'center',
@@ -277,45 +326,19 @@ export default function StudioGate() {
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg) } }
-
-        /* ── Left panel: hidden by default, shown on large screens ── */
         .sg-left { display: none; }
-        @media (min-width: 1024px) {
-          .sg-left { display: flex; }
-        }
-
-        /* ── Mobile logo: shown on mobile, hidden on large screens ── */
+        @media (min-width: 1024px) { .sg-left { display: flex; } }
         .sg-mobile-logo { display: flex; }
-        @media (min-width: 1024px) {
-          .sg-mobile-logo { display: none; }
-        }
-
-        /* ── Right panel padding ── */
+        @media (min-width: 1024px) { .sg-mobile-logo { display: none; } }
         .sg-right { padding: 40px 24px; }
-        @media (min-width: 640px) {
-          .sg-right { padding: 60px 48px; }
-        }
-
-        /* ── Title size ── */
+        @media (min-width: 640px) { .sg-right { padding: 60px 48px; } }
         .sg-title { font-size: 2rem; }
-        @media (min-width: 480px) {
-          .sg-title { font-size: 2.4rem; }
-        }
-        @media (min-width: 1024px) {
-          .sg-title { font-size: 2.6rem; }
-        }
-
-        /* ── Header margin ── */
+        @media (min-width: 480px) { .sg-title { font-size: 2.4rem; } }
+        @media (min-width: 1024px) { .sg-title { font-size: 2.6rem; } }
         .sg-header { margin-bottom: 32px !important; }
-        @media (min-width: 640px) {
-          .sg-header { margin-bottom: 44px !important; }
-        }
-
-        /* ── Submit button padding ── */
+        @media (min-width: 640px) { .sg-header { margin-bottom: 44px !important; } }
         .sg-submit { padding: 16px 24px; }
-        @media (min-width: 640px) {
-          .sg-submit { padding: 18px 32px; }
-        }
+        @media (min-width: 640px) { .sg-submit { padding: 18px 32px; } }
       `}</style>
     </div>
   )
