@@ -120,7 +120,7 @@ export default function StudioTimesheets() {
   const totalWeekMins = entries.reduce((acc, e) => {
     if (!e.clock_out) return acc
     const raw = Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in)))
-    return acc + (raw >= 360 ? raw - 45 : raw)
+    return acc + (raw >= 360 ? raw - 30 : raw)
   }, 0)
 
   const filtered = filterStylist ? entries.filter(e => e.stylist_id === filterStylist.id) : entries
@@ -416,7 +416,7 @@ export default function StudioTimesheets() {
             </div>
           ) : paged.map((e, idx) => {
             const raw    = e.clock_out ? Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in))) : null
-            const net    = raw !== null ? (raw >= 360 ? raw - 45 : raw) : null
+            const net    = raw !== null ? (raw >= 360 ? raw - 30 : raw) : null
             const isLast = idx === paged.length - 1
             return (
               <div key={e.id} className="ts-row"
@@ -458,7 +458,8 @@ export default function StudioTimesheets() {
                   </span>
                 </div>
 
-              </div>
+
+</div>
             )
           })}
         </div>

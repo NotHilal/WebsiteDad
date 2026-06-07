@@ -127,6 +127,9 @@ export default function Profile() {
           user_id: user.id, product_id: item.product_id, quantity: item.quantity,
           status: 'active', payment_intent_id: paymentIntentId, payment_status: 'paid',
         })
+        await supabase.from('products')
+          .update({ stock: Math.max(0, (item.products?.stock ?? 0) - item.quantity) })
+          .eq('id', item.product_id)
       }
       await clearCart()
       setPayStep(null); setClientSecret(null)

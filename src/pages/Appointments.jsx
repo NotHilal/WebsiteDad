@@ -54,6 +54,8 @@ export default function Appointments() {
   const [preview,      setPreview]      = useState(null)
   const [payStep,      setPayStep]      = useState(null)
   const [clientSecret, setClientSecret] = useState(null)
+  const [availableCoupons, setAvailableCoupons] = useState([])
+  const [appliedCoupon,    setAppliedCoupon]    = useState(null)
 
   useEffect(() => {
     const TTL = 5 * 60_000
@@ -115,9 +117,37 @@ export default function Appointments() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [step])
 
+  /* fetch user's unused coupons when reaching confirm step */
+  useEffect(() => {
+    if (step !== 3 || !user) return
+    setAppliedCoupon(null)
+    supabase
+      .from('user_coupons')
+      .select('id, used, coupons(id, code, discount_type, discount_value, expiry_date, active)')
+      .eq('user_id', user.id)
+      .eq('used', false)
+      .then(({ data }) => {
+        const now = new Date()
+        const valid = (data || []).filter(uc => {
+          const c = uc.coupons
+          if (!c || !c.active) return false
+          if (c.expiry_date && new Date(c.expiry_date) < now) return false
+          return true
+        })
+        setAvailableCoupons(valid)
+      })
+  }, [step, user])
+
   const days     = eachDayOfInterval({ start:startOfMonth(month), end:endOfMonth(month) })
   const startPad = getDay(startOfMonth(month))
   const isOff    = d => isBefore(d, startOfDay(new Date())) || getDay(d)===0 || blocked.includes(format(d,'yyyy-MM-dd'))
+
+  const basePrice  = parseFloat(sel.service?.price || 0)
+  const finalPrice = appliedCoupon
+    ? appliedCoupon.coupons.discount_type === 'percentage'
+      ? Math.max(0, basePrice * (1 - appliedCoupon.coupons.discount_value / 100))
+      : Math.max(0, basePrice - appliedCoupon.coupons.discount_value)
+    : basePrice
 
   async function startPayment() {
     if (!user) return toast.error('Please sign in to book')
@@ -125,7 +155,7 @@ export default function Appointments() {
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
         body: {
-          amount: sel.service.price,
+          amount: finalPrice.toFixed(2),
           label: `${sel.service.name} with ${sel.stylist.name} — ${format(sel.date, 'MMM d')} at ${sel.time}`,
         },
       })
@@ -147,6 +177,9 @@ export default function Appointments() {
         status: 'confirmed', payment_intent_id: paymentIntentId, payment_status: 'paid',
       })
       if (error) throw error
+      if (appliedCoupon) {
+        await supabase.from('user_coupons').update({ used: true }).eq('id', appliedCoupon.id)
+      }
       setDone(true)
     } catch (err) {
       toast.error('Payment succeeded but booking failed — please contact us')
@@ -673,6 +706,44 @@ export default function Appointments() {
                   />
                 </div>
 
+                {/* ── Coupons ── */}
+                {availableCoupons.length > 0 && (
+                  <div style={{ marginBottom:18 }}>
+                    <p style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.2)', marginBottom:8, fontFamily:'Jost,sans-serif' }}>Your coupons</p>
+                    <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                      {availableCoupons.map(uc => {
+                        const c = uc.coupons
+                        const isApplied = appliedCoupon?.id === uc.id
+                        const discLabel = c.discount_type === 'percentage' ? `${c.discount_value}% off` : `€${c.discount_value} off`
+                        return (
+                          <button key={uc.id} onClick={() => setAppliedCoupon(isApplied ? null : uc)}
+                            style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.7rem 1rem', borderRadius:12, cursor:'pointer', transition:'all 0.2s',
+                              background: isApplied ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.02)',
+                              border: isApplied ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                            }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                              <div style={{ width:28, height:28, borderRadius:8, background: isApplied ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', border: isApplied ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                {isApplied ? <Check size={13} color="#C9A84C" strokeWidth={2.5}/> : <Star size={11} color="rgba(255,255,255,0.2)" strokeWidth={1.5}/>}
+                              </div>
+                              <span style={{ fontSize:'0.82rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.08em', color: isApplied ? '#C9A84C' : 'rgba(255,255,255,0.55)', fontWeight: isApplied ? 700 : 400 }}>{c.code}</span>
+                            </div>
+                            <span style={{ fontSize:'0.78rem', fontFamily:'Jost,sans-serif', color: isApplied ? '#C9A84C' : 'rgba(255,255,255,0.3)', fontWeight: isApplied ? 600 : 400 }}>{discLabel}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {appliedCoupon && (
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.5rem 0.75rem', marginTop:6, borderRadius:9, background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.14)' }}>
+                        <span style={{ fontSize:'0.78rem', fontFamily:'Jost,sans-serif', color:'rgba(52,211,153,0.8)' }}>Coupon applied</span>
+                        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <span style={{ fontSize:'0.78rem', fontFamily:'Jost,sans-serif', color:'rgba(255,255,255,0.3)', textDecoration:'line-through' }}>€{basePrice.toFixed(2)}</span>
+                          <span style={{ fontSize:'0.9rem', fontFamily:'Jost,sans-serif', color:'#34d399', fontWeight:700 }}>€{finalPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {!user && (
                   <div style={{ padding:'11px 16px', borderRadius:12, background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.12)', marginBottom:14, textAlign:'center' }}>
                     <p style={{ color:'rgba(251,191,36,0.8)', fontSize:'0.82rem', fontFamily:'Jost,sans-serif' }}>Please sign in to book.</p>
@@ -682,7 +753,7 @@ export default function Appointments() {
                 <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||!user} style={{ width:'100%', justifyContent:'center' }}>
                   {payStep==='loading'
                     ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'#000',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
-                    : <>Pay €{sel.service?.price} <ArrowRight size={15}/></>
+                    : <>Pay €{finalPrice.toFixed(2)} <ArrowRight size={15}/></>
                   }
                 </button>
 
@@ -704,7 +775,7 @@ export default function Appointments() {
       {payStep==='form' && clientSecret && (
         <StripeCheckout
           clientSecret={clientSecret}
-          amount={sel.service?.price}
+          amount={finalPrice.toFixed(2)}
           label={`${sel.service?.name} with ${sel.stylist?.name}`}
           onSuccess={completeBooking}
           onCancel={() => { setPayStep(null); setClientSecret(null) }}
