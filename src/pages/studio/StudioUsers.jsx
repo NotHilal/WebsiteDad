@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Eye, EyeOff, Check, UserPlus, Scissors, Plus, ArrowRight } from 'lucide-react'
+import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Check, UserPlus, Scissors, Plus, ArrowRight } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { format } from 'date-fns'
@@ -104,21 +104,15 @@ export default function StudioUsers() {
   const [sending,       setSending]       = useState(false)
   // role-change confirmation (user ↔ admin)
   const [roleConfirm,   setRoleConfirm]   = useState(null)
-  const [confirmPwd,    setConfirmPwd]    = useState('')
-  const [showPwd,       setShowPwd]       = useState(false)
-  const [confirmErr,    setConfirmErr]    = useState('')
   const [confirming,    setConfirming]    = useState(false)
-  const pwdRef = useRef(null)
   // employee promotion wizard
   const [empModal,      setEmpModal]      = useState(null) // { userId, userName }
-  const [empStep,       setEmpStep]       = useState(1)    // 1=assign, 2=password
+  const [empStep,       setEmpStep]       = useState(1)    // 1=assign, 2=confirm
   const [freeStylists,  setFreeStylists]  = useState([])   // unlinked stylists
   const [empMode,       setEmpMode]       = useState('assign') // 'assign' | 'create'
   const [empSelected,   setEmpSelected]   = useState(null)
   const [empName,       setEmpName]       = useState('')
   const [empTitle,      setEmpTitle]      = useState('')
-  const [empPwd,        setEmpPwd]        = useState('')
-  const [empPwdShow,    setEmpPwdShow]    = useState(false)
   const [empErr,        setEmpErr]        = useState('')
   const [empSaving,     setEmpSaving]     = useState(false)
   const [stylists,      setStylists]      = useState([])
@@ -155,12 +149,10 @@ export default function StudioUsers() {
       setEmpMode(free.length > 0 ? 'assign' : 'create')
       setEmpSelected(null)
       setEmpName(target?.full_name || '')
-      setEmpTitle(''); setEmpPwd(''); setEmpPwdShow(false); setEmpErr('')
+      setEmpTitle(''); setEmpErr('')
       return
     }
     setRoleConfirm({ userId: id, newRole, userName: target?.full_name || 'this user' })
-    setConfirmPwd(''); setConfirmErr(''); setShowPwd(false)
-    setTimeout(() => pwdRef.current?.focus(), 80)
   }
 
   async function applyEmployeePromotion() {
@@ -169,9 +161,7 @@ export default function StudioUsers() {
       if (empMode === 'create' && !empName.trim()) { setEmpErr('Enter a name for the new employee'); return }
       setEmpErr(''); setEmpStep(2); return
     }
-    // Step 2 — password + execute
-    if (!empPwd) { setEmpErr('Enter the admin password'); return }
-    if (empPwd !== 'hairgo24') { setEmpErr('Incorrect admin password'); return }
+    // Step 2 — execute
     setEmpSaving(true); setEmpErr('')
     try {
       // 1. Change role via edge function
@@ -199,10 +189,7 @@ export default function StudioUsers() {
   }
 
   async function applyRoleChange() {
-    if (!confirmPwd) { setConfirmErr('Enter the admin password'); return }
-    if (confirmPwd !== 'hairgo24') { setConfirmErr('Incorrect admin password'); return }
     setConfirming(true)
-    setConfirmErr('')
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-role`, {
@@ -583,34 +570,8 @@ export default function StudioUsers() {
                 <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
                   You're changing <span style={{ color: C.white }}>{roleConfirm.userName}</span>'s role to{' '}
                   <span style={{ color: ROLE_STYLE[roleConfirm.newRole]?.color }}>{roleConfirm.newRole}</span>.
-                  <br />Enter the HairGo admin password to confirm.
+                  <br />This cannot be undone without changing it back manually.
                 </p>
-              </div>
-
-              {/* Password field */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
-                  Admin Password
-                </label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    ref={pwdRef}
-                    type={showPwd ? 'text' : 'password'}
-                    value={confirmPwd}
-                    onChange={e => { setConfirmPwd(e.target.value); setConfirmErr('') }}
-                    onKeyDown={e => e.key === 'Enter' && applyRoleChange()}
-                    placeholder="Enter admin password…"
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${confirmErr ? 'rgba(248,113,113,0.5)' : C.border}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
-                    className="msg-inp"
-                  />
-                  <button type="button" onClick={() => setShowPwd(p => !p)}
-                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}>
-                    {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-                {confirmErr && (
-                  <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif', marginTop: 6 }}>{confirmErr}</p>
-                )}
               </div>
 
               {/* Buttons */}
@@ -833,22 +794,7 @@ export default function StudioUsers() {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>Admin Password</label>
-                  <div style={{ position: 'relative' }}>
-                    <input autoFocus type={empPwdShow ? 'text' : 'password'} value={empPwd}
-                      onChange={e => { setEmpPwd(e.target.value); setEmpErr('') }}
-                      onKeyDown={e => e.key === 'Enter' && applyEmployeePromotion()}
-                      placeholder="Enter admin password…"
-                      style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${empErr ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }}
-                      className="msg-inp" />
-                    <button type="button" onClick={() => setEmpPwdShow(p => !p)}
-                      style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', padding: 0 }}>
-                      {empPwdShow ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </div>
-                  {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif', marginTop: 6 }}>{empErr}</p>}
-                </div>
+                {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif', marginBottom: 12 }}>{empErr}</p>}
 
                 <div style={{ display: 'flex', gap: '0.625rem' }}>
                   <button onClick={() => { setEmpStep(1); setEmpErr('') }}

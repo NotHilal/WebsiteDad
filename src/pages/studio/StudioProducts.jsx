@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, Eye, EyeOff, ShieldAlert, Search, Tag } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, EyeOff, ShieldAlert, Search, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
 import Pager from '../../lib/Pager'
@@ -52,10 +52,7 @@ export default function StudioProducts() {
   const [statusFilter,  setStatusFilter]  = useState('all')
   const [adjusting,     setAdjusting]     = useState(null)
   const [deleteTarget,  setDeleteTarget]  = useState(null)
-  const [deletePwd,     setDeletePwd]     = useState('')
-  const [deleteErr,     setDeleteErr]     = useState('')
   const [deleting,      setDeleting]      = useState(false)
-  const [showDeletePwd, setShowDeletePwd] = useState(false)
 
   // categories management
   const [prodCats,      setProdCats]      = useState([])
@@ -64,10 +61,7 @@ export default function StudioProducts() {
   const [newCatColor,   setNewCatColor]   = useState(COLOR_PRESETS[0])
   const [addingCat,     setAddingCat]     = useState(false)
   const [catDelId,      setCatDelId]      = useState(null)
-  const [catDelPwd,     setCatDelPwd]     = useState('')
-  const [catDelErr,     setCatDelErr]     = useState('')
   const [catDeleting,   setCatDeleting]   = useState(false)
-  const [showCatDelPwd, setShowCatDelPwd] = useState(false)
 
   useEffect(() => { load(); loadCategories() }, [])
 
@@ -98,18 +92,17 @@ export default function StudioProducts() {
   }
 
   async function deleteCategory() {
-    if (catDelPwd !== 'hairgo24') { setCatDelErr('Incorrect password'); return }
     setCatDeleting(true)
     const { error } = await supabase.from('product_categories').delete().eq('id', catDelId)
     setCatDeleting(false)
-    if (error) { setCatDelErr(error.message); return }
+    if (error) { toast.error(error.message); return }
     toast.success('Category deleted')
-    setCatDelId(null); setCatDelPwd(''); setCatDelErr('')
+    setCatDelId(null)
     loadCategories()
   }
 
   function closeCatModal() {
-    setCatModal(false); setCatDelId(null); setCatDelPwd(''); setCatDelErr('')
+    setCatModal(false); setCatDelId(null)
     setNewCatName(''); setNewCatColor(COLOR_PRESETS[0])
   }
 
@@ -173,15 +166,12 @@ export default function StudioProducts() {
 
   function openDelete(p) {
     setDeleteTarget({ id: p.id, name: p.name })
-    setDeletePwd(''); setDeleteErr(''); setShowDeletePwd(false)
   }
 
   async function confirmDelete() {
-    if (!deletePwd) { setDeleteErr('Enter the admin password'); return }
-    if (deletePwd !== 'hairgo24') { setDeleteErr('Incorrect admin password'); return }
     setDeleting(true)
     const { error } = await supabase.from('products').delete().eq('id', deleteTarget.id)
-    if (error) { setDeleteErr(error.message); setDeleting(false); return }
+    if (error) { toast.error(error.message); setDeleting(false); return }
     toast.success('Product deleted')
     setDeleteTarget(null)
     setDeleting(false)
@@ -615,7 +605,7 @@ export default function StudioProducts() {
                         <div style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color, flexShrink: 0, boxShadow: `0 0 8px ${cat.color}66` }} />
                         <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{cat.name}</span>
                         {catDelId !== cat.id && (
-                          <button onClick={() => { setCatDelId(cat.id); setCatDelPwd(''); setCatDelErr(''); setShowCatDelPwd(false) }}
+                          <button onClick={() => setCatDelId(cat.id)}
                             className="cat-del-row-btn"
                             style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .15s' }}>
                             <Trash2 size={11} />
@@ -625,28 +615,16 @@ export default function StudioProducts() {
                       {/* Inline delete confirmation */}
                       {catDelId === cat.id && (
                         <div style={{ margin: '0 1rem 0.75rem', background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 11, padding: '0.875rem' }}>
-                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', marginBottom: 8, lineHeight: 1.5 }}>
-                            Enter admin password to delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>
+                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
+                            Delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>? This cannot be undone.
                           </p>
-                          <div style={{ position: 'relative', marginBottom: catDelErr ? 6 : 8 }}>
-                            <input type={showCatDelPwd ? 'text' : 'password'} value={catDelPwd}
-                              onChange={e => { setCatDelPwd(e.target.value); setCatDelErr('') }}
-                              onKeyDown={e => e.key === 'Enter' && deleteCategory()}
-                              placeholder="Admin password…" autoFocus
-                              style={{ ...inp, borderColor: catDelErr ? 'rgba(248,113,113,0.5)' : undefined, paddingRight: '2.5rem' }} className="m-inp" />
-                            <button type="button" onClick={() => setShowCatDelPwd(p => !p)}
-                              style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', padding: 0 }}>
-                              {showCatDelPwd ? <EyeOff size={13} /> : <Eye size={13} />}
-                            </button>
-                          </div>
-                          {catDelErr && <p style={{ fontSize: '0.7rem', color: C.red, fontFamily: 'Jost,sans-serif', marginBottom: 7 }}>{catDelErr}</p>}
                           <div style={{ display: 'flex', gap: 6 }}>
-                            <button onClick={() => { setCatDelId(null); setCatDelPwd(''); setCatDelErr('') }}
+                            <button onClick={() => setCatDelId(null)}
                               style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
                               Cancel
                             </button>
-                            <button onClick={deleteCategory} disabled={catDeleting || !catDelPwd}
-                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: catDelPwd ? 'rgba(248,113,113,0.15)' : 'transparent', border: `1px solid ${catDelPwd ? 'rgba(248,113,113,0.35)' : 'rgba(248,113,113,0.15)'}`, color: catDelPwd ? C.red : 'rgba(248,113,113,0.3)', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: (catDeleting || !catDelPwd) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
+                            <button onClick={deleteCategory} disabled={catDeleting}
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'rgba(248,113,113,0.15)', border: '1px solid rgba(248,113,113,0.35)', color: C.red, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: catDeleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
                               {catDeleting
                                 ? <div style={{ width: 12, height: 12, border: '2px solid rgba(248,113,113,0.3)', borderTopColor: C.red, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                                 : <><Trash2 size={11} /> Delete</>}
@@ -719,19 +697,8 @@ export default function StudioProducts() {
                 </div>
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1.1, marginBottom: '0.4rem' }}>Delete Product</h2>
                 <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
-                  You're about to permanently delete <span style={{ color: C.white }}>{deleteTarget.name}</span>.<br />Enter the admin password to confirm.
+                  Permanently delete <span style={{ color: C.white }}>{deleteTarget.name}</span>?<br />This action cannot be undone.
                 </p>
-              </div>
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>Admin Password</label>
-                <div style={{ position: 'relative' }}>
-                  <input type={showDeletePwd ? 'text' : 'password'} value={deletePwd} onChange={e => { setDeletePwd(e.target.value); setDeleteErr('') }} onKeyDown={e => e.key === 'Enter' && confirmDelete()} placeholder="Enter admin password…" autoFocus
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${deleteErr ? C.redBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }} />
-                  <button type="button" onClick={() => setShowDeletePwd(p => !p)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}>
-                    {showDeletePwd ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                </div>
-                {deleteErr && <p style={{ fontSize: '0.72rem', color: C.red, fontFamily: 'Jost,sans-serif', marginTop: 6 }}>{deleteErr}</p>}
               </div>
               <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>

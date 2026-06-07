@@ -31,9 +31,6 @@ export default function StudioOrders() {
   const [updating,     setUpdating]     = useState(null)
   const [details,      setDetails]      = useState(null)   // order shown in details modal
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const [deletePass,   setDeletePass]   = useState('')
-  const [deleteError,  setDeleteError]  = useState(false)
-  const [showPass,     setShowPass]     = useState(false)
   const [page,         setPage]         = useState(0)
 
   useEffect(() => { load() }, [])
@@ -79,11 +76,10 @@ export default function StudioOrders() {
     setUpdating(null)
   }
 
-  function openDelete(order) { setDeleteTarget(order); setDeletePass(''); setDeleteError(false); setShowPass(false) }
-  function closeDelete() { setDeleteTarget(null); setDeletePass(''); setDeleteError(false) }
+  function openDelete(order) { setDeleteTarget(order) }
+  function closeDelete() { setDeleteTarget(null) }
 
   async function confirmDelete() {
-    if (deletePass !== 'hairgo24') { setDeleteError(true); return }
     const { error } = await supabase.from('preorders').delete().eq('id', deleteTarget.id)
     if (error) { toast.error('Delete failed'); return }
     toast.success('Order deleted')
@@ -376,21 +372,6 @@ export default function StudioOrders() {
                     {deleteTarget.profiles?.full_name} · ×{deleteTarget.quantity} · €{((parseFloat(deleteTarget.products?.price) || 0) * (deleteTarget.quantity || 1)).toFixed(2)}
                   </p>
                 </div>
-                <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 8 }}>
-                  Enter password to confirm
-                </label>
-                <div style={{ position: 'relative', marginBottom: '1.25rem' }}>
-                  <input type={showPass ? 'text' : 'password'} value={deletePass}
-                    onChange={e => { setDeletePass(e.target.value); setDeleteError(false) }}
-                    onKeyDown={e => e.key === 'Enter' && confirmDelete()}
-                    placeholder="••••••••" autoFocus
-                    style={{ width: '100%', boxSizing: 'border-box', background: deleteError ? 'rgba(248,113,113,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${deleteError ? 'rgba(248,113,113,0.45)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 10, padding: '0.7rem 2.5rem 0.7rem 0.9rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', transition: 'border-color .2s' }} />
-                  <button onClick={() => setShowPass(p => !p)}
-                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: C.muted, cursor: 'pointer', fontSize: 10, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em' }}>
-                    {showPass ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-                {deleteError && <p style={{ color: '#f87171', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', marginBottom: '1rem' }}>Incorrect password</p>}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={closeDelete}
                     style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: C.muted, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>

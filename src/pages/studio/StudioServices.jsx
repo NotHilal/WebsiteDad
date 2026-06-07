@@ -42,9 +42,6 @@ export default function StudioServices() {
   const [file,        setFile]        = useState(null)
   const [filePreview, setFilePreview] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const [deletePass,   setDeletePass]   = useState('')
-  const [deleteError,  setDeleteError]  = useState(false)
-  const [showPass,     setShowPass]     = useState(false)
   const [deleting,     setDeleting]     = useState(false)
 
   function handleFile(e) {
@@ -98,11 +95,10 @@ export default function StudioServices() {
     finally { setSaving(false) }
   }
 
-  function openDelete(s)  { setDeleteTarget(s); setDeletePass(''); setDeleteError(false); setShowPass(false) }
-  function closeDelete()  { setDeleteTarget(null); setDeletePass(''); setDeleteError(false) }
+  function openDelete(s)  { setDeleteTarget(s) }
+  function closeDelete()  { setDeleteTarget(null) }
 
   async function confirmDelete() {
-    if (deletePass !== 'hairgo24') { setDeleteError(true); return }
     setDeleting(true)
     const { error } = await supabase.from('services').delete().eq('id', deleteTarget.id)
     setDeleting(false)
@@ -477,32 +473,14 @@ export default function StudioServices() {
                   </p>
                 </div>
 
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 8 }}>
-                    Enter password to confirm
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <input type={showPass ? 'text' : 'password'} value={deletePass}
-                      onChange={e => { setDeletePass(e.target.value); setDeleteError(false) }}
-                      onKeyDown={e => e.key === 'Enter' && confirmDelete()}
-                      placeholder="••••••" autoComplete="new-password" autoFocus
-                      style={{ width: '100%', boxSizing: 'border-box', background: deleteError ? 'rgba(248,113,113,0.07)' : 'rgba(255,255,255,0.04)', border: `1px solid ${deleteError ? 'rgba(248,113,113,0.45)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.6rem 2.5rem 0.6rem 0.875rem', fontSize: '0.88rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', transition: 'border-color .15s', letterSpacing: showPass ? 'normal' : '0.2em' }} />
-                    <button onClick={() => setShowPass(v => !v)}
-                      style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center' }}>
-                      {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </div>
-                  {deleteError && <p style={{ marginTop: 6, fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif' }}>Incorrect password. Try again.</p>}
-                </div>
-
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={closeDelete}
                     style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}
                     className="modal-cancel">
                     Cancel
                   </button>
-                  <button onClick={confirmDelete} disabled={deleting || !deletePass}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting || !deletePass ? 'not-allowed' : 'pointer', background: deletePass ? 'linear-gradient(135deg,#f87171,#ef4444)' : 'rgba(248,113,113,0.15)', color: deletePass ? '#fff' : 'rgba(248,113,113,0.4)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
+                  <button onClick={confirmDelete} disabled={deleting}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
                     {deleting
                       ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                       : <><Trash2 size={13} /> Delete</>
