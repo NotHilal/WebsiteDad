@@ -3,6 +3,7 @@ import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, CalendarDays, Alert
 import { supabase } from '../../lib/supabase'
 import Pager from '../../lib/Pager'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLogAction } from '../../hooks/useLogAction'
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, differenceInMinutes, isToday, startOfMonth, addDays, isSameMonth, addMonths, subMonths, isSameWeek } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -25,6 +26,7 @@ function fmtMins(mins) {
 
 export default function StudioTimesheets() {
   const { user, isAdmin } = useAuth()
+  const log = useLogAction()
   const [week,         setWeek]         = useState(new Date())
   const [stylists,     setStylists]     = useState([])
   const [entries,      setEntries]      = useState([])
@@ -102,6 +104,8 @@ export default function StudioTimesheets() {
     const { error } = await supabase.from('timesheets').insert({ stylist_id: stylistId, clock_in: new Date().toISOString() })
     if (error) { toast.error('Could not clock in'); return }
     toast.success('Clocked in!')
+    const stylistName = stylists.find(s => s.id === stylistId)?.name || 'Unknown'
+    log('timesheet.clock_in', { entityType: 'timesheet', entityId: stylistId, details: { message: `clocked in (${stylistName})` } })
     load()
   }
 
@@ -112,6 +116,8 @@ export default function StudioTimesheets() {
       .is('clock_out', null)
     if (error) { toast.error('Could not clock out'); return }
     toast.success('Clocked out!')
+    const stylistName = stylists.find(s => s.id === stylistId)?.name || 'Unknown'
+    log('timesheet.clock_out', { entityType: 'timesheet', entityId: stylistId, details: { message: `clocked out (${stylistName})` } })
     load()
   }
 

@@ -3,6 +3,7 @@ import Pager from '../../lib/Pager'
 import { Plus, Trash2, Image, X, Save, Edit2, Eye, EyeOff, ShieldAlert, ChevronDown, Check, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useLogAction } from '../../hooks/useLogAction'
 import toast from 'react-hot-toast'
 
 const C = {
@@ -80,6 +81,7 @@ function Select({ value, onChange, options }) {
 }
 
 export default function StudioGallery() {
+  const log = useLogAction()
   const [images,      setImages]      = useState([])
   const [stylists,    setStylists]    = useState([])
   const [loading,     setLoading]     = useState(true)
@@ -198,6 +200,7 @@ export default function StudioGallery() {
         : await supabase.from('gallery').update(payload).eq('id', editing.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Photo added' : 'Photo updated')
+      log(modal === 'add' ? 'gallery.photo_added' : 'gallery.photo_edited', { entityType: 'gallery', details: { message: `${modal === 'add' ? 'added photo' : 'edited photo'} "${form.title || 'untitled'}" in gallery` } })
       closeModal(); invalidate('studio_gallery'); invalidate('studio_home_display'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
@@ -224,6 +227,7 @@ export default function StudioGallery() {
     const { error } = await supabase.from('gallery').delete().eq('id', deleteTarget.id)
     if (error) { toast.error(error.message); setDeleting(false); return }
     toast.success('Photo deleted')
+    log('gallery.photo_deleted', { entityType: 'gallery', entityId: deleteTarget.id, details: { message: `deleted photo "${deleteTarget.title || 'untitled'}" from gallery` } })
     setDeleteTarget(null); setDeleting(false)
     invalidate('studio_gallery'); invalidate('studio_home_display'); load()
   }

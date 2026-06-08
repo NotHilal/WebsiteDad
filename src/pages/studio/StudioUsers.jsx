@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Check, UserPlus, Scissors, Plus, ArrowRight } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLogAction } from '../../hooks/useLogAction'
 import { format } from 'date-fns'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -94,6 +95,7 @@ function RoleSelector({ value, onChange }) {
 
 export default function StudioUsers() {
   const { user: adminUser } = useAuth()
+  const log = useLogAction()
   const [all,           setAll]           = useState([])
   const [loading,       setLoading]       = useState(true)
   const [search,        setSearch]        = useState('')
@@ -187,6 +189,10 @@ export default function StudioUsers() {
       }
       setAll(prev => prev.map(u => u.id === empModal.userId ? { ...u, role: 'artist' } : u))
       toast.success(`${empModal.userName} is now an artist`)
+      log('user.artist_promoted', {
+        entityType: 'user', entityId: empModal.userId,
+        details: { message: `promoted ${empModal.userName} to artist` },
+      })
       setEmpModal(null)
     } catch (err) { setEmpErr(err.message) }
     finally { setEmpSaving(false) }
@@ -215,6 +221,10 @@ export default function StudioUsers() {
       }
       setAll(prev => prev.map(u => u.id === roleConfirm.userId ? { ...u, role: roleConfirm.newRole } : u))
       toast.success(`Role changed to ${roleConfirm.newRole}`)
+      log('user.role_changed', {
+        entityType: 'user', entityId: roleConfirm.userId,
+        details: { message: `changed ${roleConfirm.userName}'s role to "${roleConfirm.newRole}"` },
+      })
       setRoleConfirm(null)
     } catch (err) { toast.error(err.message) }
     finally { setConfirming(false) }

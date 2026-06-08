@@ -31,6 +31,7 @@ import StudioHomeDisplay from './pages/studio/StudioHomeDisplay'
 import StudioTimesheets  from './pages/studio/StudioTimesheets'
 import StudioPayRuns     from './pages/studio/StudioPayRuns'
 import StudioPaysheet    from './pages/studio/StudioPaysheet'
+import StudioLogs        from './pages/studio/StudioLogs'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
 import AdminOnlyRoute from './components/auth/AdminOnlyRoute'
@@ -88,6 +89,7 @@ export default function App() {
             <Route path="timesheets"  element={<AdminRoute><StudioTimesheets /></AdminRoute>} />
             <Route path="pay-runs"    element={<AdminOnlyRoute><StudioPayRuns /></AdminOnlyRoute>} />
             <Route path="paysheet"    element={<AdminRoute><StudioPaysheet /></AdminRoute>} />
+            <Route path="logs"        element={<AdminOnlyRoute><StudioLogs /></AdminOnlyRoute>} />
           </Route>
         </Routes>
         </CartProvider>

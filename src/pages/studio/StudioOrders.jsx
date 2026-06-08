@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useLogAction } from '../../hooks/useLogAction'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Search, Package, Check, X, Trash2, AlertTriangle, ChevronRight, User } from 'lucide-react'
+import { Search, Package, Check, X, Trash2, AlertTriangle, ChevronRight, User, RotateCcw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch } from '../../lib/cache'
 import Pager from '../../lib/Pager'
@@ -24,6 +25,7 @@ const STATUS_STYLE = {
 const STATUS_TABS = ['All', 'Active', 'Retrieved', 'Expired', 'Cancelled']
 
 export default function StudioOrders() {
+  const log = useLogAction()
   const [orders,       setOrders]       = useState([])
   const [loading,      setLoading]      = useState(true)
   const [search,       setSearch]       = useState('')
@@ -54,6 +56,7 @@ export default function StudioOrders() {
     const { error } = await supabase.from('preorders').update({ status: 'retrieved' }).eq('id', order.id)
     if (error) { toast.error('Update failed'); setUpdating(null); return }
     toast.success('Marked as retrieved')
+    log('order.retrieved', { entityType: 'order', entityId: order.id, details: { message: `marked ${order.profiles?.full_name || 'client'}'s order of "${order.products?.name || 'item'}" as retrieved` } })
     const updated = { ...order, status: 'retrieved' }
     setOrders(prev => prev.map(o => o.id === order.id ? updated : o))
     setDetails(updated)
@@ -65,12 +68,25 @@ export default function StudioOrders() {
     setUpdating(order.id)
     const { error } = await supabase.from('preorders').update({ status: 'cancelled' }).eq('id', order.id)
     if (error) { toast.error('Update failed'); setUpdating(null); return }
+    log('order.cancelled', { entityType: 'order', entityId: order.id, details: { message: `cancelled ${order.profiles?.full_name || 'client'}'s order of "${order.products?.name || 'item'}"` } })
     if (order.product_id && order.quantity) {
       const { data: prod } = await supabase.from('products').select('stock').eq('id', order.product_id).single()
       if (prod) await supabase.from('products').update({ stock: (prod.stock || 0) + order.quantity }).eq('id', order.product_id)
     }
     toast.success('Order cancelled')
     const updated = { ...order, status: 'cancelled' }
+    setOrders(prev => prev.map(o => o.id === order.id ? updated : o))
+    setDetails(updated)
+    setUpdating(null)
+  }
+
+  async function revertToWaiting(order) {
+    setUpdating(order.id)
+    const { error } = await supabase.from('preorders').update({ status: 'active' }).eq('id', order.id)
+    if (error) { toast.error('Update failed'); setUpdating(null); return }
+    toast.success('Order reverted to awaiting pickup')
+    log('order.reverted', { entityType: 'order', entityId: order.id, details: { message: `reverted ${order.profiles?.full_name || 'client'}'s order of "${order.products?.name || 'item'}" back to awaiting pickup` } })
+    const updated = { ...order, status: 'active' }
     setOrders(prev => prev.map(o => o.id === order.id ? updated : o))
     setDetails(updated)
     setUpdating(null)
@@ -83,6 +99,7 @@ export default function StudioOrders() {
     const { error } = await supabase.from('preorders').delete().eq('id', deleteTarget.id)
     if (error) { toast.error('Delete failed'); return }
     toast.success('Order deleted')
+    log('order.deleted', { entityType: 'order', entityId: deleteTarget.id, details: { message: `deleted order from ${deleteTarget.profiles?.full_name || 'client'} (${deleteTarget.products?.name || 'item'})` } })
     setOrders(prev => prev.filter(o => o.id !== deleteTarget.id))
     setDetails(null)
     closeDelete()
@@ -120,6 +137,7 @@ export default function StudioOrders() {
         .o-retrieve:hover:not(:disabled) { background: rgba(52,211,153,0.2) !important; border-color: rgba(52,211,153,0.5) !important; }
         .o-cancel:hover:not(:disabled) { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .o-delete:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
+        .o-revert:hover:not(:disabled) { background: rgba(201,168,76,0.18) !important; border-color: rgba(201,168,76,0.45) !important; }
       `}</style>
 
       {/* ── Header ── */}
@@ -181,6 +199,12 @@ export default function StudioOrders() {
                     <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'nowrap', flexShrink: 0 }}>
                       {s.label}
                     </span>
+                    {order.status === 'retrieved' && (
+                      <button onClick={() => revertToWaiting(order)} disabled={updating === order.id} className="o-revert"
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: updating === order.id ? 'not-allowed' : 'pointer', transition: 'all .18s', flexShrink: 0, opacity: updating === order.id ? 0.5 : 1 }}>
+                        <RotateCcw size={9} /> Revert
+                      </button>
+                    )}
                     <button onClick={() => setDetails(order)} className="o-details-btn"
                       style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
                       Info <ChevronRight size={9} />
@@ -319,6 +343,15 @@ export default function StudioOrders() {
 
                 {/* Actions */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {details.status === 'retrieved' && (
+                    <button onClick={() => revertToWaiting(details)} disabled={updating === details.id} className="o-revert"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '0.65rem', borderRadius: 10, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1 }}>
+                      {updating === details.id
+                        ? <div style={{ width: 12, height: 12, border: `2px solid ${C.goldBorder}`, borderTopColor: C.gold, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                        : <RotateCcw size={14} />}
+                      Revert to Awaiting Pickup
+                    </button>
+                  )}
                   {details.status === 'active' && (
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button onClick={() => markRetrieved(details)} disabled={updating === details.id} className="o-retrieve"

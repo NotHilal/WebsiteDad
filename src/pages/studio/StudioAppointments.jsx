@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, X, Calendar, User } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useLogAction } from '../../hooks/useLogAction'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay,
@@ -26,6 +27,7 @@ const ALL_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled']
 const WDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function StudioAppointments() {
+  const log = useLogAction()
   const [appointments, setAppointments] = useState([])
   const [loading,      setLoading]      = useState(true)
   const [month,        setMonth]        = useState(new Date())
@@ -54,6 +56,13 @@ export default function StudioAppointments() {
     const appt = appointments.find(a => a.id === id)
     const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id)
     if (error) { toast.error(error.message); return }
+
+    const clientName = appt?.profiles?.full_name || 'client'
+    const service    = appt?.services?.name || 'appointment'
+    log('appointment.status_changed', {
+      entityType: 'appointment', entityId: id,
+      details: { message: `changed ${clientName}'s "${service}" appointment status → ${newStatus}` },
+    })
 
     setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
 

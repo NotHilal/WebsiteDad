@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
-  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote
+  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote, Activity
 } from 'lucide-react'
 import AppointmentAlert from '../../components/AppointmentAlert'
 import DayOffAlert from '../../components/DayOffAlert'
@@ -36,6 +36,7 @@ const adminNavItems = [
   { to: '/studio/gallery',       icon: Image,           label: 'Gallery' },
   { to: '/studio/coupons',       icon: Tag,             label: 'Coupons' },
   { to: '/studio/users',         icon: Users,           label: 'Users' },
+  { to: '/studio/logs',          icon: Activity,        label: 'Activity Logs' },
 ]
 
 const workerNavItems = [

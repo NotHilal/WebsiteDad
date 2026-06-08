@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Send, MessageSquare, CheckCircle, RotateCcw, Trash2, AlertTriangle, Store, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLogAction } from '../../hooks/useLogAction'
 import { format, isToday, isYesterday } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -24,6 +25,7 @@ const FILTERS = ['All', 'Open', 'Closed']
 
 export default function StudioMessages() {
   const { user, profile, isAdmin } = useAuth()
+  const log = useLogAction()
   const [tickets,    setTickets]   = useState([])
   const [selected,   setSelected]  = useState(null)
   const [messages,   setMessages]  = useState([])
@@ -151,6 +153,11 @@ export default function StudioMessages() {
     if (!error) {
       setSelected(prev => ({ ...prev, status: newStatus }))
       toast.success(`Ticket ${newStatus === 'closed' ? 'closed' : 'reopened'}`)
+      const clientName = selected.user?.full_name || 'client'
+      log(newStatus === 'closed' ? 'ticket.closed' : 'ticket.reopened', {
+        entityType: 'ticket', entityId: selected.id,
+        details: { message: `${newStatus === 'closed' ? 'closed' : 'reopened'} ticket "${selected.title}" (${clientName})` },
+      })
       loadTickets()
     }
     setToggling(false)

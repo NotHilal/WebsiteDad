@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Plus, Edit2, Trash2, X, Save, User, Upload, Link2, ChevronDown, Check } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useLogAction } from '../../hooks/useLogAction'
 import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
@@ -65,6 +66,7 @@ function CustomSelect({ value, onChange, options }) {
 }
 
 export default function StudioStylists() {
+  const log = useLogAction()
   const [stylists,     setStylists]     = useState([])
   const [staff,        setStaff]        = useState([])
   const [loading,      setLoading]      = useState(true)
@@ -130,6 +132,16 @@ export default function StudioStylists() {
         : await supabase.from('stylists').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Stylist added' : 'Stylist updated')
+      if (modal === 'add') {
+        log('stylist.created', { entityType: 'stylist', details: { message: `created stylist "${form.name}"` } })
+      } else {
+        const prev = stylists.find(s => s.id === form.id)
+        if (prev?.profile_id && !payload.profile_id) {
+          log('stylist.unlinked', { entityType: 'stylist', entityId: form.id, details: { message: `unlinked account from stylist "${form.name}"` } })
+        } else {
+          log('stylist.edited', { entityType: 'stylist', entityId: form.id, details: { message: `edited stylist "${form.name}"` } })
+        }
+      }
       setModal(null); setLocalPreview(null); invalidate('studio_stylists'); invalidate('studio_home_display'); invalidate('studio_gallery'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
@@ -137,8 +149,10 @@ export default function StudioStylists() {
 
   async function del(id) {
     if (!confirm('Delete this team member?')) return
+    const name = stylists.find(s => s.id === id)?.name || 'Unknown'
     await supabase.from('stylists').delete().eq('id', id)
     toast.success('Team member removed'); invalidate('studio_stylists'); invalidate('studio_home_display'); invalidate('studio_gallery'); load()
+    log('stylist.deleted', { entityType: 'stylist', entityId: id, details: { message: `deleted stylist "${name}"` } })
   }
 
   function openEdit(s) {

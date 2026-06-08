@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLogAction } from '../../hooks/useLogAction'
 import { Check, UserCheck, Image, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch } from '../../lib/cache'
@@ -17,6 +18,7 @@ const MAX_GALLERY  = 5
 const MAX_SERVICES = 4
 
 export default function StudioHomeDisplay() {
+  const log = useLogAction()
   const [stylists,  setStylists]  = useState([])
   const [gallery,   setGallery]   = useState([])
   const [services,  setServices]  = useState([])
@@ -50,7 +52,10 @@ export default function StudioHomeDisplay() {
     setUpdating(s.id)
     const { error } = await supabase.from('stylists').update({ featured: !s.featured }).eq('id', s.id)
     if (error) toast.error('Failed to update')
-    else setStylists(prev => prev.map(x => x.id === s.id ? { ...x, featured: !x.featured } : x))
+    else {
+      setStylists(prev => prev.map(x => x.id === s.id ? { ...x, featured: !x.featured } : x))
+      log('home_display.updated', { entityType: 'stylist', entityId: s.id, details: { message: `${s.featured ? 'removed' : 'featured'} stylist "${s.name}" on home page` } })
+    }
     setUpdating(null)
   }
 
@@ -60,7 +65,10 @@ export default function StudioHomeDisplay() {
     setUpdating(item.id)
     const { error } = await supabase.from('gallery').update({ featured: !item.featured }).eq('id', item.id)
     if (error) toast.error('Failed to update')
-    else setGallery(prev => prev.map(x => x.id === item.id ? { ...x, featured: !x.featured } : x))
+    else {
+      setGallery(prev => prev.map(x => x.id === item.id ? { ...x, featured: !x.featured } : x))
+      log('home_display.updated', { entityType: 'gallery', entityId: item.id, details: { message: `${item.featured ? 'removed' : 'featured'} gallery photo "${item.title || 'untitled'}" on home page` } })
+    }
     setUpdating(null)
   }
 
@@ -71,7 +79,10 @@ export default function StudioHomeDisplay() {
     setUpdating(svc.id)
     const { error } = await supabase.from('services').update({ featured: !svc.featured }).eq('id', svc.id)
     if (error) toast.error('Failed to update')
-    else setServices(prev => prev.map(x => x.id === svc.id ? { ...x, featured: !x.featured } : x))
+    else {
+      setServices(prev => prev.map(x => x.id === svc.id ? { ...x, featured: !x.featured } : x))
+      log('home_display.updated', { entityType: 'service', entityId: svc.id, details: { message: `${svc.featured ? 'removed' : 'featured'} service "${svc.name}" on home page` } })
+    }
     setUpdating(null)
   }
 

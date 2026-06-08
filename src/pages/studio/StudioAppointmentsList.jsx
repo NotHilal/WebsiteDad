@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Search, X, ChevronDown, Trash2, AlertTriangle, Eye, EyeOff, ChevronRight, Calendar, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLogAction } from '../../hooks/useLogAction'
 import { format, isToday, isTomorrow, isPast, parseISO, startOfWeek, endOfWeek, isSameMonth } from 'date-fns'
 import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
@@ -70,7 +71,8 @@ function StatusDropdown({ appt, onUpdate }) {
 }
 
 export default function StudioAppointmentsList() {
-  const { user, isAdmin }               = useAuth()
+  const { user, isAdmin } = useAuth()
+  const log = useLogAction()
   const [appointments, setAppointments] = useState([])
   const [loading,      setLoading]      = useState(true)
   const [search,       setSearch]       = useState('')
@@ -125,6 +127,10 @@ export default function StudioAppointmentsList() {
     const appt = appointments.find(a => a.id === id)
     const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id)
     if (error) { toast.error(error.message); return }
+    log('appointment.status_changed', {
+      entityType: 'appointment', entityId: id,
+      details: { message: `changed ${appt?.profiles?.full_name || 'client'}'s "${appt?.services?.name || 'appointment'}" status → ${newStatus}` },
+    })
     const updated = { ...appt, status: newStatus }
     setAppointments(prev => prev.map(a => a.id === id ? updated : a))
     if (details?.id === id) setDetails(updated)

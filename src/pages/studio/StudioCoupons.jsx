@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Plus, X, Save, Trash2, Edit2, Search, Scissors, AlertTriangle, ChevronRight, ChevronLeft, UserPlus } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useLogAction } from '../../hooks/useLogAction'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
@@ -169,6 +170,7 @@ function SelectableCouponCard({ coupon, selected, onSelect }) {
 
 /* ── Main ──────────────────────────────────────────── */
 export default function StudioCoupons() {
+  const log = useLogAction()
   const [coupons,      setCoupons]      = useState([])
   const [users,        setUsers]        = useState([])
   const [assignments,  setAssignments]  = useState({})   // coupon_id → { name, used }
@@ -225,6 +227,7 @@ export default function StudioCoupons() {
         : await supabase.from('coupons').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Coupon created' : 'Coupon updated')
+      log(modal === 'add' ? 'coupon.created' : 'coupon.edited', { entityType: 'coupon', details: { message: `${modal === 'add' ? 'created' : 'edited'} coupon "${form.code.toUpperCase()}"` } })
       setModal(null); setForm(EMPTY); invalidate('studio_coupons'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
@@ -236,6 +239,7 @@ export default function StudioCoupons() {
     if (error) { toast.error(error.message); return }
     setCoupons(prev => prev.filter(c => c.id !== deleteTarget.id))
     toast.success('Coupon deleted')
+    log('coupon.deleted', { entityType: 'coupon', entityId: deleteTarget.id, details: { message: `deleted coupon "${deleteTarget.code}"` } })
     setDeleteTarget(null)
   }
 
@@ -278,6 +282,7 @@ export default function StudioCoupons() {
       setAssignedIds(prev => new Set([...prev, assignCoupon.id]))
       setAssignments(prev => ({ ...prev, [assignCoupon.id]: { name: assignUser.full_name || 'Unknown', used: false } }))
       toast.success(`Coupon assigned to ${assignUser.full_name || 'client'}`)
+      log('coupon.assigned', { entityType: 'coupon', entityId: assignCoupon.id, details: { message: `assigned coupon "${assignCoupon.code}" to ${assignUser.full_name || 'client'}` } })
       setModal(null); setAssignStep(1); setAssignCoupon(null); setAssignUser(null); setUserSearch('')
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }

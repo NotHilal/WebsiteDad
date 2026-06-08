@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, Edit2, Trash2, X, Save, Scissors, Clock, Upload, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useLogAction } from '../../hooks/useLogAction'
 import toast from 'react-hot-toast'
 
 const C = {
@@ -33,6 +34,7 @@ const inp = (extra = {}) => ({
 const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 export default function StudioServices() {
+  const log = useLogAction()
   const [services,    setServices]    = useState([])
   const [loading,     setLoading]     = useState(true)
   const [modal,       setModal]       = useState(null)
@@ -90,6 +92,7 @@ export default function StudioServices() {
         : await supabase.from('services').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Service added' : 'Service updated')
+      log(modal === 'add' ? 'service.created' : 'service.edited', { entityType: 'service', details: { message: `${modal === 'add' ? 'created' : 'edited'} service "${form.name}"` } })
       closeModal(); invalidate('studio_services'); invalidate('studio_home_display'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
@@ -104,6 +107,7 @@ export default function StudioServices() {
     setDeleting(false)
     if (error) { toast.error(error.message); return }
     toast.success('Service deleted')
+    log('service.deleted', { entityType: 'service', entityId: deleteTarget.id, details: { message: `deleted service "${deleteTarget.name}"` } })
     invalidate('studio_services'); invalidate('studio_home_display'); load()
     closeDelete()
   }
@@ -111,6 +115,7 @@ export default function StudioServices() {
   async function toggleActive(s) {
     await supabase.from('services').update({ active: !s.active }).eq('id', s.id)
     toast.success(s.active ? 'Service archived' : 'Service restored')
+    log(s.active ? 'service.archived' : 'service.restored', { entityType: 'service', entityId: s.id, details: { message: `${s.active ? 'archived' : 'restored'} service "${s.name}"` } })
     invalidate('studio_services'); invalidate('studio_home_display'); load()
   }
 

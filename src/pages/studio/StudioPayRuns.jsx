@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Check, Edit2, X, ArrowLeft, Clock, ChevronRight, ChevronLeft, Info, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useLogAction } from '../../hooks/useLogAction'
 import {
   format, differenceInMinutes,
   startOfWeek, endOfWeek, startOfMonth, endOfMonth,
@@ -305,6 +306,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
 
 // ═══════════════════════════════════════════════════════════════════
 export default function StudioPayRuns() {
+  const log = useLogAction()
   const [stylists,      setStylists]      = useState([])
   const [timesheets,    setTimesheets]    = useState([])
   const [payRuns,       setPayRuns]       = useState([])
@@ -316,6 +318,7 @@ export default function StudioPayRuns() {
   const [saving,        setSaving]        = useState(false)
   const [payModal,      setPayModal]      = useState(false)
   const [modalSelected, setModalSelected] = useState(new Set())
+  const [activeSessions, setActiveSessions] = useState(new Set()) // stylist IDs with open clock-in
   // detail view tabs / filter
   const [activeTab,     setActiveTab]     = useState('calendar')
   const [unpaidOnly,    setUnpaidOnly]    = useState(false)
@@ -338,18 +341,20 @@ export default function StudioPayRuns() {
   async function load() {
     setLoading(true)
     setError(null)
-    const [{ data: stys, error: e1 }, { data: sheets, error: e2 }, { data: runs, error: e3 }] = await Promise.all([
+    const [{ data: stys, error: e1 }, { data: sheets, error: e2 }, { data: runs, error: e3 }, { data: open }] = await Promise.all([
       supabase.from('stylists').select('id, name, photo_url, hourly_rate').not('profile_id', 'is', null).order('display_order'),
       supabase.from('timesheets')
         .select('id, stylist_id, clock_in, clock_out, break_minutes, paid_at')
         .not('clock_out', 'is', null)
         .order('clock_in', { ascending: false }),
       supabase.from('pay_runs').select('id, stylist_id, tips, commissions, other'),
+      supabase.from('timesheets').select('stylist_id').is('clock_out', null),
     ])
     if (e1 || e2 || e3) { setError('Could not load pay data — check your connection.'); setLoading(false); return }
     setStylists(stys || [])
     setTimesheets(sheets || [])
     setPayRuns(runs || [])
+    setActiveSessions(new Set((open || []).map(t => t.stylist_id)))
     setLoading(false)
   }
 
@@ -389,6 +394,10 @@ export default function StudioPayRuns() {
     const { error } = await supabase.from('timesheets').update({ paid_at: new Date().toISOString() }).in('id', arr)
     if (error) return toast.error(error.message)
     toast.success(`${stylist.name} — ${fmtMins(mins)} marked as paid`)
+    log('payrun.paid', {
+      entityType: 'payrun', entityId: stylist.id,
+      details: { message: `marked ${stylist.name}'s timesheets as paid (${fmtMins(mins)}, ${ids.size} session${ids.size !== 1 ? 's' : ''})` },
+    })
     setPayModal(false); setModalSelected(new Set()); load()
   }
 
@@ -622,6 +631,14 @@ export default function StudioPayRuns() {
                     </div>
                   </div>
                   <div style={{ flex: 1, overflowY: 'auto', padding: '0.75rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {activeSessions.has(stylist.id) && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.5rem 0.75rem', borderRadius: 8, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.18)', marginBottom: 2 }}>
+                        <Clock size={11} color="#fbbf24" style={{ flexShrink: 0 }} />
+                        <span style={{ fontSize: '0.72rem', color: '#fbbf24', fontFamily: 'Jost,sans-serif' }}>
+                          1 session in progress — clock out to include it
+                        </span>
+                      </div>
+                    )}
                     {unpaidSheets.length === 0
                       ? <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', textAlign: 'center', padding: '2rem 0', margin: 0 }}>No unpaid sessions</p>
                       : unpaidSheets.map(t => {

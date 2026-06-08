@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, EyeOff, ShieldAlert, Search, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useLogAction } from '../../hooks/useLogAction'
 import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
@@ -40,6 +41,7 @@ const STATUS_FILTERS = [
 ]
 
 export default function StudioProducts() {
+  const log = useLogAction()
   const [products,      setProducts]      = useState([])
   const [loading,       setLoading]       = useState(true)
   const [modal,         setModal]         = useState(null)
@@ -159,6 +161,7 @@ export default function StudioProducts() {
         : await supabase.from('products').update(payload).eq('id', form.id)
       if (error) throw error
       toast.success(modal === 'add' ? 'Product added' : 'Product updated')
+      log(modal === 'add' ? 'product.created' : 'product.edited', { entityType: 'product', details: { message: `${modal === 'add' ? 'created' : 'edited'} product "${form.name}"` } })
       closeModal(); invalidate('studio_products'); load()
     } catch (err) { toast.error(err.message) }
     finally { setSaving(false) }
@@ -173,6 +176,7 @@ export default function StudioProducts() {
     const { error } = await supabase.from('products').delete().eq('id', deleteTarget.id)
     if (error) { toast.error(error.message); setDeleting(false); return }
     toast.success('Product deleted')
+    log('product.deleted', { entityType: 'product', entityId: deleteTarget.id, details: { message: `deleted product "${deleteTarget.name}"` } })
     setDeleteTarget(null)
     setDeleting(false)
     invalidate('studio_products'); load()

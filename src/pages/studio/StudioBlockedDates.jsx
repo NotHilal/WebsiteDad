@@ -6,6 +6,7 @@ import {
 import { supabase } from '../../lib/supabase'
 import { invalidate } from '../../lib/cache'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLogAction } from '../../hooks/useLogAction'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
   eachDayOfInterval, getDay, isSameDay, isBefore, startOfDay,
@@ -49,6 +50,7 @@ function TabBtn({ id, label, icon: Icon, active, set }) {
 
 export default function StudioBlockedDates() {
   const { user, isAdmin } = useAuth()
+  const log = useLogAction()
 
   const [loading,        setLoading]        = useState(true)
   const [month,          setMonth]          = useState(new Date())
@@ -229,6 +231,7 @@ export default function StudioBlockedDates() {
       })
       if (error) throw error
       toast.success('Day blocked')
+      log('blocked_dates.salon_blocked', { entityType: 'blocked_dates', details: { message: `blocked salon day ${selected.key}${reason.trim() ? ` — ${reason.trim()}` : ''}` } })
       closeModal(); invalidate('studio_blocked'); load()
     } catch (e) { toast.error(e.message) }
     finally { setSaving(false) }
@@ -239,6 +242,7 @@ export default function StudioBlockedDates() {
     const rec = salonBlocked.find(d => (d.date || d) === selected.key)
     if (rec?.id) await supabase.from('blocked_dates').delete().eq('id', rec.id)
     toast.success('Day reopened')
+    log('blocked_dates.salon_unblocked', { entityType: 'blocked_dates', details: { message: `unblocked salon day ${selected.key}` } })
     setSaving(false); closeModal(); invalidate('studio_blocked'); load()
   }
 
@@ -246,11 +250,13 @@ export default function StudioBlockedDates() {
   async function approveRequest(req) {
     await supabase.from('blocked_dates').update({ status: 'approved' }).eq('id', req.id)
     toast.success('Approved')
+    log('blocked_dates.approved', { entityType: 'blocked_dates', entityId: req.id, details: { message: `approved day-off for ${req.stylist?.name || 'artist'} on ${req.date}` } })
     load()
   }
   async function rejectRequest(req) {
     await supabase.from('blocked_dates').update({ status: 'rejected' }).eq('id', req.id)
     toast.success('Rejected')
+    log('blocked_dates.rejected', { entityType: 'blocked_dates', entityId: req.id, details: { message: `rejected day-off for ${req.stylist?.name || 'artist'} on ${req.date}` } })
     load()
   }
 
@@ -293,6 +299,7 @@ export default function StudioBlockedDates() {
       })
       if (error) throw error
       toast.success('Day-off request submitted — awaiting manager approval')
+      log('blocked_dates.requested', { entityType: 'blocked_dates', details: { message: `requested day off on ${selected.key}${reason.trim() ? ` — ${reason.trim()}` : ''}` } })
       closeModal(); load()
     } catch (e) { toast.error(e.message) }
     finally { setSaving(false) }
