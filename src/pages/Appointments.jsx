@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info } from 'lucide-react'
+import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info, Mail, UserPlus } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { getOrFetch } from '../lib/cache'
@@ -50,6 +50,9 @@ export default function Appointments() {
   const [month,    setMonth]    = useState(new Date())
   const [saving,       setSaving]       = useState(false)
   const [done,         setDone]         = useState(false)
+  const [payInStore,   setPayInStore]   = useState(false)
+  const [guestInfo,    setGuestInfo]    = useState({ name:'', phone:'', email:'' })
+  const [showPromo,    setShowPromo]    = useState(true)
   const [sel,          setSel]          = useState({ service:null, stylist:null, date:null, time:null, notes:'' })
   const [preview,      setPreview]      = useState(null)
   const [payStep,      setPayStep]      = useState(null)
@@ -154,6 +157,12 @@ export default function Appointments() {
   const startPad = getDay(startOfMonth(month))
   const isOff    = d => isBefore(d, startOfDay(new Date())) || getDay(d)===0 || blocked.includes(format(d,'yyyy-MM-dd')) || (sel.stylist && stylistDayOffs.includes(format(d,'yyyy-MM-dd')))
 
+  const guestInfoValid = user || (
+    guestInfo.name.trim() !== '' &&
+    guestInfo.phone.trim() !== '' &&
+    /\S+@\S+\.\S+/.test(guestInfo.email)
+  )
+
   const basePrice  = parseFloat(sel.service?.price || 0)
   const finalPrice = appliedCoupon
     ? appliedCoupon.coupons.discount_type === 'percentage'
@@ -161,8 +170,50 @@ export default function Appointments() {
       : Math.max(0, basePrice - appliedCoupon.coupons.discount_value)
     : basePrice
 
+  async function logBooking(paymentStatus) {
+    try {
+      await supabase.from('activity_logs').insert({
+        actor_id:   user?.id   || null,
+        actor_name: user ? (profile?.full_name || user.email) : guestInfo.name,
+        actor_role: user ? (profile?.role || 'user') : 'guest',
+        action:     'appointment.booked',
+        details: {
+          message: `${user ? (profile?.full_name || 'Client') : guestInfo.name} booked ${sel.service.name} with ${sel.stylist.name} on ${format(sel.date, 'MMM d')} at ${sel.time}${paymentStatus === 'pay_in_store' ? ' · Pay in store' : ' · Paid online'}`,
+          service:        sel.service.name,
+          stylist:        sel.stylist.name,
+          date:           format(sel.date, 'yyyy-MM-dd'),
+          time:           sel.time,
+          payment_status: paymentStatus,
+        },
+      })
+    } catch {
+      // logging is non-critical
+    }
+  }
+
+  async function sendConfirmationEmail(paymentStatus, paymentIntentId) {
+    try {
+      const email = user ? user.email : guestInfo.email
+      const name  = user ? (profile?.full_name || 'Guest') : guestInfo.name
+      await supabase.functions.invoke('send-appointment-confirmation', {
+        body: {
+          to: email, name,
+          service: sel.service.name,
+          stylist: sel.stylist.name,
+          date: format(sel.date, 'EEEE, MMMM d, yyyy'),
+          time: sel.time,
+          price: finalPrice.toFixed(2),
+          paymentStatus,
+          ...(paymentIntentId ? { paymentIntentId } : {}),
+        },
+      })
+    } catch (err) {
+      toast.error('Email error: ' + (err?.message || JSON.stringify(err)))
+    }
+  }
+
   async function startPayment() {
-    if (!user) return toast.error('Please sign in to book')
+    if (!guestInfoValid) return toast.error('Please fill in your contact information')
     setPayStep('loading')
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
@@ -183,15 +234,22 @@ export default function Appointments() {
   async function completeBooking(paymentIntentId) {
     setSaving(true)
     try {
-      const { error } = await supabase.from('appointments').insert({
-        user_id: user.id, stylist_id: sel.stylist.id, service_id: sel.service.id,
+      const row = {
+        stylist_id: sel.stylist.id, service_id: sel.service.id,
         date: format(sel.date, 'yyyy-MM-dd'), time: sel.time, notes: sel.notes,
         status: 'confirmed', payment_intent_id: paymentIntentId, payment_status: 'paid',
-      })
+      }
+      if (user) row.user_id = user.id
+      else { row.guest_name = guestInfo.name; row.guest_phone = guestInfo.phone; row.guest_email = guestInfo.email }
+      const { error } = await supabase.from('appointments').insert(row)
       if (error) throw error
       if (appliedCoupon) {
         await supabase.from('user_coupons').update({ used: true }).eq('id', appliedCoupon.id)
       }
+      await Promise.all([
+        sendConfirmationEmail('paid', paymentIntentId),
+        logBooking('paid'),
+      ])
       setDone(true)
     } catch (err) {
       toast.error('Payment succeeded but booking failed — please contact us')
@@ -200,12 +258,41 @@ export default function Appointments() {
     }
   }
 
+  async function bookInStore() {
+    if (!guestInfoValid) return toast.error('Please fill in your contact information')
+    setSaving(true)
+    try {
+      const row = {
+        stylist_id: sel.stylist.id, service_id: sel.service.id,
+        date: format(sel.date, 'yyyy-MM-dd'), time: sel.time, notes: sel.notes,
+        status: 'confirmed', payment_status: 'pay_in_store',
+      }
+      if (user) row.user_id = user.id
+      else { row.guest_name = guestInfo.name; row.guest_phone = guestInfo.phone; row.guest_email = guestInfo.email }
+      const { error } = await supabase.from('appointments').insert(row)
+      if (error) throw error
+      if (appliedCoupon) {
+        await supabase.from('user_coupons').update({ used: true }).eq('id', appliedCoupon.id)
+      }
+      await Promise.all([
+        sendConfirmationEmail('pay_in_store'),
+        logBooking('pay_in_store'),
+      ])
+      setPayInStore(true)
+      setDone(true)
+    } catch (err) {
+      toast.error(err.message || 'Could not book appointment')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   /* ── Success ── */
   if (done) return (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem' }}>
-      <div style={{ position:'absolute', top:'40%', left:'50%', transform:'translate(-50%,-50%)', width:600, height:600, background:'radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 65%)', pointerEvents:'none' }} />
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem', overflow:'hidden', position:'relative' }}>
+      <div style={{ position:'absolute', top:'40%', left:'50%', transform:'translate(-50%,-50%)', width:600, height:600, background:'radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 65%)', pointerEvents:'none', zIndex:0 }} />
       <motion.div initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }} transition={{ type:'spring', damping:22 }}
-        style={{ textAlign:'center', maxWidth:480, position:'relative' }}>
+        style={{ textAlign:'center', maxWidth:480, position:'relative', zIndex:1 }}>
         <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ type:'spring', damping:14, delay:0.15 }}
           style={{ width:112, height:112, borderRadius:'50%', background:'linear-gradient(135deg,#C9A84C,#C4956A)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 2.5rem', boxShadow:'0 24px 80px rgba(201,168,76,0.5), 0 0 0 20px rgba(201,168,76,0.07)' }}>
           <Check size={48} color="#000" strokeWidth={2.5}/>
@@ -214,6 +301,19 @@ export default function Appointments() {
           You're <span className="gold-gradient" style={{ fontStyle:'italic' }}>booked!</span>
         </h2>
         <div className="gold-bar"/>
+        {payInStore && (
+          <div style={{ padding:'12px 18px', borderRadius:12, background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.15)', margin:'1.25rem auto 0', maxWidth:380 }}>
+            <p style={{ color:'rgba(245,158,11,0.85)', fontSize:'0.84rem', fontFamily:'Jost,sans-serif', lineHeight:1.7, margin:0 }}>
+              Your slot is reserved — please bring <strong style={{ color:'#f59e0b' }}>€{sel.service?.price}</strong> to pay at the salon.
+            </p>
+          </div>
+        )}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:7, padding:'10px 16px', borderRadius:10, background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.06)', margin:'1rem auto 0', maxWidth:380 }}>
+          <Mail size={12} color="rgba(255,255,255,0.28)" strokeWidth={1.5}/>
+          <p style={{ color:'rgba(255,255,255,0.32)', fontSize:'0.78rem', fontFamily:'Jost,sans-serif', margin:0 }}>
+            Confirmation sent to <span style={{ color:'rgba(255,255,255,0.55)' }}>{user ? user.email : guestInfo.email}</span>
+          </p>
+        </div>
         <p style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.9rem', lineHeight:1.9, margin:'1.5rem auto 2rem' }}>
           <strong style={{ color:'#fff' }}>{format(sel.date,'MMMM d, yyyy')}</strong> at <strong style={{ color:'#fff' }}>{sel.time}</strong> · <strong style={{ color:'#fff' }}>{sel.stylist?.name}</strong>
         </p>
@@ -222,7 +322,7 @@ export default function Appointments() {
             <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)', fontSize:11, color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{l}</span>
           ))}
         </div>
-        <button className="btn-gold" onClick={() => { setDone(false); setStep(0); setSel({ service:null, stylist:null, date:null, time:null, notes:'' }); setPayStep(null); setClientSecret(null) }}>
+        <button className="btn-gold" onClick={() => { setDone(false); setStep(0); setSel({ service:null, stylist:null, date:null, time:null, notes:'' }); setPayStep(null); setClientSecret(null); setPayInStore(false); setGuestInfo({ name:'', phone:'', email:'' }); setShowPromo(true) }}>
           Book Another <ArrowRight size={15}/>
         </button>
       </motion.div>
@@ -358,6 +458,21 @@ export default function Appointments() {
                     Tap a card to book instantly · use <Info size={11} style={{ display:'inline', verticalAlign:'middle' }}/> for details
                   </p>
                 </div>
+
+                {!user && showPromo && (
+                  <div style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderRadius:14, background:'rgba(96,165,250,0.07)', border:'1px solid rgba(96,165,250,0.18)', marginBottom:24, position:'relative' }}>
+                    <div style={{ width:34, height:34, borderRadius:'50%', background:'rgba(96,165,250,0.12)', border:'1px solid rgba(96,165,250,0.22)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <UserPlus size={15} color="#60a5fa" strokeWidth={1.5}/>
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <p style={{ color:'#60a5fa', fontSize:'0.84rem', fontFamily:'Jost,sans-serif', fontWeight:600, margin:'0 0 2px' }}>Get 30% off your service</p>
+                      <p style={{ color:'rgba(96,165,250,0.6)', fontSize:'0.75rem', fontFamily:'Jost,sans-serif', margin:0, lineHeight:1.5 }}>Create a free account and earn a 30% discount after a few completed appointments.</p>
+                    </div>
+                    <button onClick={() => setShowPromo(false)} style={{ flexShrink:0, width:22, height:22, borderRadius:'50%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.25)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+                      <X size={11}/>
+                    </button>
+                  </div>
+                )}
 
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(270px, 1fr))', gap:'1.25rem' }}>
                   {(services.length ? services : Array.from({length:6},(_,i)=>({id:i,name:'',price:'',duration:0,category:''}))).map((svc) => {
@@ -505,7 +620,7 @@ export default function Appointments() {
                   </p>
                 </div>
 
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:'1.1rem' }}>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))', gap:'1.1rem' }}>
                   {(stylists.length ? stylists : Array.from({length:4},(_,i)=>({id:i,name:'',title:''}))).map((sty) => {
                     const isActive = sel.stylist?.id === sty.id
                     return (
@@ -516,7 +631,7 @@ export default function Appointments() {
                                  background:'rgba(255,255,255,0.02)', transition:'all 0.35s ease',
                                  boxShadow: isActive ? '0 0 0 4px rgba(201,168,76,0.1),0 8px 40px rgba(201,168,76,0.12)' : '0 4px 20px rgba(0,0,0,0.3)',
                                  position:'relative' }}>
-                        <div style={{ height:190, background:'linear-gradient(135deg,rgba(201,168,76,0.08),rgba(196,149,106,0.04))', position:'relative', overflow:'hidden' }}>
+                        <div style={{ aspectRatio:'1/1', background:'linear-gradient(135deg,rgba(201,168,76,0.08),rgba(196,149,106,0.04))', position:'relative', overflow:'hidden' }}>
                           {sty.photo_url
                             ? <img src={sty.photo_url} alt={sty.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
                             : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -757,17 +872,44 @@ export default function Appointments() {
                 )}
 
                 {!user && (
-                  <div style={{ padding:'11px 16px', borderRadius:12, background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.12)', marginBottom:14, textAlign:'center' }}>
-                    <p style={{ color:'rgba(251,191,36,0.8)', fontSize:'0.82rem', fontFamily:'Jost,sans-serif' }}>Please sign in to book.</p>
+                  <div style={{ marginBottom:18 }}>
+                    <p style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.2)', marginBottom:10, fontFamily:'Jost,sans-serif' }}>Your contact information</p>
+                    <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                      {[
+                        { key:'name',  type:'text',  placeholder:'Full name *' },
+                        { key:'phone', type:'tel',   placeholder:'Phone number *' },
+                        { key:'email', type:'email', placeholder:'Email address *' },
+                      ].map(({ key, type, placeholder }) => (
+                        <input key={key} type={type} placeholder={placeholder} value={guestInfo[key]}
+                          onChange={e => setGuestInfo(p => ({ ...p, [key]: e.target.value }))}
+                          className="appt-textarea"
+                          style={{ width:'100%', background:'rgba(255,255,255,0.02)', border:`1px solid ${guestInfo[key] ? 'rgba(96,165,250,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius:12, padding:'0.75rem 1.1rem', fontSize:'0.84rem', color:'#f0f0f0', outline:'none', fontFamily:'Jost,sans-serif', fontWeight:300, transition:'border-color 0.3s', boxSizing:'border-box' }}
+                        />
+                      ))}
+                    </div>
+                    <p style={{ fontSize:'0.72rem', color:'rgba(255,255,255,0.2)', fontFamily:'Jost,sans-serif', marginTop:8 }}>
+                      A confirmation email will be sent to you after booking.
+                    </p>
                   </div>
                 )}
 
-                <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||!user} style={{ width:'100%', justifyContent:'center' }}>
-                  {payStep==='loading'
-                    ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'#000',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
-                    : <>Pay €{finalPrice.toFixed(2)} <ArrowRight size={15}/></>
-                  }
-                </button>
+                <div style={{ display:'flex', gap:10 }}>
+                  <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||saving||!guestInfoValid} style={{ flex:1, justifyContent:'center' }}>
+                    {payStep==='loading'
+                      ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'#000',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
+                      : <>Pay Online &nbsp;€{finalPrice.toFixed(2)} <ArrowRight size={15}/></>
+                    }
+                  </button>
+                  <button onClick={bookInStore} disabled={saving||payStep==='loading'||!guestInfoValid}
+                    style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:12, border:'1px solid rgba(201,168,76,0.28)', background:'rgba(201,168,76,0.07)', color: (saving||!guestInfoValid) ? 'rgba(201,168,76,0.35)' : '#C9A84C', cursor: (saving||payStep==='loading'||!guestInfoValid) ? 'not-allowed' : 'pointer', fontSize:13, fontFamily:'Jost,sans-serif', fontWeight:500, letterSpacing:'0.04em', transition:'all 0.25s' }}
+                    onMouseEnter={e => { if (!saving && !payStep && guestInfoValid) { e.currentTarget.style.background='rgba(201,168,76,0.13)'; e.currentTarget.style.borderColor='rgba(201,168,76,0.45)' } }}
+                    onMouseLeave={e => { e.currentTarget.style.background='rgba(201,168,76,0.07)'; e.currentTarget.style.borderColor='rgba(201,168,76,0.28)' }}>
+                    {saving
+                      ? <div style={{ width:16,height:16,border:'2px solid rgba(201,168,76,0.25)',borderTopColor:'#C9A84C',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
+                      : 'Pay in Store'
+                    }
+                  </button>
+                </div>
 
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:12 }}>
                   <Sparkles size={10} color="rgba(201,168,76,0.4)"/>

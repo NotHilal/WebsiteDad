@@ -21,6 +21,9 @@ const STATUS = {
   completed: { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',  border: 'rgba(201,168,76,0.22)'  },
 }
 
+const PAY_IN_STORE_STYLE = { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.22)' }
+const apptStyle = a => a.payment_status === 'pay_in_store' ? PAY_IN_STORE_STYLE : (STATUS[a.status] || STATUS.pending)
+
 const ALL_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled']
 const WDAYS_SHORT  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const WDAYS_SUN    = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -207,6 +210,7 @@ export default function StudioSchedule() {
                     const isWeekend = getDay(day) === 0 || getDay(day) === 6
                     const hasAppts = appts.length > 0
                     const counts = ALL_STATUSES.reduce((acc, s) => { acc[s] = appts.filter(a => a.status === s).length; return acc }, {})
+                    const inStoreCount = appts.filter(a => a.payment_status === 'pay_in_store').length
                     return (
                       <div key={key} onClick={() => hasAppts && openDay(day)}
                         className={`d-cal-day ${hasAppts ? 'has-appts' : ''}`}
@@ -223,6 +227,12 @@ export default function StudioSchedule() {
                                 {counts[st] > 1 && <span style={{ fontSize: 8, color: STATUS[st].color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{counts[st]}</span>}
                               </div>
                             ))}
+                            {inStoreCount > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <div style={{ width: 5, height: 5, borderRadius: '50%', background: PAY_IN_STORE_STYLE.color }} />
+                                {inStoreCount > 1 && <span style={{ fontSize: 8, color: PAY_IN_STORE_STYLE.color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{inStoreCount}</span>}
+                              </div>
+                            )}
                           </div>
                         )}
                         {hasAppts && appts[0] && (
@@ -242,6 +252,10 @@ export default function StudioSchedule() {
                   {st.charAt(0).toUpperCase() + st.slice(1)}
                 </div>
               ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: PAY_IN_STORE_STYLE.color, flexShrink: 0 }} />
+                Pay in store
+              </div>
             </div>
           </div>
         )}
@@ -293,7 +307,7 @@ export default function StudioSchedule() {
                       ))}
                       {/* Appointments */}
                       {laidOut.map(appt => {
-                        const s   = STATUS[appt.status] || STATUS.pending
+                        const s   = apptStyle(appt)
                         const top = apptTop(appt.time?.slice(0, 5))
                         const h   = apptHeight(appt.services?.duration)
                         const pct = 100 / appt._n
@@ -337,6 +351,10 @@ export default function StudioSchedule() {
                   {st.charAt(0).toUpperCase() + st.slice(1)}
                 </div>
               ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: PAY_IN_STORE_STYLE.color, flexShrink: 0 }} />
+                Pay in store
+              </div>
             </div>
             </div>{/* end week-inner */}
             </div>{/* end week-scroll-wrap */}
@@ -365,7 +383,7 @@ export default function StudioSchedule() {
                 ))}
                 {/* Appointments */}
                 {loading ? null : layoutAppts(dayApptList).map(appt => {
-                  const s   = STATUS[appt.status] || STATUS.pending
+                  const s   = apptStyle(appt)
                   const top = apptTop(appt.time?.slice(0, 5))
                   const h   = apptHeight(appt.services?.duration)
                   const pct = 100 / appt._n
@@ -419,7 +437,7 @@ export default function StudioSchedule() {
                   <p style={{ color: C.muted, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif' }}>No appointments today</p>
                 </div>
               ) : dayApptList.map(appt => {
-                const s = STATUS[appt.status] || STATUS.pending
+                const s = apptStyle(appt)
                 return (
                   <div key={appt.id} onClick={() => setSelectedAppt(appt)} className="sched-mobile-card"
                     style={{ background: s.bg, border: `1px solid ${s.border}`, borderLeft: `3px solid ${s.color}`, borderRadius: 12, padding: '0.875rem 1rem', cursor: 'pointer', transition: 'all .15s' }}>
@@ -479,7 +497,7 @@ export default function StudioSchedule() {
       {/* Appointment detail modal */}
       {selectedAppt && (() => {
         const a = selectedAppt
-        const s = STATUS[a.status] || STATUS.pending
+        const s = apptStyle(a)
         const rows = [
           { label: 'Date',     value: a.date ? format(new Date(a.date), 'EEEE, MMMM d, yyyy') : '—' },
           { label: 'Time',     value: a.time?.slice(0, 5) || '—' },
@@ -489,6 +507,7 @@ export default function StudioSchedule() {
           { label: 'Duration', value: a.services?.duration ? `${a.services.duration} min` : '—' },
           { label: 'Price',    value: a.services?.price ? `€${a.services.price}` : '—', gold: true },
           { label: 'Stylist',  value: a.stylists?.name || '—' },
+          ...(a.payment_status === 'pay_in_store' ? [{ label: 'Payment', value: 'Pay in store', blue: true }] : []),
           ...(a.notes ? [{ label: 'Notes', value: a.notes }] : []),
         ]
         return (
@@ -532,10 +551,10 @@ export default function StudioSchedule() {
 
               {/* Info rows */}
               <div style={{ padding: '0.875rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {rows.map(({ label, value, gold }, i) => (
+                {rows.map(({ label, value, gold, blue }, i) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.45rem 0', borderBottom: i < rows.length - 1 ? `1px solid ${C.border}` : 'none' }}>
                     <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0, marginRight: 16 }}>{label}</span>
-                    <span style={{ fontSize: '0.82rem', color: gold ? C.gold : C.dim, fontFamily: 'Jost,sans-serif', fontWeight: gold ? 600 : 300, textAlign: 'right' }}>{value}</span>
+                    <span style={{ fontSize: '0.82rem', color: blue ? PAY_IN_STORE_STYLE.color : gold ? C.gold : C.dim, fontFamily: 'Jost,sans-serif', fontWeight: blue || gold ? 600 : 300, textAlign: 'right' }}>{value}</span>
                   </div>
                 ))}
               </div>

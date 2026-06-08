@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Check, UserPlus, Scissors, Plus, ArrowRight } from 'lucide-react'
+import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Check, UserPlus, Scissors, Plus, ArrowRight, Upload } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { invalidate } from '../../lib/cache'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLogAction } from '../../hooks/useLogAction'
 import { format } from 'date-fns'
@@ -109,8 +110,9 @@ export default function StudioUsers() {
   const [msgBody,       setMsgBody]       = useState('')
   const [sending,       setSending]       = useState(false)
   // role-change confirmation (user ↔ admin)
-  const [roleConfirm,   setRoleConfirm]   = useState(null)
-  const [confirming,    setConfirming]    = useState(false)
+  const [roleConfirm,      setRoleConfirm]      = useState(null)
+  const [confirming,       setConfirming]       = useState(false)
+  const [deleteStylist,    setDeleteStylist]    = useState(false)
   // employee promotion wizard
   const [empModal,      setEmpModal]      = useState(null) // { userId, userName }
   const [empStep,       setEmpStep]       = useState(1)    // 1=assign, 2=confirm
@@ -119,8 +121,11 @@ export default function StudioUsers() {
   const [empSelected,   setEmpSelected]   = useState(null)
   const [empName,       setEmpName]       = useState('')
   const [empTitle,      setEmpTitle]      = useState('')
+  const [empPhoto,      setEmpPhoto]      = useState(null)   // File
+  const [empPreview,    setEmpPreview]    = useState(null)   // object URL
   const [empErr,        setEmpErr]        = useState('')
   const [empSaving,     setEmpSaving]     = useState(false)
+  const empFileRef = useRef(null)
   const [stylists,      setStylists]      = useState([])
   const [page,          setPage]          = useState(0)
   const navigate = useNavigate()
@@ -156,9 +161,12 @@ export default function StudioUsers() {
       setEmpSelected(null)
       setEmpName(target?.full_name || '')
       setEmpTitle(''); setEmpErr('')
+      setEmpPhoto(null); setEmpPreview(null)
       return
     }
-    setRoleConfirm({ userId: id, newRole, userName: target?.full_name || 'this user' })
+    const linked = stylists.find(s => s.profile_id === id) || null
+    setDeleteStylist(false)
+    setRoleConfirm({ userId: id, newRole, userName: target?.full_name || 'this user', linkedStylist: linked })
   }
 
   async function applyEmployeePromotion() {
@@ -180,14 +188,29 @@ export default function StudioUsers() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to update role')
       // 2. Link or create stylist
+      let newStylist = null
       if (empMode === 'assign') {
-        const { error } = await supabase.from('stylists').update({ profile_id: empModal.userId }).eq('id', empSelected)
+        const { data, error } = await supabase.from('stylists').update({ profile_id: empModal.userId }).eq('id', empSelected).select('id, name, title, profile_id').single()
         if (error) throw error
+        newStylist = data
       } else {
-        const { error } = await supabase.from('stylists').insert({ name: empName.trim(), title: empTitle.trim() || null, profile_id: empModal.userId })
+        let photo_url = null
+        if (empPhoto) {
+          const ext  = empPhoto.name.split('.').pop()
+          const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+          const { error: upErr } = await supabase.storage.from('stylists').upload(path, empPhoto, { upsert: false })
+          if (upErr) throw new Error('Photo upload failed: ' + upErr.message)
+          photo_url = supabase.storage.from('stylists').getPublicUrl(path).data.publicUrl
+        }
+        const { data, error } = await supabase.from('stylists').insert({ name: empName.trim(), title: empTitle.trim() || null, photo_url, profile_id: empModal.userId }).select('id, name, title, profile_id').single()
         if (error) throw error
+        newStylist = data
       }
       setAll(prev => prev.map(u => u.id === empModal.userId ? { ...u, role: 'artist' } : u))
+      setStylists(prev => {
+        const without = prev.filter(s => s.id !== newStylist.id)
+        return [...without, newStylist]
+      })
       toast.success(`${empModal.userName} is now an artist`)
       log('user.artist_promoted', {
         entityType: 'user', entityId: empModal.userId,
@@ -213,11 +236,18 @@ export default function StudioUsers() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to update role')
-      // If demoting from employee, unlink any attached stylist
+      // If demoting from employee, unlink or delete the attached stylist
       const wasEmployee = all.find(u => u.id === roleConfirm.userId)?.role === 'artist'
       if (wasEmployee) {
-        await supabase.from('stylists').update({ profile_id: null }).eq('profile_id', roleConfirm.userId)
+        if (deleteStylist && roleConfirm.linkedStylist) {
+          await supabase.from('stylists').delete().eq('id', roleConfirm.linkedStylist.id)
+        } else {
+          await supabase.from('stylists').update({ profile_id: null }).eq('profile_id', roleConfirm.userId)
+        }
         setStylists(prev => prev.filter(s => s.profile_id !== roleConfirm.userId))
+        invalidate('stylists_all')
+        invalidate('home_stylists')
+        invalidate('studio_stylists')
       }
       setAll(prev => prev.map(u => u.id === roleConfirm.userId ? { ...u, role: roleConfirm.newRole } : u))
       toast.success(`Role changed to ${roleConfirm.newRole}`)
@@ -588,6 +618,43 @@ export default function StudioUsers() {
                 </p>
               </div>
 
+              {/* Linked stylist — only shown when demoting an artist */}
+              {roleConfirm.linkedStylist && (
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 8 }}>
+                    Linked artist profile
+                  </p>
+
+                  {/* Keep option */}
+                  <button onClick={() => setDeleteStylist(false)}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, marginBottom: 6, background: !deleteStylist ? 'rgba(52,211,153,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${!deleteStylist ? 'rgba(52,211,153,0.3)' : C.border}`, cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${!deleteStylist ? '#34d399' : 'rgba(255,255,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
+                      {!deleteStylist && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#34d399' }} />}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '0.8rem', color: !deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: !deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
+                        Keep <span style={{ color: !deleteStylist ? '#34d399' : C.muted }}>{roleConfirm.linkedStylist.name}</span>
+                      </p>
+                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>Unlink the account but keep the profile for reassignment</p>
+                    </div>
+                  </button>
+
+                  {/* Delete option */}
+                  <button onClick={() => setDeleteStylist(true)}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, background: deleteStylist ? 'rgba(248,113,113,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${deleteStylist ? 'rgba(248,113,113,0.35)' : C.border}`, cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${deleteStylist ? '#f87171' : 'rgba(255,255,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
+                      {deleteStylist && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f87171' }} />}
+                    </div>
+                    <div>
+                      <p style={{ fontSize: '0.8rem', color: deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
+                        Delete <span style={{ color: deleteStylist ? '#f87171' : C.muted }}>{roleConfirm.linkedStylist.name}</span>
+                      </p>
+                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>Permanently remove the artist profile</p>
+                    </div>
+                  </button>
+                </div>
+              )}
+
               {/* Buttons */}
               <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button onClick={() => setRoleConfirm(null)} className="modal-cancel"
@@ -761,17 +828,53 @@ export default function StudioUsers() {
 
                 {/* Create form — shown when "Create New" is selected */}
                 {empMode === 'create' && (
-                  <div style={{ display: 'flex', gap: '0.75rem', padding: '1rem', borderRadius: 12, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.12)', marginBottom: 0 }}>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Name <span style={{ color: '#60a5fa' }}>*</span></label>
-                      <input value={empName} onChange={e => { setEmpName(e.target.value); setEmpErr('') }} placeholder="Full name…" autoFocus
-                        style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                  <div style={{ display: 'flex', gap: '0.75rem', padding: '1rem', borderRadius: 12, background: 'rgba(96,165,250,0.04)', border: '1px solid rgba(96,165,250,0.12)', marginBottom: 0, alignItems: 'flex-start' }}>
+
+                    {/* Photo picker */}
+                    <input ref={empFileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                      onChange={e => {
+                        const f = e.target.files?.[0]
+                        if (!f) return
+                        if (!f.type.startsWith('image/')) { toast.error('Select an image file'); return }
+                        if (f.size > 5 * 1024 * 1024) { toast.error('Image must be under 5 MB'); return }
+                        setEmpPhoto(f)
+                        setEmpPreview(URL.createObjectURL(f))
+                        e.target.value = ''
+                      }} />
+                    <div style={{ flexShrink: 0 }}>
+                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Photo</label>
+                      <button type="button" onClick={() => empFileRef.current?.click()}
+                        style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', border: `1px dashed ${empPreview ? 'rgba(96,165,250,0.5)' : 'rgba(255,255,255,0.15)'}`, background: empPreview ? 'transparent' : 'rgba(255,255,255,0.03)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, position: 'relative', transition: 'border-color .2s' }}>
+                        {empPreview
+                          ? <img src={empPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} />
+                          : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                              <Upload size={16} color="rgba(96,165,250,0.4)" strokeWidth={1.5} />
+                              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>Upload</span>
+                            </div>
+                        }
+                      </button>
+                      {empPreview && (
+                        <button type="button" onClick={() => { setEmpPhoto(null); setEmpPreview(null) }}
+                          style={{ marginTop: 4, width: '100%', fontSize: 8, color: '#f87171', fontFamily: 'Jost,sans-serif', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.08em' }}>
+                          Remove
+                        </button>
+                      )}
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Title</label>
-                      <input value={empTitle} onChange={e => setEmpTitle(e.target.value)} placeholder="e.g. Senior Stylist…"
-                        style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+
+                    {/* Name + Title */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Name <span style={{ color: '#60a5fa' }}>*</span></label>
+                        <input value={empName} onChange={e => { setEmpName(e.target.value); setEmpErr('') }} placeholder="Full name…" autoFocus
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                      </div>
+                      <div>
+                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Title</label>
+                        <input value={empTitle} onChange={e => setEmpTitle(e.target.value)} placeholder="e.g. Senior Stylist…"
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                      </div>
                     </div>
+
                   </div>
                 )}
 

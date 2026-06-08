@@ -77,6 +77,8 @@ export default function StudioStylists() {
   const [uploading,    setUploading]    = useState(false)
   const [localPreview, setLocalPreview] = useState(null)
   const [dragOver,     setDragOver]     = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(null) // { id, name }
+  const [deleting,     setDeleting]     = useState(false)
   const fileRef = useRef(null)
 
   useEffect(() => { load() }, [])
@@ -147,12 +149,23 @@ export default function StudioStylists() {
     finally { setSaving(false) }
   }
 
-  async function del(id) {
-    if (!confirm('Delete this team member?')) return
+  function del(id) {
     const name = stylists.find(s => s.id === id)?.name || 'Unknown'
-    await supabase.from('stylists').delete().eq('id', id)
-    toast.success('Team member removed'); invalidate('studio_stylists'); invalidate('studio_home_display'); invalidate('studio_gallery'); load()
-    log('stylist.deleted', { entityType: 'stylist', entityId: id, details: { message: `deleted stylist "${name}"` } })
+    setDeleteTarget({ id, name })
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      await supabase.from('stylists').delete().eq('id', deleteTarget.id)
+      toast.success('Team member removed')
+      invalidate('studio_stylists'); invalidate('studio_home_display'); invalidate('studio_gallery')
+      log('stylist.deleted', { entityType: 'stylist', entityId: deleteTarget.id, details: { message: `deleted stylist "${deleteTarget.name}"` } })
+      setDeleteTarget(null)
+      load()
+    } catch (err) { toast.error(err.message) }
+    finally { setDeleting(false) }
   }
 
   function openEdit(s) {
@@ -448,6 +461,47 @@ export default function StudioStylists() {
                   {saving
                     ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Save size={13} /> {modal === 'add' ? 'Add Stylist' : 'Save Changes'}</>
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirmation Modal ───────────────────────── */}
+      {deleteTarget && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onMouseDown={e => { if (e.target === e.currentTarget) setDeleteTarget(null) }}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: 380, background: '#1a1a24', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
+
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#f87171,#ef4444,rgba(248,113,113,0.1))' }} />
+
+            <div style={{ padding: '1.75rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <Trash2 size={22} color="#f87171" strokeWidth={1.5} />
+                </div>
+                <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: '#f0f0f0', lineHeight: 1.1, marginBottom: '0.4rem' }}>
+                  Delete Artist
+                </h2>
+                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
+                  Are you sure you want to delete <span style={{ color: '#f0f0f0', fontWeight: 600 }}>{deleteTarget.name}</span>?
+                  <br />This will remove their profile and all related data permanently.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.625rem' }}>
+                <button onClick={() => setDeleteTarget(null)}
+                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
+                  Cancel
+                </button>
+                <button onClick={confirmDelete} disabled={deleting}
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1, transition: 'all .2s' }}>
+                  {deleting
+                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    : <><Trash2 size={13} /> Delete Permanently</>
                   }
                 </button>
               </div>

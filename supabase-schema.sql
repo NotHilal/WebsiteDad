@@ -268,3 +268,84 @@ INSERT INTO services (name, description, price, duration, category) VALUES
 ('Balayage', 'Hand-painted highlights that create a natural, sun-kissed effect with beautiful dimension.', 115.00, 150, 'Color'),
 ('Hair Consultation', 'In-depth consultation with one of our expert stylists to plan your perfect look.', 0.00, 30, 'Other')
 ON CONFLICT DO NOTHING;
+
+-- =========================================
+-- MIGRATION: Pay In Store + Auto-Expiry
+-- Run these in the Supabase SQL editor
+-- =========================================
+
+-- Add payment tracking columns (safe to run multiple times)
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending';
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS payment_intent_id TEXT;
+
+-- =========================================
+-- MIGRATION: Guest Bookings
+-- Run these in the Supabase SQL editor
+-- =========================================
+
+-- Guest contact info (null when user is logged in)
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS guest_name  TEXT;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS guest_phone TEXT;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS guest_email TEXT;
+
+-- Allow unauthenticated inserts for guest bookings
+CREATE POLICY "Guest appointments allowed" ON appointments
+  FOR INSERT WITH CHECK (user_id IS NULL AND guest_email IS NOT NULL);
+
+-- =========================================
+-- MIGRATION: Activity Logs
+-- Run these in the Supabase SQL editor
+-- =========================================
+
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor_id   UUID        REFERENCES profiles(id) ON DELETE SET NULL,
+  actor_name TEXT,
+  actor_role TEXT        DEFAULT 'user',
+  action     TEXT        NOT NULL,
+  details    JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
+
+-- Admins can read all logs
+CREATE POLICY "Admins read activity logs" ON activity_logs
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- Anyone (including guests) can insert log entries
+CREATE POLICY "Anyone can insert activity logs" ON activity_logs
+  FOR INSERT WITH CHECK (true);
+
+ALTER TABLE preorders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'paid';
+ALTER TABLE preorders ADD COLUMN IF NOT EXISTS payment_intent_id TEXT;
+
+-- =========================================
+-- AUTO-EXPIRY CRON JOB (pg_cron)
+-- Requires: Database > Extensions > pg_cron enabled in Supabase dashboard
+-- =========================================
+
+-- Enable the extension (skip if already enabled)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Schedule daily at 2 AM: expire in-store holds older than 7 days, restore stock
+SELECT cron.schedule(
+  'expire-in-store-reservations',
+  '0 2 * * *',
+  $$
+    WITH expired AS (
+      UPDATE preorders
+      SET status = 'expired'
+      WHERE status = 'active'
+        AND payment_status = 'pay_in_store'
+        AND expires_at < NOW()
+      RETURNING id, product_id, quantity
+    )
+    UPDATE products p
+    SET stock = p.stock + e.quantity
+    FROM expired e
+    WHERE p.id = e.product_id;
+  $$
+);

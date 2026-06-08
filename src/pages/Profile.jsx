@@ -76,6 +76,7 @@ export default function Profile() {
   // Payment modal state
   const [payStep,      setPayStep]      = useState(null)
   const [clientSecret, setClientSecret] = useState(null)
+  const [reserving,    setReserving]    = useState(false)
 
   useEffect(() => { if (user) loadAll() }, [user])
 
@@ -120,6 +121,31 @@ export default function Profile() {
     }
   }
 
+  async function reserveInStore() {
+    if (cartItems.length === 0) return
+    setReserving(true)
+    try {
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      for (const item of cartItems) {
+        await supabase.from('preorders').insert({
+          user_id: user.id, product_id: item.product_id, quantity: item.quantity,
+          status: 'active', payment_status: 'pay_in_store', expires_at: expiresAt,
+        })
+        await supabase.from('products')
+          .update({ stock: Math.max(0, (item.products?.stock ?? 0) - item.quantity) })
+          .eq('id', item.product_id)
+      }
+      await clearCart()
+      toast.success('Items reserved! Come pay in store within 7 days.')
+      loadAll()
+      setTab('Orders')
+    } catch {
+      toast.error('Could not reserve items — please try again')
+    } finally {
+      setReserving(false)
+    }
+  }
+
   async function completeCartPayment(paymentIntentId) {
     try {
       for (const item of cartItems) {
@@ -152,6 +178,7 @@ export default function Profile() {
     const lite = [170, 170, 170]
     const bg   = [248, 248, 248]
     const paid = order.payment_status === 'paid'
+    const inStore = order.payment_status === 'pay_in_store'
     const total = ((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)
     const orderDate = format(new Date(order.created_at), 'MMMM d, yyyy')
     const orderId   = order.id.slice(0, 8).toUpperCase()
@@ -289,7 +316,7 @@ export default function Profile() {
     doc.setFontSize(9)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...statusTx)
-    doc.text(paid ? 'Paid via Stripe' : 'Payment pending', W / 2, y + 1.5, { align: 'center' })
+    doc.text(paid ? 'Paid via Stripe' : inStore ? 'Pay in store' : 'Payment pending', W / 2, y + 1.5, { align: 'center' })
 
     y += 20
 
@@ -324,6 +351,7 @@ export default function Profile() {
     const lite = [170, 170, 170]
     const bg   = [248, 248, 248]
     const paid = appt.payment_status === 'paid'
+    const inStoreAppt = appt.payment_status === 'pay_in_store'
     const apptId   = appt.id.slice(0, 8).toUpperCase()
     const apptDate = format(new Date(appt.date), 'MMMM d, yyyy')
     const bookedOn = appt.created_at ? format(new Date(appt.created_at), 'MMMM d, yyyy') : apptDate
@@ -421,7 +449,7 @@ export default function Profile() {
     doc.setDrawColor(paid ? 187 : 253, paid ? 247 : 230, paid ? 208 : 138)
     doc.setLineWidth(0.3); doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 12, 3, 3, 'S')
     doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...statusTx)
-    doc.text(paid ? 'Paid via Stripe' : 'Payment pending', W / 2, y + 1.5, { align: 'center' })
+    doc.text(paid ? 'Paid via Stripe' : inStoreAppt ? 'Pay in store' : 'Payment pending', W / 2, y + 1.5, { align: 'center' })
 
     y += 18
 
@@ -582,17 +610,26 @@ export default function Profile() {
                         ))}
 
                         {/* Cart footer */}
-                        <div style={{ padding: '14px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                        <div style={{ padding: '14px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                           <div>
                             <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost, sans-serif', marginBottom: 3 }}>Total</p>
                             <p className="font-display" style={{ fontSize: '1.6rem', color: '#C9A84C', lineHeight: 1 }}>€{cartTotal.toFixed(2)}</p>
                           </div>
-                          <button onClick={startCartPayment} disabled={payStep === 'loading'} className="btn-gold" style={{ padding: '11px 28px', fontSize: 11 }}>
-                            {payStep === 'loading'
-                              ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                              : <>Pay €{cartTotal.toFixed(2)}</>
-                            }
-                          </button>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 11, justifyContent: 'center' }}>
+                              {payStep === 'loading'
+                                ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                : 'Pay Online'
+                              }
+                            </button>
+                            <button onClick={reserveInStore} disabled={payStep === 'loading' || reserving}
+                              style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(201,168,76,0.07)', color: (payStep === 'loading' || reserving) ? 'rgba(201,168,76,0.4)' : '#C9A84C', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: (payStep === 'loading' || reserving) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                              {reserving
+                                ? <div style={{ width: 12, height: 12, border: '2px solid rgba(201,168,76,0.3)', borderTopColor: '#C9A84C', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                : 'Pay In Store'
+                              }
+                            </button>
+                          </div>
                         </div>
                       </>
                     )}
@@ -682,9 +719,9 @@ export default function Profile() {
                             {/* Footer */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(255,255,255,0.01)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: appt.payment_status === 'paid' ? '#34d399' : 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: appt.payment_status === 'paid' ? '#34d399' : appt.payment_status === 'pay_in_store' ? '#f59e0b' : 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
                                 <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>
-                                  {appt.payment_status === 'paid' ? 'Paid via Stripe' : 'No payment on file'}
+                                  {appt.payment_status === 'paid' ? 'Paid via Stripe' : appt.payment_status === 'pay_in_store' ? 'Pay in store' : 'No payment on file'}
                                 </span>
                               </div>
                               {appt.payment_status === 'paid' && (
@@ -767,11 +804,18 @@ export default function Profile() {
 
                             {/* Footer */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(255,255,255,0.01)' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: order.payment_status === 'paid' ? '#34d399' : '#f59e0b' }} />
-                                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>
-                                  {order.payment_status === 'paid' ? 'Paid via Stripe' : 'Payment pending'}
-                                </span>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: order.payment_status === 'paid' ? '#34d399' : '#f59e0b', flexShrink: 0 }} />
+                                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>
+                                    {order.payment_status === 'paid' ? 'Paid via Stripe' : order.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
+                                  </span>
+                                </div>
+                                {order.payment_status === 'pay_in_store' && order.expires_at && order.status === 'active' && (
+                                  <span style={{ fontSize: 9, color: 'rgba(245,158,11,0.55)', fontFamily: 'Jost,sans-serif', paddingLeft: 11 }}>
+                                    Hold expires {format(new Date(order.expires_at), 'MMM d')}
+                                  </span>
+                                )}
                               </div>
                               <button
                                 onClick={() => setReceipt(order)}
@@ -900,7 +944,7 @@ export default function Profile() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px 14px', background: receipt.payment_status === 'paid' ? 'rgba(52,211,153,0.08)' : 'rgba(245,158,11,0.08)', borderRadius: 10, border: `1px solid ${receipt.payment_status === 'paid' ? 'rgba(52,211,153,0.2)' : 'rgba(245,158,11,0.2)'}`, marginBottom: 22 }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: receipt.payment_status === 'paid' ? '#34d399' : '#f59e0b', flexShrink: 0 }} />
                   <span style={{ fontSize: 11, fontFamily: 'Jost,sans-serif', color: receipt.payment_status === 'paid' ? '#34d399' : '#f59e0b', fontWeight: 600, letterSpacing: '0.1em' }}>
-                    {receipt.payment_status === 'paid' ? 'Paid via Stripe' : 'Payment pending'}
+                    {receipt.payment_status === 'paid' ? 'Paid via Stripe' : receipt.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
                   </span>
                 </div>
 

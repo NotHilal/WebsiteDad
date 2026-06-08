@@ -24,6 +24,10 @@ const STATUS_CFG = {
 }
 const ALL_STATUSES = ['confirmed', 'completed', 'cancelled']
 
+const clientName  = a => a.profiles?.full_name || a.guest_name  || null
+const clientPhone = a => a.profiles?.phone     || a.guest_phone || null
+const isGuest     = a => !a.user_id && !!a.guest_name
+
 function dateLabel(dateStr) {
   const d = parseISO(dateStr)
   if (isToday(d))    return { text: 'Today',    accent: true  }
@@ -129,7 +133,7 @@ export default function StudioAppointmentsList() {
     if (error) { toast.error(error.message); return }
     log('appointment.status_changed', {
       entityType: 'appointment', entityId: id,
-      details: { message: `changed ${appt?.profiles?.full_name || 'client'}'s "${appt?.services?.name || 'appointment'}" status → ${newStatus}` },
+      details: { message: `changed ${clientName(appt) || 'client'}'s "${appt?.services?.name || 'appointment'}" status → ${newStatus}` },
     })
     const updated = { ...appt, status: newStatus }
     setAppointments(prev => prev.map(a => a.id === id ? updated : a))
@@ -175,6 +179,9 @@ export default function StudioAppointmentsList() {
       const matchSearch = !q ||
         a.profiles?.full_name?.toLowerCase().includes(q) ||
         a.profiles?.phone?.includes(q) ||
+        a.guest_name?.toLowerCase().includes(q) ||
+        a.guest_phone?.includes(q) ||
+        a.guest_email?.toLowerCase().includes(q) ||
         a.services?.name?.toLowerCase().includes(q) ||
         a.stylists?.name?.toLowerCase().includes(q)
       let matchPeriod = true
@@ -320,7 +327,8 @@ export default function StudioAppointmentsList() {
         ) : (
           <>{paged.map((appt, i) => {
             const { text: dateText, accent } = dateLabel(appt.date)
-            const initials = appt.profiles?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+            const name     = clientName(appt)
+            const initials = name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
             const isPastAppt = isPast(parseISO(`${appt.date}T${appt.time || '23:59'}`))
             const cfg = STATUS_CFG[appt.status] || STATUS_CFG.confirmed
 
@@ -334,7 +342,8 @@ export default function StudioAppointmentsList() {
                     <span style={{ fontSize: 10, color: cfg.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                   </div>
                   <p style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>
-                    {appt.profiles?.full_name || <span style={{ color: C.muted, fontStyle: 'italic' }}>Unknown</span>}
+                    {name || <span style={{ color: C.muted, fontStyle: 'italic' }}>Unknown</span>}
+                    {isGuest(appt) && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.05em', verticalAlign: 'middle' }}>GUEST</span>}
                   </p>
                   <StatusDropdown appt={appt} onUpdate={updateStatus} />
                   <button onClick={() => setDetails(appt)} className="al-info-btn"
@@ -368,6 +377,12 @@ export default function StudioAppointmentsList() {
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
                     <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: appt.status === 'completed' ? C.gold : 'rgba(255,255,255,0.32)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>€{appt.services.price}</span>
                   </>}
+                  {appt.payment_status === 'pay_in_store' && <>
+                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
+                    <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                      Pay in store
+                    </span>
+                  </>}
                 </div>
               </div>
             )
@@ -395,7 +410,8 @@ export default function StudioAppointmentsList() {
               {(() => {
                 const cfg = STATUS_CFG[details.status] || STATUS_CFG.confirmed
                 const { text: dateText, accent } = dateLabel(details.date)
-                const initials = details.profiles?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+                const dName    = clientName(details)
+                const initials = dName?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
                 const isPastAppt = isPast(parseISO(`${details.date}T${details.time || '23:59'}`))
 
                 return (
@@ -423,11 +439,19 @@ export default function StudioAppointmentsList() {
                           <span style={{ fontSize: 14, color: cfg.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>
-                            {details.profiles?.full_name || 'Unknown client'}
-                          </p>
-                          {details.profiles?.phone && (
-                            <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif' }}>{details.profiles.phone}</p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2, flexWrap: 'wrap' }}>
+                            <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>
+                              {dName || 'Unknown client'}
+                            </p>
+                            {isGuest(details) && (
+                              <span style={{ fontSize: 9, padding: '1px 7px', borderRadius: 5, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.05em' }}>GUEST</span>
+                            )}
+                          </div>
+                          {clientPhone(details) && (
+                            <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif' }}>{clientPhone(details)}</p>
+                          )}
+                          {isGuest(details) && details.guest_email && (
+                            <p style={{ color: 'rgba(96,165,250,0.6)', fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{details.guest_email}</p>
                           )}
                         </div>
                       </div>
@@ -479,6 +503,17 @@ export default function StudioAppointmentsList() {
                         </div>
                       )}
 
+                      {/* Payment method */}
+                      {details.payment_status === 'pay_in_store' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.65rem 1rem', background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 10, marginBottom: '0.875rem' }}>
+                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Payment due in store</span>
+                          {details.services?.price && (
+                            <span className="font-display" style={{ marginLeft: 'auto', fontSize: '1.1rem', color: '#f59e0b' }}>€{details.services.price}</span>
+                          )}
+                        </div>
+                      )}
+
                       {/* Status + actions */}
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: `${cfg.bg}`, border: `1px solid ${cfg.border}`, borderRadius: 10, marginBottom: isAdmin ? '0.875rem' : 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -527,7 +562,8 @@ export default function StudioAppointmentsList() {
                 </div>
                 <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem' }}>
                   <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 4 }}>
-                    {deleteTarget.profiles?.full_name || 'Unknown client'}
+                    {clientName(deleteTarget) || 'Unknown client'}
+                    {isGuest(deleteTarget) && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'Jost,sans-serif', fontWeight: 700, verticalAlign: 'middle' }}>GUEST</span>}
                   </p>
                   <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
                     {[deleteTarget.services?.name, deleteTarget.date ? format(parseISO(deleteTarget.date), 'MMM d, yyyy') : null, deleteTarget.time?.slice(0, 5)].filter(Boolean).join(' · ')}

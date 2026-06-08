@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Plus, Minus, Package, CheckCircle, ShoppingCart, ChevronRight, Star } from 'lucide-react'
+import { X, Plus, Minus, Package, CheckCircle, ShoppingCart, ChevronRight, Star, Store as StoreIcon, MapPin, Lock } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
@@ -9,7 +9,7 @@ import { getOrFetch } from '../lib/cache'
 
 
 /* Per-card quantity state lives here so each card tracks its own qty */
-function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail }) {
+function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest }) {
   const [qty, setQty] = useState(1)
   const [adding, setAdding] = useState(false)
   const outOfStock = (p.stock || 0) === 0
@@ -122,52 +122,72 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail }) {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          {/* Qty selector */}
-          <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 10, flexShrink: 0 }}>
-            <button
-              onClick={e => { e.stopPropagation(); setQty(q => Math.max(1, q - 1)) }}
-              disabled={outOfStock}
-              style={{ width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s', borderRadius: '10px 0 0 10px' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>
-              <Minus size={11} />
-            </button>
-            <span style={{ width: 28, textAlign: 'center', color: '#fff', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Jost,sans-serif', userSelect: 'none' }}>
-              {qty}
-            </span>
-            <button
-              onClick={e => { e.stopPropagation(); setQty(q => Math.min(p.stock || 10, q + 1)) }}
-              disabled={outOfStock || qty >= (p.stock || 10)}
-              style={{ width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', color: qty >= (p.stock || 10) ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: qty >= (p.stock || 10) ? 'not-allowed' : 'pointer', transition: 'color 0.15s', borderRadius: '0 10px 10px 0' }}
-              onMouseEnter={e => { if (qty < (p.stock || 10)) e.currentTarget.style.color = '#fff' }}
-              onMouseLeave={e => e.currentTarget.style.color = qty >= (p.stock || 10) ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.4)'}>
-              <Plus size={11} />
-            </button>
-          </div>
-
-          {/* Add / Add more button */}
+        {isGuest ? (
+          /* ── Guest: sign-in prompt button ──────────────────── */
           <button
-            onClick={handleAdd}
-            disabled={outOfStock || adding}
+            onClick={e => { e.stopPropagation(); onAddToCart(p, 1) }}
+            disabled={outOfStock}
             style={{
-              flex: 1, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              background: outOfStock ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg, #C9A84C, #C4956A)',
-              color: outOfStock ? 'rgba(255,255,255,0.2)' : '#000',
-              border: outOfStock ? '1px solid rgba(255,255,255,0.07)' : 'none',
+              width: '100%', height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              background: 'rgba(255,255,255,0.04)',
+              color: outOfStock ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)',
+              border: '1px solid rgba(255,255,255,0.1)',
               cursor: outOfStock ? 'not-allowed' : 'pointer',
               fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700,
-              boxShadow: outOfStock ? 'none' : '0 4px 16px rgba(201,168,76,0.25)',
-              transition: 'all 0.25s',
+              transition: 'all 0.2s',
             }}
-            onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.boxShadow = '0 6px 24px rgba(201,168,76,0.45)'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow = outOfStock ? 'none' : '0 4px 16px rgba(201,168,76,0.25)'; e.currentTarget.style.transform = 'translateY(0)' }}>
-            {adding
-              ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-              : <><ShoppingCart size={12} /> {inCart ? 'Add More' : 'Add'}</>
-            }
+            onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)' } }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = outOfStock ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}>
+            <Lock size={11} /> Sign in to order
           </button>
-        </div>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {/* Qty selector */}
+            <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 10, flexShrink: 0 }}>
+              <button
+                onClick={e => { e.stopPropagation(); setQty(q => Math.max(1, q - 1)) }}
+                disabled={outOfStock}
+                style={{ width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s', borderRadius: '10px 0 0 10px' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}>
+                <Minus size={11} />
+              </button>
+              <span style={{ width: 28, textAlign: 'center', color: '#fff', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Jost,sans-serif', userSelect: 'none' }}>
+                {qty}
+              </span>
+              <button
+                onClick={e => { e.stopPropagation(); setQty(q => Math.min(p.stock || 10, q + 1)) }}
+                disabled={outOfStock || qty >= (p.stock || 10)}
+                style={{ width: 34, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', color: qty >= (p.stock || 10) ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: qty >= (p.stock || 10) ? 'not-allowed' : 'pointer', transition: 'color 0.15s', borderRadius: '0 10px 10px 0' }}
+                onMouseEnter={e => { if (qty < (p.stock || 10)) e.currentTarget.style.color = '#fff' }}
+                onMouseLeave={e => e.currentTarget.style.color = qty >= (p.stock || 10) ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.4)'}>
+                <Plus size={11} />
+              </button>
+            </div>
+
+            {/* Add / Add more button */}
+            <button
+              onClick={handleAdd}
+              disabled={outOfStock || adding}
+              style={{
+                flex: 1, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                background: outOfStock ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg, #C9A84C, #C4956A)',
+                color: outOfStock ? 'rgba(255,255,255,0.2)' : '#000',
+                border: outOfStock ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                cursor: outOfStock ? 'not-allowed' : 'pointer',
+                fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700,
+                boxShadow: outOfStock ? 'none' : '0 4px 16px rgba(201,168,76,0.25)',
+                transition: 'all 0.25s',
+              }}
+              onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.boxShadow = '0 6px 24px rgba(201,168,76,0.45)'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = outOfStock ? 'none' : '0 4px 16px rgba(201,168,76,0.25)'; e.currentTarget.style.transform = 'translateY(0)' }}>
+              {adding
+                ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                : <><ShoppingCart size={12} /> {inCart ? 'Add More' : 'Add'}</>
+              }
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   )
@@ -183,7 +203,8 @@ export default function Store() {
   const [activecat, setActivecat] = useState('All')
   const [detail,    setDetail]    = useState(null)
   const [dQty,      setDQty]      = useState(1)
-  const [dAdding,   setDAdding]   = useState(false)
+  const [dAdding,      setDAdding]      = useState(false)
+  const [showGuestModal, setShowGuestModal] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -206,12 +227,12 @@ export default function Store() {
   const cartQty = cartItems.reduce((s, i) => s + i.quantity, 0)
 
   async function handleAddFromCard(product, qty) {
-    if (!user) return
+    if (!user) { setShowGuestModal(true); return }
     await addToCart(product, qty)
   }
 
   async function handleAddFromDetail() {
-    if (!detail || !user) return
+    if (!detail || !user) { setShowGuestModal(true); return }
     setDAdding(true)
     await addToCart(detail, dQty)
     setDAdding(false)
@@ -305,15 +326,19 @@ export default function Store() {
                 cartItems={cartItems}
                 onAddToCart={handleAddFromCard}
                 onViewDetail={openDetail}
+                isGuest={!user}
               />
             ))}
           </div>
         )}
 
         {!user && !loading && filtered.length > 0 && (
-          <p style={{ textAlign: 'center', marginTop: 32, fontSize: 12, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em' }}>
-            Sign in to add items to your cart
-          </p>
+          <div style={{ textAlign: 'center', marginTop: 32, display: 'flex', justifyContent: 'center' }}>
+            <button onClick={() => setShowGuestModal(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 12, background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.2)', color: 'rgba(201,168,76,0.7)', fontSize: 12, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em', transition: 'all .2s' }}>
+              <ShoppingCart size={13} /> Sign in to order
+            </button>
+          </div>
         )}
       </div>
 
@@ -397,14 +422,85 @@ export default function Store() {
                     </span>
                   </div>
                 )}
-                <button onClick={handleAddFromDetail} disabled={dAdding || !user || detail.stock === 0} className="btn-gold" style={{ width: '100%', justifyContent: 'center' }}>
-                  {dAdding
-                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-                    : <><ShoppingCart size={14} /> {inCart(detail.id) ? 'Add More' : 'Add to Cart'} · €{(parseFloat(detail.price) * dQty).toFixed(2)}</>
-                  }
-                </button>
+                {user ? (
+                  <button onClick={handleAddFromDetail} disabled={dAdding || detail.stock === 0} className="btn-gold" style={{ width: '100%', justifyContent: 'center' }}>
+                    {dAdding
+                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                      : <><ShoppingCart size={14} /> {inCart(detail.id) ? 'Add More' : 'Add to Cart'} · €{(parseFloat(detail.price) * dQty).toFixed(2)}</>
+                    }
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setShowGuestModal(true)}
+                    disabled={detail.stock === 0}
+                    style={{
+                      width: '100%', padding: '11px', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)',
+                      color: detail.stock === 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)',
+                      fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700,
+                      cursor: detail.stock === 0 ? 'not-allowed' : 'pointer', transition: 'all .2s',
+                    }}
+                    onMouseEnter={e => { if (detail.stock > 0) { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)' } }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = detail.stock === 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)' }}>
+                    <Lock size={13} /> Sign in to order
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                {!user && <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 10, fontFamily: 'Jost,sans-serif' }}>Sign in to add to cart</p>}
+      {/* ── Guest order modal ─────────────────── */}
+      <AnimatePresence>
+        {showGuestModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onMouseDown={e => { if (e.target === e.currentTarget) setShowGuestModal(false) }}
+            style={{ position: 'fixed', inset: 0, zIndex: 70, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(14px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.93, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.93, y: 8 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 340 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: 400, background: '#111116', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.8)' }}>
+
+              <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.2))' }} />
+
+              <div style={{ padding: '1.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                  <button onClick={() => setShowGuestModal(false)}
+                    style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <X size={12} />
+                  </button>
+                </div>
+
+                <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                    <ShoppingCart size={22} color="#C9A84C" strokeWidth={1.5} />
+                  </div>
+                  <h2 className="font-display font-light" style={{ color: '#fff', fontSize: '1.6rem', lineHeight: 1.1, marginBottom: 10 }}>
+                    Ready to order?
+                  </h2>
+                  <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: '0.84rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.7 }}>
+                    Create an account or sign in to order online and have your items ready for pick-up.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: '1.25rem' }}>
+                  <button onClick={() => navigate('/login')} className="btn-gold" style={{ justifyContent: 'center', width: '100%' }}>
+                    Log in to my account
+                  </button>
+                  <button onClick={() => navigate('/register')}
+                    style={{ width: '100%', padding: '11px', borderRadius: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.55)', fontSize: 13, fontFamily: 'Jost,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .2s' }}>
+                    Create a free account
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <MapPin size={14} color="rgba(255,255,255,0.25)" strokeWidth={1.5} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif', lineHeight: 1.6, margin: 0 }}>
+                    Prefer to shop in person? Come visit us at the salon — all products are available to purchase directly in store.
+                  </p>
+                </div>
               </div>
             </motion.div>
           </motion.div>

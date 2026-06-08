@@ -20,6 +20,7 @@ const C = {
 
 const ACTION_META = {
   // Appointments
+  'appointment.booked':            { Icon: Calendar,      color: '#34d399', bg: 'rgba(52,211,153,0.12)',  label: 'New booking'   },
   'appointment.status_changed':    { Icon: Calendar,      color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', label: 'Appointment'   },
   // Users
   'user.role_changed':             { Icon: Users,         color: C.gold,    bg: C.goldBg,                 label: 'Role change'   },

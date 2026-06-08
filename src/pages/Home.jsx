@@ -65,7 +65,7 @@ export default function Home() {
     getOrFetch('home_stylists', async () => {
       const { data } = await supabase.from('stylists').select('id, name, title, photo_url').eq('featured', true).order('display_order')
       if (data?.length) return data
-      const { data: fb } = await supabase.from('stylists').select('id, name, title, photo_url').order('display_order').limit(4)
+      const { data: fb } = await supabase.from('stylists').select('id, name, title, photo_url').not('profile_id', 'is', null).order('display_order').limit(4)
       return fb || []
     }, TTL).then(setTeamMembers)
 
