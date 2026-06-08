@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Send, MessageSquare, CheckCircle, RotateCcw, Trash2, AlertTriangle } from 'lucide-react'
+import { Send, MessageSquare, CheckCircle, RotateCcw, Trash2, AlertTriangle, Store, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { format, isToday, isYesterday } from 'date-fns'
@@ -10,7 +10,7 @@ const C = {
   card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
   goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
-  border: 'rgba(255,255,255,0.07)',
+  border: 'rgba(255,255,255,0.07)', blue: '#60a5fa', blueBg: 'rgba(96,165,250,0.1)', blueBorder: 'rgba(96,165,250,0.22)',
 }
 
 function timeFmt(d) {
@@ -23,19 +23,25 @@ function timeFmt(d) {
 const FILTERS = ['All', 'Open', 'Closed']
 
 export default function StudioMessages() {
-  const { user, profile } = useAuth()
-  const [tickets,   setTickets]   = useState([])
-  const [selected,  setSelected]  = useState(null)
-  const [messages,  setMessages]  = useState([])
-  const [input,     setInput]     = useState('')
-  const [loading,   setLoading]   = useState(true)
+  const { user, profile, isAdmin } = useAuth()
+  const [tickets,    setTickets]   = useState([])
+  const [selected,   setSelected]  = useState(null)
+  const [messages,   setMessages]  = useState([])
+  const [input,      setInput]     = useState('')
+  const [loading,    setLoading]   = useState(true)
   const [filter,     setFilter]    = useState('All')
+  const [tab,        setTab]       = useState('store')
   const [sending,    setSending]   = useState(false)
   const [toggling,   setToggling]  = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
   const [deleting,   setDeleting]  = useState(false)
-  const bottomRef  = useRef(null)
+  const bottomRef   = useRef(null)
   const selectedRef = useRef(null)
+
+  // Artists only ever see their direct tab
+  useEffect(() => {
+    if (profile?.role === 'artist') setTab('direct')
+  }, [profile?.role])
 
   useEffect(() => { selectedRef.current = selected }, [selected])
 
@@ -56,18 +62,36 @@ export default function StudioMessages() {
     return () => supabase.removeChannel(sub)
   }, [])
 
+  // Reload list when tab changes
+  useEffect(() => {
+    setSelected(null)
+    setMessages([])
+    loadTickets()
+  }, [tab])
+
   useEffect(() => {
     if (!selected) return
     loadMessages(selected.id)
   }, [selected?.id])
 
-  async function loadTickets(role = profile?.role) {
+  async function loadTickets() {
+    const role = profile?.role
     let query = supabase
       .from('tickets')
       .select('*, user:profiles!user_id(full_name), recipient:profiles!recipient_id(full_name)')
       .order('updated_at', { ascending: false })
-    if (role === 'employee') query = query.or(`recipient_id.is.null,recipient_id.eq.${user.id}`)
-    else query = query.is('recipient_id', null)
+
+    if (role === 'artist') {
+      // Artists: only their own direct messages
+      query = query.eq('recipient_id', user.id)
+    } else if (tab === 'store') {
+      // Admin store tab: no recipient (sent to the shop)
+      query = query.is('recipient_id', null)
+    } else {
+      // Admin direct tab: all tickets addressed to a specific artist
+      query = query.not('recipient_id', 'is', null)
+    }
+
     const { data: tkts } = await query
     if (!tkts?.length) { setTickets([]); setLoading(false); return }
 
@@ -89,7 +113,10 @@ export default function StudioMessages() {
 
   async function loadMessages(ticketId) {
     const { data } = await supabase
-      .from('ticket_messages').select('*').eq('ticket_id', ticketId).order('created_at')
+      .from('ticket_messages')
+      .select('*, sender:profiles!sender_id(full_name, role)')
+      .eq('ticket_id', ticketId)
+      .order('created_at')
     setMessages(data || [])
     await supabase.from('ticket_messages')
       .update({ read: true }).eq('ticket_id', ticketId).eq('is_from_admin', false).eq('read', false)
@@ -99,13 +126,13 @@ export default function StudioMessages() {
 
   async function send(e) {
     e.preventDefault()
-    if (!input.trim() || !selected || sending) return
+    if (!input.trim() || !selected || sending || !canReply) return
     setSending(true)
     const content = input.trim(); setInput('')
     const { data, error } = await supabase
       .from('ticket_messages')
       .insert({ ticket_id: selected.id, sender_id: user.id, content, is_from_admin: true, read: false })
-      .select().single()
+      .select('*, sender:profiles!sender_id(full_name, role)').single()
     if (error) { setInput(content); toast.error('Failed to send') }
     else if (data) {
       setMessages(prev => [...prev, data])
@@ -145,6 +172,12 @@ export default function StudioMessages() {
     setDeleting(false)
   }
 
+  // Who can reply: admin replies to store tickets, artists reply to their own direct tickets
+  const canReply = selected && selected.status === 'open' && (
+    (isAdmin && !selected.recipient_id) ||
+    (!isAdmin && selected.recipient_id === user?.id)
+  )
+
   const totalUnread = tickets.reduce((sum, t) => sum + (t.unread || 0), 0)
   const filtered = tickets.filter(t => filter === 'All' || t.status === filter.toLowerCase())
 
@@ -166,9 +199,9 @@ export default function StudioMessages() {
       `}</style>
 
       {/* Header */}
-      <div style={{ flexShrink: 0, marginBottom: '1rem', paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 2 }}>
+      <div style={{ flexShrink: 0, marginBottom: '1rem', paddingBottom: '1rem', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1 }}>Messages</h1>
             {totalUnread > 0 && (
               <span style={{ padding: '2px 9px', borderRadius: 20, background: '#ef4444', fontSize: 9, color: '#fff', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
@@ -176,17 +209,32 @@ export default function StudioMessages() {
               </span>
             )}
           </div>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{tickets.length} tickets</p>
+          {/* Status filter */}
+          <div style={{ display: 'flex', gap: 4 }}>
+            {FILTERS.map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', background: filter === f ? C.goldBg : 'transparent', border: `1px solid ${filter === f ? C.goldBorder : C.border}`, color: filter === f ? C.gold : C.muted }}>
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
-        {/* Status filter */}
-        <div style={{ display: 'flex', gap: 4 }}>
-          {FILTERS.map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', background: filter === f ? C.goldBg : 'transparent', border: `1px solid ${filter === f ? C.goldBorder : C.border}`, color: filter === f ? C.gold : C.muted }}>
-              {f}
-            </button>
-          ))}
-        </div>
+
+        {/* Store / Direct tabs — admin only */}
+        {isAdmin && (
+          <div style={{ display: 'flex', gap: 6 }}>
+            {[
+              { key: 'store',  Icon: Store,    label: 'Store',  color: C.gold,   bg: C.goldBg,  border: C.goldBorder },
+              { key: 'direct', Icon: Scissors, label: 'Direct', color: C.blue,   bg: C.blueBg,  border: C.blueBorder },
+            ].map(({ key, Icon, label, color, bg, border }) => (
+              <button key={key} onClick={() => setTab(key)}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: tab === key ? 600 : 400, cursor: 'pointer', transition: 'all .15s', background: tab === key ? bg : 'transparent', border: `1px solid ${tab === key ? border : C.border}`, color: tab === key ? color : C.muted }}>
+                <Icon size={12} strokeWidth={tab === key ? 2.5 : 1.5} />
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={`msg-layout${selected ? ' msg-has-chat' : ''}`} style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: '0.75rem', flex: 1, minHeight: 0, overflow: 'hidden' }}>
@@ -215,7 +263,6 @@ export default function StudioMessages() {
               return (
                 <button key={tk.id} className="tk-row" onClick={() => setSelected(tk)}
                   style={{ width: '100%', textAlign: 'left', padding: '0.65rem 0.75rem', display: 'flex', alignItems: 'flex-start', gap: 9, background: isActive ? 'rgba(201,168,76,0.06)' : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background .15s' }}>
-                  {/* Client avatar with status ring */}
                   <div style={{ position: 'relative', flexShrink: 0, marginTop: 1 }}>
                     <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(96,165,250,0.22), rgba(139,92,246,0.12))', border: `1px solid ${isActive ? 'rgba(96,165,250,0.3)' : 'rgba(96,165,250,0.18)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ fontSize: 11, color: 'rgba(96,165,250,0.85)', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{clientInitial}</span>
@@ -237,15 +284,18 @@ export default function StudioMessages() {
                       </div>
                     </div>
                     <p style={{ fontSize: '0.7rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 4 }}>{tk.title}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>{tk.lastMsg || '—'}</p>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 20, marginLeft: 6, flexShrink: 0, background: tk.recipient_id ? 'rgba(52,211,153,0.07)' : 'rgba(201,168,76,0.07)', border: `1px solid ${tk.recipient_id ? 'rgba(52,211,153,0.18)' : 'rgba(201,168,76,0.15)'}` }}>
-                        <div style={{ width: 4, height: 4, borderRadius: '50%', background: tk.recipient_id ? '#34d399' : C.gold, flexShrink: 0 }} />
-                        <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', fontWeight: 600, color: tk.recipient_id ? 'rgba(52,211,153,0.75)' : C.goldDim, whiteSpace: 'nowrap' }}>
-                          {tk.recipient?.full_name || 'Store'}
+                    {/* Recipient badge — only shown on admin direct tab */}
+                    {isAdmin && tab === 'direct' && tk.recipient?.full_name && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 20, background: C.blueBg, border: `1px solid ${C.blueBorder}` }}>
+                        <div style={{ width: 4, height: 4, borderRadius: '50%', background: C.blue, flexShrink: 0 }} />
+                        <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', fontWeight: 600, color: 'rgba(96,165,250,0.75)', whiteSpace: 'nowrap' }}>
+                          {tk.recipient.full_name}
                         </span>
                       </span>
-                    </div>
+                    )}
+                    {!isAdmin && (
+                      <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{tk.lastMsg || '—'}</p>
+                    )}
                   </div>
                 </button>
               )
@@ -272,31 +322,32 @@ export default function StudioMessages() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
                   </button>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 5 }}>{selected.title}</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: 20, background: selected.recipient_id ? 'rgba(52,211,153,0.1)' : 'rgba(201,168,76,0.1)', border: `1px solid ${selected.recipient_id ? 'rgba(52,211,153,0.3)' : 'rgba(201,168,76,0.22)'}` }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.recipient_id ? '#34d399' : C.gold, flexShrink: 0 }} />
-                        <span style={{ fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: selected.recipient_id ? '#34d399' : C.gold, letterSpacing: '0.04em' }}>
-                          {selected.recipient?.full_name || 'Store'}
-                        </span>
+                    <p style={{ color: C.white, fontSize: '1.05rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 4 }}>
+                      {selected.user?.full_name || 'Client'}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.45)', marginBottom: 3, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.25)', marginRight: 4 }}>Subject :</span>{selected.title}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ color: 'rgba(255,255,255,0.25)' }}>Status :</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.2)', boxShadow: selected.status === 'open' ? '0 0 5px rgba(52,211,153,0.4)' : 'none', display: 'inline-block', flexShrink: 0 }} />
+                        <span style={{ color: selected.status === 'open' ? 'rgba(52,211,153,0.85)' : 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>{selected.status}</span>
                       </span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: selected.status === 'open' ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selected.status === 'open' ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.07)'}` }}>
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.2)', boxShadow: selected.status === 'open' ? '0 0 5px rgba(52,211,153,0.4)' : 'none', flexShrink: 0 }} />
-                        <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? 'rgba(52,211,153,0.8)' : 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{selected.status}</span>
-                      </span>
-                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
-                    </div>
+                    </p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
                     <button onClick={toggleStatus} disabled={toggling} className="btn-g"
                       style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: toggling ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: toggling ? 0.6 : 1, ...(selected.status === 'open' ? { background: 'rgba(248,113,113,0.12)', color: '#f87171' } : { background: 'rgba(52,211,153,0.1)', color: '#34d399' }) }}>
                       {selected.status === 'open' ? <><CheckCircle size={11} /> Close</> : <><RotateCcw size={11} /> Reopen</>}
                     </button>
-                    <button onClick={() => setConfirmDel(true)} className="btn-g"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.15)', color: '#f87171', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}
-                      title="Delete ticket">
-                      <Trash2 size={13} />
-                    </button>
+                    {isAdmin && (
+                      <button onClick={() => setConfirmDel(true)} className="btn-g"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.15)', color: '#f87171', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}
+                        title="Delete ticket">
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -312,6 +363,7 @@ export default function StudioMessages() {
                   const showDate = i === 0 || new Date(msg.created_at).toDateString() !== new Date(messages[i - 1].created_at).toDateString()
                   const prevSame = i > 0 && !!messages[i-1].is_from_admin === !!msg.is_from_admin
                   const clientInitial = (selected.user?.full_name || 'C')[0].toUpperCase()
+                  const senderName = isMe ? (msg.sender?.full_name || 'Store') : (selected.user?.full_name || 'Client')
                   return (
                     <div key={msg.id} style={{ marginBottom: 2 }}>
                       {showDate && (
@@ -331,8 +383,10 @@ export default function StudioMessages() {
                           </div>
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
-                          {!isMe && !prevSame && (
-                            <span style={{ fontSize: 9, color: 'rgba(96,165,250,0.6)', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.06em', paddingLeft: 3 }}>{selected.user?.full_name || 'Client'}</span>
+                          {!prevSame && (
+                            <span style={{ fontSize: 9, color: isMe ? C.goldDim : 'rgba(96,165,250,0.6)', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.06em', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>
+                              {senderName}
+                            </span>
                           )}
                           <div style={{ padding: '0.55rem 0.95rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.82rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontWeight: 500, boxShadow: '0 4px 14px rgba(201,168,76,0.2)' } : { background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.14)', color: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(4px)' }) }}>
                             {msg.content}
@@ -350,16 +404,20 @@ export default function StudioMessages() {
 
               {/* Input */}
               <div style={{ padding: '0.75rem 0.875rem', borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
-                {selected.status === 'closed' ? (
+                {!canReply ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <CheckCircle size={13} color="rgba(255,255,255,0.2)" />
-                    <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>This ticket is closed. Reopen to reply.</p>
+                    <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                      {selected.status === 'closed'
+                        ? 'This ticket is closed. Reopen to reply.'
+                        : 'Only the assigned artist can reply to this ticket.'}
+                    </p>
                   </div>
                 ) : (
                   <form onSubmit={send} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 11, padding: '0.3rem 0.3rem 0.3rem 0.75rem', transition: 'border-color .2s' }}
                     onFocus={e => e.currentTarget.style.borderColor = C.goldBorder}
                     onBlur={e => e.currentTarget.style.borderColor = C.border}>
-                    <input value={input} onChange={e => setInput(e.target.value)} placeholder={`Reply to ${selected.user?.full_name || 'client'}…`} className="send-inp"
+                    <input value={input} onChange={e => setInput(e.target.value)} placeholder={`Reply as ${profile?.full_name || 'you'}…`} className="send-inp"
                       style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.82rem', color: C.white, fontFamily: 'Jost,sans-serif', outline: 'none' }} />
                     <button type="submit" disabled={!input.trim() || sending} className="btn-g"
                       style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.4rem 0.8rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},#C4956A)` : 'rgba(255,255,255,0.06)', color: input.trim() ? '#000' : 'rgba(255,255,255,0.22)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: !input.trim() || sending ? 'not-allowed' : 'pointer', flexShrink: 0, transition: 'all .2s', letterSpacing: '0.08em' }}>
@@ -387,11 +445,8 @@ export default function StudioMessages() {
               onClick={e => e.stopPropagation()}
               style={{ width: '100%', maxWidth: 380, background: '#111118', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}
             >
-              {/* Red top bar */}
               <div style={{ height: 3, background: 'linear-gradient(90deg, #f87171, rgba(248,113,113,0.3))' }} />
-
               <div style={{ padding: '1.5rem' }}>
-                {/* Icon + title */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1rem' }}>
                   <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <AlertTriangle size={17} color="#f87171" />
@@ -401,8 +456,6 @@ export default function StudioMessages() {
                     <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>This action cannot be undone</p>
                   </div>
                 </div>
-
-                {/* Ticket name */}
                 <div style={{ padding: '0.7rem 0.875rem', borderRadius: 9, background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', marginBottom: '1.25rem' }}>
                   <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', fontFamily: 'Jost,sans-serif' }}>
                     <span style={{ color: 'rgba(255,255,255,0.35)' }}>Ticket: </span>{selected.title}
@@ -411,8 +464,6 @@ export default function StudioMessages() {
                     All messages in this thread will be permanently removed.
                   </p>
                 </div>
-
-                {/* Actions */}
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button onClick={() => setConfirmDel(false)} disabled={deleting}
                     style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: deleting ? 'not-allowed' : 'pointer', transition: 'all .2s' }}>

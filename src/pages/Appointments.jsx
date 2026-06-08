@@ -56,6 +56,7 @@ export default function Appointments() {
   const [clientSecret, setClientSecret] = useState(null)
   const [availableCoupons, setAvailableCoupons] = useState([])
   const [appliedCoupon,    setAppliedCoupon]    = useState(null)
+  const [stylistDayOffs,   setStylistDayOffs]   = useState([])
 
   useEffect(() => {
     const TTL = 5 * 60_000
@@ -65,11 +66,11 @@ export default function Appointments() {
         return data || []
       }, TTL),
       getOrFetch('stylists_all', async () => {
-        const { data } = await supabase.from('stylists').select('*').order('display_order')
+        const { data } = await supabase.from('stylists').select('*').not('profile_id', 'is', null).order('display_order')
         return data || []
       }, TTL),
       getOrFetch('blocked_dates', async () => {
-        const { data } = await supabase.from('blocked_dates').select('date')
+        const { data } = await supabase.from('blocked_dates').select('date').is('stylist_id', null).eq('status', 'approved')
         return (data || []).map(b => b.date)
       }, 2 * 60_000),
     ]).then(([svc, sty, blk]) => {
@@ -80,11 +81,22 @@ export default function Appointments() {
   }, [])
 
   useEffect(() => {
+    if (!sel.stylist) { setStylistDayOffs([]); return }
+    supabase
+      .from('blocked_dates')
+      .select('date')
+      .eq('stylist_id', sel.stylist.id)
+      .eq('status', 'approved')
+      .then(({ data }) => setStylistDayOffs((data || []).map(d => d.date)))
+  }, [sel.stylist?.id])
+
+  useEffect(() => {
     if (!sel.date || !sel.stylist) return
     const dateStr = format(sel.date, 'yyyy-MM-dd')
+    if (stylistDayOffs.includes(dateStr)) { setTaken([...SLOTS]); setBlockedSlots([]); return }
     Promise.all([
       supabase.from('appointments').select('time, services(duration)').eq('stylist_id', sel.stylist.id).eq('date', dateStr).neq('status', 'cancelled'),
-      supabase.from('blocked_hours').select('hour').eq('date', dateStr),
+      supabase.from('blocked_hours').select('hour').eq('date', dateStr).or(`stylist_id.eq.${sel.stylist.id},stylist_id.is.null`),
     ]).then(([{ data: appts }, { data: hours }]) => {
       const selectedDur = sel.service?.duration || 60
       const takenSet = new Set()
@@ -110,7 +122,7 @@ export default function Appointments() {
       setTaken([...takenSet])
       setBlockedSlots((hours || []).map(h => h.hour))
     })
-  }, [sel.date, sel.stylist, sel.service])
+  }, [sel.date, sel.stylist, sel.service, stylistDayOffs])
 
   /* scroll to top on every step change */
   useEffect(() => {
@@ -140,7 +152,7 @@ export default function Appointments() {
 
   const days     = eachDayOfInterval({ start:startOfMonth(month), end:endOfMonth(month) })
   const startPad = getDay(startOfMonth(month))
-  const isOff    = d => isBefore(d, startOfDay(new Date())) || getDay(d)===0 || blocked.includes(format(d,'yyyy-MM-dd'))
+  const isOff    = d => isBefore(d, startOfDay(new Date())) || getDay(d)===0 || blocked.includes(format(d,'yyyy-MM-dd')) || (sel.stylist && stylistDayOffs.includes(format(d,'yyyy-MM-dd')))
 
   const basePrice  = parseFloat(sel.service?.price || 0)
   const finalPrice = appliedCoupon

@@ -150,7 +150,7 @@ export default function Navbar() {
           {/* Auth — right */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 14 }} className="hidden-mobile">
             <AppointmentAlert />
-            {(profile?.role === 'admin' || profile?.role === 'employee') && (
+            {(profile?.role === 'admin' || profile?.role === 'artist') && (
               <button onClick={() => { sessionStorage.removeItem('studio_access'); navigate('/studio') }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', color: '#C9A84C', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
                 <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
               </button>
@@ -284,7 +284,7 @@ export default function Navbar() {
                     {label}
                   </NavLink>
                 ))}
-                {(profile?.role === 'admin' || profile?.role === 'employee') && (
+                {(profile?.role === 'admin' || profile?.role === 'artist') && (
                   <button onClick={() => { sessionStorage.removeItem('studio_access'); setMenuOpen(false); navigate('/studio') }}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9A84C', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)', cursor: 'pointer', fontFamily: 'Jost,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
                     <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio

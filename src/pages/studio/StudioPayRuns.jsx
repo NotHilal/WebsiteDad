@@ -339,7 +339,7 @@ export default function StudioPayRuns() {
     setLoading(true)
     setError(null)
     const [{ data: stys, error: e1 }, { data: sheets, error: e2 }, { data: runs, error: e3 }] = await Promise.all([
-      supabase.from('stylists').select('id, name, photo_url, hourly_rate').order('display_order'),
+      supabase.from('stylists').select('id, name, photo_url, hourly_rate').not('profile_id', 'is', null).order('display_order'),
       supabase.from('timesheets')
         .select('id, stylist_id, clock_in, clock_out, break_minutes, paid_at')
         .not('clock_out', 'is', null)
@@ -499,7 +499,7 @@ export default function StudioPayRuns() {
           {totals.unpaidMins > 0 && (
             <button onClick={() => openPayModal(stylist)} className="pr-pay"
               style={{ padding: '0.65rem 1.5rem', borderRadius: 10, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, transition: 'background .15s' }}>
-              <Check size={14} /> Pay employee — {fmt(totals.unpaidEarnings)} ({fmtMins(totals.unpaidMins)} unpaid)
+              <Check size={14} /> Pay artist — {fmt(totals.unpaidEarnings)} ({fmtMins(totals.unpaidMins)} unpaid)
             </button>
           )}
           <button onClick={() => editing ? setEditing(false) : openEdit(stylist)} className="pr-edit"

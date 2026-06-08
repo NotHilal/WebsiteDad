@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -7,6 +7,8 @@ import {
   Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote
 } from 'lucide-react'
 import AppointmentAlert from '../../components/AppointmentAlert'
+import DayOffAlert from '../../components/DayOffAlert'
+import UnlinkedArtistAlert from '../../components/UnlinkedArtistAlert'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
 
@@ -48,25 +50,60 @@ const workerNavItems = [
 ]
 
 export default function StudioLayout() {
-  const [open,         setOpen]         = useState(false)
-  const [unread,       setUnread]       = useState(0)
-  const { signOut, profile, isAdmin } = useAuth()
+  const [open,           setOpen]           = useState(false)
+  const [unread,         setUnread]         = useState(0)
+  const [pendingDayoffs, setPendingDayoffs] = useState(0)
+  const { signOut, profile, isAdmin, user } = useAuth()
+
+  // Refs so the realtime handler always sees the latest values
+  const isAdminRef = useRef(isAdmin)
+  const userRef    = useRef(user)
+  useEffect(() => { isAdminRef.current = isAdmin }, [isAdmin])
+  useEffect(() => { userRef.current = user },       [user])
 
   useEffect(() => {
     fetchUnread()
+    fetchPendingDayoffs()
     const sub = supabase.channel('studio-unread-badge')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ticket_messages' }, fetchUnread)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'blocked_dates' }, fetchPendingDayoffs)
       .subscribe()
     return () => supabase.removeChannel(sub)
   }, [])
 
+  // Re-fetch when profile loads (first time isAdmin / user become available)
+  useEffect(() => { fetchUnread() }, [isAdmin, user?.id])
+
   async function fetchUnread() {
+    const usr  = userRef.current
+    const isAdm = isAdminRef.current
+    if (!usr) return
+
+    // Only count messages in tickets relevant to this user's role
+    let ticketQ = supabase.from('tickets').select('id')
+    if (isAdm) ticketQ = ticketQ.is('recipient_id', null)          // admin: store tickets
+    else       ticketQ = ticketQ.eq('recipient_id', usr.id)        // artist: their own direct tickets
+
+    const { data: tkts } = await ticketQ
+    const ids = (tkts || []).map(t => t.id)
+    if (!ids.length) { setUnread(0); return }
+
     const { count } = await supabase
       .from('ticket_messages')
       .select('*', { count: 'exact', head: true })
+      .in('ticket_id', ids)
       .eq('is_from_admin', false)
       .eq('read', false)
     setUnread(count || 0)
+  }
+
+  async function fetchPendingDayoffs() {
+    const { count } = await supabase
+      .from('blocked_dates')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .not('stylist_id', 'is', null)
+    setPendingDayoffs(count || 0)
   }
   const navigate = useNavigate()
   const location = useLocation()
@@ -123,6 +160,11 @@ export default function StudioLayout() {
                     {unread > 9 ? '9+' : unread}
                   </span>
                 )}
+                {label === 'Blocked Dates' && isAdmin && pendingDayoffs > 0 && (
+                  <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
+                    {pendingDayoffs > 9 ? '9+' : pendingDayoffs}
+                  </span>
+                )}
               </>
             )}
           </NavLink>
@@ -136,7 +178,7 @@ export default function StudioLayout() {
             {profile?.full_name || 'Admin'}
           </p>
           <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
-            {isAdmin ? 'Studio Admin' : 'Employee'}
+            {isAdmin ? 'Studio Admin' : 'Artist'}
           </p>
         </div>
         <button onClick={handleSignOut} className="s-signout"
@@ -181,6 +223,8 @@ export default function StudioLayout() {
             <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <UnlinkedArtistAlert />
+            <DayOffAlert />
             <AppointmentAlert />
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.14)' }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />

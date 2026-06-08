@@ -83,7 +83,7 @@ export default function StudioStylists() {
     const [stylistData, staffData] = await getOrFetch('studio_stylists', async () => {
       const [{ data: stys }, { data: staff }] = await Promise.all([
         supabase.from('stylists').select('*').order('display_order'),
-        supabase.from('profiles').select('id, full_name, email').in('role', ['admin', 'employee']).order('full_name'),
+        supabase.from('profiles').select('id, full_name, email').in('role', ['admin', 'artist']).order('full_name'),
       ])
       return [stys || [], staff || []]
     }, 5 * 60_000)

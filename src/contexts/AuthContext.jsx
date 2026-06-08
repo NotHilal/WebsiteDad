@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
   }
 
   const isAdmin  = profile?.role === 'admin'
-  const isWorker = profile?.role === 'employee'   // role value is 'employee' in DB
+  const isWorker = profile?.role === 'artist'
   const isStaff  = isAdmin || isWorker
 
   return (

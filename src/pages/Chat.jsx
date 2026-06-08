@@ -44,7 +44,7 @@ export default function Chat() {
   useEffect(() => {
     if (!user) return
     loadTickets()
-    supabase.from('profiles').select('id, full_name').eq('role', 'employee').order('full_name')
+    supabase.from('profiles').select('id, full_name').eq('role', 'artist').order('full_name')
       .then(({ data }) => setWorkers(data || []))
     const sub = supabase.channel(`client-tickets-${user.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_messages' }, payload => {
@@ -92,7 +92,7 @@ export default function Chat() {
 
   async function loadMessages(ticketId) {
     const { data } = await supabase
-      .from('ticket_messages').select('*').eq('ticket_id', ticketId).order('created_at')
+      .from('ticket_messages').select('*, sender:profiles!sender_id(full_name)').eq('ticket_id', ticketId).order('created_at')
     setMessages(data || [])
     await supabase.from('ticket_messages')
       .update({ read: true }).eq('ticket_id', ticketId).eq('is_from_admin', true).eq('read', false)
@@ -325,7 +325,7 @@ export default function Chat() {
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
                           {!isMe && !prevSame && (
-                            <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>HairGo Team</span>
+                            <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>{msg.sender?.full_name || 'HairGo Team'}</span>
                           )}
                           <div style={{ padding: '0.6rem 1rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontWeight: 500, boxShadow: '0 4px 16px rgba(201,168,76,0.22)' } : { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(6px)' }) }}>
                             {msg.content}

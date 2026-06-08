@@ -3,31 +3,31 @@
 
 ALTER TABLE tickets ADD COLUMN IF NOT EXISTS recipient_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
 
--- Allow employees to see: store tickets (recipient_id IS NULL) + tickets directed at them
-CREATE POLICY "Employees see store and direct tickets" ON tickets FOR SELECT
+-- Allow artists to see: store tickets (recipient_id IS NULL) + tickets directed at them
+CREATE POLICY "Artists see store and direct tickets" ON tickets FOR SELECT
   USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'employee')
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'artist')
     AND (recipient_id IS NULL OR recipient_id = auth.uid())
   );
 
--- Allow employees to read messages inside those tickets
-CREATE POLICY "Employees read ticket messages" ON ticket_messages FOR SELECT
+-- Allow artists to read messages inside those tickets
+CREATE POLICY "Artists read ticket messages" ON ticket_messages FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM tickets t
       WHERE t.id = ticket_id
-        AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'employee')
+        AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'artist')
         AND (t.recipient_id IS NULL OR t.recipient_id = auth.uid())
     )
   );
 
--- Allow employees to reply in tickets they can see
-CREATE POLICY "Employees insert ticket messages" ON ticket_messages FOR INSERT
+-- Allow artists to reply in tickets they can see
+CREATE POLICY "Artists insert ticket messages" ON ticket_messages FOR INSERT
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM tickets t
       WHERE t.id = ticket_id
-        AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'employee')
+        AND EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'artist')
         AND (t.recipient_id IS NULL OR t.recipient_id = auth.uid())
     )
   );

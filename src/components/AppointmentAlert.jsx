@@ -47,7 +47,7 @@ export default function AppointmentAlert() {
     setUpdatingId(null)
   }
 
-  const isStaff = profile?.role === 'admin' || profile?.role === 'employee'
+  const isStaff = profile?.role === 'admin' || profile?.role === 'artist'
 
   useEffect(() => {
     if (!user || !isStaff) return

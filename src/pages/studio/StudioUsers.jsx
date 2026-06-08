@@ -4,7 +4,7 @@ import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldC
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { format } from 'date-fns'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
 
@@ -17,13 +17,13 @@ const C = {
 
 const ROLE_STYLE = {
   user:   { color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)',  label: 'User'   },
-  employee: { color: '#60a5fa',              bg: 'rgba(96,165,250,0.1)',   border: 'rgba(96,165,250,0.22)', label: 'Employee' },
+  artist: { color: '#60a5fa',              bg: 'rgba(96,165,250,0.1)',   border: 'rgba(96,165,250,0.22)', label: 'Artist' },
   admin:  { color: '#C9A84C',               bg: 'rgba(201,168,76,0.08)', border: 'rgba(201,168,76,0.18)', label: 'Admin'  },
 }
 
 const TABS = [
   { key: 'user',   label: 'Users' },
-  { key: 'employee', label: 'Employees' },
+  { key: 'artist', label: 'Artists' },
   { key: 'admin',  label: 'Admins' },
 ]
 
@@ -79,7 +79,7 @@ function RoleSelector({ value, onChange }) {
           <div style={{ height: 2, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))' }} />
           {[
             { role: 'user',   label: 'User'   },
-            { role: 'employee', label: 'Employee' },
+            { role: 'artist', label: 'Artist' },
             { role: 'admin',  label: 'Admin'  },
           ].map(({ role, label }) => (
             <RoleOption key={role} rrs={ROLE_STYLE[role]} isActive={role === value} label={label}
@@ -97,7 +97,11 @@ export default function StudioUsers() {
   const [all,           setAll]           = useState([])
   const [loading,       setLoading]       = useState(true)
   const [search,        setSearch]        = useState('')
-  const [tab,           setTab]           = useState('user')
+  const [searchParams]  = useSearchParams()
+  const [tab,           setTab]           = useState(() => {
+    const t = searchParams.get('tab')
+    return ['user', 'artist', 'admin'].includes(t) ? t : 'user'
+  })
   const [msgModal,      setMsgModal]      = useState(null)
   const [msgTitle,      setMsgTitle]      = useState('')
   const [msgBody,       setMsgBody]       = useState('')
@@ -140,7 +144,7 @@ export default function StudioUsers() {
 
   async function changeRole(id, newRole) {
     const target = all.find(u => u.id === id)
-    if (newRole === 'employee') {
+    if (newRole === 'artist') {
       const { data } = await supabase.from('stylists').select('id, name, title, photo_url').is('profile_id', null).order('name')
       const free = data || []
       setFreeStylists(free)
@@ -157,8 +161,8 @@ export default function StudioUsers() {
 
   async function applyEmployeePromotion() {
     if (empStep === 1) {
-      if (empMode === 'assign' && !empSelected) { setEmpErr('Select an employee profile to link'); return }
-      if (empMode === 'create' && !empName.trim()) { setEmpErr('Enter a name for the new employee'); return }
+      if (empMode === 'assign' && !empSelected) { setEmpErr('Select an artist profile to link'); return }
+      if (empMode === 'create' && !empName.trim()) { setEmpErr('Enter a name for the new artist'); return }
       setEmpErr(''); setEmpStep(2); return
     }
     // Step 2 — execute
@@ -169,7 +173,7 @@ export default function StudioUsers() {
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-role`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY },
-        body: JSON.stringify({ userId: empModal.userId, newRole: 'employee' }),
+        body: JSON.stringify({ userId: empModal.userId, newRole: 'artist' }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to update role')
@@ -181,8 +185,8 @@ export default function StudioUsers() {
         const { error } = await supabase.from('stylists').insert({ name: empName.trim(), title: empTitle.trim() || null, profile_id: empModal.userId })
         if (error) throw error
       }
-      setAll(prev => prev.map(u => u.id === empModal.userId ? { ...u, role: 'employee' } : u))
-      toast.success(`${empModal.userName} is now an employee`)
+      setAll(prev => prev.map(u => u.id === empModal.userId ? { ...u, role: 'artist' } : u))
+      toast.success(`${empModal.userName} is now an artist`)
       setEmpModal(null)
     } catch (err) { setEmpErr(err.message) }
     finally { setEmpSaving(false) }
@@ -204,7 +208,7 @@ export default function StudioUsers() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to update role')
       // If demoting from employee, unlink any attached stylist
-      const wasEmployee = all.find(u => u.id === roleConfirm.userId)?.role === 'employee'
+      const wasEmployee = all.find(u => u.id === roleConfirm.userId)?.role === 'artist'
       if (wasEmployee) {
         await supabase.from('stylists').update({ profile_id: null }).eq('profile_id', roleConfirm.userId)
         setStylists(prev => prev.filter(s => s.profile_id !== roleConfirm.userId))
@@ -212,7 +216,7 @@ export default function StudioUsers() {
       setAll(prev => prev.map(u => u.id === roleConfirm.userId ? { ...u, role: roleConfirm.newRole } : u))
       toast.success(`Role changed to ${roleConfirm.newRole}`)
       setRoleConfirm(null)
-    } catch (err) { setConfirmErr(err.message) }
+    } catch (err) { toast.error(err.message) }
     finally { setConfirming(false) }
   }
 
@@ -445,7 +449,7 @@ export default function StudioUsers() {
                         </button>
 
                         {/* Unlink stylist — employees only */}
-                        {tab === 'employee' && (
+                        {tab === 'artist' && (
                           <>
                             <div style={{ width: 1, height: 18, background: C.border, flexShrink: 0 }} />
                             <button onClick={() => unlinkStylist(u.id, u.full_name)} className="usr-unlink-btn"
@@ -530,7 +534,7 @@ export default function StudioUsers() {
                     style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)', color: '#34d399', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', opacity: u.email ? 1 : 0.3 }}>
                     <Mail size={11} /> Email
                   </button>
-                  {tab === 'employee' && (
+                  {tab === 'artist' && (
                     <button onClick={() => unlinkStylist(u.id, u.full_name)} className="usr-unlink-btn"
                       style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
                       <Scissors size={9} /> Unlink
@@ -678,7 +682,7 @@ export default function StudioUsers() {
               {/* Header + step indicator */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div>
-                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(96,165,250,0.55)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Promoting to Employee</p>
+                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(96,165,250,0.55)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Promoting to Artist</p>
                   <h2 className="font-display font-light" style={{ fontSize: '1.6rem', color: C.white, lineHeight: 1.1 }}>
                     {empStep === 1 ? empModal.userName : 'Almost done'}
                   </h2>
@@ -780,7 +784,7 @@ export default function StudioUsers() {
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <UserPlus size={13} color="#60a5fa" style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>
-                      <span style={{ color: C.white }}>{empModal.userName}</span> → Employee role
+                      <span style={{ color: C.white }}>{empModal.userName}</span> → Artist role
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>

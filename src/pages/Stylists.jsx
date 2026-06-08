@@ -10,7 +10,7 @@ export default function Stylists() {
 
   useEffect(() => {
     getOrFetch('stylists_all', async () => {
-      const { data } = await supabase.from('stylists').select('*').order('display_order')
+      const { data } = await supabase.from('stylists').select('*').not('profile_id', 'is', null).order('display_order')
       return data || []
     }, 5 * 60_000).then(data => { setTeam(data); setLoading(false) })
   }, [])

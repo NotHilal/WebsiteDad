@@ -11,7 +11,7 @@ export default function AdminRoute({ children }) {
   )
 
   const studioAccess = sessionStorage.getItem('studio_access') === 'true'
-  const isStaff = profile?.role === 'admin' || profile?.role === 'employee'
+  const isStaff = profile?.role === 'admin' || profile?.role === 'artist'
 
   if (!user) return <Navigate to="/studio" replace />
   if (!studioAccess || !isStaff) return <Navigate to="/studio" replace />

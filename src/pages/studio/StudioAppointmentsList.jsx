@@ -93,7 +93,7 @@ export default function StudioAppointmentsList() {
         .order('time', { ascending: true })
       setAppointments(data || [])
     } else {
-      const { data: linked } = await supabase.from('stylists').select('id').eq('profile_id', user.id).single()
+      const { data: linked } = await supabase.from('stylists').select('id').eq('profile_id', user.id).maybeSingle()
       if (linked) {
         const { data } = await supabase
           .from('appointments')
