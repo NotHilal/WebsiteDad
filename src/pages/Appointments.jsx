@@ -54,6 +54,7 @@ export default function Appointments() {
   const [guestInfo,    setGuestInfo]    = useState({ name:'', phone:'', email:'' })
   const [showPromo,    setShowPromo]    = useState(true)
   const [sel,          setSel]          = useState({ service:null, stylist:null, date:null, time:null, notes:'' })
+  const [genderFilter, setGenderFilter] = useState('all')
   const [preview,      setPreview]      = useState(null)
   const [payStep,      setPayStep]      = useState(null)
   const [clientSecret, setClientSecret] = useState(null)
@@ -331,10 +332,10 @@ export default function Appointments() {
 
   /* ── Main layout ── */
   return (
-    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', paddingBottom:(sel.service||sel.stylist||sel.date)?88:0 }}>
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', paddingTop:68, paddingBottom:(sel.service||sel.stylist||sel.date)?88:0 }}>
 
       {/* ── Mobile step bar (shown only when sidebar is hidden) ── */}
-      <div className="appt-mobile-steps" style={{ display:'none', padding:'1rem 1.25rem 0.75rem', borderBottom:'1px solid rgba(201,168,76,0.1)', background:'#0a0a12', position:'sticky', top:58, zIndex:20 }}>
+      <div className="appt-mobile-steps" style={{ display:'none', padding:'1rem 1.25rem 0.75rem', borderBottom:'1px solid rgba(201,168,76,0.1)', background:'#0a0a12', position:'sticky', top:68, zIndex:20 }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:0 }}>
           {STEPS.map((s, i) => {
             const isActive = i===step, isDone = i<step
@@ -443,13 +444,13 @@ export default function Appointments() {
 
       {/* ── CENTER CONTENT ── */}
       <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ maxWidth:720, margin:'0 auto', padding:'3.5rem 2rem' }} className="appt-content-wrap">
+        <div style={{ maxWidth:720, margin:'0 auto', padding:'2rem 2rem' }} className="appt-content-wrap">
           <AnimatePresence mode="wait">
 
             {/* ── STEP 0: Service ── */}
             {step===0 && (
               <motion.div key="s0" {...slide}>
-                <div style={{ textAlign:'center', marginBottom:36 }}>
+                <div style={{ textAlign:'center', marginBottom:28 }}>
                   <h1 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(2.2rem,4vw,3.4rem)', marginBottom:8, lineHeight:1.05 }}>
                     What would you like<br/>
                     <span className="gold-gradient" style={{ fontStyle:'italic' }}>today?</span>
@@ -457,6 +458,23 @@ export default function Appointments() {
                   <p style={{ color:'rgba(255,255,255,0.28)', fontSize:'0.85rem', fontFamily:'Jost,sans-serif' }}>
                     Tap a card to book instantly · use <Info size={11} style={{ display:'inline', verticalAlign:'middle' }}/> for details
                   </p>
+                </div>
+
+                {/* Gender filter toggle */}
+                <div style={{ display:'flex', justifyContent:'center', gap:8, marginBottom:28, flexWrap:'wrap' }}>
+                  {[
+                    { value:'all',   label:'All Services', color:'#C9A84C' },
+                    { value:'man',   label:'Men',          color:'#60a5fa' },
+                    { value:'woman', label:'Women',        color:'#f472b6' },
+                  ].map(({ value, label, color }) => {
+                    const isActive = genderFilter === value
+                    return (
+                      <button key={value} onClick={() => setGenderFilter(value)}
+                        style={{ padding:'7px 20px', borderRadius:9999, border:`1px solid ${isActive ? color+'55' : 'rgba(255,255,255,0.08)'}`, background:isActive ? `${color}18` : 'transparent', color:isActive ? color : 'rgba(255,255,255,0.3)', fontSize:11, fontFamily:'Jost,sans-serif', fontWeight:700, cursor:'pointer', transition:'all .2s', letterSpacing:'0.12em', textTransform:'uppercase' }}>
+                        {label}
+                      </button>
+                    )
+                  })}
                 </div>
 
                 {!user && showPromo && (
@@ -475,7 +493,11 @@ export default function Appointments() {
                 )}
 
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(270px, 1fr))', gap:'1.25rem' }}>
-                  {(services.length ? services : Array.from({length:6},(_,i)=>({id:i,name:'',price:'',duration:0,category:''}))).map((svc) => {
+                  {(() => {
+                    const filtered = genderFilter === 'all'
+                      ? services
+                      : services.filter(s => s.gender === genderFilter || s.gender === 'mixed' || !s.gender)
+                    return (filtered.length ? filtered : services.length ? [] : Array.from({length:6},(_,i)=>({id:i,name:'',price:'',duration:0,category:''}))).map((svc) => {
                     const isActive = sel.service?.id === svc.id
                     return (
                       <div key={svc.id} className="appt-svc-card"
@@ -532,7 +554,8 @@ export default function Appointments() {
                         </div>
                       </div>
                     )
-                  })}
+                    })
+                  })()}
                 </div>
 
                 {/* Service detail modal */}
@@ -958,9 +981,12 @@ export default function Appointments() {
           .appt-mobile-steps { display:block !important; }
         }
         .appt-step-panel::-webkit-scrollbar { display:none; }
+        @media (max-width:900px) {
+          .appt-content-wrap { padding: 1rem 1.25rem !important; }
+        }
         @media (max-width:600px) {
           .appt-svc-card { height:220px !important; }
-          .appt-content-wrap { padding: 1.5rem 1.25rem !important; }
+          .appt-content-wrap { padding: 0.75rem 1.25rem !important; }
         }
       `}</style>
       </div>

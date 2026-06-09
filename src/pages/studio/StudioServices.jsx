@@ -23,7 +23,13 @@ const CAT = {
   other:     { color: 'rgba(255,255,255,0.4)', bg: 'rgba(255,255,255,0.06)', gradient: 'rgba(255,255,255,0.06)', label: 'Other' },
 }
 
-const EMPTY = { name: '', description: '', price: '', duration: '', category: '', active: true, image_url: '' }
+const EMPTY = { name: '', description: '', price: '', duration: '', category: '', active: true, image_url: '', gender: 'mixed' }
+
+const GENDER = [
+  { value: 'man',   label: 'Men',   color: '#60a5fa', border: 'rgba(96,165,250,0.35)' },
+  { value: 'woman', label: 'Women', color: '#f472b6', border: 'rgba(244,114,182,0.35)' },
+  { value: 'mixed', label: 'Both',  color: '#C9A84C', border: 'rgba(201,168,76,0.35)' },
+]
 
 const inp = (extra = {}) => ({
   width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -243,10 +249,20 @@ export default function StudioServices() {
 
                   {/* ── Top row: category badge (left) + action buttons (right) ── */}
                   <div style={{ position: 'absolute', top: 12, left: 12, right: 12, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', zIndex: 3 }}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${cat.color}35` }}>
-                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: cat.color }} />
-                      {cat.label}
-                    </span>
+                    <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${cat.color}35` }}>
+                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: cat.color }} />
+                        {cat.label}
+                      </span>
+                      {s.gender && s.gender !== 'mixed' && (() => {
+                        const g = GENDER.find(g => g.value === s.gender)
+                        return g ? (
+                          <span style={{ fontSize: 9, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: g.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${g.border}` }}>
+                            {g.label}
+                          </span>
+                        ) : null
+                      })()}
+                    </div>
                     <div style={{ display: 'flex', gap: 5 }}>
                       <button onClick={() => { setForm({ ...s }); setFilePreview(s.image_url || ''); setFile(null); setModal('edit') }}
                         className="svc-edit-btn"
@@ -421,6 +437,22 @@ export default function StudioServices() {
                             style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sel ? cat.color + '66' : C.border}`, background: sel ? cat.bg : 'transparent', color: sel ? cat.color : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: 5 }}>
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: sel ? cat.color : C.border, transition: 'background .15s' }} />
                             {cat.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Gender selector */}
+                  <div>
+                    <label style={lbl}>For</label>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {GENDER.map(g => {
+                        const isSel = form.gender === g.value
+                        return (
+                          <button key={g.value} type="button" onClick={() => setForm(p => ({ ...p, gender: g.value }))}
+                            style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${isSel ? g.border : C.border}`, background: isSel ? `${g.color}18` : 'transparent', color: isSel ? g.color : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            {g.label}
                           </button>
                         )
                       })}
