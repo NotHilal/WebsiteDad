@@ -9,7 +9,7 @@ import {
 
 const C = {
   card: '#161620',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
 }
@@ -18,7 +18,7 @@ const STATUS = {
   pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.22)'  },
   confirmed: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.22)'  },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
-  completed: { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',  border: 'rgba(201,168,76,0.22)'  },
+  completed: { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)'  },
 }
 
 const PAY_IN_STORE_STYLE = { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.22)' }
@@ -300,7 +300,7 @@ export default function StudioSchedule() {
                   const laidOut = layoutAppts(byDate[key] || [])
                   const isToday = isSameDay(day, new Date())
                   return (
-                    <div key={i} style={{ flex: 1, position: 'relative', borderLeft: `1px solid ${C.border}`, background: isToday ? 'rgba(201,168,76,0.012)' : 'transparent' }}>
+                    <div key={i} style={{ flex: 1, position: 'relative', borderLeft: `1px solid ${C.border}`, background: isToday ? 'rgba(184,212,232,0.012)' : 'transparent' }}>
                       {/* Hour lines */}
                       {GRID_HOURS.map((h, j) => (
                         <div key={h} style={{ position: 'absolute', top: j * HOUR_HEIGHT, left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
@@ -568,16 +568,16 @@ export default function StudioSchedule() {
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
         .d-nav:hover       { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .d-today-btn:hover { background: ${C.gold} !important; color: #000 !important; }
-        .d-cal-day.has-appts:hover { border-color: ${C.goldBorder} !important; background: rgba(201,168,76,0.04) !important; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .d-cal-day.has-appts:hover { border-color: ${C.goldBorder} !important; background: rgba(184,212,232,0.04) !important; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .d-week-hdr:hover  { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.1) !important; }
         .d-week-chip:hover { filter: brightness(1.15); transform: translateY(-1px); }
         .d-day-chip:hover  { filter: brightness(1.12); transform: translateX(2px); }
         .modal-x:hover     { background: rgba(255,255,255,0.08) !important; color: ${C.white} !important; }
         .filter-pill:hover { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
-        .appt-card-row:hover { border-color: rgba(201,168,76,0.15) !important; }
+        .appt-card-row:hover { border-color: rgba(184,212,232,0.15) !important; }
         .st-btn-pending:hover   { background: rgba(245,158,11,0.2) !important; }
         .st-btn-confirmed:hover { background: rgba(52,211,153,0.2) !important; }
-        .st-btn-completed:hover { background: rgba(201,168,76,0.2) !important; }
+        .st-btn-completed:hover { background: rgba(184,212,232,0.2) !important; }
         .st-btn-cancelled:hover { background: rgba(248,113,113,0.2) !important; }
         .del-appt-btn:hover { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.4) !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }

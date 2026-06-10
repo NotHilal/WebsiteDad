@@ -8,8 +8,8 @@ import { format, isToday, isYesterday } from 'date-fns'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
-  goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
+  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
   border: 'rgba(255,255,255,0.07)', blue: '#60a5fa', blueBg: 'rgba(96,165,250,0.1)', blueBorder: 'rgba(96,165,250,0.22)',
 }
@@ -192,10 +192,10 @@ export default function StudioMessages() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .send-inp:focus { border-color: ${C.goldBorder} !important; outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.07); }
+        .send-inp:focus { border-color: ${C.goldBorder} !important; outline: none; box-shadow: 0 0 0 3px rgba(184,212,232,0.07); }
         .send-inp::placeholder { color: rgba(255,255,255,0.18); }
         .tk-row:hover { background: rgba(255,255,255,0.025) !important; }
-        .btn-g:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,168,76,0.25); }
+        .btn-g:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(184,212,232,0.25); }
         @media (max-width: 767px) {
           .msg-layout { grid-template-columns: 1fr !important; grid-template-rows: 1fr; }
           .msg-list-panel, .msg-chat-panel { grid-row: 1; }
@@ -231,8 +231,8 @@ export default function StudioMessages() {
         {isAdmin && (
           <div style={{ display: 'flex', gap: 6 }}>
             {[
-              { key: 'store',  Icon: Store,    label: 'Store',  color: C.gold,   bg: C.goldBg,  border: C.goldBorder },
-              { key: 'direct', Icon: Scissors, label: 'Direct', color: C.blue,   bg: C.blueBg,  border: C.blueBorder },
+              { key: 'store',  Icon: Store,    label: 'Store Messages', color: C.gold,   bg: C.goldBg,  border: C.goldBorder },
+              { key: 'direct', Icon: Scissors, label: 'My Messages',    color: C.blue,   bg: C.blueBg,  border: C.blueBorder },
             ].map(({ key, Icon, label, color, bg, border }) => (
               <button key={key} onClick={() => setTab(key)}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: tab === key ? 600 : 400, cursor: 'pointer', transition: 'all .15s', background: tab === key ? bg : 'transparent', border: `1px solid ${tab === key ? border : C.border}`, color: tab === key ? color : C.muted }}>
@@ -269,7 +269,7 @@ export default function StudioMessages() {
               const clientInitial = (tk.user?.full_name || 'U')[0].toUpperCase()
               return (
                 <button key={tk.id} className="tk-row" onClick={() => setSelected(tk)}
-                  style={{ width: '100%', textAlign: 'left', padding: '0.65rem 0.75rem', display: 'flex', alignItems: 'flex-start', gap: 9, background: isActive ? 'rgba(201,168,76,0.06)' : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background .15s' }}>
+                  style={{ width: '100%', textAlign: 'left', padding: '0.65rem 0.75rem', display: 'flex', alignItems: 'flex-start', gap: 9, background: isActive ? 'rgba(184,212,232,0.06)' : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background .15s' }}>
                   <div style={{ position: 'relative', flexShrink: 0, marginTop: 1 }}>
                     <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(96,165,250,0.22), rgba(139,92,246,0.12))', border: `1px solid ${isActive ? 'rgba(96,165,250,0.3)' : 'rgba(96,165,250,0.18)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <span style={{ fontSize: 11, color: 'rgba(96,165,250,0.85)', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{clientInitial}</span>
@@ -395,7 +395,7 @@ export default function StudioMessages() {
                               {senderName}
                             </span>
                           )}
-                          <div style={{ padding: '0.55rem 0.95rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.82rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontWeight: 500, boxShadow: '0 4px 14px rgba(201,168,76,0.2)' } : { background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.14)', color: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(4px)' }) }}>
+                          <div style={{ padding: '0.55rem 0.95rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.82rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontWeight: 500, boxShadow: '0 4px 14px rgba(184,212,232,0.2)' } : { background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.14)', color: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(4px)' }) }}>
                             {msg.content}
                           </div>
                           <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>
@@ -427,7 +427,7 @@ export default function StudioMessages() {
                     <input value={input} onChange={e => setInput(e.target.value)} placeholder={`Reply as ${profile?.full_name || 'you'}…`} className="send-inp"
                       style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.82rem', color: C.white, fontFamily: 'Jost,sans-serif', outline: 'none' }} />
                     <button type="submit" disabled={!input.trim() || sending} className="btn-g"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.4rem 0.8rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},#C4956A)` : 'rgba(255,255,255,0.06)', color: input.trim() ? '#000' : 'rgba(255,255,255,0.22)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: !input.trim() || sending ? 'not-allowed' : 'pointer', flexShrink: 0, transition: 'all .2s', letterSpacing: '0.08em' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.4rem 0.8rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: input.trim() ? '#000' : 'rgba(255,255,255,0.22)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: !input.trim() || sending ? 'not-allowed' : 'pointer', flexShrink: 0, transition: 'all .2s', letterSpacing: '0.08em' }}>
                       {sending ? <div style={{ width: 12, height: 12, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Send size={11} /> Send</>}
                     </button>
                   </form>

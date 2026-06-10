@@ -9,14 +9,14 @@ import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
-  goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
+  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
   subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)',
 }
 
 const STATUS_STYLE = {
-  active:    { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',  border: 'rgba(201,168,76,0.22)',  label: 'Awaiting Pickup' },
+  active:    { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)',  label: 'Awaiting Pickup' },
   retrieved: { color: '#34d399', bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.22)',  label: 'Retrieved'       },
   expired:   { color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', label: 'Expired' },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)', label: 'Cancelled'      },
@@ -137,7 +137,7 @@ export default function StudioOrders() {
         .o-retrieve:hover:not(:disabled) { background: rgba(52,211,153,0.2) !important; border-color: rgba(52,211,153,0.5) !important; }
         .o-cancel:hover:not(:disabled) { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .o-delete:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
-        .o-revert:hover:not(:disabled) { background: rgba(201,168,76,0.18) !important; border-color: rgba(201,168,76,0.45) !important; }
+        .o-revert:hover:not(:disabled) { background: rgba(184,212,232,0.18) !important; border-color: rgba(184,212,232,0.45) !important; }
       `}</style>
 
       {/* ── Header ── */}
@@ -249,7 +249,7 @@ export default function StudioOrders() {
               style={{ width: '100%', maxWidth: 460, background: '#12121c', border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.75)' }}>
 
               {/* Gold top bar */}
-              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#C4956A,rgba(201,168,76,0.15))` }} />
+              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
 
               <div style={{ padding: '1.5rem' }}>
                 {/* Header */}
@@ -301,7 +301,7 @@ export default function StudioOrders() {
                   <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
                     <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Client</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(201,168,76,0.1)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(184,212,232,0.1)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <span style={{ fontSize: 10, color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
                           {(details.profiles?.full_name || '?')[0].toUpperCase()}
                         </span>

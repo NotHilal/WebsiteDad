@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 
 const C = {
   card: '#161620', modal: '#1a1a24',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
 }
@@ -20,7 +20,7 @@ const STATUS = {
   pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.22)'  },
   confirmed: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.22)'  },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
-  completed: { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',  border: 'rgba(201,168,76,0.22)'  },
+  completed: { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)'  },
 }
 
 const ALL_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled']
@@ -153,15 +153,15 @@ export default function StudioAppointments() {
       <style>{`
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
-        .cal-day-appt:hover { border-color: ${C.goldBorder} !important; background: rgba(201,168,76,0.04) !important; cursor: pointer; }
+        .cal-day-appt:hover { border-color: ${C.goldBorder} !important; background: rgba(184,212,232,0.04) !important; cursor: pointer; }
         .cal-day-appt.has-appts:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .cal-day-empty-hover:hover { border-color: ${C.border} !important; }
         .bd-nav:hover { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .st-btn-pending:hover   { background: rgba(245,158,11,0.2) !important; }
         .st-btn-confirmed:hover { background: rgba(52,211,153,0.2) !important; }
-        .st-btn-completed:hover { background: rgba(201,168,76,0.2) !important; }
+        .st-btn-completed:hover { background: rgba(184,212,232,0.2) !important; }
         .st-btn-cancelled:hover { background: rgba(248,113,113,0.2) !important; }
-        .appt-card-row:hover { border-color: rgba(201,168,76,0.15) !important; }
+        .appt-card-row:hover { border-color: rgba(184,212,232,0.15) !important; }
         .filter-pill:hover { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
         .modal-x:hover { background: rgba(255,255,255,0.08) !important; color: ${C.white} !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }
@@ -406,13 +406,13 @@ export default function StudioAppointments() {
       {selectedDay && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
           onClick={() => setSelectedDay(null)}>
-          <div style={{ width: '100%', maxWidth: 580, maxHeight: '88vh', display: 'flex', flexDirection: 'column', background: '#12121a', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid rgba(201,168,76,0.2)` }}
+          <div style={{ width: '100%', maxWidth: 580, maxHeight: '88vh', display: 'flex', flexDirection: 'column', background: '#12121a', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid rgba(184,212,232,0.2)` }}
             onClick={e => e.stopPropagation()}>
 
             {/* Header */}
             <div style={{ padding: '1.75rem 1.75rem 1.25rem', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
               {/* Ambient glow */}
-              <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(184,212,232,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
                 <div>

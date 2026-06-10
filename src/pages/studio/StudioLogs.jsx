@@ -4,12 +4,12 @@ import { supabase } from '../../lib/supabase'
 import {
   Activity, Calendar, CalendarOff, Users, UserCheck, MessageSquare,
   Clock, Banknote, ShoppingBag, Sparkles, Scissors, Package, Image,
-  Tag, RefreshCw, ChevronDown, X,
+  Tag, RefreshCw, ChevronDown, ChevronLeft, ChevronRight, X,
 } from 'lucide-react'
 
 const C = {
   card: '#161620', bg: '#0e0e14',
-  gold: '#C9A84C', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   blue: '#60a5fa', blueBg: 'rgba(96,165,250,0.08)', blueBorder: 'rgba(96,165,250,0.2)',
   purple: '#a78bfa',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.08)',
@@ -95,34 +95,59 @@ const SELECT_STYLE = {
   appearance: 'none', WebkitAppearance: 'none',
 }
 
+function getWeekBounds(offset) {
+  const now = new Date()
+  const day = now.getDay()
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - ((day + 6) % 7) + offset * 7)
+  monday.setHours(0, 0, 0, 0)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  sunday.setHours(23, 59, 59, 999)
+  return { start: monday, end: sunday }
+}
+
+function weekLabel(offset) {
+  const { start, end } = getWeekBounds(offset)
+  const fmt = d => format(d, 'MMM d')
+  const year = end.getFullYear() !== new Date().getFullYear() ? `, ${end.getFullYear()}` : ''
+  if (offset === 0) return `This week  ·  ${fmt(start)} – ${fmt(end)}`
+  if (offset === -1) return `Last week  ·  ${fmt(start)} – ${fmt(end)}`
+  return `${fmt(start)} – ${fmt(end)}${year}`
+}
+
 export default function StudioLogs() {
   const [logs,         setLogs]         = useState([])
   const [loading,      setLoading]      = useState(true)
   const [filterActor,  setFilterActor]  = useState('all')
   const [filterAction, setFilterAction] = useState('all')
+  const [groupByDay,   setGroupByDay]   = useState(true)
+  const [weekOffset,   setWeekOffset]   = useState(0)
 
-  async function load() {
+  async function load(offset = weekOffset) {
     setLoading(true)
+    const { start, end } = getWeekBounds(offset)
     const { data, error } = await supabase
       .from('activity_logs')
       .select('*')
+      .gte('created_at', start.toISOString())
+      .lte('created_at', end.toISOString())
       .order('created_at', { ascending: false })
-      .limit(400)
     if (error) console.error('[Activity Logs] load failed:', error.message, error)
     setLogs(data || [])
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load(weekOffset) }, [weekOffset])
 
   useEffect(() => {
     const sub = supabase.channel('activity-logs-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_logs' }, payload => {
-        setLogs(prev => [payload.new, ...prev])
+        if (weekOffset === 0) setLogs(prev => [payload.new, ...prev])
       })
       .subscribe()
     return () => supabase.removeChannel(sub)
-  }, [])
+  }, [weekOffset])
 
   const actors = useMemo(() => {
     const map = new Map()
@@ -159,9 +184,9 @@ export default function StudioLogs() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <style>{`
         .log-row:hover { background: rgba(255,255,255,0.025) !important; }
-        .log-select:focus { border-color: rgba(201,168,76,0.35) !important; }
+        .log-select:focus { border-color: rgba(184,212,232,0.35) !important; }
         .log-clear:hover { background: rgba(248,113,113,0.12) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.25) !important; }
-        .log-refresh:hover { background: rgba(201,168,76,0.12) !important; color: #C9A84C !important; border-color: rgba(201,168,76,0.3) !important; }
+        .log-refresh:hover { background: rgba(184,212,232,0.12) !important; color: #B8D4E8 !important; border-color: rgba(184,212,232,0.3) !important; }
       `}</style>
 
       {/* Header */}
@@ -174,11 +199,39 @@ export default function StudioLogs() {
             Every action, who did it, and when
           </p>
         </div>
-        <button onClick={load} className="log-refresh"
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
-          <RefreshCw size={12} style={{ transform: loading ? 'rotate(360deg)' : 'none', transition: loading ? 'transform 0.6s linear' : 'none' }} />
-          Refresh
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+          <button onClick={() => setGroupByDay(v => !v)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s', background: groupByDay ? C.goldBg : C.subtle, border: `1px solid ${groupByDay ? C.goldBorder : C.border}`, color: groupByDay ? C.gold : C.dim }}>
+            <Calendar size={12} />
+            By day
+          </button>
+          <button onClick={() => load(weekOffset)} className="log-refresh"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
+            <RefreshCw size={12} style={{ transform: loading ? 'rotate(360deg)' : 'none', transition: loading ? 'transform 0.6s linear' : 'none' }} />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Week navigator */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem', flexShrink: 0 }}>
+        <button onClick={() => setWeekOffset(v => v - 1)}
+          style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', flexShrink: 0 }}>
+          <ChevronLeft size={14} />
         </button>
+        <span style={{ flex: 1, textAlign: 'center', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', color: C.dim, letterSpacing: '0.03em' }}>
+          {weekLabel(weekOffset)}
+        </span>
+        <button onClick={() => setWeekOffset(v => v + 1)} disabled={weekOffset >= 0}
+          style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: weekOffset >= 0 ? 'transparent' : C.subtle, border: `1px solid ${weekOffset >= 0 ? 'transparent' : C.border}`, color: weekOffset >= 0 ? 'rgba(255,255,255,0.12)' : C.dim, cursor: weekOffset >= 0 ? 'default' : 'pointer', flexShrink: 0 }}>
+          <ChevronRight size={14} />
+        </button>
+        {weekOffset < 0 && (
+          <button onClick={() => setWeekOffset(0)}
+            style={{ padding: '4px 10px', borderRadius: 8, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            This week
+          </button>
+        )}
       </div>
 
       {/* Filter bar */}
@@ -241,7 +294,44 @@ export default function StudioLogs() {
           </div>
         )}
 
-        {!loading && grouped.map(([dayKey, dayLogs]) => (
+        {!loading && !groupByDay && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {filtered.map(log => {
+              const { Icon, color, bg, label } = getActionMeta(log.action)
+              const isAdm = log.actor_role === 'admin'
+              const actorColor  = isAdm ? C.gold   : C.blue
+              const actorBg     = isAdm ? C.goldBg : C.blueBg
+              const actorBorder = isAdm ? C.goldBorder : C.blueBorder
+              return (
+                <div key={log.id} className="log-row"
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '0.6rem 0.875rem', borderRadius: 10, background: C.card, border: `1px solid ${C.border}`, transition: 'background .15s', cursor: 'default' }}>
+                  <span style={{ fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: 'rgba(255,255,255,0.22)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
+                    {format(new Date(log.created_at), 'HH:mm')}
+                  </span>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: bg, border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={13} color={color} strokeWidth={2} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 20, background: actorBg, border: `1px solid ${actorBorder}` }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: actorColor, flexShrink: 0 }} />
+                        <span style={{ fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: actorColor, letterSpacing: '0.03em' }}>{log.actor_name}</span>
+                        <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', color: actorColor, opacity: 0.55, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{log.actor_role}</span>
+                      </span>
+                      <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 600, color, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75 }}>{label}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', color: C.muted }}>{format(new Date(log.created_at), 'MMM d, HH:mm')}</span>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.52)', lineHeight: 1.5, margin: 0 }}>
+                      {log.details?.message || log.action}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {!loading && groupByDay && grouped.map(([dayKey, dayLogs]) => (
           <div key={dayKey} style={{ marginBottom: '1.75rem' }}>
             {/* Day separator */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.625rem' }}>

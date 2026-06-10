@@ -174,14 +174,14 @@ export default function Gallery() {
                 }}>
                   <span className="font-display" style={{
                     fontSize:'clamp(1.6rem,3vw,2.4rem)', fontWeight:300, fontStyle:'italic',
-                    color: gender === g ? '#C9A84C' : 'rgba(255,255,255,0.2)',
+                    color: gender === g ? '#B8D4E8' : 'rgba(255,255,255,0.2)',
                     transition:'color 0.35s ease',
                     letterSpacing:'0.02em',
                   }}>{g}</span>
                   <motion.div
                     animate={{ scaleX: gender === g ? 1 : 0, opacity: gender === g ? 1 : 0 }}
                     transition={{ duration:0.3, ease:[0.22,1,0.36,1] }}
-                    style={{ height:1, width:32, background:'linear-gradient(90deg,transparent,#C9A84C,transparent)', transformOrigin:'center' }}
+                    style={{ height:1, width:32, background:'linear-gradient(90deg,transparent,#B8D4E8,transparent)', transformOrigin:'center' }}
                   />
                 </button>
                 {i < GENDERS.length - 1 && (
@@ -198,10 +198,10 @@ export default function Gallery() {
                 padding:'9px 22px', borderRadius:9999, cursor:'pointer',
                 fontSize:10, letterSpacing:'0.18em', textTransform:'uppercase',
                 fontFamily:'Jost,sans-serif', fontWeight:500, transition:'all 0.3s ease',
-                background: active === cat ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.04)',
+                background: active === cat ? 'linear-gradient(135deg,#B8D4E8,#7AAFC9)' : 'rgba(255,255,255,0.04)',
                 border: active === cat ? 'none' : '1px solid rgba(255,255,255,0.1)',
                 color: active === cat ? '#000' : 'rgba(255,255,255,0.45)',
-                boxShadow: active === cat ? '0 6px 24px rgba(201,168,76,0.3)' : 'none',
+                boxShadow: active === cat ? '0 6px 24px rgba(184,212,232,0.3)' : 'none',
               }}>{cat}</button>
             ))}
           </div>
@@ -249,9 +249,9 @@ export default function Gallery() {
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                     <div>
                       <p className="font-display" style={{ color:'#fff', fontSize:'1rem', marginBottom:4 }}>{item.title}</p>
-                      <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{item.category}</span>
+                      <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'#B8D4E8', fontFamily:'Jost,sans-serif' }}>{item.category}</span>
                     </div>
-                    <div style={{ width:36, height:36, borderRadius:'50%', background:'rgba(201,168,76,0.9)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <div style={{ width:36, height:36, borderRadius:'50%', background:'rgba(184,212,232,0.9)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                       <ZoomIn size={15} color="#000" />
                     </div>
                   </div>
@@ -285,11 +285,11 @@ export default function Gallery() {
                   fontSize:13, fontFamily:'Jost,sans-serif',
                   display:'flex', alignItems:'center', justifyContent:'center',
                   cursor:'pointer', transition:'all 0.25s ease',
-                  background: p === page ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.04)',
+                  background: p === page ? 'linear-gradient(135deg,#B8D4E8,#7AAFC9)' : 'rgba(255,255,255,0.04)',
                   border: p === page ? 'none' : '1px solid rgba(255,255,255,0.08)',
                   color: p === page ? '#000' : 'rgba(255,255,255,0.45)',
                   fontWeight: p === page ? 600 : 400,
-                  boxShadow: p === page ? '0 4px 16px rgba(201,168,76,0.3)' : 'none',
+                  boxShadow: p === page ? '0 4px 16px rgba(184,212,232,0.3)' : 'none',
                 }}>
                 {p}
               </button>
@@ -331,7 +331,7 @@ export default function Gallery() {
                 maxWidth:900, width:'100%', maxHeight:'88vh',
                 borderRadius:28, overflow:'hidden',
                 boxShadow:'0 48px 120px rgba(0,0,0,0.9)',
-                border:'1px solid rgba(201,168,76,0.12)',
+                border:'1px solid rgba(184,212,232,0.12)',
               }}
             >
               {/* Image side */}
@@ -351,7 +351,7 @@ export default function Gallery() {
                 <button
                   onClick={() => setLightbox(null)}
                   style={{ position:'absolute', top:14, right:14, width:34, height:34, borderRadius:'50%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(255,255,255,0.5)', cursor:'pointer', transition:'all 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(201,168,76,0.4)'; e.currentTarget.style.color='#C9A84C' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(184,212,232,0.4)'; e.currentTarget.style.color='#B8D4E8' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(255,255,255,0.1)'; e.currentTarget.style.color='rgba(255,255,255,0.5)' }}
                 >
                   <X size={15} />
@@ -361,9 +361,9 @@ export default function Gallery() {
                 <div>
                   <span style={{
                     display:'inline-block', padding:'5px 16px', borderRadius:9999,
-                    background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.2)',
+                    background:'rgba(184,212,232,0.1)', border:'1px solid rgba(184,212,232,0.2)',
                     fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase',
-                    color:'#C9A84C', fontFamily:'Jost,sans-serif',
+                    color:'#B8D4E8', fontFamily:'Jost,sans-serif',
                   }}>
                     {lightbox.category}
                   </span>
@@ -385,8 +385,8 @@ export default function Gallery() {
                 <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
                   {(lightbox.stylist || lightbox.stylists?.name) && (
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <User size={13} color="#C9A84C" />
+                      <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(184,212,232,0.1)', border:'1px solid rgba(184,212,232,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <User size={13} color="#B8D4E8" />
                       </div>
                       <div>
                         <p style={{ fontSize:9, color:'rgba(255,255,255,0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', marginBottom:2 }}>Stylist</p>
@@ -396,8 +396,8 @@ export default function Gallery() {
                   )}
                   {lightbox.duration && (
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <Clock size={13} color="#C9A84C" />
+                      <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(184,212,232,0.1)', border:'1px solid rgba(184,212,232,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <Clock size={13} color="#B8D4E8" />
                       </div>
                       <div>
                         <p style={{ fontSize:9, color:'rgba(255,255,255,0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', marginBottom:2 }}>Duration</p>
@@ -407,7 +407,7 @@ export default function Gallery() {
                   )}
                   {lightbox.price && (
                     <div style={{ paddingTop:'0.25rem' }}>
-                      <span style={{ fontSize:'1.5rem', fontFamily:'Cormorant Garamond,serif', color:'#C9A84C' }}>{lightbox.price}</span>
+                      <span style={{ fontSize:'1.5rem', fontFamily:'Cormorant Garamond,serif', color:'#B8D4E8' }}>{lightbox.price}</span>
                     </div>
                   )}
                 </div>

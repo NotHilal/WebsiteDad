@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
 const C = {
-  gold: '#C9A84C', border: 'rgba(255,255,255,0.07)',
+  gold: '#B8D4E8', border: 'rgba(255,255,255,0.07)',
   white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)',
 }
 
@@ -121,7 +121,7 @@ export default function AppointmentAlert() {
                         </button>
                       )}
                       <button disabled={updatingId === a.id} onClick={() => markStatus(a, 'completed')}
-                        style={{ flex: 1, padding: '5px 0', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: updatingId === a.id ? 'not-allowed' : 'pointer', border: 'none', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', opacity: updatingId === a.id ? 0.5 : 1, transition: 'opacity .15s' }}>
+                        style={{ flex: 1, padding: '5px 0', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: updatingId === a.id ? 'not-allowed' : 'pointer', border: 'none', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', opacity: updatingId === a.id ? 0.5 : 1, transition: 'opacity .15s' }}>
                         ✓ Done
                       </button>
                       <button disabled={updatingId === a.id} onClick={() => markStatus(a, 'cancelled')}

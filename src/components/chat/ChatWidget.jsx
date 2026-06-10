@@ -97,10 +97,10 @@ export default function ChatWidget() {
                 return (
                   <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[80%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
-                      isMe ? 'bg-gradient-to-br from-[#C9A84C] to-[#C4956A] text-black' :
-                      isAdmin ? 'bg-white/8 border border-[#C9A84C]/15 text-white' : 'bg-white/5 text-white/80'
+                      isMe ? 'bg-gradient-to-br from-[#B8D4E8] to-[#7AAFC9] text-black' :
+                      isAdmin ? 'bg-white/8 border border-[#B8D4E8]/15 text-white' : 'bg-white/5 text-white/80'
                     }`}>
-                      {!isMe && isAdmin && <div className="text-[#C9A84C] text-[10px] mb-0.5">Team</div>}
+                      {!isMe && isAdmin && <div className="text-[#B8D4E8] text-[10px] mb-0.5">Team</div>}
                       {msg.content}
                     </div>
                   </div>
@@ -116,9 +116,9 @@ export default function ChatWidget() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   placeholder="Message..."
-                  className="flex-1 bg-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none border border-white/8 focus:border-[#C9A84C]/30 transition-colors"
+                  className="flex-1 bg-white/5 rounded-lg px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none border border-white/8 focus:border-[#B8D4E8]/30 transition-colors"
                 />
-                <button type="submit" disabled={!input.trim()} className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#C9A84C] to-[#C4956A] flex items-center justify-center text-black disabled:opacity-40 shrink-0">
+                <button type="submit" disabled={!input.trim()} className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#B8D4E8] to-[#7AAFC9] flex items-center justify-center text-black disabled:opacity-40 shrink-0">
                   <Send size={11} />
                 </button>
               </form>
@@ -130,7 +130,7 @@ export default function ChatWidget() {
       {/* Floating button */}
       <button
         onClick={() => { setOpen(!open); setMinimized(false) }}
-        className="relative w-12 h-12 rounded-full bg-gradient-to-br from-[#C9A84C] to-[#C4956A] flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+        className="relative w-12 h-12 rounded-full bg-gradient-to-br from-[#B8D4E8] to-[#7AAFC9] flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
       >
         <AnimatePresence mode="wait">
           {open ? (

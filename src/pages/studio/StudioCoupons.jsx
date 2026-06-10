@@ -9,7 +9,7 @@ import Pager from '../../lib/Pager'
 
 const C = {
   card: '#161620', card2: '#1a1a26',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.22)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.22)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.55)', muted: 'rgba(255,255,255,0.28)', faint: 'rgba(255,255,255,0.1)',
   border: 'rgba(255,255,255,0.07)', modal: '#13131f',
 }
@@ -33,7 +33,7 @@ function TypeToggle({ value, onChange }) {
     <div style={{ display: 'flex', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, overflow: 'hidden' }}>
       {[['percentage', '% Percentage'], ['fixed', '€ Fixed']].map(([val, label]) => (
         <button key={val} type="button" onClick={() => onChange(val)}
-          style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.03)', color: value === val ? '#C9A84C' : 'rgba(255,255,255,0.35)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+          style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.03)', color: value === val ? '#B8D4E8' : 'rgba(255,255,255,0.35)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
           {label}
         </button>
       ))}
@@ -56,7 +56,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
           <div style={{ position: 'absolute', bottom: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
         </div>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: used ? 'rgba(255,255,255,0.01)' : C.card, minWidth: 0 }}>
-          <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.07)', border: `1px solid ${used ? C.border : 'rgba(201,168,76,0.18)'}` }}>
+          <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(184,212,232,0.07)', border: `1px solid ${used ? C.border : 'rgba(184,212,232,0.18)'}` }}>
             <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
           </div>
           <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', flexShrink: 0 }}>
@@ -95,7 +95,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-              <div style={{ padding: '4px 10px', borderRadius: 7, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(201,168,76,0.08)', border: `1px solid ${used ? C.border : 'rgba(201,168,76,0.2)'}`, overflow: 'hidden' }}>
+              <div style={{ padding: '4px 10px', borderRadius: 7, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(184,212,232,0.08)', border: `1px solid ${used ? C.border : 'rgba(184,212,232,0.2)'}`, overflow: 'hidden' }}>
                 <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.88rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em' }}>{coupon.code}</span>
               </div>
               <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
@@ -151,7 +151,7 @@ function SelectableCouponCard({ coupon, selected, onSelect }) {
     <button type="button" onClick={() => onSelect(coupon)}
       style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}
       className="sel-card">
-      <div style={{ width: 60, height: 52, borderRadius: 10, background: selected ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px' }}>
+      <div style={{ width: 60, height: 52, borderRadius: 10, background: selected ? 'rgba(184,212,232,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px' }}>
         <span className="font-display gold-gradient" style={{ fontSize: '1.1rem', lineHeight: 1, filter: selected ? 'none' : 'grayscale(1)' }}>{disc}</span>
         <span style={{ fontSize: 7, letterSpacing: '0.18em', color: selected ? C.goldDim : 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>OFF</span>
       </div>
@@ -309,17 +309,17 @@ export default function StudioCoupons() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .m-inp:focus       { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .m-inp:focus       { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
         .uc-search:focus   { border-color: ${C.goldBorder} !important; }
-        .uc-row:hover      { border-color: rgba(201,168,76,0.35) !important; }
+        .uc-row:hover      { border-color: rgba(184,212,232,0.35) !important; }
         .btn-pill:hover    { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
         .btn-mark-used:hover   { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.35) !important; color: #f87171 !important; }
         .btn-mark-active:hover { background: rgba(52,211,153,0.1) !important; border-color: rgba(52,211,153,0.3) !important; color: #34d399 !important; }
         .btn-edit-uc:hover   { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.07) !important; }
         .btn-unassign:hover  { border-color: rgba(255,255,255,0.22) !important; color: ${C.white} !important; background: rgba(255,255,255,0.07) !important; }
         .btn-del-uc:hover  { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.35) !important; color: #f87171 !important; }
-        .btn-gold-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
-        .sel-card:hover    { border-color: ${C.goldBorder} !important; background: rgba(201,168,76,0.04) !important; }
+        .btn-gold-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,212,232,0.3); }
+        .sel-card:hover    { border-color: ${C.goldBorder} !important; background: rgba(184,212,232,0.04) !important; }
         .user-row:hover    { background: rgba(255,255,255,0.04) !important; }
         .uc-mobile-card { display: none; }
         @media (max-width: 767px) {
@@ -343,7 +343,7 @@ export default function StudioCoupons() {
         </div>
         <div className="uc-hdr-btns" style={{ display: 'flex', gap: 7 }}>
           <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-gold-sm"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
             <Plus size={13} /> New Coupon
           </button>
         </div>
@@ -432,7 +432,7 @@ export default function StudioCoupons() {
           </div>
           <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
             <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
+            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
               {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Save size={13} /> {modal === 'add' ? 'Create' : 'Save'}</>}
             </button>
           </div>
@@ -455,7 +455,7 @@ export default function StudioCoupons() {
 
           {/* Coupon preview */}
           <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 9, background: 'rgba(201,168,76,0.08)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 9, background: 'rgba(184,212,232,0.08)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span className="font-display gold-gradient" style={{ fontSize: '1rem', lineHeight: 1 }}>
                 {deleteTarget.discount_type === 'percentage' ? `${deleteTarget.discount_value}%` : `€${deleteTarget.discount_value}`}
               </span>
@@ -520,7 +520,7 @@ export default function StudioCoupons() {
                 })()}
               </div>
               <button onClick={() => assignCoupon && setAssignStep(2)} disabled={!assignCoupon}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignCoupon ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.05)', color: assignCoupon ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: assignCoupon ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s' }}>
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignCoupon ? 'linear-gradient(135deg,#B8D4E8,#7AAFC9)' : 'rgba(255,255,255,0.05)', color: assignCoupon ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: assignCoupon ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s' }}>
                 Next <ChevronRight size={14} />
               </button>
             </>
@@ -572,7 +572,7 @@ export default function StudioCoupons() {
                   return (
                     <button key={u.id} type="button" onClick={() => setAssignUser(u)} className="user-row"
                       style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: selected ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: selected ? 'rgba(184,212,232,0.15)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <span style={{ fontSize: 11, color: selected ? C.gold : C.muted, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -591,7 +591,7 @@ export default function StudioCoupons() {
               </div>
 
               <button onClick={confirmAssign} disabled={!assignUser || saving}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignUser ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : 'rgba(255,255,255,0.05)', color: assignUser ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: assignUser && !saving ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: saving ? 0.6 : 1 }}>
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignUser ? 'linear-gradient(135deg,#B8D4E8,#7AAFC9)' : 'rgba(255,255,255,0.05)', color: assignUser ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: assignUser && !saving ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: saving ? 0.6 : 1 }}>
                 {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><UserPlus size={14} /> Assign Coupon</>}
               </button>
             </>

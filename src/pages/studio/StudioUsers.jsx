@@ -12,7 +12,7 @@ import Pager from '../../lib/Pager'
 
 const C = {
   card: '#161620', modal: '#1a1a24',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
 }
@@ -20,7 +20,7 @@ const C = {
 const ROLE_STYLE = {
   user:   { color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)',  label: 'User'   },
   artist: { color: '#60a5fa',              bg: 'rgba(96,165,250,0.1)',   border: 'rgba(96,165,250,0.22)', label: 'Artist' },
-  admin:  { color: '#C9A84C',               bg: 'rgba(201,168,76,0.08)', border: 'rgba(201,168,76,0.18)', label: 'Admin'  },
+  admin:  { color: '#B8D4E8',               bg: 'rgba(184,212,232,0.08)', border: 'rgba(184,212,232,0.18)', label: 'Admin'  },
 }
 
 const TABS = [
@@ -77,8 +77,8 @@ function RoleSelector({ value, onChange }) {
 
       {open && createPortal(
         <div onMouseDown={e => e.stopPropagation()}
-          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: '#131320', border: '1px solid rgba(201,168,76,0.18)', borderRadius: 12, overflow: 'hidden', minWidth: 130, boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03)' }}>
-          <div style={{ height: 2, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))' }} />
+          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: '#131320', border: '1px solid rgba(184,212,232,0.18)', borderRadius: 12, overflow: 'hidden', minWidth: 130, boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03)' }}>
+          <div style={{ height: 2, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))' }} />
           {[
             { role: 'user',   label: 'User'   },
             { role: 'artist', label: 'Artist' },
@@ -328,13 +328,13 @@ export default function StudioUsers() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .usr-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .usr-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
         .usr-row:hover { background: rgba(255,255,255,0.02); }
         .usr-pts-add:hover  { background: ${C.goldBg} !important; color: ${C.gold} !important; }
         .usr-pts-sub:hover  { color: ${C.dim} !important; border-color: rgba(255,255,255,0.18) !important; }
         .usr-msg-btn:hover  { background: rgba(96,165,250,0.15)  !important; border-color: rgba(96,165,250,0.4)  !important; color: #93c5fd !important; }
         .usr-mail-btn:hover { background: rgba(52,211,153,0.13)  !important; border-color: rgba(52,211,153,0.35) !important; color: #6ee7b7 !important; }
-        .msg-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .msg-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
         .modal-cancel:hover { border-color: rgba(255,255,255,0.22) !important; color: ${C.dim} !important; }
         .usr-unlink-btn:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .emp-sty-card:hover { border-color: rgba(96,165,250,0.4) !important; background: rgba(96,165,250,0.05) !important; }
@@ -600,7 +600,7 @@ export default function StudioUsers() {
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.15))' }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.15))' }} />
 
             <div style={{ padding: '1.75rem' }}>
               {/* Icon + title */}
@@ -662,7 +662,7 @@ export default function StudioUsers() {
                   Cancel
                 </button>
                 <button onClick={applyRoleChange} disabled={confirming}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: confirming ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: confirming ? 0.6 : 1, transition: 'all .2s' }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: confirming ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: confirming ? 0.6 : 1, transition: 'all .2s' }}>
                   {confirming
                     ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                     : <><ShieldCheck size={14} /> Confirm Change</>
@@ -681,7 +681,7 @@ export default function StudioUsers() {
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.65)' }}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.15))' }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.15))' }} />
 
             <div style={{ padding: '1.5rem 1.75rem' }}>
               {/* Modal header */}
@@ -732,7 +732,7 @@ export default function StudioUsers() {
                     Cancel
                   </button>
                   <button onClick={sendMessage} disabled={sending}
-                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: sending ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: sending ? 0.6 : 1, transition: 'all .2s' }}>
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: sending ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: sending ? 0.6 : 1, transition: 'all .2s' }}>
                     {sending
                       ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><Send size={13} /> Send & Open Ticket</>
@@ -802,7 +802,7 @@ export default function StudioUsers() {
                         {/* Info */}
                         <div style={{ flex: 1, padding: '0.75rem 0.875rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3, minWidth: 0 }}>
                           <p className="font-display" style={{ color: sel ? C.white : C.dim, fontSize: '1rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .15s' }}>{s.name}</p>
-                          {s.title && <p style={{ color: sel ? 'rgba(201,168,76,0.65)' : C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em', transition: 'color .15s' }}>{s.title}</p>}
+                          {s.title && <p style={{ color: sel ? 'rgba(184,212,232,0.65)' : C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em', transition: 'color .15s' }}>{s.title}</p>}
                         </div>
 
                         {/* Selected checkmark */}

@@ -7,8 +7,8 @@ import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
-  goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
+  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
   subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)',
 }
@@ -90,6 +90,10 @@ export default function StudioHomeDisplay() {
   const galleryCount  = gallery.filter(g => g.featured).length
   const serviceCount  = services.filter(s => s.featured).length
 
+  const sortedStylists = [...stylists].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+  const sortedGallery  = [...gallery].sort((a, b)   => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+  const sortedServices = [...services].sort((a, b)  => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+
   return (
     <div className="hd-root" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto', height: '100%' }}>
     <style>{`@media (max-width: 767px) { .hd-root { gap: 2.25rem !important; } }`}</style>
@@ -119,7 +123,7 @@ export default function StudioHomeDisplay() {
         ) : (
           <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
-            {stylists.slice(pgTeam * PER, (pgTeam + 1) * PER).map(s => {
+            {sortedStylists.slice(pgTeam * PER, (pgTeam + 1) * PER).map(s => {
               const locked = !s.featured && teamCount >= MAX_TEAM
               return (
                 <button key={s.id} onClick={() => toggleStylist(s)}
@@ -147,7 +151,7 @@ export default function StudioHomeDisplay() {
               )
             })}
           </div>
-          <Pager page={pgTeam} total={stylists.length} perPage={PER} onChange={setPgTeam} />
+          <Pager page={pgTeam} total={sortedStylists.length} perPage={PER} onChange={setPgTeam} />
           </>
         )}
       </Section>
@@ -171,7 +175,7 @@ export default function StudioHomeDisplay() {
               </p>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-              {services.slice(pgSvc * PER, (pgSvc + 1) * PER).map(svc => {
+              {sortedServices.slice(pgSvc * PER, (pgSvc + 1) * PER).map(svc => {
                 const noImage = !svc.image_url
                 const locked  = (!svc.featured && serviceCount >= MAX_SERVICES) || noImage
                 return (
@@ -203,7 +207,7 @@ export default function StudioHomeDisplay() {
                 )
               })}
             </div>
-            <Pager page={pgSvc} total={services.length} perPage={PER} onChange={setPgSvc} />
+            <Pager page={pgSvc} total={sortedServices.length} perPage={PER} onChange={setPgSvc} />
           </>
         )}
       </Section>
@@ -222,7 +226,7 @@ export default function StudioHomeDisplay() {
         ) : (
           <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem' }}>
-            {gallery.slice(pgGal * PER, (pgGal + 1) * PER).map(item => {
+            {sortedGallery.slice(pgGal * PER, (pgGal + 1) * PER).map(item => {
               const locked = !item.featured && galleryCount >= MAX_GALLERY
               return (
                 <button key={item.id} onClick={() => toggleGallery(item)}
@@ -248,7 +252,7 @@ export default function StudioHomeDisplay() {
               )
             })}
           </div>
-          <Pager page={pgGal} total={gallery.length} perPage={PER} onChange={setPgGal} />
+          <Pager page={pgGal} total={sortedGallery.length} perPage={PER} onChange={setPgGal} />
           </>
         )}
       </Section>
@@ -259,7 +263,7 @@ export default function StudioHomeDisplay() {
 
 function Section({ icon, title, badge, badgeActive, children }) {
   const C = {
-    card: '#161620', gold: '#C9A84C',
+    card: '#161620', gold: '#B8D4E8',
     white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)',
     border: 'rgba(255,255,255,0.07)',
   }
@@ -281,7 +285,7 @@ function Section({ icon, title, badge, badgeActive, children }) {
 
 function CheckBadge() {
   return (
-    <div style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+    <div style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: '#B8D4E8', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
       <Check size={12} color="#000" strokeWidth={3} />
     </div>
   )
@@ -290,7 +294,7 @@ function CheckBadge() {
 function Initials({ name }) {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span className="font-display" style={{ fontSize: '2rem', color: 'rgba(201,168,76,0.35)' }}>{name?.[0]}</span>
+      <span className="font-display" style={{ fontSize: '2rem', color: 'rgba(184,212,232,0.35)' }}>{name?.[0]}</span>
     </div>
   )
 }

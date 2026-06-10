@@ -10,22 +10,22 @@ import {
 
 const C = {
   card: '#161620',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
 }
 
 const APPT_COLORS = {
-  completed: '#C9A84C', confirmed: '#34d399', pending: '#f59e0b', cancelled: '#f87171',
+  completed: '#B8D4E8', confirmed: '#34d399', pending: '#f59e0b', cancelled: '#f87171',
 }
 const STATUS_APPT = {
   pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.22)'  },
   confirmed: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.22)'  },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
-  completed: { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',  border: 'rgba(201,168,76,0.22)'  },
+  completed: { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)'  },
 }
 const STATUS_ORDER = {
-  active:    { color: '#C9A84C', bg: 'rgba(201,168,76,0.12)',   border: 'rgba(201,168,76,0.22)'   },
+  active:    { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',   border: 'rgba(184,212,232,0.22)'   },
   retrieved: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',   border: 'rgba(52,211,153,0.22)'   },
   expired:   { color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)' },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
@@ -581,7 +581,7 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end', cursor: 'default' }}>
                 <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
                   {total === 0
-                    ? <div style={{ width: '100%', height: 2, background: today ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', borderRadius: 2 }} />
+                    ? <div style={{ width: '100%', height: 2, background: today ? 'rgba(184,212,232,0.15)' : 'rgba(255,255,255,0.04)', borderRadius: 2 }} />
                     : (
                       <motion.div className="bar-fill"
                         initial={{ height: 0 }}

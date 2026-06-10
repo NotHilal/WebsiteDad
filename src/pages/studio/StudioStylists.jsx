@@ -7,8 +7,8 @@ import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
-  goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
+  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
   subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.18)',
@@ -41,7 +41,7 @@ function CustomSelect({ value, onChange, options }) {
       </button>
       {open && (
         <div style={{ position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 200, background: '#131320', border: `1px solid ${C.goldBorder}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03)' }}>
-          <div style={{ height: 2, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))' }} />
+          <div style={{ height: 2, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))' }} />
           <div style={{ maxHeight: 200, overflowY: 'auto' }}>
             {options.map(opt => {
               const isActive = opt.value === value
@@ -181,14 +181,14 @@ export default function StudioStylists() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .m-inp:focus    { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .m-inp:focus    { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
         .sty-card       { transition: border-color .2s, box-shadow .2s; }
-        .sty-card:hover { border-color: rgba(201,168,76,0.22) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35); }
+        .sty-card:hover { border-color: rgba(184,212,232,0.22) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35); }
         .sty-img        { transition: transform .5s ease; }
         .sty-card:hover .sty-img { transform: scale(1.05); }
-        .sty-edit:hover { background: rgba(201,168,76,0.16) !important; border-color: rgba(201,168,76,0.45) !important; color: ${C.gold} !important; }
+        .sty-edit:hover { background: rgba(184,212,232,0.16) !important; border-color: rgba(184,212,232,0.45) !important; color: ${C.gold} !important; }
         .sty-del:hover  { background: rgba(248,113,113,0.12) !important; border-color: rgba(248,113,113,0.3) !important; color: #f87171 !important; }
-        .btn-g:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .btn-g:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,212,232,0.3); }
         .drop-zone:hover { border-color: ${C.goldBorder} !important; background: ${C.goldBg} !important; }
         .csel-opt:hover { background: rgba(255,255,255,0.04) !important; }
         @media (max-width: 520px) {
@@ -214,7 +214,7 @@ export default function StudioStylists() {
           </div>
         </div>
         <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
           <Plus size={14} /> Add Stylist
         </button>
       </div>
@@ -235,7 +235,7 @@ export default function StudioStylists() {
             <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif' }}>No team members yet</p>
             <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>Add your first stylist to get started</p>
             <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
-              style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+              style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
               <Plus size={14} /> Add Stylist
             </button>
           </div>
@@ -252,8 +252,8 @@ export default function StudioStylists() {
                     {s.photo_url
                       ? <img src={s.photo_url} alt={s.name} className="sty-img"
                           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(201,168,76,0.05), rgba(196,149,106,0.03))' }}>
-                          <User size={32} color="rgba(201,168,76,0.18)" strokeWidth={1} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(184,212,232,0.05), rgba(122,175,201,0.03))' }}>
+                          <User size={32} color="rgba(184,212,232,0.18)" strokeWidth={1} />
                         </div>
                     }
                     {/* Right-side gradient for smooth blend into card */}
@@ -274,7 +274,7 @@ export default function StudioStylists() {
                       </div>
                       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                         <button onClick={() => openEdit(s)} className="sty-edit"
-                          style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.18)', color: 'rgba(201,168,76,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                          style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(184,212,232,0.07)', border: '1px solid rgba(184,212,232,0.18)', color: 'rgba(184,212,232,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
                           <Edit2 size={11} />
                         </button>
                         <button onClick={() => del(s.id)} className="sty-del"
@@ -332,7 +332,7 @@ export default function StudioStylists() {
           <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,.65)' }}
             onClick={e => e.stopPropagation()}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.15))' }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.15))' }} />
 
             <div style={{ padding: '1.75rem' }}>
               {/* Modal header */}
@@ -457,7 +457,7 @@ export default function StudioStylists() {
                   Cancel
                 </button>
                 <button onClick={save} disabled={saving || uploading}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || uploading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || uploading) ? 0.6 : 1 }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || uploading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || uploading) ? 0.6 : 1 }}>
                   {saving
                     ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Save size={13} /> {modal === 'add' ? 'Add Stylist' : 'Save Changes'}</>

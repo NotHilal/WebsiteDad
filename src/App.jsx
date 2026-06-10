@@ -47,11 +47,11 @@ export default function App() {
             style: {
               background: '#1a1a1a',
               color: '#f5f5f5',
-              border: '1px solid rgba(201,168,76,0.2)',
+              border: '1px solid rgba(184,212,232,0.2)',
               fontFamily: 'Jost, sans-serif',
               fontSize: '14px',
             },
-            success: { iconTheme: { primary: '#C9A84C', secondary: '#0a0a0a' } },
+            success: { iconTheme: { primary: '#B8D4E8', secondary: '#0a0a0a' } },
             error: { iconTheme: { primary: '#ef4444', secondary: '#0a0a0a' } },
           }}
         />

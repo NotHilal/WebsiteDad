@@ -7,8 +7,8 @@ import { useLogAction } from '../../hooks/useLogAction'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)',
-  goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
+  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
   subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
   red: '#f87171', redBg: 'rgba(248,113,113,0.1)', redBorder: 'rgba(248,113,113,0.2)',
@@ -16,7 +16,7 @@ const C = {
 
 const COLOR_PRESETS = [
   '#60a5fa', '#818cf8', '#c084fc', '#f472b6', '#fb7185',
-  '#f87171', '#fb923c', '#f59e0b', '#C9A84C', '#a3e635',
+  '#f87171', '#fb923c', '#f59e0b', '#B8D4E8', '#a3e635',
   '#34d399', '#2dd4bf', '#22d3ee', '#38bdf8', '#94a3b8',
 ]
 
@@ -65,7 +65,7 @@ function Select({ value, onChange, options }) {
             const active = value === o.value
             return (
               <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'rgba(201,168,76,0.1)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(255,255,255,0.04)`, color: active ? C.gold : 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'rgba(184,212,232,0.1)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(255,255,255,0.04)`, color: active ? C.gold : 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}>
                 {o.dot && <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.dot, flexShrink: 0 }} />}
@@ -250,12 +250,12 @@ export default function StudioGallery() {
         @keyframes spin    { to { transform: rotate(360deg); } }
         @keyframes modalIn { from { transform: scale(0.96) translateY(8px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         @keyframes dropIn  { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
         .gal-card  { transition: transform .22s ease, box-shadow .22s ease; }
         .gal-card:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.45); }
         .gal-img   { transition: transform .45s ease; }
         .gal-card:hover .gal-img { transform: scale(1.05); }
-        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,212,232,0.3); }
         .btn-cat:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.08) !important; }
         .gal-filter:hover { border-color: rgba(255,255,255,0.2) !important; color: rgba(255,255,255,0.55) !important; }
         .sp-modal-close:hover { background: rgba(255,255,255,0.1) !important; }
@@ -296,7 +296,7 @@ export default function StudioGallery() {
             <Tag size={13} /> Categories
           </button>
           <button onClick={openAdd} className="btn-g"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Plus size={14} /> Add Photo
           </button>
         </div>
@@ -420,7 +420,7 @@ export default function StudioGallery() {
           <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 24, overflow: 'hidden', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 48px 120px rgba(0,0,0,.7)', animation: 'modalIn .2s ease' }}
             onClick={e => e.stopPropagation()}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))', flexShrink: 0 }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))', flexShrink: 0 }} />
 
             <div style={{ padding: '1.5rem 1.75rem 1.25rem', flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
@@ -501,7 +501,7 @@ export default function StudioGallery() {
                   <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>Visible to visitors</p>
                   <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Shown in the public gallery</p>
                 </div>
-                <div style={{ width: 44, height: 26, borderRadius: 13, background: form.visible ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.visible ? '0 0 14px rgba(201,168,76,0.4)' : 'none' }}
+                <div style={{ width: 44, height: 26, borderRadius: 13, background: form.visible ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.visible ? '0 0 14px rgba(184,212,232,0.4)' : 'none' }}
                   onClick={() => setForm(p => ({ ...p, visible: !p.visible }))}>
                   <div style={{ position: 'absolute', top: 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.25)', transition: 'left .22s', left: form.visible ? 21 : 3 }} />
                 </div>
@@ -516,7 +516,7 @@ export default function StudioGallery() {
                 Cancel
               </button>
               <button onClick={save} disabled={saving || (!file && !form.image_url)}
-                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || (!file && !form.image_url)) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || (!file && !form.image_url)) ? 0.5 : 1, boxShadow: (saving || (!file && !form.image_url)) ? 'none' : '0 4px 20px rgba(201,168,76,0.28)', transition: 'opacity .2s, box-shadow .2s' }}>
+                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || (!file && !form.image_url)) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || (!file && !form.image_url)) ? 0.5 : 1, boxShadow: (saving || (!file && !form.image_url)) ? 'none' : '0 4px 20px rgba(184,212,232,0.28)', transition: 'opacity .2s, box-shadow .2s' }}>
                 {saving
                   ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                   : <><Save size={13} /> {modal === 'add' ? 'Add Photo' : 'Save Changes'}</>}
@@ -533,7 +533,7 @@ export default function StudioGallery() {
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 22, overflow: 'hidden', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 40px 100px rgba(0,0,0,.75)', animation: 'modalIn .2s ease' }}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.1))', flexShrink: 0 }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))', flexShrink: 0 }} />
 
             <div style={{ padding: '1.25rem 1.5rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}` }}>
               <div>
@@ -613,7 +613,7 @@ export default function StudioGallery() {
                     style={{ ...inp, paddingLeft: '1.75rem' }} />
                 </div>
                 <button onClick={saveGalCat} disabled={addingCat || !newCatName.trim()}
-                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#C4956A)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {addingCat
                     ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Plus size={12} /> Add</>}

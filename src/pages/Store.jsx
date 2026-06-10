@@ -86,7 +86,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
 
         {/* Category */}
         {p.category && (
-          <span style={{ fontSize: 9, color: 'rgba(201,168,76,0.55)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>
+          <span style={{ fontSize: 9, color: 'rgba(184,212,232,0.55)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>
             {p.category}
           </span>
         )}
@@ -95,14 +95,14 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
         <p
           onClick={() => onViewDetail(p)}
           style={{ color: '#f0f0f0', fontSize: '0.88rem', fontWeight: 500, lineHeight: 1.35, marginBottom: 10, cursor: 'pointer', transition: 'color 0.2s', flex: 1 }}
-          onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
+          onMouseEnter={e => e.currentTarget.style.color = '#B8D4E8'}
           onMouseLeave={e => e.currentTarget.style.color = '#f0f0f0'}>
           {p.name}
         </p>
 
         {/* Price */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 14 }}>
-          <span className="font-display" style={{ fontSize: '1.45rem', color: '#C9A84C', lineHeight: 1 }}>€{parseFloat(p.price).toFixed(2)}</span>
+          <span className="font-display" style={{ fontSize: '1.45rem', color: '#B8D4E8', lineHeight: 1 }}>€{parseFloat(p.price).toFixed(2)}</span>
           {qty > 1 && (
             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif' }}>×{qty} = €{(p.price * qty).toFixed(2)}</span>
           )}
@@ -171,16 +171,16 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
               disabled={outOfStock || adding}
               style={{
                 flex: 1, height: 38, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                background: outOfStock ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg, #C9A84C, #C4956A)',
+                background: outOfStock ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg, #B8D4E8, #7AAFC9)',
                 color: outOfStock ? 'rgba(255,255,255,0.2)' : '#000',
                 border: outOfStock ? '1px solid rgba(255,255,255,0.07)' : 'none',
                 cursor: outOfStock ? 'not-allowed' : 'pointer',
                 fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700,
-                boxShadow: outOfStock ? 'none' : '0 4px 16px rgba(201,168,76,0.25)',
+                boxShadow: outOfStock ? 'none' : '0 4px 16px rgba(184,212,232,0.25)',
                 transition: 'all 0.25s',
               }}
-              onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.boxShadow = '0 6px 24px rgba(201,168,76,0.45)'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = outOfStock ? 'none' : '0 4px 16px rgba(201,168,76,0.25)'; e.currentTarget.style.transform = 'translateY(0)' }}>
+              onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.boxShadow = '0 6px 24px rgba(184,212,232,0.45)'; e.currentTarget.style.transform = 'translateY(-1px)' } }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = outOfStock ? 'none' : '0 4px 16px rgba(184,212,232,0.25)'; e.currentTarget.style.transform = 'translateY(0)' }}>
               {adding
                 ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,0.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                 : <><ShoppingCart size={12} /> {inCart ? 'Add More' : 'Add'}</>
@@ -260,14 +260,14 @@ export default function Store() {
           {/* Cart summary */}
           {user && (
             <button onClick={() => navigate('/profile')}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', borderRadius: 12, background: cartQty > 0 ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cartQty > 0 ? 'rgba(201,168,76,0.3)' : 'rgba(255,255,255,0.08)'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', borderRadius: 12, background: cartQty > 0 ? 'rgba(184,212,232,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cartQty > 0 ? 'rgba(184,212,232,0.3)' : 'rgba(255,255,255,0.08)'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
               <div style={{ position: 'relative' }}>
-                <ShoppingCart size={16} color={cartQty > 0 ? '#C9A84C' : 'rgba(255,255,255,0.35)'} />
+                <ShoppingCart size={16} color={cartQty > 0 ? '#B8D4E8' : 'rgba(255,255,255,0.35)'} />
                 {cartQty > 0 && (
-                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: '#C9A84C', color: '#000', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>{cartQty}</span>
+                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: '#B8D4E8', color: '#000', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>{cartQty}</span>
                 )}
               </div>
-              <span style={{ fontSize: 12, color: cartQty > 0 ? '#C9A84C' : 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: cartQty > 0 ? '#B8D4E8' : 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
                 {cartQty > 0 ? `Cart (${cartQty})` : 'Cart'}
               </span>
             </button>
@@ -284,9 +284,9 @@ export default function Store() {
                 <button key={cat} onClick={() => setActivecat(cat)} style={{
                   padding: '7px 16px', borderRadius: 8, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
                   fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, cursor: 'pointer',
-                  background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
-                  color: isActive ? '#C9A84C' : 'rgba(255,255,255,0.35)',
-                  border: isActive ? '1px solid rgba(201,168,76,0.3)' : '1px solid transparent',
+                  background: isActive ? 'rgba(184,212,232,0.12)' : 'transparent',
+                  color: isActive ? '#B8D4E8' : 'rgba(255,255,255,0.35)',
+                  border: isActive ? '1px solid rgba(184,212,232,0.3)' : '1px solid transparent',
                   transition: 'all 0.18s',
                 }}>
                   {cat}
@@ -335,7 +335,7 @@ export default function Store() {
         {!user && !loading && filtered.length > 0 && (
           <div style={{ textAlign: 'center', marginTop: 32, display: 'flex', justifyContent: 'center' }}>
             <button onClick={() => setShowGuestModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 12, background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.2)', color: 'rgba(201,168,76,0.7)', fontSize: 12, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em', transition: 'all .2s' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 12, background: 'rgba(184,212,232,0.07)', border: '1px solid rgba(184,212,232,0.2)', color: 'rgba(184,212,232,0.7)', fontSize: 12, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em', transition: 'all .2s' }}>
               <ShoppingCart size={13} /> Sign in to order
             </button>
           </div>
@@ -367,7 +367,7 @@ export default function Store() {
                     </div>
                 }
                 {detail.category && (
-                  <div style={{ position: 'absolute', top: 16, left: 16, padding: '4px 12px', borderRadius: 6, background: '#C9A84C' }}>
+                  <div style={{ position: 'absolute', top: 16, left: 16, padding: '4px 12px', borderRadius: 6, background: '#B8D4E8' }}>
                     <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: '#000', letterSpacing: '0.16em', textTransform: 'uppercase' }}>{detail.category}</span>
                   </div>
                 )}
@@ -463,7 +463,7 @@ export default function Store() {
               onClick={e => e.stopPropagation()}
               style={{ width: '100%', maxWidth: 400, background: '#111116', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 22, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.8)' }}>
 
-              <div style={{ height: 3, background: 'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.2))' }} />
+              <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.2))' }} />
 
               <div style={{ padding: '1.75rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
@@ -474,8 +474,8 @@ export default function Store() {
                 </div>
 
                 <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-                  <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-                    <ShoppingCart size={22} color="#C9A84C" strokeWidth={1.5} />
+                  <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(184,212,232,0.1)', border: '1px solid rgba(184,212,232,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
+                    <ShoppingCart size={22} color="#B8D4E8" strokeWidth={1.5} />
                   </div>
                   <h2 className="font-display font-light" style={{ color: '#fff', fontSize: '1.6rem', lineHeight: 1.1, marginBottom: 10 }}>
                     Ready to order?

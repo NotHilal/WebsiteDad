@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 
 const C = {
   card: '#161620', modal: '#1a1a24',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
 }
@@ -19,7 +19,7 @@ const CAT = {
   cut:       { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',   gradient: 'rgba(96,165,250,0.15)',   label: 'Cut' },
   color:     { color: '#c084fc', bg: 'rgba(192,132,252,0.1)',  gradient: 'rgba(192,132,252,0.15)',  label: 'Color' },
   treatment: { color: '#34d399', bg: 'rgba(52,211,153,0.1)',   gradient: 'rgba(52,211,153,0.15)',   label: 'Treatment' },
-  style:     { color: '#C9A84C', bg: 'rgba(201,168,76,0.1)',   gradient: 'rgba(201,168,76,0.15)',   label: 'Style' },
+  style:     { color: '#B8D4E8', bg: 'rgba(184,212,232,0.1)',   gradient: 'rgba(184,212,232,0.15)',   label: 'Style' },
   other:     { color: 'rgba(255,255,255,0.4)', bg: 'rgba(255,255,255,0.06)', gradient: 'rgba(255,255,255,0.06)', label: 'Other' },
 }
 
@@ -28,7 +28,7 @@ const EMPTY = { name: '', description: '', price: '', duration: '', category: ''
 const GENDER = [
   { value: 'man',   label: 'Men',   color: '#60a5fa', border: 'rgba(96,165,250,0.35)' },
   { value: 'woman', label: 'Women', color: '#f472b6', border: 'rgba(244,114,182,0.35)' },
-  { value: 'mixed', label: 'Both',  color: '#C9A84C', border: 'rgba(201,168,76,0.35)' },
+  { value: 'mixed', label: 'Both',  color: '#B8D4E8', border: 'rgba(184,212,232,0.35)' },
 ]
 
 const inp = (extra = {}) => ({
@@ -144,15 +144,15 @@ export default function StudioServices() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
         .svc-card { transition: transform .35s cubic-bezier(0.22,1,0.36,1), box-shadow .35s ease; }
         .svc-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 28px 64px rgba(0,0,0,0.6) !important; }
         .svc-card:hover .svc-img { transform: scale(1.08) !important; }
         .svc-edit-btn:hover   { background: rgba(255,255,255,0.22) !important; color: #fff !important; border-color: rgba(255,255,255,0.3) !important; }
-        .svc-arc-btn:hover    { background: rgba(201,168,76,0.22) !important; color: #C9A84C !important; border-color: rgba(201,168,76,0.4) !important; }
+        .svc-arc-btn:hover    { background: rgba(184,212,232,0.22) !important; color: #B8D4E8 !important; border-color: rgba(184,212,232,0.4) !important; }
         .svc-del-btn:hover    { background: rgba(248,113,113,0.25) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.4) !important; }
         .cat-filter:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.dim} !important; }
-        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,168,76,0.3); }
+        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(184,212,232,0.3); }
         .modal-close:hover { background: rgba(255,255,255,0.1) !important; }
         .modal-cancel:hover { border-color: rgba(255,255,255,0.2) !important; }
         .skel { background: linear-gradient(90deg,#1a1a26 25%,#22222e 50%,#1a1a26 75%); background-size:200% 100%; animation:shimmer 1.6s infinite; }
@@ -168,7 +168,7 @@ export default function StudioServices() {
           </p>
         </div>
         <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', letterSpacing: '0.04em' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', letterSpacing: '0.04em' }}>
           <Plus size={14} /> New Service
         </button>
       </div>
@@ -272,7 +272,7 @@ export default function StudioServices() {
                       <button onClick={() => toggleActive(s)}
                         className="svc-arc-btn"
                         title={s.active ? 'Archive' : 'Restore'}
-                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: `1px solid ${s.active ? 'rgba(201,168,76,0.22)' : 'rgba(201,168,76,0.45)'}`, color: s.active ? 'rgba(201,168,76,0.55)' : '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
+                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: `1px solid ${s.active ? 'rgba(184,212,232,0.22)' : 'rgba(184,212,232,0.45)'}`, color: s.active ? 'rgba(184,212,232,0.55)' : '#B8D4E8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
                         {s.active ? <EyeOff size={12} /> : <Eye size={12} />}
                       </button>
                       <button onClick={() => openDelete(s)}
@@ -339,7 +339,7 @@ export default function StudioServices() {
               style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.65)', maxHeight: '90vh', overflowY: 'auto' }}>
 
               {/* Gold top bar */}
-              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#C4956A,rgba(201,168,76,0.15))` }} />
+              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
 
               <div style={{ padding: '1.75rem' }}>
                 {/* Modal header */}
@@ -468,7 +468,7 @@ export default function StudioServices() {
                     Cancel
                   </button>
                   <button onClick={save} disabled={saving} className="btn-g"
-                    style={{ flex: 1.5, padding: '0.7rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#C4956A)`, color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'all .2s' }}>
+                    style={{ flex: 1.5, padding: '0.7rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'all .2s' }}>
                     {saving
                       ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><Save size={14} /> {modal === 'add' ? 'Add Service' : 'Save Changes'}</>

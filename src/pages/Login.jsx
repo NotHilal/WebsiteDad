@@ -42,13 +42,13 @@ export default function Login() {
     textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
     marginBottom: 8, fontFamily: 'Jost,sans-serif',
   }
-  const onFocus = e => { e.target.style.borderColor = 'rgba(201,168,76,0.45)'; e.target.style.background = 'rgba(255,255,255,0.06)' }
+  const onFocus = e => { e.target.style.borderColor = 'rgba(184,212,232,0.45)'; e.target.style.background = 'rgba(255,255,255,0.06)' }
   const onBlur  = e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' }
 
   return (
     <div style={{ height: 'calc(100vh - 72px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1.5rem', overflow: 'hidden', paddingBottom: '6vh' }}>
       {/* Ambient glow */}
-      <div style={{ position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%,-50%)', width: 560, height: 420, background: 'radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%)', pointerEvents: 'none', borderRadius: '50%' }} />
+      <div style={{ position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%,-50%)', width: 560, height: 420, background: 'radial-gradient(circle, rgba(184,212,232,0.06) 0%, transparent 70%)', pointerEvents: 'none', borderRadius: '50%' }} />
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -58,7 +58,7 @@ export default function Login() {
       >
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px auto', boxShadow: '0 8px 36px rgba(201,168,76,0.38)' }}>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px auto', boxShadow: '0 8px 36px rgba(184,212,232,0.38)' }}>
             <Scissors size={21} color="#000" style={{ transform: 'rotate(45deg)' }} />
           </div>
           <h1 className="font-display font-light" style={{ fontSize: '2.6rem', color: '#fff', textAlign: 'center', marginBottom: '0.8rem', lineHeight: 1 }}>
@@ -100,9 +100,9 @@ export default function Login() {
           <div style={{ marginTop: 24, paddingTop: 22, borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
             <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)' }}>
               Don't have an account?{' '}
-              <Link to="/register" style={{ color: '#C9A84C', textDecoration: 'none', fontWeight: 400 }}
+              <Link to="/register" style={{ color: '#B8D4E8', textDecoration: 'none', fontWeight: 400 }}
                 onMouseEnter={e => e.currentTarget.style.color = '#E8D5A3'}
-                onMouseLeave={e => e.currentTarget.style.color = '#C9A84C'}>
+                onMouseLeave={e => e.currentTarget.style.color = '#B8D4E8'}>
                 Create one
               </Link>
             </p>

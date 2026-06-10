@@ -52,10 +52,10 @@ export default function Stylists() {
         .team-pill {
           display: inline-flex; align-items: center;
           padding: 3px 10px; border-radius: 9999px;
-          background: rgba(201,168,76,0.15);
-          border: 1px solid rgba(201,168,76,0.25);
+          background: rgba(184,212,232,0.15);
+          border: 1px solid rgba(184,212,232,0.25);
           font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
-          color: #C9A84C; font-family: Jost,sans-serif;
+          color: #B8D4E8; font-family: Jost,sans-serif;
           white-space: nowrap;
         }
 
@@ -66,15 +66,15 @@ export default function Stylists() {
           font-family: Jost,sans-serif; transition: color 0.2s;
           margin-top: 0.75rem;
         }
-        .ig-link:hover { color: #C9A84C; }
+        .ig-link:hover { color: #B8D4E8; }
 
         .team-placeholder {
           width: 100%; height: 100%;
           display: flex; align-items: center; justify-content: center;
-          background: linear-gradient(135deg, rgba(201,168,76,0.06), rgba(255,255,255,0.02));
+          background: linear-gradient(135deg, rgba(184,212,232,0.06), rgba(255,255,255,0.02));
         }
 
-        .join-card:hover { border-color: rgba(201,168,76,0.22) !important; }
+        .join-card:hover { border-color: rgba(184,212,232,0.22) !important; }
       `}</style>
 
       <div className="wrap">
@@ -165,7 +165,7 @@ export default function Stylists() {
                     {s.name}
                   </h3>
                   {s.title && (
-                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C', fontFamily: 'Jost,sans-serif', fontWeight: 400 }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#B8D4E8', fontFamily: 'Jost,sans-serif', fontWeight: 400 }}>
                       {s.title}
                     </p>
                   )}
@@ -188,8 +188,8 @@ export default function Stylists() {
             borderRadius: 4, padding: '3.5rem 3rem',
             transition: 'border-color 0.3s',
           }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.75rem' }}>
-              <Scissors size={18} color="#C9A84C" style={{ transform: 'rotate(45deg)' }} />
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(184,212,232,0.1)', border: '1px solid rgba(184,212,232,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.75rem' }}>
+              <Scissors size={18} color="#B8D4E8" style={{ transform: 'rotate(45deg)' }} />
             </div>
             <h3 className="font-display font-light" style={{ fontSize: '2rem', color: '#fff', marginBottom: '1rem' }}>
               Join the family

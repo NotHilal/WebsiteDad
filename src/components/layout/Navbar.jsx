@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useCart } from '../../contexts/CartContext'
 import AppointmentAlert from '../AppointmentAlert'
 import toast from 'react-hot-toast'
+import hairgoLogo from '../../assets/hairgo.png'
 
 const BASE_LINKS = [
   { to: '/', label: 'Home', exact: true },
@@ -67,63 +68,48 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ── Floating header bar ─────────────────────────────── */}
       <motion.header
         initial={{ y: -90, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          position: 'fixed',
-          top: 5,
-          left: 16,
-          right: 16,
-          zIndex: 50,
+          position: 'fixed', top: 5, left: 16, right: 16, zIndex: 50,
           borderRadius: 18,
           transition: 'background 0.4s, box-shadow 0.4s, border-color 0.4s',
-          background: scrolled
-            ? 'rgba(10, 10, 10, 0.88)'
-            : 'rgba(10, 10, 10, 0.55)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
+          background: scrolled ? 'rgba(10,10,10,0.88)' : 'rgba(10,10,10,0.55)',
+          backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
           border: scrolled
-            ? '1px solid rgba(201, 168, 76, 0.18)'
-            : '1px solid rgba(255, 255, 255, 0.07)',
+            ? '1px solid rgba(184,212,232,0.18)'
+            : '1px solid rgba(255,255,255,0.07)',
           boxShadow: scrolled
-            ? '0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(201,168,76,0.08) inset'
+            ? '0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(184,212,232,0.08) inset'
             : '0 4px 24px rgba(0,0,0,0.25)',
-          padding: '0 1.5rem',
-          height: 58,
+          padding: '0 1.5rem', height: 58,
         }}
       >
-        {/* 3-col grid: logo | nav | auth */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', height: '100%', maxWidth: 1280, margin: '0 auto' }}>
 
           {/* Logo */}
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', width: 'fit-content' }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #C9A84C, #C4956A)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(201,168,76,0.4)',
-              flexShrink: 0,
-            }}>
-              <Scissors size={13} color="#000" style={{ transform: 'rotate(45deg)' }} />
-            </div>
+            <img src={hairgoLogo} alt="HairGo" style={{
+              height: 46, width: 46, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
+              border: '1.5px solid rgba(184,212,232,0.4)',
+              boxShadow: '0 0 12px rgba(184,212,232,0.25)',
+            }} />
             <span className="font-display" style={{ fontSize: '1.45rem', letterSpacing: '0.02em', color: '#fff', lineHeight: 1 }}>
-              Hair<span style={{ color: '#C9A84C' }}>Go</span>
+              Hair<span style={{ color: '#B8D4E8' }}>Go</span>
             </span>
           </Link>
 
-          {/* Nav links — center */}
+          {/* Nav links */}
           <nav style={{ display: 'flex', alignItems: 'center', gap: 32 }} className="hidden-mobile">
             {links.map(({ to, label, exact }) => (
               <NavLink key={to} to={to} end={exact}
                 style={({ isActive }) => ({
                   fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
-                  color: isActive ? '#C9A84C' : 'rgba(255,255,255,0.52)',
+                  color: isActive ? '#B8D4E8' : 'rgba(255,255,255,0.52)',
                   textDecoration: 'none', position: 'relative',
-                  transition: 'color 0.3s',
-                  fontFamily: 'Jost, sans-serif', fontWeight: 400,
+                  transition: 'color 0.3s', fontFamily: 'Jost, sans-serif', fontWeight: 400,
                 })}
                 className="nav-link"
               >
@@ -134,12 +120,10 @@ export default function Navbar() {
                       <span style={{ position: 'absolute', top: -3, right: -8, width: 7, height: 7, borderRadius: '50%', background: '#ef4444' }} />
                     )}
                     <span style={{
-                      position: 'absolute', bottom: -4, left: 0,
-                      height: 1,
+                      position: 'absolute', bottom: -4, left: 0, height: 1,
                       width: isActive ? '100%' : '0%',
-                      background: 'linear-gradient(90deg, #C9A84C, #C4956A)',
-                      transition: 'width 0.35s ease',
-                      display: 'block',
+                      background: 'linear-gradient(90deg, #7AAFC9, #B8D4E8)',
+                      transition: 'width 0.35s ease', display: 'block',
                     }} className="nav-underline" />
                   </>
                 )}
@@ -147,20 +131,22 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Auth — right */}
+          {/* Auth */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 14 }} className="hidden-mobile">
             <AppointmentAlert />
             {(profile?.role === 'admin' || profile?.role === 'artist') && (
-              <button onClick={() => { sessionStorage.removeItem('studio_access'); navigate('/studio') }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', color: '#C9A84C', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
+              <button onClick={() => { sessionStorage.removeItem('studio_access'); navigate('/studio') }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'rgba(184,212,232,0.08)', border: '1px solid rgba(184,212,232,0.2)', color: '#B8D4E8', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
                 <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
               </button>
             )}
             {user && (
-              <Link to="/profile" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cartCount > 0 ? 'rgba(201,168,76,0.3)' : 'rgba(255,255,255,0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
+              <Link to="/profile"
+                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'rgba(184,212,232,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${cartCount > 0 ? 'rgba(184,212,232,0.3)' : 'rgba(255,255,255,0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
                 onClick={() => {}}>
-                <ShoppingCart size={13} color={cartCount > 0 ? '#C9A84C' : 'rgba(255,255,255,0.4)'} />
+                <ShoppingCart size={13} color={cartCount > 0 ? '#B8D4E8' : 'rgba(255,255,255,0.4)'} />
                 {cartCount > 0 && (
-                  <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#C9A84C', color: '#000', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost, sans-serif' }}>
+                  <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#B8D4E8', color: '#0F2235', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost, sans-serif' }}>
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}
@@ -171,15 +157,14 @@ export default function Navbar() {
                 <button onClick={() => setProfile(!profileOpen)} style={{
                   display: 'flex', alignItems: 'center', gap: 9,
                   padding: '7px 14px 7px 9px', borderRadius: 9999,
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.09)',
+                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)',
                   cursor: 'pointer', transition: 'border-color 0.3s',
                 }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)'}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(184,212,232,0.3)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)'}
                 >
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(201,168,76,0.35)', flexShrink: 0 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#000', lineHeight: 1 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#3D5A73,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(184,212,232,0.35)', flexShrink: 0 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1 }}>
                       {profile?.full_name?.[0] || user.email[0].toUpperCase()}
                     </span>
                   </div>
@@ -196,15 +181,15 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.96 }}
                       transition={{ duration: 0.18 }}
-                      style={{ position: 'absolute', right: 0, top: 'calc(100% + 10px)', width: 220, background: 'rgba(12,12,12,0.95)', backdropFilter: 'blur(24px)', border: '1px solid rgba(201,168,76,0.12)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}
+                      style={{ position: 'absolute', right: 0, top: 'calc(100% + 10px)', width: 220, background: 'rgba(12,26,39,0.95)', backdropFilter: 'blur(24px)', border: '1px solid rgba(184,212,232,0.12)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}
                     >
                       <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                         <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: 4, fontFamily: 'Jost,sans-serif' }}>Signed in as</p>
                         <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                         {(profile?.points || 0) > 0 && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                            <Star size={10} color="#C9A84C" />
-                            <span style={{ fontSize: 11, color: '#C9A84C', fontFamily: 'Jost,sans-serif' }}>{profile.points} visit{profile.points !== 1 ? 's' : ''}</span>
+                            <Star size={10} color="#B8D4E8" />
+                            <span style={{ fontSize: 11, color: '#B8D4E8', fontFamily: 'Jost,sans-serif' }}>{profile.points} visit{profile.points !== 1 ? 's' : ''}</span>
                           </div>
                         )}
                       </div>
@@ -213,13 +198,15 @@ export default function Navbar() {
                           { to: '/profile', icon: User, label: 'My Profile' },
                           { to: '/chat', icon: MessageCircle, label: 'Messages' },
                         ].map(({ to, icon: Icon, label: lbl }) => (
-                          <Link key={to} to={to} onClick={() => setProfile(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', transition: 'color 0.2s, background 0.2s', fontFamily: 'Jost,sans-serif' }}
+                          <Link key={to} to={to} onClick={() => setProfile(false)}
+                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', transition: 'color 0.2s, background 0.2s', fontFamily: 'Jost,sans-serif' }}
                             onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
                             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = 'transparent' }}>
                             <Icon size={13} />{lbl}
                           </Link>
                         ))}
-                        <button onClick={handleSignOut} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.6)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s, background 0.2s', fontFamily: 'Jost,sans-serif' }}
+                        <button onClick={handleSignOut}
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.6)', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s, background 0.2s', fontFamily: 'Jost,sans-serif' }}
                           onMouseEnter={e => { e.currentTarget.style.color = 'rgba(239,68,68,0.9)'; e.currentTarget.style.background = 'rgba(239,68,68,0.05)' }}
                           onMouseLeave={e => { e.currentTarget.style.color = 'rgba(239,68,68,0.6)'; e.currentTarget.style.background = 'transparent' }}>
                           <LogOut size={13} />Sign Out
@@ -231,7 +218,8 @@ export default function Navbar() {
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <Link to="/login" style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)', textDecoration: 'none', fontFamily: 'Jost,sans-serif', transition: 'color 0.3s' }}
+                <Link to="/login"
+                  style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.42)', textDecoration: 'none', fontFamily: 'Jost,sans-serif', transition: 'color 0.3s' }}
                   onMouseEnter={e => e.currentTarget.style.color = '#fff'}
                   onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.42)'}>
                   Sign In
@@ -262,10 +250,17 @@ export default function Navbar() {
             <motion.div
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 50, width: 280, background: '#0d0d0d', borderLeft: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column' }}
+              style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 50, width: 280, background: '#0d1e2f', borderLeft: '1px solid rgba(184,212,232,0.08)', display: 'flex', flexDirection: 'column' }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <span className="font-display" style={{ fontSize: '1.3rem', color: '#fff' }}>Hair<span style={{ color: '#C9A84C' }}>Go</span></span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <img src={hairgoLogo} alt="HairGo" style={{
+                    height: 38, width: 38, borderRadius: '50%', objectFit: 'cover',
+                    border: '1.5px solid rgba(184,212,232,0.4)',
+                    boxShadow: '0 0 10px rgba(184,212,232,0.2)',
+                  }} />
+                  <span className="font-display" style={{ fontSize: '1.3rem', color: '#fff' }}>Hair<span style={{ color: '#B8D4E8' }}>Go</span></span>
+                </div>
                 <button onClick={() => setMenuOpen(false)} style={{ padding: 6, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer' }}>
                   <X size={18} />
                 </button>
@@ -276,9 +271,9 @@ export default function Navbar() {
                   <NavLink key={to} to={to} end={exact} onClick={() => setMenuOpen(false)}
                     style={({ isActive }) => ({
                       padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
-                      color: isActive ? '#C9A84C' : 'rgba(255,255,255,0.45)',
-                      background: isActive ? 'rgba(201,168,76,0.08)' : 'transparent',
-                      border: isActive ? '1px solid rgba(201,168,76,0.15)' : '1px solid transparent',
+                      color: isActive ? '#B8D4E8' : 'rgba(255,255,255,0.45)',
+                      background: isActive ? 'rgba(184,212,232,0.08)' : 'transparent',
+                      border: isActive ? '1px solid rgba(184,212,232,0.15)' : '1px solid transparent',
                       textDecoration: 'none', fontFamily: 'Jost,sans-serif', transition: 'all 0.2s',
                     })}>
                     {label}
@@ -286,7 +281,7 @@ export default function Navbar() {
                 ))}
                 {(profile?.role === 'admin' || profile?.role === 'artist') && (
                   <button onClick={() => { sessionStorage.removeItem('studio_access'); setMenuOpen(false); navigate('/studio') }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9A84C', background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.15)', cursor: 'pointer', fontFamily: 'Jost,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#B8D4E8', background: 'rgba(184,212,232,0.08)', border: '1px solid rgba(184,212,232,0.15)', cursor: 'pointer', fontFamily: 'Jost,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
                     <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
                   </button>
                 )}

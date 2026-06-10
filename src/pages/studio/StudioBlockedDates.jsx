@@ -15,7 +15,7 @@ import toast from 'react-hot-toast'
 
 const C = {
   card: '#161620', modal: '#1a1a24',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
   danger: '#f87171', dangerBg: 'rgba(248,113,113,0.12)', dangerBorder: 'rgba(248,113,113,0.25)',
@@ -29,7 +29,7 @@ const WDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 // ── Shared button / input styles ──
 const btnSecondary = { flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }
-const btnGold      = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#C9A84C,#C4956A)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
+const btnGold      = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
 const btnDanger    = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1.5px solid ${C.dangerBorder}`, color: C.danger, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background .18s' }
 const labelStyle   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 7 }
 const inputStyle   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
@@ -334,10 +334,10 @@ export default function StudioBlockedDates() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .bd-day.clickable:hover { border-color: ${C.gold} !important; background: rgba(201,168,76,0.06) !important; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,0.14); cursor: pointer; }
+        .bd-day.clickable:hover { border-color: ${C.gold} !important; background: rgba(184,212,232,0.06) !important; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(184,212,232,0.14); cursor: pointer; }
         .bd-nav:hover { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .bd-today-btn:hover { background: ${C.gold} !important; color: #000 !important; }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08); outline: none; }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); outline: none; }
         .hour-pill { transition: all .15s ease; }
         .hour-pill:hover { border-color: ${C.gold} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
         .block-tab-btn:hover:not(.active) { color: ${C.dim} !important; background: rgba(255,255,255,0.04) !important; }
@@ -620,7 +620,7 @@ export default function StudioBlockedDates() {
           <div style={{ width: '100%', maxWidth: 460, background: C.modal, borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)', border: `1px solid ${C.goldBorder}` }}
             onClick={e => e.stopPropagation()}>
 
-            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#C4956A,rgba(201,168,76,0.15))` }} />
+            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
             <div style={{ padding: '1.5rem' }}>
 
               {/* Modal header */}
@@ -718,7 +718,7 @@ export default function StudioBlockedDates() {
                             const on = selHours.includes(h)
                             return (
                               <button key={h} onClick={() => toggleHour(h)} className="hour-pill"
-                                style={{ padding: '0.45rem 0', borderRadius: 8, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: on ? 700 : 400, cursor: 'pointer', border: on ? 'none' : `1px solid ${C.border}`, background: on ? `linear-gradient(135deg,${C.gold},#C4956A)` : 'rgba(255,255,255,0.03)', color: on ? '#000' : C.muted, boxShadow: on ? `0 3px 10px rgba(201,168,76,0.3)` : 'none', transition: 'all .15s' }}>
+                                style={{ padding: '0.45rem 0', borderRadius: 8, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: on ? 700 : 400, cursor: 'pointer', border: on ? 'none' : `1px solid ${C.border}`, background: on ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.03)', color: on ? '#000' : C.muted, boxShadow: on ? `0 3px 10px rgba(184,212,232,0.3)` : 'none', transition: 'all .15s' }}>
                                 {h}
                               </button>
                             )
@@ -810,7 +810,7 @@ export default function StudioBlockedDates() {
           onMouseDown={e => { if (e.target === e.currentTarget) setEditingSettings(false) }}>
           <div style={{ width: '100%', maxWidth: 420, background: C.modal, borderRadius: 18, overflow: 'hidden', border: `1px solid ${C.goldBorder}`, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#C4956A,rgba(201,168,76,0.15))`, flexShrink: 0 }} />
+            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))`, flexShrink: 0 }} />
 
             <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.1rem' }}>

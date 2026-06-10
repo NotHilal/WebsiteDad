@@ -291,11 +291,11 @@ export default function Appointments() {
   /* ── Success ── */
   if (done) return (
     <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'2rem', overflow:'hidden', position:'relative' }}>
-      <div style={{ position:'absolute', top:'40%', left:'50%', transform:'translate(-50%,-50%)', width:600, height:600, background:'radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 65%)', pointerEvents:'none', zIndex:0 }} />
+      <div style={{ position:'absolute', top:'40%', left:'50%', transform:'translate(-50%,-50%)', width:600, height:600, background:'radial-gradient(circle, rgba(184,212,232,0.09) 0%, transparent 65%)', pointerEvents:'none', zIndex:0 }} />
       <motion.div initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }} transition={{ type:'spring', damping:22 }}
         style={{ textAlign:'center', maxWidth:480, position:'relative', zIndex:1 }}>
         <motion.div initial={{ scale:0 }} animate={{ scale:1 }} transition={{ type:'spring', damping:14, delay:0.15 }}
-          style={{ width:112, height:112, borderRadius:'50%', background:'linear-gradient(135deg,#C9A84C,#C4956A)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 2.5rem', boxShadow:'0 24px 80px rgba(201,168,76,0.5), 0 0 0 20px rgba(201,168,76,0.07)' }}>
+          style={{ width:112, height:112, borderRadius:'50%', background:'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 2.5rem', boxShadow:'0 24px 80px rgba(184,212,232,0.5), 0 0 0 20px rgba(184,212,232,0.07)' }}>
           <Check size={48} color="#000" strokeWidth={2.5}/>
         </motion.div>
         <h2 className="font-display font-light" style={{ fontSize:'clamp(2.5rem,5vw,4.5rem)', color:'#fff', marginBottom:'1rem', lineHeight:1 }}>
@@ -320,7 +320,7 @@ export default function Appointments() {
         </p>
         <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8, marginBottom:'2.5rem' }}>
           {[sel.service?.name, `€${sel.service?.price}`, sel.service?.duration ? fmtDur(sel.service.duration) : null].filter(Boolean).map((l,i)=>(
-            <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.18)', fontSize:11, color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{l}</span>
+            <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'rgba(184,212,232,0.08)', border:'1px solid rgba(184,212,232,0.18)', fontSize:11, color:'#B8D4E8', fontFamily:'Jost,sans-serif' }}>{l}</span>
           ))}
         </div>
         <button className="btn-gold" onClick={() => { setDone(false); setStep(0); setSel({ service:null, stylist:null, date:null, time:null, notes:'' }); setPayStep(null); setClientSecret(null); setPayInStore(false); setGuestInfo({ name:'', phone:'', email:'' }); setShowPromo(true) }}>
@@ -335,7 +335,7 @@ export default function Appointments() {
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', paddingTop:68, paddingBottom:(sel.service||sel.stylist||sel.date)?88:0 }}>
 
       {/* ── Mobile step bar (shown only when sidebar is hidden) ── */}
-      <div className="appt-mobile-steps" style={{ display:'none', padding:'1rem 1.25rem 0.75rem', borderBottom:'1px solid rgba(201,168,76,0.1)', background:'#0a0a12', position:'sticky', top:68, zIndex:20 }}>
+      <div className="appt-mobile-steps" style={{ display:'none', padding:'1rem 1.25rem 0.75rem', borderBottom:'1px solid rgba(184,212,232,0.1)', background:'#0a0a12', position:'sticky', top:68, zIndex:20 }}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:0 }}>
           {STEPS.map((s, i) => {
             const isActive = i===step, isDone = i<step
@@ -343,12 +343,12 @@ export default function Appointments() {
               <div key={s} style={{ display:'flex', alignItems:'center' }}>
                 <div onClick={() => isDone && setStep(i)}
                   style={{ display:'flex', alignItems:'center', gap:6, cursor:isDone?'pointer':'default' }}>
-                  <div style={{ width:24, height:24, borderRadius:'50%', flexShrink:0, background:isActive?'linear-gradient(135deg,#C9A84C,#C4956A)':isDone?'rgba(201,168,76,0.12)':'rgba(255,255,255,0.05)', border:isActive?'none':isDone?'1px solid rgba(201,168,76,0.35)':'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .3s', boxShadow:isActive?'0 4px 14px rgba(201,168,76,0.45)':'none' }}>
-                    {isDone ? <Check size={10} color="#C9A84C"/> : <span style={{ fontSize:10, fontWeight:600, color:isActive?'#000':'rgba(255,255,255,0.25)', fontFamily:'Jost,sans-serif' }}>{i+1}</span>}
+                  <div style={{ width:24, height:24, borderRadius:'50%', flexShrink:0, background:isActive?'linear-gradient(135deg,#B8D4E8,#7AAFC9)':isDone?'rgba(184,212,232,0.12)':'rgba(255,255,255,0.05)', border:isActive?'none':isDone?'1px solid rgba(184,212,232,0.35)':'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .3s', boxShadow:isActive?'0 4px 14px rgba(184,212,232,0.45)':'none' }}>
+                    {isDone ? <Check size={10} color="#B8D4E8"/> : <span style={{ fontSize:10, fontWeight:600, color:isActive?'#000':'rgba(255,255,255,0.25)', fontFamily:'Jost,sans-serif' }}>{i+1}</span>}
                   </div>
-                  <span style={{ fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', color:isActive?'#fff':isDone?'rgba(201,168,76,0.55)':'rgba(255,255,255,0.2)', fontWeight:isActive?600:300 }}>{s}</span>
+                  <span style={{ fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', color:isActive?'#fff':isDone?'rgba(184,212,232,0.55)':'rgba(255,255,255,0.2)', fontWeight:isActive?600:300 }}>{s}</span>
                 </div>
-                {i < STEPS.length - 1 && <div style={{ width:20, height:1, background:isDone?'rgba(201,168,76,0.3)':'rgba(255,255,255,0.07)', margin:'0 6px', flexShrink:0 }} />}
+                {i < STEPS.length - 1 && <div style={{ width:20, height:1, background:isDone?'rgba(184,212,232,0.3)':'rgba(255,255,255,0.07)', margin:'0 6px', flexShrink:0 }} />}
               </div>
             )
           })}
@@ -361,29 +361,29 @@ export default function Appointments() {
       <div className="appt-step-panel" style={{
         width:300, flexShrink:0, position:'sticky', top:68,
         height:'calc(100vh - 68px)', overflowY:'auto',
-        background:'#0a0a12', borderRight:'1px solid rgba(201,168,76,0.14)',
+        background:'#0a0a12', borderRight:'1px solid rgba(184,212,232,0.14)',
         display:'flex', flexDirection:'column', padding:'3rem 2rem', zIndex:10,
       }}>
         {/* Top ambient glow */}
-        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:360, height:240, background:'radial-gradient(ellipse, rgba(201,168,76,0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:360, height:240, background:'radial-gradient(ellipse, rgba(184,212,232,0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
 
         {/* Brand */}
         <div style={{ marginBottom:'3rem', position:'relative' }}>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
-            <div style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#C9A84C,#C4956A)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 20px rgba(201,168,76,0.38)', flexShrink:0 }}>
+            <div style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 20px rgba(184,212,232,0.38)', flexShrink:0 }}>
               <Scissors size={13} color="#000" style={{ transform:'rotate(45deg)' }}/>
             </div>
             <div>
-              <span className="font-display" style={{ fontSize:'1.4rem', color:'#fff', lineHeight:1 }}>Hair<span style={{ color:'#C9A84C' }}>Go</span></span>
+              <span className="font-display" style={{ fontSize:'1.4rem', color:'#fff', lineHeight:1 }}>Hair<span style={{ color:'#B8D4E8' }}>Go</span></span>
               <span style={{ display:'block', fontSize:8, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.22)', fontFamily:'Jost,sans-serif', marginTop:3 }}>Book your appointment</span>
             </div>
           </div>
-          <div style={{ height:1, background:'linear-gradient(90deg,rgba(201,168,76,0.2),transparent)', marginTop:6 }} />
+          <div style={{ height:1, background:'linear-gradient(90deg,rgba(184,212,232,0.2),transparent)', marginTop:6 }} />
         </div>
 
         {/* Steps */}
         <div style={{ position:'relative', marginBottom:'2rem' }}>
-          <div style={{ position:'absolute', left:15, top:26, height:'calc(100% - 52px)', width:1, background:'linear-gradient(to bottom,rgba(201,168,76,0.22),rgba(255,255,255,0.04))' }} />
+          <div style={{ position:'absolute', left:15, top:26, height:'calc(100% - 52px)', width:1, background:'linear-gradient(to bottom,rgba(184,212,232,0.22),rgba(255,255,255,0.04))' }} />
           {STEPS.map((s, i) => {
             const isActive = i===step, isDone = i<step
             return (
@@ -391,18 +391,18 @@ export default function Appointments() {
                 style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'0.85rem 0', cursor:isDone?'pointer':'default', position:'relative', zIndex:1 }}>
                 <div style={{
                   width:32, height:32, borderRadius:'50%', flexShrink:0, marginTop:1,
-                  background: isActive ? 'linear-gradient(135deg,#C9A84C,#C4956A)' : isDone ? 'rgba(201,168,76,0.12)' : '#0a0a12',
-                  border: isActive ? 'none' : isDone ? '1px solid rgba(201,168,76,0.35)' : '1px solid rgba(255,255,255,0.1)',
+                  background: isActive ? 'linear-gradient(135deg,#B8D4E8,#7AAFC9)' : isDone ? 'rgba(184,212,232,0.12)' : '#0a0a12',
+                  border: isActive ? 'none' : isDone ? '1px solid rgba(184,212,232,0.35)' : '1px solid rgba(255,255,255,0.1)',
                   display:'flex', alignItems:'center', justifyContent:'center',
-                  boxShadow: isActive ? '0 6px 24px rgba(201,168,76,0.5)' : 'none',
+                  boxShadow: isActive ? '0 6px 24px rgba(184,212,232,0.5)' : 'none',
                   transition:'all 0.4s ease',
                 }}>
-                  {isDone ? <Check size={13} color="#C9A84C"/> : <span style={{ fontSize:12, fontWeight:600, color:isActive?'#000':'rgba(255,255,255,0.22)', fontFamily:'Jost,sans-serif' }}>{i+1}</span>}
+                  {isDone ? <Check size={13} color="#B8D4E8"/> : <span style={{ fontSize:12, fontWeight:600, color:isActive?'#000':'rgba(255,255,255,0.22)', fontFamily:'Jost,sans-serif' }}>{i+1}</span>}
                 </div>
                 <div style={{ paddingTop:3 }}>
-                  <span style={{ fontSize:11, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', color:isActive?'#fff':isDone?'rgba(201,168,76,0.65)':'rgba(255,255,255,0.22)', fontWeight:isActive?600:300, transition:'color 0.3s', display:'block' }}>{s}</span>
+                  <span style={{ fontSize:11, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', color:isActive?'#fff':isDone?'rgba(184,212,232,0.65)':'rgba(255,255,255,0.22)', fontWeight:isActive?600:300, transition:'color 0.3s', display:'block' }}>{s}</span>
                   {isDone && (
-                    <span style={{ fontSize:10, color:'rgba(201,168,76,0.45)', fontFamily:'Jost,sans-serif', marginTop:3, display:'block', lineHeight:1 }}>
+                    <span style={{ fontSize:10, color:'rgba(184,212,232,0.45)', fontFamily:'Jost,sans-serif', marginTop:3, display:'block', lineHeight:1 }}>
                       {i===0 && sel.service?.name}
                       {i===1 && sel.stylist?.name}
                       {i===2 && sel.date && format(sel.date,'MMM d')}
@@ -415,7 +415,7 @@ export default function Appointments() {
         </div>
 
         {/* Divider */}
-        <div style={{ height:1, background:'linear-gradient(90deg,rgba(201,168,76,0.15),transparent)', marginBottom:'1.75rem' }} />
+        <div style={{ height:1, background:'linear-gradient(90deg,rgba(184,212,232,0.15),transparent)', marginBottom:'1.75rem' }} />
 
         {/* Live summary */}
         <div style={{ flex:1 }}>
@@ -432,7 +432,7 @@ export default function Appointments() {
                 {value
                   ? <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
                       <p style={{ fontSize:'0.85rem', color:'rgba(255,255,255,0.72)', fontFamily:'Jost,sans-serif', lineHeight:1.3 }}>{value}</p>
-                      {sub && <span style={{ fontSize:11, color:'#C9A84C', fontFamily:'Jost,sans-serif', fontWeight:500 }}>{sub}</span>}
+                      {sub && <span style={{ fontSize:11, color:'#B8D4E8', fontFamily:'Jost,sans-serif', fontWeight:500 }}>{sub}</span>}
                     </div>
                   : <div style={{ height:1, width:24, background:'rgba(255,255,255,0.1)', marginTop:6 }} />
                 }
@@ -463,7 +463,7 @@ export default function Appointments() {
                 {/* Gender filter toggle */}
                 <div style={{ display:'flex', justifyContent:'center', gap:8, marginBottom:28, flexWrap:'wrap' }}>
                   {[
-                    { value:'all',   label:'All Services', color:'#C9A84C' },
+                    { value:'all',   label:'All Services', color:'#B8D4E8' },
                     { value:'man',   label:'Men',          color:'#60a5fa' },
                     { value:'woman', label:'Women',        color:'#f472b6' },
                   ].map(({ value, label, color }) => {
@@ -503,20 +503,20 @@ export default function Appointments() {
                       <div key={svc.id} className="appt-svc-card"
                         onClick={() => { setSel(p=>({...p,service:svc})); setStep(1) }}
                         style={{ height:260, borderRadius:18, overflow:'hidden', position:'relative', cursor:'pointer',
-                                 border: isActive ? '2px solid rgba(201,168,76,0.7)' : '1px solid rgba(255,255,255,0.06)',
-                                 boxShadow: isActive ? '0 0 0 4px rgba(201,168,76,0.12),0 16px 48px rgba(0,0,0,0.5)' : '0 6px 24px rgba(0,0,0,0.35)',
+                                 border: isActive ? '2px solid rgba(184,212,232,0.7)' : '1px solid rgba(255,255,255,0.06)',
+                                 boxShadow: isActive ? '0 0 0 4px rgba(184,212,232,0.12),0 16px 48px rgba(0,0,0,0.5)' : '0 6px 24px rgba(0,0,0,0.35)',
                                  transition:'all 0.35s cubic-bezier(0.22,1,0.36,1)' }}>
 
                         <div style={{ position:'absolute', inset:0 }}>
                           {svc.image_url
                             ? <img src={svc.image_url} alt={svc.name} className="appt-svc-img" loading="lazy" decoding="async"
                                 style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.7s cubic-bezier(0.22,1,0.36,1)' }} />
-                            : <div style={{ width:'100%', height:'100%', background:'radial-gradient(ellipse at 25% 30%, rgba(201,168,76,0.14) 0%, rgba(201,168,76,0.04) 50%, #0d0d14 100%)' }}>
-                                {svc.name && <span className="font-display" style={{ position:'absolute', bottom:-10, right:14, fontSize:'8rem', color:'rgba(201,168,76,0.07)', lineHeight:1, userSelect:'none' }}>{svc.name.charAt(0)}</span>}
+                            : <div style={{ width:'100%', height:'100%', background:'radial-gradient(ellipse at 25% 30%, rgba(184,212,232,0.14) 0%, rgba(184,212,232,0.04) 50%, #0d0d14 100%)' }}>
+                                {svc.name && <span className="font-display" style={{ position:'absolute', bottom:-10, right:14, fontSize:'8rem', color:'rgba(184,212,232,0.07)', lineHeight:1, userSelect:'none' }}>{svc.name.charAt(0)}</span>}
                               </div>
                           }
                           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(0,0,0,0.04) 0%,rgba(6,6,10,0.55) 45%,rgba(6,6,10,0.98) 100%)' }} />
-                          <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,rgba(201,168,76,${isActive?'0.9':'0.4'}),transparent)` }} />
+                          <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,rgba(184,212,232,${isActive?'0.9':'0.4'}),transparent)` }} />
                         </div>
 
                         {svc.category && (
@@ -534,16 +534,16 @@ export default function Appointments() {
                         </button>
 
                         {isActive && (
-                          <div style={{ position:'absolute', top:10, right:10, zIndex:3, width:30, height:30, borderRadius:'50%', background:'linear-gradient(135deg,#C9A84C,#C4956A)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 16px rgba(201,168,76,0.5)' }}>
+                          <div style={{ position:'absolute', top:10, right:10, zIndex:3, width:30, height:30, borderRadius:'50%', background:'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 16px rgba(184,212,232,0.5)' }}>
                             <Check size={14} color="#000" strokeWidth={2.5}/>
                           </div>
                         )}
 
                         <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'1.25rem 1.4rem 1.3rem', zIndex:2 }}>
-                          <div style={{ height:1, background:`linear-gradient(90deg,rgba(201,168,76,${isActive?'0.5':'0.22'}),transparent)`, marginBottom:'0.7rem' }} />
+                          <div style={{ height:1, background:`linear-gradient(90deg,rgba(184,212,232,${isActive?'0.5':'0.22'}),transparent)`, marginBottom:'0.7rem' }} />
                           <h3 className="font-display" style={{ fontSize:'1.5rem', color:'#fff', lineHeight:1.1, marginBottom:'0.6rem', fontWeight:400 }}>{svc.name}</h3>
                           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                            {svc.price && <span className="font-display" style={{ fontSize:'1.8rem', color:'#C9A84C', lineHeight:1, textShadow:isActive?'0 0 28px rgba(201,168,76,0.5)':'none' }}>€{svc.price}</span>}
+                            {svc.price && <span className="font-display" style={{ fontSize:'1.8rem', color:'#B8D4E8', lineHeight:1, textShadow:isActive?'0 0 28px rgba(184,212,232,0.5)':'none' }}>€{svc.price}</span>}
                             {svc.duration>0 && (
                               <div style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 10px', borderRadius:20, background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.1)' }}>
                                 <Clock size={9} color="rgba(255,255,255,0.4)" strokeWidth={1.5}/>
@@ -568,7 +568,7 @@ export default function Appointments() {
                         initial={{ opacity:0, scale:0.93, y:16 }} animate={{ opacity:1, scale:1, y:0 }} exit={{ opacity:0, scale:0.93, y:8 }}
                         transition={{ type:'spring', damping:26, stiffness:340 }}
                         onClick={e => e.stopPropagation()}
-                        style={{ width:'100%', maxWidth:460, background:'#0e0e14', border:'1px solid rgba(201,168,76,0.15)', borderRadius:22, overflow:'hidden', boxShadow:'0 40px 100px rgba(0,0,0,0.7)' }}>
+                        style={{ width:'100%', maxWidth:460, background:'#0e0e14', border:'1px solid rgba(184,212,232,0.15)', borderRadius:22, overflow:'hidden', boxShadow:'0 40px 100px rgba(0,0,0,0.7)' }}>
 
                         {preview.image_url ? (
                           <div style={{ height:200, position:'relative', overflow:'hidden' }}>
@@ -577,16 +577,16 @@ export default function Appointments() {
                             <button onClick={() => setPreview(null)} style={{ position:'absolute', top:12, right:12, width:32, height:32, borderRadius:'50%', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.15)', color:'rgba(255,255,255,0.5)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }} className="preview-close"><X size={14}/></button>
                             <div style={{ position:'absolute', bottom:14, left:18, right:18 }}>
                               <h2 className="font-display font-light" style={{ fontSize:'1.8rem', color:'#fff', lineHeight:1.1, marginBottom:preview.category?3:0 }}>{preview.name}</h2>
-                              {preview.category && <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{preview.category}</span>}
+                              {preview.category && <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'#B8D4E8', fontFamily:'Jost,sans-serif' }}>{preview.category}</span>}
                             </div>
                           </div>
                         ) : (
                           <>
-                            <div style={{ height:3, background:'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.2))' }}/>
+                            <div style={{ height:3, background:'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.2))' }}/>
                             <div style={{ padding:'1.5rem 1.5rem 0.75rem', display:'flex', alignItems:'flex-start', justifyContent:'space-between' }}>
                               <div>
                                 <h2 className="font-display font-light" style={{ fontSize:'1.8rem', color:'#fff', lineHeight:1.1, marginBottom:4 }}>{preview.name}</h2>
-                                {preview.category && <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{preview.category}</span>}
+                                {preview.category && <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'#B8D4E8', fontFamily:'Jost,sans-serif' }}>{preview.category}</span>}
                               </div>
                               <button onClick={() => setPreview(null)} style={{ width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.4)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }} className="preview-close"><X size={14}/></button>
                             </div>
@@ -596,9 +596,9 @@ export default function Appointments() {
                         <div style={{ height:1, background:'rgba(255,255,255,0.06)', margin:'0.875rem 1.5rem 0' }}/>
                         <div style={{ display:'flex', gap:8, padding:'1rem 1.5rem', flexWrap:'wrap' }}>
                           {preview.price && (
-                            <div style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:'rgba(201,168,76,0.08)', border:'1px solid rgba(201,168,76,0.2)' }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:'rgba(184,212,232,0.08)', border:'1px solid rgba(184,212,232,0.2)' }}>
                               <span style={{ fontSize:10, letterSpacing:'0.12em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', fontFamily:'Jost,sans-serif' }}>Price</span>
-                              <span className="font-display" style={{ fontSize:'1.1rem', color:'#C9A84C' }}>€{preview.price}</span>
+                              <span className="font-display" style={{ fontSize:'1.1rem', color:'#B8D4E8' }}>€{preview.price}</span>
                             </div>
                           )}
                           {preview.duration>0 && (
@@ -650,27 +650,27 @@ export default function Appointments() {
                       <button key={sty.id} onClick={() => { setSel(p=>({...p,stylist:sty})); setStep(2) }}
                         className="appt-sty-card"
                         style={{ padding:0, borderRadius:18, cursor:'pointer', overflow:'hidden',
-                                 border: isActive ? '2px solid rgba(201,168,76,0.6)' : '1px solid rgba(255,255,255,0.07)',
+                                 border: isActive ? '2px solid rgba(184,212,232,0.6)' : '1px solid rgba(255,255,255,0.07)',
                                  background:'rgba(255,255,255,0.02)', transition:'all 0.35s ease',
-                                 boxShadow: isActive ? '0 0 0 4px rgba(201,168,76,0.1),0 8px 40px rgba(201,168,76,0.12)' : '0 4px 20px rgba(0,0,0,0.3)',
+                                 boxShadow: isActive ? '0 0 0 4px rgba(184,212,232,0.1),0 8px 40px rgba(184,212,232,0.12)' : '0 4px 20px rgba(0,0,0,0.3)',
                                  position:'relative' }}>
-                        <div style={{ aspectRatio:'1/1', background:'linear-gradient(135deg,rgba(201,168,76,0.08),rgba(196,149,106,0.04))', position:'relative', overflow:'hidden' }}>
+                        <div style={{ aspectRatio:'1/1', background:'linear-gradient(135deg,rgba(184,212,232,0.08),rgba(122,175,201,0.04))', position:'relative', overflow:'hidden' }}>
                           {sty.photo_url
                             ? <img src={sty.photo_url} alt={sty.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center' }}/>
                             : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                                <User size={40} color="rgba(201,168,76,0.18)" strokeWidth={1}/>
+                                <User size={40} color="rgba(184,212,232,0.18)" strokeWidth={1}/>
                               </div>
                           }
                           {isActive && (
-                            <div style={{ position:'absolute', inset:0, background:'rgba(201,168,76,0.06)' }}>
-                              <div style={{ position:'absolute', top:10, right:10, width:26, height:26, borderRadius:'50%', background:'linear-gradient(135deg,#C9A84C,#C4956A)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 12px rgba(201,168,76,0.4)' }}>
+                            <div style={{ position:'absolute', inset:0, background:'rgba(184,212,232,0.06)' }}>
+                              <div style={{ position:'absolute', top:10, right:10, width:26, height:26, borderRadius:'50%', background:'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 12px rgba(184,212,232,0.4)' }}>
                                 <Check size={12} color="#000" strokeWidth={2.5}/>
                               </div>
                             </div>
                           )}
                           <div style={{ position:'absolute', bottom:0, left:0, right:0, height:60, background:'linear-gradient(to top,rgba(0,0,0,0.55),transparent)' }}/>
                         </div>
-                        <div style={{ padding:'0.9rem 1rem 1rem', textAlign:'center', borderTop:`1px solid ${isActive?'rgba(201,168,76,0.12)':'rgba(255,255,255,0.04)'}` }}>
+                        <div style={{ padding:'0.9rem 1rem 1rem', textAlign:'center', borderTop:`1px solid ${isActive?'rgba(184,212,232,0.12)':'rgba(255,255,255,0.04)'}` }}>
                           <p className="font-display" style={{ color:'#fff', fontSize:'1.1rem', marginBottom:4 }}>{sty.name}</p>
                           {sty.title && <p style={{ fontSize:8, color:'rgba(255,255,255,0.25)', letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Jost,sans-serif' }}>{sty.title}</p>}
                         </div>
@@ -721,10 +721,10 @@ export default function Appointments() {
                         <button key={day.toString()} disabled={off} onClick={() => setSel(p=>({...p,date:day,time:null}))} className="appt-day-btn"
                           style={{ height:44, borderRadius:10, fontSize:'0.85rem', fontFamily:'Jost,sans-serif',
                             cursor:off?'not-allowed':'pointer', transition:'all 0.2s ease',
-                            border:isToday&&!isSel?'1px solid rgba(201,168,76,0.35)':'1px solid transparent',
-                            background:isSel?'linear-gradient(135deg,#C9A84C,#C4956A)':'transparent',
-                            color:isSel?'#000':off?'rgba(255,255,255,0.08)':isToday?'#C9A84C':'rgba(255,255,255,0.5)',
-                            fontWeight:isSel?700:400, boxShadow:isSel?'0 4px 16px rgba(201,168,76,0.4)':'none',
+                            border:isToday&&!isSel?'1px solid rgba(184,212,232,0.35)':'1px solid transparent',
+                            background:isSel?'linear-gradient(135deg,#B8D4E8,#7AAFC9)':'transparent',
+                            color:isSel?'#000':off?'rgba(255,255,255,0.08)':isToday?'#B8D4E8':'rgba(255,255,255,0.5)',
+                            fontWeight:isSel?700:400, boxShadow:isSel?'0 4px 16px rgba(184,212,232,0.4)':'none',
                           }}>{format(day,'d')}</button>
                       )
                     })}
@@ -736,8 +736,8 @@ export default function Appointments() {
                     <>
                       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                          <Calendar size={11} color="#C9A84C" strokeWidth={1.5}/>
-                          <span style={{ fontSize:10, letterSpacing:'0.13em', textTransform:'uppercase', color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{format(sel.date,'EEEE, MMMM d')}</span>
+                          <Calendar size={11} color="#B8D4E8" strokeWidth={1.5}/>
+                          <span style={{ fontSize:10, letterSpacing:'0.13em', textTransform:'uppercase', color:'#B8D4E8', fontFamily:'Jost,sans-serif' }}>{format(sel.date,'EEEE, MMMM d')}</span>
                         </div>
                         {sel.time && (
                           <button className="btn-gold" onClick={() => setStep(3)} style={{ padding:'6px 18px', fontSize:10, gap:6 }}>
@@ -760,7 +760,7 @@ export default function Appointments() {
                                   const isSel = sel.time===slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
-                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'Jost,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(255,255,255,0.07)', background:isSel?'linear-gradient(135deg,#C9A84C,#C4956A)':'rgba(255,255,255,0.02)', color:isSel?'#000':tk?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.4)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(201,168,76,0.35)':'none' }}>
+                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'Jost,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(255,255,255,0.07)', background:isSel?'linear-gradient(135deg,#B8D4E8,#7AAFC9)':'rgba(255,255,255,0.02)', color:isSel?'#000':tk?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.4)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(184,212,232,0.35)':'none' }}>
                                       {slot}
                                     </button>
                                   )
@@ -778,7 +778,7 @@ export default function Appointments() {
                                   const isSel = sel.time===slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
-                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'Jost,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(201,168,76,0.1)', background:isSel?'linear-gradient(135deg,#C9A84C,#C4956A)':'rgba(201,168,76,0.03)', color:isSel?'#000':tk?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.4)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(201,168,76,0.35)':'none' }}>
+                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'Jost,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(184,212,232,0.1)', background:isSel?'linear-gradient(135deg,#B8D4E8,#7AAFC9)':'rgba(184,212,232,0.03)', color:isSel?'#000':tk?'rgba(255,255,255,0.08)':'rgba(255,255,255,0.4)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(184,212,232,0.35)':'none' }}>
                                       {slot}
                                     </button>
                                   )
@@ -813,22 +813,22 @@ export default function Appointments() {
                   <p style={{ color:'rgba(255,255,255,0.25)', fontSize:'0.85rem', fontFamily:'Jost,sans-serif' }}>Review your appointment details</p>
                 </div>
 
-                <div style={{ borderRadius:18, overflow:'hidden', border:'1px solid rgba(201,168,76,0.14)', marginBottom:20, position:'relative' }}>
+                <div style={{ borderRadius:18, overflow:'hidden', border:'1px solid rgba(184,212,232,0.14)', marginBottom:20, position:'relative' }}>
                   {sel.service?.image_url ? (
                     <div style={{ height:140, position:'relative', overflow:'hidden' }}>
                       <img src={sel.service.image_url} alt={sel.service.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                       <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(14,14,20,0.93) 100%)' }}/>
                       <div style={{ position:'absolute', bottom:14, left:20, right:20, display:'flex', alignItems:'flex-end', justifyContent:'space-between' }}>
                         <h3 className="font-display" style={{ color:'#fff', fontSize:'1.6rem', lineHeight:1 }}>{sel.service.name}</h3>
-                        <span className="font-display" style={{ color:'#C9A84C', fontSize:'1.8rem', lineHeight:1 }}>€{sel.service.price}</span>
+                        <span className="font-display" style={{ color:'#B8D4E8', fontSize:'1.8rem', lineHeight:1 }}>€{sel.service.price}</span>
                       </div>
                     </div>
                   ) : (
-                    <div style={{ height:3, background:'linear-gradient(90deg,#C9A84C,#C4956A,rgba(201,168,76,0.2))' }}/>
+                    <div style={{ height:3, background:'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.2))' }}/>
                   )}
 
                   <div style={{ background:'rgba(255,255,255,0.02)', position:'relative' }}>
-                    <div style={{ position:'absolute', top:0, right:0, width:160, height:160, background:'radial-gradient(circle,rgba(201,168,76,0.05) 0%,transparent 70%)', pointerEvents:'none' }}/>
+                    <div style={{ position:'absolute', top:0, right:0, width:160, height:160, background:'radial-gradient(circle,rgba(184,212,232,0.05) 0%,transparent 70%)', pointerEvents:'none' }}/>
                     {[
                       ...(!sel.service?.image_url ? [{ label:'Service', value:sel.service?.name, extra:`€${sel.service?.price}` }] : []),
                       { label:'Stylist',  value:sel.stylist?.name },
@@ -840,7 +840,7 @@ export default function Appointments() {
                         <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.2)', fontFamily:'Jost,sans-serif' }}>{label}</span>
                         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                           <span style={{ color:'rgba(255,255,255,0.75)', fontSize:'0.85rem', fontFamily:'Jost,sans-serif', fontWeight:300 }}>{value}</span>
-                          {extra && <span style={{ padding:'2px 10px', borderRadius:9999, background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.2)', fontSize:11, color:'#C9A84C', fontFamily:'Jost,sans-serif' }}>{extra}</span>}
+                          {extra && <span style={{ padding:'2px 10px', borderRadius:9999, background:'rgba(184,212,232,0.1)', border:'1px solid rgba(184,212,232,0.2)', fontSize:11, color:'#B8D4E8', fontFamily:'Jost,sans-serif' }}>{extra}</span>}
                         </div>
                       </div>
                     ))}
@@ -868,16 +868,16 @@ export default function Appointments() {
                         return (
                           <button key={uc.id} onClick={() => setAppliedCoupon(isApplied ? null : uc)}
                             style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.7rem 1rem', borderRadius:12, cursor:'pointer', transition:'all 0.2s',
-                              background: isApplied ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.02)',
-                              border: isApplied ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.07)',
+                              background: isApplied ? 'rgba(184,212,232,0.1)' : 'rgba(255,255,255,0.02)',
+                              border: isApplied ? '1px solid rgba(184,212,232,0.4)' : '1px solid rgba(255,255,255,0.07)',
                             }}>
                             <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                              <div style={{ width:28, height:28, borderRadius:8, background: isApplied ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)', border: isApplied ? '1px solid rgba(201,168,76,0.3)' : '1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                                {isApplied ? <Check size={13} color="#C9A84C" strokeWidth={2.5}/> : <Star size={11} color="rgba(255,255,255,0.2)" strokeWidth={1.5}/>}
+                              <div style={{ width:28, height:28, borderRadius:8, background: isApplied ? 'rgba(184,212,232,0.15)' : 'rgba(255,255,255,0.04)', border: isApplied ? '1px solid rgba(184,212,232,0.3)' : '1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                {isApplied ? <Check size={13} color="#B8D4E8" strokeWidth={2.5}/> : <Star size={11} color="rgba(255,255,255,0.2)" strokeWidth={1.5}/>}
                               </div>
-                              <span style={{ fontSize:'0.82rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.08em', color: isApplied ? '#C9A84C' : 'rgba(255,255,255,0.55)', fontWeight: isApplied ? 700 : 400 }}>{c.code}</span>
+                              <span style={{ fontSize:'0.82rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.08em', color: isApplied ? '#B8D4E8' : 'rgba(255,255,255,0.55)', fontWeight: isApplied ? 700 : 400 }}>{c.code}</span>
                             </div>
-                            <span style={{ fontSize:'0.78rem', fontFamily:'Jost,sans-serif', color: isApplied ? '#C9A84C' : 'rgba(255,255,255,0.3)', fontWeight: isApplied ? 600 : 400 }}>{discLabel}</span>
+                            <span style={{ fontSize:'0.78rem', fontFamily:'Jost,sans-serif', color: isApplied ? '#B8D4E8' : 'rgba(255,255,255,0.3)', fontWeight: isApplied ? 600 : 400 }}>{discLabel}</span>
                           </button>
                         )
                       })}
@@ -924,18 +924,18 @@ export default function Appointments() {
                     }
                   </button>
                   <button onClick={bookInStore} disabled={saving||payStep==='loading'||!guestInfoValid}
-                    style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:12, border:'1px solid rgba(201,168,76,0.28)', background:'rgba(201,168,76,0.07)', color: (saving||!guestInfoValid) ? 'rgba(201,168,76,0.35)' : '#C9A84C', cursor: (saving||payStep==='loading'||!guestInfoValid) ? 'not-allowed' : 'pointer', fontSize:13, fontFamily:'Jost,sans-serif', fontWeight:500, letterSpacing:'0.04em', transition:'all 0.25s' }}
-                    onMouseEnter={e => { if (!saving && !payStep && guestInfoValid) { e.currentTarget.style.background='rgba(201,168,76,0.13)'; e.currentTarget.style.borderColor='rgba(201,168,76,0.45)' } }}
-                    onMouseLeave={e => { e.currentTarget.style.background='rgba(201,168,76,0.07)'; e.currentTarget.style.borderColor='rgba(201,168,76,0.28)' }}>
+                    style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:12, border:'1px solid rgba(184,212,232,0.28)', background:'rgba(184,212,232,0.07)', color: (saving||!guestInfoValid) ? 'rgba(184,212,232,0.35)' : '#B8D4E8', cursor: (saving||payStep==='loading'||!guestInfoValid) ? 'not-allowed' : 'pointer', fontSize:13, fontFamily:'Jost,sans-serif', fontWeight:500, letterSpacing:'0.04em', transition:'all 0.25s' }}
+                    onMouseEnter={e => { if (!saving && !payStep && guestInfoValid) { e.currentTarget.style.background='rgba(184,212,232,0.13)'; e.currentTarget.style.borderColor='rgba(184,212,232,0.45)' } }}
+                    onMouseLeave={e => { e.currentTarget.style.background='rgba(184,212,232,0.07)'; e.currentTarget.style.borderColor='rgba(184,212,232,0.28)' }}>
                     {saving
-                      ? <div style={{ width:16,height:16,border:'2px solid rgba(201,168,76,0.25)',borderTopColor:'#C9A84C',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
+                      ? <div style={{ width:16,height:16,border:'2px solid rgba(184,212,232,0.25)',borderTopColor:'#B8D4E8',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
                       : 'Pay in Store'
                     }
                   </button>
                 </div>
 
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:12 }}>
-                  <Sparkles size={10} color="rgba(201,168,76,0.4)"/>
+                  <Sparkles size={10} color="rgba(184,212,232,0.4)"/>
                   <p style={{ fontSize:9, color:'rgba(255,255,255,0.18)', letterSpacing:'0.12em', fontFamily:'Jost,sans-serif' }}>Every completed visit counts toward your 30% reward</p>
                 </div>
               </motion.div>
@@ -962,15 +962,15 @@ export default function Appointments() {
       <style>{`
         @keyframes spin { to { transform:rotate(360deg) } }
 
-        .appt-svc-card:hover { transform:translateY(-5px) !important; box-shadow:0 24px 60px rgba(0,0,0,0.6) !important; border-color:rgba(201,168,76,0.35) !important; }
+        .appt-svc-card:hover { transform:translateY(-5px) !important; box-shadow:0 24px 60px rgba(0,0,0,0.6) !important; border-color:rgba(184,212,232,0.35) !important; }
         .appt-svc-card:hover .appt-svc-img { transform:scale(1.07) !important; }
         .appt-info-btn:hover { color:rgba(255,255,255,0.75) !important; background:rgba(255,255,255,0.12) !important; border-color:rgba(255,255,255,0.2) !important; }
-        .appt-sty-card:hover { border-color:rgba(201,168,76,0.3) !important; transform:translateY(-4px) !important; box-shadow:0 16px 48px rgba(201,168,76,0.1) !important; }
+        .appt-sty-card:hover { border-color:rgba(184,212,232,0.3) !important; transform:translateY(-4px) !important; box-shadow:0 16px 48px rgba(184,212,232,0.1) !important; }
         .appt-back-btn:hover { color:rgba(255,255,255,0.6) !important; border-color:rgba(255,255,255,0.13) !important; background:rgba(255,255,255,0.07) !important; }
-        .appt-nav-btn:hover { background:rgba(201,168,76,0.09) !important; border-color:rgba(201,168,76,0.22) !important; color:#C9A84C !important; }
-        .appt-day-btn:not(:disabled):hover { background:rgba(201,168,76,0.1) !important; color:#C9A84C !important; }
-        .appt-slot-btn:not(:disabled):hover { border-color:rgba(201,168,76,0.28) !important; background:rgba(201,168,76,0.07) !important; color:#C9A84C !important; }
-        .appt-textarea:focus { border-color:rgba(201,168,76,0.35) !important; }
+        .appt-nav-btn:hover { background:rgba(184,212,232,0.09) !important; border-color:rgba(184,212,232,0.22) !important; color:#B8D4E8 !important; }
+        .appt-day-btn:not(:disabled):hover { background:rgba(184,212,232,0.1) !important; color:#B8D4E8 !important; }
+        .appt-slot-btn:not(:disabled):hover { border-color:rgba(184,212,232,0.28) !important; background:rgba(184,212,232,0.07) !important; color:#B8D4E8 !important; }
+        .appt-textarea:focus { border-color:rgba(184,212,232,0.35) !important; }
         .appt-textarea::placeholder { color:rgba(255,255,255,0.13); }
         .preview-close:hover { background:rgba(255,255,255,0.1) !important; color:rgba(255,255,255,0.8) !important; }
         .preview-cancel:hover { background:rgba(255,255,255,0.07) !important; color:rgba(255,255,255,0.6) !important; }

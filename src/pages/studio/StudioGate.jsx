@@ -126,16 +126,16 @@ export default function StudioGate() {
 
       {/* ── Left panel ── */}
       <div className="sg-left" style={{ width: 400, flexShrink: 0, position: 'relative', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 52px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(201,168,76,0.04) 0%, transparent 60%)' }} />
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 320, height: 320, background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: 'linear-gradient(rgba(201,168,76,1) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,1) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(184,212,232,0.04) 0%, transparent 60%)' }} />
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 320, height: 320, background: 'radial-gradient(circle, rgba(184,212,232,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: 'linear-gradient(rgba(184,212,232,1) 1px,transparent 1px),linear-gradient(90deg,rgba(184,212,232,1) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
 
         <div style={{ position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(201,168,76,0.3)' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(184,212,232,0.3)' }}>
               <Scissors size={16} color="#000" style={{ transform: 'rotate(45deg)' }} />
             </div>
-            <span className="font-display" style={{ fontSize: '1.6rem', color: '#fff' }}>Hair<span style={{ color: '#C9A84C' }}>Go</span></span>
+            <span className="font-display" style={{ fontSize: '1.6rem', color: '#fff' }}>Hair<span style={{ color: '#B8D4E8' }}>Go</span></span>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ export default function StudioGate() {
             Welcome<br />
             <span className="gold-gradient" style={{ fontStyle: 'italic' }}>back.</span>
           </h2>
-          <div style={{ width: 36, height: 1, background: 'linear-gradient(90deg,#C9A84C,transparent)', marginBottom: 20 }} />
+          <div style={{ width: 36, height: 1, background: 'linear-gradient(90deg,#B8D4E8,transparent)', marginBottom: 20 }} />
           <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: '0.88rem', lineHeight: 1.9, maxWidth: 280, fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>
             The HairGo Studio is your private management hub — restricted to authorised administrators only.
           </p>
@@ -168,15 +168,15 @@ export default function StudioGate() {
         >
           {/* Mobile logo */}
           <div className="sg-mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(201,168,76,0.3)' }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(184,212,232,0.3)' }}>
               <Scissors size={14} color="#000" style={{ transform: 'rotate(45deg)' }} />
             </div>
-            <span className="font-display" style={{ fontSize: '1.45rem', color: '#fff' }}>Hair<span style={{ color: '#C9A84C' }}>Go</span></span>
+            <span className="font-display" style={{ fontSize: '1.45rem', color: '#fff' }}>Hair<span style={{ color: '#B8D4E8' }}>Go</span></span>
           </div>
 
           {/* Header */}
           <div className="sg-header" style={{ marginBottom: 44 }}>
-            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: 14, fontFamily: 'Jost, sans-serif' }}>
+            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 14, fontFamily: 'Jost, sans-serif' }}>
               Studio Access
             </p>
             <h1 className="font-display font-light sg-title" style={{ color: '#fff', lineHeight: 1.1, marginBottom: 0 }}>
@@ -184,7 +184,7 @@ export default function StudioGate() {
             </h1>
             {user && (
               <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', fontFamily: 'Jost, sans-serif', marginTop: 8 }}>
-                Signed in as <span style={{ color: '#C9A84C' }}>{user.email}</span>
+                Signed in as <span style={{ color: '#B8D4E8' }}>{user.email}</span>
               </p>
             )}
           </div>
@@ -205,7 +205,7 @@ export default function StudioGate() {
                       placeholder="admin@hairgo.com"
                       required
                       style={inputStyle}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(201,168,76,0.45)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
+                      onFocus={e => { e.target.style.borderColor = 'rgba(184,212,232,0.45)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
                       onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.03)' }}
                     />
                   </div>
@@ -222,7 +222,7 @@ export default function StudioGate() {
                       placeholder="••••••••"
                       required
                       style={{ ...inputStyle, paddingRight: 50 }}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(201,168,76,0.45)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
+                      onFocus={e => { e.target.style.borderColor = 'rgba(184,212,232,0.45)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
                       onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.03)' }}
                     />
                     <button type="button" onClick={() => setShowPass(!showPass)}
@@ -249,7 +249,7 @@ export default function StudioGate() {
             {/* OTP boxes */}
             <div style={{ marginBottom: 36 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
-                <Smartphone size={13} color="rgba(201,168,76,0.6)" />
+                <Smartphone size={13} color="rgba(184,212,232,0.6)" />
                 <label style={{ ...labelStyle, marginBottom: 0 }}>6-digit code from your authenticator app</label>
               </div>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }} onPaste={handlePaste}>
@@ -266,15 +266,15 @@ export default function StudioGate() {
                     style={{
                       width: 52, height: 62, textAlign: 'center',
                       fontSize: '1.6rem', fontWeight: 600, fontFamily: 'Jost, sans-serif',
-                      background: d ? 'rgba(201,168,76,0.07)' : 'rgba(255,255,255,0.03)',
-                      border: d ? '1px solid rgba(201,168,76,0.45)' : '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 14, color: '#C9A84C', outline: 'none',
-                      transition: 'all 0.2s', caretColor: '#C9A84C',
+                      background: d ? 'rgba(184,212,232,0.07)' : 'rgba(255,255,255,0.03)',
+                      border: d ? '1px solid rgba(184,212,232,0.45)' : '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 14, color: '#B8D4E8', outline: 'none',
+                      transition: 'all 0.2s', caretColor: '#B8D4E8',
                     }}
-                    onFocus={e => { e.target.style.borderColor = 'rgba(201,168,76,0.6)'; e.target.style.background = 'rgba(201,168,76,0.06)' }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(184,212,232,0.6)'; e.target.style.background = 'rgba(184,212,232,0.06)' }}
                     onBlur={e => {
-                      e.target.style.borderColor = d ? 'rgba(201,168,76,0.45)' : 'rgba(255,255,255,0.1)'
-                      e.target.style.background = d ? 'rgba(201,168,76,0.07)' : 'rgba(255,255,255,0.03)'
+                      e.target.style.borderColor = d ? 'rgba(184,212,232,0.45)' : 'rgba(255,255,255,0.1)'
+                      e.target.style.background = d ? 'rgba(184,212,232,0.07)' : 'rgba(255,255,255,0.03)'
                     }}
                   />
                 ))}
@@ -289,7 +289,7 @@ export default function StudioGate() {
               style={{
                 width: '100%',
                 borderRadius: 14,
-                background: 'linear-gradient(135deg,#C9A84C 0%,#E8D5A3 50%,#C4956A 100%)',
+                background: 'linear-gradient(135deg,#B8D4E8 0%,#E8D5A3 50%,#7AAFC9 100%)',
                 color: '#000',
                 fontSize: 11,
                 fontWeight: 700,
@@ -299,7 +299,7 @@ export default function StudioGate() {
                 border: 'none',
                 cursor: (loading || digits.join('').length < 6) ? 'not-allowed' : 'pointer',
                 opacity: (loading || digits.join('').length < 6) ? 0.5 : 1,
-                boxShadow: '0 12px 40px rgba(201,168,76,0.25)',
+                boxShadow: '0 12px 40px rgba(184,212,232,0.25)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

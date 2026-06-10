@@ -1,5 +1,5 @@
 const P = {
-  gold: '#C9A84C', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   muted: 'rgba(255,255,255,0.22)', border: 'rgba(255,255,255,0.07)',
 }
 

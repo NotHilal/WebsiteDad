@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 
 const C = {
   card: '#161620',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.2)',
@@ -39,11 +39,40 @@ export default function StudioTimesheets() {
   const [pickerMonth,    setPickerMonth]    = useState(startOfMonth(new Date()))
   const [filterStylist,  setFilterStylist]  = useState(null)
   const [showFilter,     setShowFilter]     = useState(false)
+  const [liveClockIns,   setLiveClockIns]   = useState([])
+  const [tick,           setTick]           = useState(0)
 
   const weekStart = startOfWeek(week, { weekStartsOn: 1 })
   const weekEnd   = endOfWeek(week,   { weekStartsOn: 1 })
 
   useEffect(() => { load() }, [week, user])
+
+  useEffect(() => {
+    if (!isAdmin) return
+    loadLiveClockIns()
+    const sub = supabase.channel('ts-live-clockins')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'timesheets' }, () => {
+        loadLiveClockIns()
+        load()
+      })
+      .subscribe()
+    return () => supabase.removeChannel(sub)
+  }, [isAdmin])
+
+  useEffect(() => {
+    if (!isAdmin) return
+    const t = setInterval(() => setTick(v => v + 1), 60_000)
+    return () => clearInterval(t)
+  }, [isAdmin])
+
+  async function loadLiveClockIns() {
+    const { data } = await supabase
+      .from('timesheets')
+      .select('id, clock_in, stylist_id, stylists(name, photo_url)')
+      .is('clock_out', null)
+      .order('clock_in')
+    setLiveClockIns(data || [])
+  }
 
   useEffect(() => {
     const onVisible = () => { if (document.visibilityState === 'visible') load() }
@@ -146,11 +175,11 @@ export default function StudioTimesheets() {
       <style>{`
         @keyframes blink        { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
         .ts-row:hover           { background: rgba(255,255,255,0.02) !important; }
-.week-nav:hover         { background: rgba(201,168,76,0.08) !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
+.week-nav:hover         { background: rgba(184,212,232,0.08) !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .clk-in:hover           { background: rgba(52,211,153,0.18)  !important; }
         .clk-out:hover          { background: rgba(248,113,113,0.18) !important; }
         .ts-date-btn:hover      { background: rgba(255,255,255,0.05) !important; }
-        .ts-picker-week:hover   { background: rgba(201,168,76,0.1) !important; border-color: rgba(201,168,76,0.15) !important; }
+        .ts-picker-week:hover   { background: rgba(184,212,232,0.1) !important; border-color: rgba(184,212,232,0.15) !important; }
         .ts-filter-btn:hover    { background: rgba(255,255,255,0.05) !important; }
         .ts-stylist-row:hover   { background: rgba(255,255,255,0.04) !important; }
       `}</style>
@@ -319,10 +348,10 @@ export default function StudioTimesheets() {
                 return (
                   <div key={wi} className="ts-picker-week"
                     onClick={() => { setWeek(wk[0]); setPage(0); setShowPicker(false) }}
-                    style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderRadius: 9, cursor: 'pointer', marginBottom: 2, transition: 'all .15s', background: selected ? 'rgba(201,168,76,0.12)' : 'transparent', border: selected ? `1px solid rgba(201,168,76,0.25)` : '1px solid transparent' }}>
+                    style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderRadius: 9, cursor: 'pointer', marginBottom: 2, transition: 'all .15s', background: selected ? 'rgba(184,212,232,0.12)' : 'transparent', border: selected ? `1px solid rgba(184,212,232,0.25)` : '1px solid transparent' }}>
                     {wk.map((day, di) => (
                       <div key={di} style={{ textAlign: 'center', padding: '7px 0', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif',
-                        color: !isSameMonth(day, pickerMonth) ? 'rgba(255,255,255,0.15)' : isToday(day) ? C.gold : selected ? 'rgba(201,168,76,0.9)' : C.white,
+                        color: !isSameMonth(day, pickerMonth) ? 'rgba(255,255,255,0.15)' : isToday(day) ? C.gold : selected ? 'rgba(184,212,232,0.9)' : C.white,
                         fontWeight: isToday(day) ? 700 : 400 }}>
                         {format(day, 'd')}
                       </div>
@@ -334,6 +363,48 @@ export default function StudioTimesheets() {
           )
         })()}
       </div>
+
+      {/* ── Who's In strip (admin realtime view) ─────────────── */}
+      {isAdmin && (
+        <div style={{ flexShrink: 0, background: '#161620', border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.875rem', borderBottom: liveClockIns.length > 0 ? `1px solid ${C.border}` : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.muted }}>Who's In</span>
+              <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', color: C.muted }}>·</span>
+              <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', color: C.muted }}>Live</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 20, background: liveClockIns.length > 0 ? C.greenBg : C.subtle, border: `1px solid ${liveClockIns.length > 0 ? C.greenBorder : C.border}` }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: liveClockIns.length > 0 ? C.green : 'rgba(255,255,255,0.2)', flexShrink: 0, animation: liveClockIns.length > 0 ? 'blink 2s infinite' : 'none' }} />
+              <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: liveClockIns.length > 0 ? C.green : C.muted, letterSpacing: '0.08em' }}>
+                {liveClockIns.length} clocked in
+              </span>
+            </div>
+          </div>
+          {liveClockIns.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', padding: '0.625rem 0.875rem' }}>
+              {liveClockIns.map(entry => {
+                const mins    = differenceInMinutes(new Date(), new Date(entry.clock_in))
+                const elapsed = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`
+                const s       = entry.stylists
+                return (
+                  <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.4rem 0.75rem 0.4rem 0.4rem', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
+                    {s?.photo_url
+                      ? <img src={s.photo_url} alt={s.name} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1.5px solid ${C.greenBorder}` }} />
+                      : <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(52,211,153,0.1)', border: `1.5px solid ${C.greenBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, color: C.green, fontWeight: 700 }}>
+                          {s?.name?.charAt(0) || '?'}
+                        </div>
+                    }
+                    <div>
+                      <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: C.white, lineHeight: 1.2 }}>{s?.name?.split(' ')[0] || 'Stylist'}</p>
+                      <p style={{ fontSize: '0.65rem', fontFamily: 'Jost,sans-serif', color: C.green }}>{format(new Date(entry.clock_in), 'HH:mm')} · {elapsed}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Today's status strip (employees only) ───────────── */}
       {!isAdmin && stylists.length > 0 && (

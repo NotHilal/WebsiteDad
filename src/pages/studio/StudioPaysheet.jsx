@@ -11,7 +11,7 @@ import {
 
 const C = {
   card: '#161620',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.08)', greenBorder: 'rgba(52,211,153,0.18)',
@@ -160,7 +160,7 @@ function Pagination({ page, total, onChange }) {
     pages.push(total - 1)
   }
   const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: d ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'Jost,sans-serif', transition: 'all .15s' })
-  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${a ? 'rgba(201,168,76,0.3)' : C.border}`, color: a ? '#C9A84C' : 'rgba(255,255,255,0.45)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
+  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${a ? 'rgba(184,212,232,0.3)' : C.border}`, color: a ? '#B8D4E8' : 'rgba(255,255,255,0.45)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '0.25rem 0' }}>
       <button onClick={() => onChange(Math.max(0, page - 1))} disabled={page === 0} style={nav(page === 0)}>‹</button>
@@ -356,7 +356,7 @@ export default function StudioPaysheet() {
 
   if (loading) return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid rgba(201,168,76,0.18)', borderTopColor: '#C9A84C', animation: 'spin 0.7s linear infinite' }} />
+      <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid rgba(184,212,232,0.18)', borderTopColor: '#B8D4E8', animation: 'spin 0.7s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
@@ -422,7 +422,7 @@ export default function StudioPaysheet() {
       <div style={{ flexShrink: 0, display: 'flex', gap: 3, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 3 }}>
         {[['calendar', 'Calendar'], ['table', 'Table']].map(([key, label]) => (
           <button key={key} onClick={() => { setActiveTab(key); setPage(0) }}
-            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'rgba(201,168,76,0.1)' : 'transparent', color: activeTab === key ? '#C9A84C' : C.muted, border: `1px solid ${activeTab === key ? 'rgba(201,168,76,0.22)' : 'transparent'}`, transition: 'all .18s' }}>
+            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'rgba(184,212,232,0.1)' : 'transparent', color: activeTab === key ? '#B8D4E8' : C.muted, border: `1px solid ${activeTab === key ? 'rgba(184,212,232,0.22)' : 'transparent'}`, transition: 'all .18s' }}>
             {label}
           </button>
         ))}

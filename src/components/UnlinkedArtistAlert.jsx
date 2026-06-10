@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 
 const C = {
   border: 'rgba(255,255,255,0.07)', white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)',
-  gold: '#C9A84C', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.2)',
+  gold: '#B8D4E8', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.2)',
 }
 
 export default function UnlinkedArtistAlert() {
@@ -46,14 +46,14 @@ export default function UnlinkedArtistAlert() {
     <>
       <style>{`
         @keyframes artist-pulse {
-          0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.55); transform: scale(1); }
-          50%      { box-shadow: 0 0 0 7px rgba(201,168,76,0); transform: scale(1.06); }
+          0%,100% { box-shadow: 0 0 0 0 rgba(184,212,232,0.55); transform: scale(1); }
+          50%      { box-shadow: 0 0 0 7px rgba(184,212,232,0); transform: scale(1.06); }
         }
-        .ula-link:hover { background: rgba(201,168,76,0.14) !important; border-color: rgba(201,168,76,0.4) !important; color: #C9A84C !important; }
+        .ula-link:hover { background: rgba(184,212,232,0.14) !important; border-color: rgba(184,212,232,0.4) !important; color: #B8D4E8 !important; }
       `}</style>
 
       <button onClick={() => setOpen(p => !p)}
-        style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#C9A84C,#C4956A)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'artist-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
+        style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'artist-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
         <Scissors size={13} color="#000" style={{ transform: 'rotate(45deg)' }} strokeWidth={2.5} />
         {artists.length > 1 && (
           <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#ef4444', border: '2px solid #111118', fontSize: 8, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>

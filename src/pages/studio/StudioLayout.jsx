@@ -6,6 +6,7 @@ import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
   Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote, Activity
 } from 'lucide-react'
+import hairgoLogo from '../../assets/hairgo.png'
 import AppointmentAlert from '../../components/AppointmentAlert'
 import DayOffAlert from '../../components/DayOffAlert'
 import UnlinkedArtistAlert from '../../components/UnlinkedArtistAlert'
@@ -14,7 +15,7 @@ import toast from 'react-hot-toast'
 
 const C = {
   bg: '#0e0e14', card: '#161620', sidebar: '#0a0a10', topbar: '#111118',
-  gold: '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
   border: 'rgba(255,255,255,0.07)', danger: '#f87171',
 }
@@ -124,9 +125,7 @@ export default function StudioLayout() {
       <div className="s-brand-wrap" style={{ padding: '1.5rem 1.25rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
         <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', opacity: 1, transition: 'opacity .18s' }}
           className="s-brand">
-          <div className="s-logo-circle" style={{ width: 32, height: 32, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},#C4956A)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 16px rgba(201,168,76,0.3)` }}>
-            <Scissors size={13} color="#000" style={{ transform: 'rotate(45deg)' }} />
-          </div>
+          <img src={hairgoLogo} alt="HairGo" className="s-logo-circle" style={{ width: 32, height: 32, borderRadius: '50%', border: `1px solid rgba(184,212,232,0.35)`, boxShadow: `0 4px 16px rgba(184,212,232,0.3)`, flexShrink: 0, objectFit: 'cover' }} />
           <div>
             <span className="font-display s-brand-name" style={{ fontSize: '1.15rem', color: C.white, lineHeight: 1 }}>
               Hair<span style={{ color: C.gold }}>Go</span>

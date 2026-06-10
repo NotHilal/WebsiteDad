@@ -80,7 +80,7 @@ export default function DayOffAlert() {
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'dayoff-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
         <CalendarCheck size={14} color="#fff" strokeWidth={2.5} />
         {notes.length > 1 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#C9A84C', border: '2px solid #111118', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#B8D4E8', border: '2px solid #111118', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
             {notes.length}
           </span>
         )}

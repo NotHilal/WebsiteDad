@@ -12,7 +12,7 @@ const C = {
   bg:     '#0e0e14',
   card:   '#161620',
   card2:  '#1a1a26',
-  gold:   '#C9A84C', goldDim: 'rgba(201,168,76,0.55)', goldBg: 'rgba(201,168,76,0.08)', goldBorder: 'rgba(201,168,76,0.18)',
+  gold:   '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
   white:  '#f0f0f0', dim: 'rgba(255,255,255,0.55)', muted: 'rgba(255,255,255,0.28)', faint: 'rgba(255,255,255,0.1)',
   border: 'rgba(255,255,255,0.07)',
 }
@@ -210,7 +210,7 @@ export default function StudioAppointmentsList() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .al-row:hover { background: rgba(255,255,255,0.02) !important; }
         .al-row:hover .al-info-btn { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
-        .al-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.07); }
+        .al-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.07); }
         .al-pill:hover  { border-color: rgba(255,255,255,0.18) !important; color: rgba(255,255,255,0.7) !important; }
         .dd-opt:hover   { background: rgba(255,255,255,0.05) !important; }
         .stat-card:hover { border-color: rgba(255,255,255,0.12) !important; transform: translateY(-1px); }
@@ -416,7 +416,7 @@ export default function StudioAppointmentsList() {
 
                 return (
                   <>
-                    <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#C4956A,rgba(201,168,76,0.15))` }} />
+                    <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
                     <div style={{ padding: '1.5rem' }}>
 
                       {/* Header */}
