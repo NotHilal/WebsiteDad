@@ -11,10 +11,10 @@ import {
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.2)',
   red: '#f87171', redBg: 'rgba(248,113,113,0.1)', redBorder: 'rgba(248,113,113,0.22)',
 }
@@ -31,7 +31,7 @@ function fmtMins(mins) {
 }
 
 const fmt = n => `$${(n || 0).toFixed(2)}`
-const inp = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '0.4rem 0.6rem 0.4rem 1.5rem', fontSize: '0.8rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', width: '100%', boxSizing: 'border-box', transition: 'border-color .2s' }
+const inp = { background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 8, padding: '0.4rem 0.6rem 0.4rem 1.5rem', fontSize: '0.8rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', width: '100%', boxSizing: 'border-box', transition: 'border-color .2s' }
 
 function sheetMins(t) {
   const raw = Math.max(0, differenceInMinutes(new Date(t.clock_out), new Date(t.clock_in)))
@@ -52,7 +52,7 @@ function SessionModal({ sessions, rate, onClose }) {
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }} />
       <div style={{ position: 'fixed', inset: 0, zIndex: 201, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-        <div style={{ background: '#18181f', border: `1px solid ${C.border}`, borderRadius: 18, width: '100%', maxWidth: 360, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+        <div style={{ background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 18, width: '100%', maxWidth: 360, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
           <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
             <div>
               <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: '0 0 3px' }}>
@@ -162,8 +162,8 @@ function Pagination({ page, total, onChange }) {
     if (page < total - 3) pages.push(-2)
     pages.push(total - 1)
   }
-  const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: d ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', transition: 'all .15s' })
-  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${a ? 'rgba(184,212,232,0.3)' : C.border}`, color: a ? '#B8D4E8' : 'rgba(255,255,255,0.45)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
+  const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, color: d ? 'var(--col-text)' : 'var(--col-text)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', transition: 'all .15s' })
+  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${a ? 'var(--col-acc)' : C.border}`, color: a ? 'var(--col-acc)' : 'var(--col-text)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '0.25rem 0' }}>
       <button onClick={() => onChange(Math.max(0, page - 1))} disabled={page === 0} style={nav(page === 0)}>‹</button>
@@ -198,7 +198,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <style>{`.cal-day:hover { background: rgba(255,255,255,0.045) !important; } .cal-nav:hover { color: ${C.white} !important; }`}</style>
+      <style>{`.cal-day:hover { background: rgba(var(--rgb-hi),0.045) !important; } .cal-nav:hover { color: ${C.white} !important; }`}</style>
 
       {/* Month navigation */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -212,7 +212,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
       {/* Calendar grid */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
         {/* Day headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}` }}>
           {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
             <div key={d} style={{ padding: '0.45rem 0.25rem', textAlign: 'center', fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{d}</div>
           ))}
@@ -267,8 +267,8 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
               </div>
               {/* Week summary */}
               {wInMonth && wMins > 0 && (
-                <div style={{ padding: '0.3rem 1rem', background: 'rgba(255,255,255,0.015)', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif' }}>This week</span>
+                <div style={{ padding: '0.3rem 1rem', background: 'rgba(var(--rgb-hi),0.015)', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>This week</span>
                   <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif' }}>
                     <span style={{ color: C.gold }}>{fmtMins(wMins)}</span>
                     {rate > 0 && <span style={{ color: C.muted }}> · <span style={{ color: C.white }}>{fmt(wEarned)}</span></span>}
@@ -453,11 +453,11 @@ export default function StudioPayRuns() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', overflowY: 'auto', height: '100%' }}>
         <style>{`
-          .pr-back:hover       { background: rgba(255,255,255,0.06) !important; color: ${C.white} !important; }
+          .pr-back:hover       { background: rgba(var(--rgb-hi),0.06) !important; color: ${C.white} !important; }
           .pr-pay:hover        { background: rgba(52,211,153,0.22) !important; }
           .pr-edit:hover       { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
-          .pr-row:hover        { background: rgba(255,255,255,0.02) !important; }
-          .pr-info-btn:hover   { background: rgba(255,255,255,0.08) !important; color: ${C.white} !important; }
+          .pr-row:hover        { background: rgba(var(--rgb-hi),0.02) !important; }
+          .pr-info-btn:hover   { background: rgba(var(--rgb-hi),0.08) !important; color: ${C.white} !important; }
           .pr-modal-row:hover  { background: rgba(52,211,153,0.1) !important; border-color: ${C.greenBorder} !important; }
           .pr-modal-pay:hover  { background: rgba(52,211,153,0.22) !important; }
           .m-inp:focus         { border-color: ${C.goldBorder} !important; }
@@ -519,12 +519,12 @@ export default function StudioPayRuns() {
 
         {/* Extras panel */}
         {editing && (
-          <div style={{ flexShrink: 0, padding: '1rem 1.25rem', background: 'rgba(184,212,232,0.04)', border: `1px solid ${C.goldBorder}`, borderRadius: 14 }}>
+          <div style={{ flexShrink: 0, padding: '1rem 1.25rem', background: 'var(--col-acc)', border: `1px solid ${C.goldBorder}`, borderRadius: 14 }}>
             <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.75rem' }}>Extras for {stylist.name} — cumulative</p>
             <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
               {[['Tips', 'tips'], ['Commissions', 'commissions'], ['Other', 'other']].map(([label, key]) => (
                 <div key={key} style={{ minWidth: 130, flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>{label}</label>
+                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>{label}</label>
                   <div style={{ position: 'relative' }}>
                     <span style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: C.goldDim, pointerEvents: 'none', fontFamily: 'DM Sans,sans-serif' }}>$</span>
                     <input type="number" min="0" step="0.01" value={editVals[key]} onChange={e => setEditVals(p => ({ ...p, [key]: e.target.value }))} className="m-inp" style={inp} />
@@ -532,7 +532,7 @@ export default function StudioPayRuns() {
                 </div>
               ))}
               <button onClick={() => saveExtras(stylist)} disabled={saving}
-                style={{ padding: '0.5rem 1.25rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, border: 'none', color: '#000', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: 6, height: 38, flexShrink: 0 }}>
+                style={{ padding: '0.5rem 1.25rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, border: 'none', color: 'var(--col-bg)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1, display: 'flex', alignItems: 'center', gap: 6, height: 38, flexShrink: 0 }}>
                 <Check size={13} /> Save
               </button>
             </div>
@@ -540,10 +540,10 @@ export default function StudioPayRuns() {
         )}
 
         {/* Tab switcher: Table | Calendar */}
-        <div style={{ flexShrink: 0, display: 'flex', gap: 3, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 3 }}>
+        <div style={{ flexShrink: 0, display: 'flex', gap: 3, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 3 }}>
           {[['calendar', 'Calendar'], ['table', 'Table']].map(([key, label]) => (
             <button key={key} onClick={() => { setActiveTab(key); setPage(0) }}
-              style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'rgba(184,212,232,0.1)' : 'transparent', color: activeTab === key ? '#B8D4E8' : C.muted, border: `1px solid ${activeTab === key ? 'rgba(184,212,232,0.22)' : 'transparent'}`, transition: 'all .18s' }}>
+              style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'var(--col-acc)' : 'transparent', color: activeTab === key ? 'var(--col-bg)' : C.muted, border: `1px solid ${activeTab === key ? 'var(--col-acc)' : 'transparent'}`, transition: 'all .18s' }}>
               {label}
             </button>
           ))}
@@ -573,7 +573,7 @@ export default function StudioPayRuns() {
               </div>
             ) : (
               <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.55rem 1rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.55rem 1rem', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem' }}>
                   {['Date', 'Hours', 'Earned', 'Status', ''].map(h => (
                     <div key={h} style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>{h}</div>
                   ))}
@@ -614,7 +614,7 @@ export default function StudioPayRuns() {
             <>
               <div onClick={() => setPayModal(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }} />
               <div style={{ position: 'fixed', inset: 0, zIndex: 101, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                <div style={{ background: '#18181f', border: `1px solid ${C.border}`, borderRadius: 18, width: '100%', maxWidth: 540, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+                <div style={{ background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 18, width: '100%', maxWidth: 540, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
                   <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
                     <div>
                       <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: '0 0 3px' }}>Pay Sessions</p>
@@ -646,9 +646,9 @@ export default function StudioPayRuns() {
                           return (
                             <div key={t.id} onClick={() => setModalSelected(prev => { const n = new Set(prev); isOn ? n.delete(t.id) : n.add(t.id); return n })}
                               className="pr-modal-row"
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', padding: '0.75rem 1rem', borderRadius: 12, background: isOn ? 'rgba(52,211,153,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${isOn ? C.greenBorder : C.border}`, cursor: 'pointer', transition: 'all .15s', userSelect: 'none' }}>
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', padding: '0.75rem 1rem', borderRadius: 12, background: isOn ? 'rgba(52,211,153,0.07)' : 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${isOn ? C.greenBorder : C.border}`, cursor: 'pointer', transition: 'all .15s', userSelect: 'none' }}>
                               <div style={{ width: 18, height: 18, borderRadius: 5, background: isOn ? C.green : 'transparent', border: `2px solid ${isOn ? C.green : C.muted}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
-                                {isOn && <Check size={11} color="#000" strokeWidth={3} />}
+                                {isOn && <Check size={11} color="var(--col-bg)" strokeWidth={3} />}
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
                                 <p style={{ margin: 0, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{format(new Date(t.clock_in), 'EEEE, MMM d, yyyy')}</p>
@@ -685,7 +685,7 @@ export default function StudioPayRuns() {
   // ── EMPLOYEE LIST ────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
-      <style>{`.pr-emp-row:hover { background: rgba(255,255,255,0.025) !important; }`}</style>
+      <style>{`.pr-emp-row:hover { background: rgba(var(--rgb-hi),0.025) !important; }`}</style>
       <div style={{ flexShrink: 0 }}>
         <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>Team</p>
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem,3vw,2.4rem)', color: C.white, lineHeight: 1.1, margin: '2px 0 4px' }}>Pay Runs</h1>

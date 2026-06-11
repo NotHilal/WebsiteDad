@@ -8,10 +8,10 @@ import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, differenceInMinutes
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.2)',
   red: '#f87171',   redBg:   'rgba(248,113,113,0.1)', redBorder:   'rgba(248,113,113,0.22)',
 }
@@ -174,14 +174,14 @@ export default function StudioTimesheets() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
       <style>{`
         @keyframes blink        { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }
-        .ts-row:hover           { background: rgba(255,255,255,0.02) !important; }
-.week-nav:hover         { background: rgba(184,212,232,0.08) !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
+        .ts-row:hover           { background: rgba(var(--rgb-hi),0.02) !important; }
+.week-nav:hover         { background: rgba(var(--rgb-acc),0.08) !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .clk-in:hover           { background: rgba(52,211,153,0.18)  !important; }
         .clk-out:hover          { background: rgba(248,113,113,0.18) !important; }
-        .ts-date-btn:hover      { background: rgba(255,255,255,0.05) !important; }
-        .ts-picker-week:hover   { background: rgba(184,212,232,0.1) !important; border-color: rgba(184,212,232,0.15) !important; }
-        .ts-filter-btn:hover    { background: rgba(255,255,255,0.05) !important; }
-        .ts-stylist-row:hover   { background: rgba(255,255,255,0.04) !important; }
+        .ts-date-btn:hover      { background: rgba(var(--rgb-hi),0.05) !important; }
+        .ts-picker-week:hover   { background: rgba(var(--rgb-acc),0.1) !important; border-color: rgba(var(--rgb-acc),0.15) !important; }
+        .ts-filter-btn:hover    { background: rgba(var(--rgb-hi),0.05) !important; }
+        .ts-stylist-row:hover   { background: rgba(var(--rgb-hi),0.04) !important; }
       `}</style>
 
       {/* ── Header ──────────────────────────────────────────── */}
@@ -240,7 +240,7 @@ export default function StudioTimesheets() {
       {showFilter && (
         <>
           <div onClick={() => setShowFilter(false)} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)' }} />
-          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 101, background: '#1b1b27', border: `1px solid ${C.border}`, borderRadius: 20, padding: '1.5rem', width: 'min(92vw, 380px)', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
+          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 101, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 20, padding: '1.5rem', width: 'min(92vw, 380px)', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
             {/* Modal header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <div>
@@ -263,7 +263,7 @@ export default function StudioTimesheets() {
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '0.875rem 0.5rem', borderRadius: 12, background: isActive ? C.goldBg : C.subtle, border: `1px solid ${isActive ? C.goldBorder : C.border}`, cursor: 'pointer', transition: 'all .15s' }}>
                     {s.photo_url
                       ? <img src={s.photo_url} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `2px solid ${isActive ? C.gold : C.border}`, transition: 'border-color .15s' }} />
-                      : <div style={{ width: 44, height: 44, borderRadius: '50%', background: isActive ? C.goldBg : 'rgba(255,255,255,0.06)', border: `2px solid ${isActive ? C.gold : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      : <div style={{ width: 44, height: 44, borderRadius: '50%', background: isActive ? C.goldBg : 'rgba(var(--rgb-hi),0.06)', border: `2px solid ${isActive ? C.gold : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <span style={{ fontSize: 16, color: isActive ? C.gold : C.muted, fontWeight: 700 }}>{s.name[0]}</span>
                         </div>
                     }
@@ -319,7 +319,7 @@ export default function StudioTimesheets() {
           const pickerDays = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i))
           const pickerWeeks = Array.from({ length: 6 }, (_, i) => pickerDays.slice(i * 7, (i + 1) * 7))
           return (
-            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, zIndex: 50, background: '#1b1b27', border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
+            <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, zIndex: 50, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem', boxShadow: '0 12px 40px rgba(0,0,0,0.5)' }}>
               {/* Month nav */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <button onClick={() => setPickerMonth(subMonths(pickerMonth, 1))} className="week-nav"
@@ -348,10 +348,10 @@ export default function StudioTimesheets() {
                 return (
                   <div key={wi} className="ts-picker-week"
                     onClick={() => { setWeek(wk[0]); setPage(0); setShowPicker(false) }}
-                    style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderRadius: 9, cursor: 'pointer', marginBottom: 2, transition: 'all .15s', background: selected ? 'rgba(184,212,232,0.12)' : 'transparent', border: selected ? `1px solid rgba(184,212,232,0.25)` : '1px solid transparent' }}>
+                    style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderRadius: 9, cursor: 'pointer', marginBottom: 2, transition: 'all .15s', background: selected ? 'var(--col-acc)' : 'transparent', border: selected ? `1px solid rgba(var(--rgb-acc),0.25)` : '1px solid transparent' }}>
                     {wk.map((day, di) => (
                       <div key={di} style={{ textAlign: 'center', padding: '7px 0', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif',
-                        color: !isSameMonth(day, pickerMonth) ? 'rgba(255,255,255,0.15)' : isToday(day) ? C.gold : selected ? 'rgba(184,212,232,0.9)' : C.white,
+                        color: !isSameMonth(day, pickerMonth) ? 'var(--col-text)' : isToday(day) ? C.gold : selected ? 'rgba(var(--rgb-acc),0.9)' : C.white,
                         fontWeight: isToday(day) ? 700 : 400 }}>
                         {format(day, 'd')}
                       </div>
@@ -366,7 +366,7 @@ export default function StudioTimesheets() {
 
       {/* ── Who's In strip (admin realtime view) ─────────────── */}
       {isAdmin && (
-        <div style={{ flexShrink: 0, background: '#161620', border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
+        <div style={{ flexShrink: 0, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.875rem', borderBottom: liveClockIns.length > 0 ? `1px solid ${C.border}` : 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.muted }}>Who's In</span>
@@ -374,7 +374,7 @@ export default function StudioTimesheets() {
               <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: C.muted }}>Live</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 20, background: liveClockIns.length > 0 ? C.greenBg : C.subtle, border: `1px solid ${liveClockIns.length > 0 ? C.greenBorder : C.border}` }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: liveClockIns.length > 0 ? C.green : 'rgba(255,255,255,0.2)', flexShrink: 0, animation: liveClockIns.length > 0 ? 'blink 2s infinite' : 'none' }} />
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: liveClockIns.length > 0 ? C.green : 'var(--col-text)', flexShrink: 0, animation: liveClockIns.length > 0 ? 'blink 2s infinite' : 'none' }} />
               <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: liveClockIns.length > 0 ? C.green : C.muted, letterSpacing: '0.08em' }}>
                 {liveClockIns.length} clocked in
               </span>
@@ -436,7 +436,7 @@ export default function StudioTimesheets() {
                   ? <p style={{ fontSize: 10, color: C.green, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(sinceMin)}</p>
                   : todayMins > 0
                     ? <p style={{ fontSize: 10, color: C.goldDim, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(todayMins)}</p>
-                    : <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif' }}>Not in</p>
+                    : <p style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>Not in</p>
                 }
 
                 {isAdmin ? (
@@ -444,7 +444,7 @@ export default function StudioTimesheets() {
                     ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '3px 9px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
                         <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> Active
                       </span>
-                    : <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', padding: '3px 9px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
+                    : <span style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', padding: '3px 9px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
                 ) : (
                   active
                     ? <button onClick={() => clockOut(s.id)} className="clk-out"
@@ -467,7 +467,7 @@ export default function StudioTimesheets() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
 
           {/* Column headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.5rem 0.875rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.5rem 0.875rem', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
             {['Member', 'In', 'Out', 'Net'].map((h, i) => (
               <div key={i} style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, textAlign: i > 0 ? 'center' : 'left' }}>{h}</div>
             ))}

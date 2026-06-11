@@ -154,7 +154,7 @@ export default function Gallery() {
           </h1>
           <span className="sec-label">Our Work</span>
           <div className="gold-bar" style={{ marginTop:'1rem', marginBottom:'1.25rem' }} />
-          <p style={{ color:'rgba(var(--rgb-hi),0.38)', fontSize:'0.9rem', lineHeight:1.85, maxWidth:420, margin:'0 auto' }}>
+          <p style={{ color: 'var(--col-text)', fontSize:'0.9rem', lineHeight:1.85, maxWidth:420, margin:'0 auto' }}>
             Every image is a story of craft, care, and transformation.
           </p>
         </motion.div>
@@ -174,7 +174,7 @@ export default function Gallery() {
                 }}>
                   <span className="font-display" style={{
                     fontSize:'clamp(1.6rem,3vw,2.4rem)', fontWeight:300, fontStyle:'italic',
-                    color: gender === g ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.2)',
+                    color: gender === g ? 'var(--col-acc)' : 'var(--col-text)',
                     transition:'color 0.35s ease',
                     letterSpacing:'0.02em',
                   }}>{g}</span>
@@ -200,7 +200,7 @@ export default function Gallery() {
                 fontFamily:'DM Sans,sans-serif', fontWeight:500, transition:'all 0.3s ease',
                 background: active === cat ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.04)',
                 border: active === cat ? 'none' : '1px solid rgba(var(--rgb-hi),0.1)',
-                color: active === cat ? '#000' : 'rgba(var(--rgb-hi),0.45)',
+                color: active === cat ? 'var(--col-bg)' : 'var(--col-text)',
                 boxShadow: active === cat ? '0 6px 24px rgba(var(--rgb-acc),0.3)' : 'none',
               }}>{cat}</button>
             ))}
@@ -252,7 +252,7 @@ export default function Gallery() {
                       <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{item.category}</span>
                     </div>
                     <div style={{ width:36, height:36, borderRadius:'50%', background:'rgba(var(--rgb-acc),0.9)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      <ZoomIn size={15} color="#000" />
+                      <ZoomIn size={15} color="var(--col-bg)" />
                     </div>
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export default function Gallery() {
               style={{
                 width:40, height:40, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center',
                 background:'rgba(var(--rgb-hi),0.04)', border:'1px solid rgba(var(--rgb-hi),0.08)',
-                color: page === 1 ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.5)',
+                color: page === 1 ? 'var(--col-text)' : 'var(--col-text)',
                 cursor: page === 1 ? 'not-allowed' : 'pointer', transition:'all 0.2s',
               }}>
               ‹
@@ -287,7 +287,7 @@ export default function Gallery() {
                   cursor:'pointer', transition:'all 0.25s ease',
                   background: p === page ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.04)',
                   border: p === page ? 'none' : '1px solid rgba(var(--rgb-hi),0.08)',
-                  color: p === page ? '#000' : 'rgba(var(--rgb-hi),0.45)',
+                  color: p === page ? 'var(--col-bg)' : 'var(--col-text)',
                   fontWeight: p === page ? 600 : 400,
                   boxShadow: p === page ? '0 4px 16px rgba(var(--rgb-acc),0.3)' : 'none',
                 }}>
@@ -300,7 +300,7 @@ export default function Gallery() {
               style={{
                 width:40, height:40, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center',
                 background:'rgba(var(--rgb-hi),0.04)', border:'1px solid rgba(var(--rgb-hi),0.08)',
-                color: page === totalPages ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.5)',
+                color: page === totalPages ? 'var(--col-text)' : 'var(--col-text)',
                 cursor: page === totalPages ? 'not-allowed' : 'pointer', transition:'all 0.2s',
               }}>
               ›
@@ -350,9 +350,9 @@ export default function Gallery() {
                 {/* Close button */}
                 <button
                   onClick={() => setLightbox(null)}
-                  style={{ position:'absolute', top:14, right:14, width:34, height:34, borderRadius:'50%', background:'rgba(var(--rgb-hi),0.06)', border:'1px solid rgba(var(--rgb-hi),0.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(var(--rgb-hi),0.5)', cursor:'pointer', transition:'all 0.2s' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(var(--rgb-acc),0.4)'; e.currentTarget.style.color='var(--col-acc)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(var(--rgb-hi),0.1)'; e.currentTarget.style.color='rgba(var(--rgb-hi),0.5)' }}
+                  style={{ position:'absolute', top:14, right:14, width:34, height:34, borderRadius:'50%', background:'rgba(var(--rgb-hi),0.06)', border:'1px solid rgba(var(--rgb-hi),0.1)', display:'flex', alignItems:'center', justifyContent:'center', color: 'var(--col-text)', cursor:'pointer', transition:'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor='var(--col-acc)'; e.currentTarget.style.color='var(--col-acc)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(var(--rgb-hi),0.1)'; e.currentTarget.style.color = 'var(--col-text)' }}
                 >
                   <X size={15} />
                 </button>
@@ -361,7 +361,7 @@ export default function Gallery() {
                 <div>
                   <span style={{
                     display:'inline-block', padding:'5px 16px', borderRadius:9999,
-                    background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.2)',
+                    background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.2)',
                     fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase',
                     color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif',
                   }}>
@@ -377,7 +377,7 @@ export default function Gallery() {
                 <div className="gold-bar" style={{ margin:0 }} />
 
                 {/* Description */}
-                <p style={{ color:'rgba(var(--rgb-hi),0.5)', fontSize:'0.88rem', lineHeight:1.9, margin:0 }}>
+                <p style={{ color: 'var(--col-text)', fontSize:'0.88rem', lineHeight:1.9, margin:0 }}>
                   {lightbox.description}
                 </p>
 
@@ -385,23 +385,23 @@ export default function Gallery() {
                 <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
                   {(lightbox.stylist || lightbox.stylists?.name) && (
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <div style={{ width:30, height:30, borderRadius:'50%', background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                         <User size={13} color="var(--col-acc)" />
                       </div>
                       <div>
-                        <p style={{ fontSize:9, color:'rgba(var(--rgb-hi),0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', marginBottom:2 }}>Stylist</p>
-                        <p style={{ fontSize:'0.85rem', color:'rgba(var(--rgb-hi),0.7)', fontFamily:'DM Sans,sans-serif' }}>{lightbox.stylist || lightbox.stylists?.name}</p>
+                        <p style={{ fontSize:9, color: 'var(--col-text)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', marginBottom:2 }}>Stylist</p>
+                        <p style={{ fontSize:'0.85rem', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{lightbox.stylist || lightbox.stylists?.name}</p>
                       </div>
                     </div>
                   )}
                   {lightbox.duration && (
                     <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                      <div style={{ width:30, height:30, borderRadius:'50%', background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <div style={{ width:30, height:30, borderRadius:'50%', background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
                         <Clock size={13} color="var(--col-acc)" />
                       </div>
                       <div>
-                        <p style={{ fontSize:9, color:'rgba(var(--rgb-hi),0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', marginBottom:2 }}>Duration</p>
-                        <p style={{ fontSize:'0.85rem', color:'rgba(var(--rgb-hi),0.7)', fontFamily:'DM Sans,sans-serif' }}>{lightbox.duration}</p>
+                        <p style={{ fontSize:9, color: 'var(--col-text)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', marginBottom:2 }}>Duration</p>
+                        <p style={{ fontSize:'0.85rem', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{lightbox.duration}</p>
                       </div>
                     </div>
                   )}

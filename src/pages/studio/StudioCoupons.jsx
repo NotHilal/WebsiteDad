@@ -8,14 +8,14 @@ import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
 
 const C = {
-  card: '#161620', card2: '#1a1a26',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.22)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.55)', muted: 'rgba(255,255,255,0.28)', faint: 'rgba(255,255,255,0.1)',
-  border: 'rgba(255,255,255,0.07)', modal: '#13131f',
+  card: 'var(--col-modal)', card2: 'var(--col-card)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', faint: 'rgba(var(--rgb-hi),0.1)',
+  border: 'rgba(var(--rgb-hi),0.07)', modal: 'var(--col-modal)',
 }
 
-const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp = { width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 const EMPTY = { code: '', discount_type: 'percentage', discount_value: '', expiry_date: '' }
 
 function ModalWrap({ children, onClose, maxWidth = 440 }) {
@@ -30,10 +30,10 @@ function ModalWrap({ children, onClose, maxWidth = 440 }) {
 
 function TypeToggle({ value, onChange }) {
   return (
-    <div style={{ display: 'flex', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, overflow: 'hidden' }}>
+    <div style={{ display: 'flex', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, overflow: 'hidden' }}>
       {[['percentage', '% Percentage'], ['fixed', '$ Fixed']].map(([val, label]) => (
         <button key={val} type="button" onClick={() => onChange(val)}
-          style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.03)', color: value === val ? '#B8D4E8' : 'rgba(255,255,255,0.35)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+          style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)', color: value === val ? 'var(--col-bg)' : 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(var(--rgb-hi),0.1)' : 'none' }}>
           {label}
         </button>
       ))}
@@ -49,15 +49,15 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
     <div>
       {/* ── Desktop ── */}
       <div className="uc-desktop-card" style={{ display: 'flex', borderRadius: 14, overflow: 'hidden', border: sharedBorder, opacity: used ? 0.5 : 1, filter: used ? 'grayscale(0.35)' : 'none', transition: 'all .2s' }}>
-        <div style={{ flexShrink: 0, width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(255,255,255,0.02)' : C.goldBg, borderRight: `1px dashed ${used ? C.border : C.goldBorder}`, padding: '14px 6px', position: 'relative' }}>
+        <div style={{ flexShrink: 0, width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(var(--rgb-hi),0.02)' : C.goldBg, borderRight: `1px dashed ${used ? C.border : C.goldBorder}`, padding: '14px 6px', position: 'relative' }}>
           <span className="font-display gold-gradient" style={{ fontSize: '1.75rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
-          <span style={{ fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>OFF</span>
-          <div style={{ position: 'absolute', top: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
-          <div style={{ position: 'absolute', bottom: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: '#0e0e14' }} />
+          <span style={{ fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>OFF</span>
+          <div style={{ position: 'absolute', top: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-modal)' }} />
+          <div style={{ position: 'absolute', bottom: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-modal)' }} />
         </div>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: used ? 'rgba(255,255,255,0.01)' : C.card, minWidth: 0 }}>
-          <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(184,212,232,0.07)', border: `1px solid ${used ? C.border : 'rgba(184,212,232,0.18)'}` }}>
-            <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: used ? 'rgba(var(--rgb-hi),0.01)' : C.card, minWidth: 0 }}>
+          <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(var(--rgb-hi),0.03)' : 'var(--col-acc)', border: `1px solid ${used ? C.border : 'var(--col-acc)'}` }}>
+            <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: used ? C.muted : 'var(--col-bg)', letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
           </div>
           <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>
             {coupon.expiry_date ? `Exp. ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
@@ -70,15 +70,15 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
               <p style={{ fontSize: '0.72rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{assignment.name}</p>
             </div>
           ) : (
-            <span style={{ flex: 1, fontSize: '0.7rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>
+            <span style={{ flex: 1, fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>
           )}
-          <span style={{ fontSize: 9, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
-          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
+          <span style={{ fontSize: 9, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
           {assignment
-            ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>Unassign</button>
+            ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>Unassign</button>
             : <button onClick={() => onAssign(coupon)} className="btn-assign-uc" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>Assign</button>
           }
-          <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
+          <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}><Edit2 size={12} /></button>
           <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
         </div>
       </div>
@@ -86,19 +86,19 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
       {/* ── Mobile card ── */}
       <div className="uc-mobile-card" style={{ display: 'none', borderRadius: 14, overflow: 'hidden', border: sharedBorder, opacity: used ? 0.55 : 1, filter: used ? 'grayscale(0.35)' : 'none', transition: 'all .2s' }}>
         {/* Top row: badge + code + status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: used ? 'rgba(255,255,255,0.01)' : C.card }}>
-          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(255,255,255,0.03)' : C.goldBg, border: `1px dashed ${used ? C.border : C.goldBorder}`, borderRadius: 10, padding: '8px 12px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: '#0e0e14' }} />
-            <div style={{ position: 'absolute', bottom: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: '#0e0e14' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: used ? 'rgba(var(--rgb-hi),0.01)' : C.card }}>
+          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(var(--rgb-hi),0.03)' : C.goldBg, border: `1px dashed ${used ? C.border : C.goldBorder}`, borderRadius: 10, padding: '8px 12px', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: 'var(--col-modal)' }} />
+            <div style={{ position: 'absolute', bottom: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: 'var(--col-modal)' }} />
             <span className="font-display gold-gradient" style={{ fontSize: '1.35rem', lineHeight: 1, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
-            <span style={{ fontSize: 7, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
+            <span style={{ fontSize: 7, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-              <div style={{ padding: '4px 10px', borderRadius: 7, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(184,212,232,0.08)', border: `1px solid ${used ? C.border : 'rgba(184,212,232,0.2)'}`, overflow: 'hidden' }}>
-                <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.88rem', color: used ? C.muted : C.gold, letterSpacing: '0.12em' }}>{coupon.code}</span>
+              <div style={{ padding: '4px 10px', borderRadius: 7, background: used ? 'rgba(var(--rgb-hi),0.03)' : 'var(--col-acc)', border: `1px solid ${used ? C.border : 'var(--col-acc)'}`, overflow: 'hidden' }}>
+                <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.88rem', color: used ? C.muted : 'var(--col-bg)', letterSpacing: '0.12em' }}>{coupon.code}</span>
               </div>
-              <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.22)' : '#34d399', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(255,255,255,0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+              <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
@@ -112,19 +112,19 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
                   <span style={{ fontSize: '0.68rem', color: C.dim, fontFamily: 'DM Sans,sans-serif' }}>{assignment.name}</span>
                 </div>
               )}
-              {!assignment && <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>}
+              {!assignment && <span style={{ fontSize: '0.68rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>}
             </div>
           </div>
         </div>
         {/* Action row */}
-        <div style={{ display: 'flex', gap: 6, padding: '10px 14px', flexWrap: 'wrap', borderTop: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.01)' }}>
+        <div style={{ display: 'flex', gap: 6, padding: '10px 14px', flexWrap: 'wrap', borderTop: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
           <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'}
-            style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(255,255,255,0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
+            style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
             {used ? 'Mark active' : 'Mark used'}
           </button>
           {assignment
             ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign"
-                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: C.muted }}>
+                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>
                 Unassign
               </button>
             : <button onClick={() => onAssign(coupon)} className="btn-assign-uc"
@@ -134,7 +134,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
           }
           <div style={{ display: 'flex', gap: 5, marginLeft: 'auto' }}>
             <button onClick={() => onEdit(coupon)} className="btn-edit-uc"
-              style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.03)', color: C.muted }}><Edit2 size={12} /></button>
+              style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}><Edit2 size={12} /></button>
             <button onClick={() => onDelete(coupon)} className="btn-del-uc"
               style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
           </div>
@@ -149,11 +149,11 @@ function SelectableCouponCard({ coupon, selected, onSelect }) {
   const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `$${coupon.discount_value}`
   return (
     <button type="button" onClick={() => onSelect(coupon)}
-      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}
+      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(var(--rgb-hi),0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}
       className="sel-card">
-      <div style={{ width: 60, height: 52, borderRadius: 10, background: selected ? 'rgba(184,212,232,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px' }}>
+      <div style={{ width: 60, height: 52, borderRadius: 10, background: selected ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px' }}>
         <span className="font-display gold-gradient" style={{ fontSize: '1.1rem', lineHeight: 1, filter: selected ? 'none' : 'grayscale(1)' }}>{disc}</span>
-        <span style={{ fontSize: 7, letterSpacing: '0.18em', color: selected ? C.goldDim : 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
+        <span style={{ fontSize: 7, letterSpacing: '0.18em', color: selected ? C.goldDim : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: selected ? C.gold : C.white, letterSpacing: '0.1em', marginBottom: 3 }}>{coupon.code}</p>
@@ -162,7 +162,7 @@ function SelectableCouponCard({ coupon, selected, onSelect }) {
         </p>
       </div>
       <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${selected ? C.gold : C.border}`, background: selected ? C.gold : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {selected && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#0e0e14' }} />}
+        {selected && <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--col-modal)' }} />}
       </div>
     </button>
   )
@@ -309,18 +309,18 @@ export default function StudioCoupons() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .m-inp:focus       { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
+        .m-inp:focus       { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); }
         .uc-search:focus   { border-color: ${C.goldBorder} !important; }
-        .uc-row:hover      { border-color: rgba(184,212,232,0.35) !important; }
+        .uc-row:hover      { border-color: rgba(var(--rgb-acc),0.35) !important; }
         .btn-pill:hover    { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
         .btn-mark-used:hover   { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.35) !important; color: #f87171 !important; }
         .btn-mark-active:hover { background: rgba(52,211,153,0.1) !important; border-color: rgba(52,211,153,0.3) !important; color: #34d399 !important; }
-        .btn-edit-uc:hover   { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.07) !important; }
-        .btn-unassign:hover  { border-color: rgba(255,255,255,0.22) !important; color: ${C.white} !important; background: rgba(255,255,255,0.07) !important; }
+        .btn-edit-uc:hover   { border-color: var(--col-text) !important; color: ${C.white} !important; background: rgba(var(--rgb-hi),0.07) !important; }
+        .btn-unassign:hover  { border-color: var(--col-text) !important; color: ${C.white} !important; background: rgba(var(--rgb-hi),0.07) !important; }
         .btn-del-uc:hover  { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.35) !important; color: #f87171 !important; }
-        .btn-gold-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,212,232,0.3); }
-        .sel-card:hover    { border-color: ${C.goldBorder} !important; background: rgba(184,212,232,0.04) !important; }
-        .user-row:hover    { background: rgba(255,255,255,0.04) !important; }
+        .btn-gold-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(var(--rgb-acc),0.3); }
+        .sel-card:hover    { border-color: ${C.goldBorder} !important; background: rgba(var(--rgb-acc),0.04) !important; }
+        .user-row:hover    { background: rgba(var(--rgb-hi),0.04) !important; }
         .uc-mobile-card { display: none; }
         @media (max-width: 767px) {
           .uc-desktop-card { display: none !important; }
@@ -338,12 +338,12 @@ export default function StudioCoupons() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{coupons.length} total</span>
             {activeCount > 0 && <span style={{ fontSize: '0.7rem', color: '#34d399', fontFamily: 'DM Sans,sans-serif', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)', padding: '2px 8px', borderRadius: 20 }}>{activeCount} active</span>}
-            {usedCount > 0 && <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, padding: '2px 8px', borderRadius: 20 }}>{usedCount} used</span>}
+            {usedCount > 0 && <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, padding: '2px 8px', borderRadius: 20 }}>{usedCount} used</span>}
           </div>
         </div>
         <div className="uc-hdr-btns" style={{ display: 'flex', gap: 7 }}>
           <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-gold-sm"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
             <Plus size={13} /> New Coupon
           </button>
         </div>
@@ -371,7 +371,7 @@ export default function StudioCoupons() {
           Array.from({ length: 4 }).map((_, i) => <div key={i} style={{ height: 76, borderRadius: 14, background: C.card, border: `1px solid ${C.border}` }} className="shimmer" />)
         ) : filtered.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 12 }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scissors size={22} style={{ color: C.faint }} />
             </div>
             <p style={{ color: C.dim, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif' }}>{coupons.length === 0 ? 'No coupons yet' : 'No results match your search'}</p>
@@ -407,7 +407,7 @@ export default function StudioCoupons() {
               <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'New Coupon' : 'Edit Coupon'}</h2>
               <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Fill in the discount details</p>
             </div>
-            <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
+            <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
@@ -432,8 +432,8 @@ export default function StudioCoupons() {
           </div>
           <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
             <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
-              {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Save size={13} /> {modal === 'add' ? 'Create' : 'Save'}</>}
+            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
+              {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Save size={13} /> {modal === 'add' ? 'Create' : 'Save'}</>}
             </button>
           </div>
         </ModalWrap>
@@ -455,7 +455,7 @@ export default function StudioCoupons() {
 
           {/* Coupon preview */}
           <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 9, background: 'rgba(184,212,232,0.08)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 9, background: 'var(--col-acc)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span className="font-display gold-gradient" style={{ fontSize: '1rem', lineHeight: 1 }}>
                 {deleteTarget.discount_type === 'percentage' ? `${deleteTarget.discount_value}%` : `$${deleteTarget.discount_value}`}
               </span>
@@ -470,7 +470,7 @@ export default function StudioCoupons() {
 
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={confirmDelete} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <button onClick={confirmDelete} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <Trash2 size={13} /> Delete
             </button>
           </div>
@@ -500,7 +500,7 @@ export default function StudioCoupons() {
                 <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginLeft: 4 }}>Step {assignStep} of 2</span>
               </div>
             </div>
-            <button onClick={() => setModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
+            <button onClick={() => setModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
           </div>
 
           {/* Step 1 — Pick coupon */}
@@ -520,7 +520,7 @@ export default function StudioCoupons() {
                 })()}
               </div>
               <button onClick={() => assignCoupon && setAssignStep(2)} disabled={!assignCoupon}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignCoupon ? 'linear-gradient(135deg,#B8D4E8,#7AAFC9)' : 'rgba(255,255,255,0.05)', color: assignCoupon ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignCoupon ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s' }}>
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignCoupon ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.05)', color: assignCoupon ? 'var(--col-bg)' : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignCoupon ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s' }}>
                 Next <ChevronRight size={14} />
               </button>
             </>
@@ -561,7 +561,7 @@ export default function StudioCoupons() {
                       </button>
                     )}
                     {users.length === 0 && (
-                      <p style={{ color: 'rgba(255,255,255,0.18)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>
+                      <p style={{ color: 'var(--col-text)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>
                         Users need to register on the website first
                       </p>
                     )}
@@ -571,19 +571,19 @@ export default function StudioCoupons() {
                   const initials = u.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
                   return (
                     <button key={u.id} type="button" onClick={() => setAssignUser(u)} className="user-row"
-                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: selected ? 'rgba(184,212,232,0.15)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(var(--rgb-hi),0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: selected ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1.5px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <span style={{ fontSize: 11, color: selected ? C.gold : C.muted, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <p style={{ fontSize: '0.82rem', color: selected ? C.white : C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: selected ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.full_name || 'No name'}</p>
-                          {u.role && <span style={{ fontSize: 8, padding: '1px 6px', borderRadius: 9, background: u.role === 'admin' ? C.goldBg : 'rgba(255,255,255,0.05)', color: u.role === 'admin' ? C.goldDim : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>{u.role}</span>}
+                          {u.role && <span style={{ fontSize: 8, padding: '1px 6px', borderRadius: 9, background: u.role === 'admin' ? C.goldBg : 'rgba(var(--rgb-hi),0.05)', color: u.role === 'admin' ? C.goldDim : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>{u.role}</span>}
                         </div>
                         <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{u.points || 0} visits</p>
                       </div>
                       <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${selected ? C.gold : C.border}`, background: selected ? C.gold : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {selected && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#0e0e14' }} />}
+                        {selected && <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--col-modal)' }} />}
                       </div>
                     </button>
                   )
@@ -591,8 +591,8 @@ export default function StudioCoupons() {
               </div>
 
               <button onClick={confirmAssign} disabled={!assignUser || saving}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignUser ? 'linear-gradient(135deg,#B8D4E8,#7AAFC9)' : 'rgba(255,255,255,0.05)', color: assignUser ? '#000' : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignUser && !saving ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: saving ? 0.6 : 1 }}>
-                {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><UserPlus size={14} /> Assign Coupon</>}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignUser ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.05)', color: assignUser ? 'var(--col-bg)' : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignUser && !saving ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: saving ? 0.6 : 1 }}>
+                {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><UserPlus size={14} /> Assign Coupon</>}
               </button>
             </>
           )}

@@ -8,17 +8,17 @@ import {
 } from 'date-fns'
 
 const C = {
-  card: '#161620',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const STATUS = {
   pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.22)'  },
   confirmed: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.22)'  },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
-  completed: { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)'  },
+  completed: { color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)',  border: 'rgba(var(--rgb-acc),0.22)' },
 }
 
 const PAY_IN_STORE_STYLE = { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.22)' }
@@ -125,6 +125,11 @@ export default function StudioSchedule() {
     setMonth(now); setWeekDate(now); setDayDate(now)
   }
 
+  function openDay(day) {
+    setDayDate(day)
+    setView('daily')
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
@@ -180,7 +185,7 @@ export default function StudioSchedule() {
                 <button key={s.id} onClick={() => setStylistFilter(active ? null : s.id)}
                   style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '3px 10px 3px 4px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : C.border}`, background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {s.photo_url
-                    ? <img src={s.photo_url} alt={s.name} style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `1.5px solid ${active ? C.gold : 'rgba(255,255,255,0.12)'}` }} />
+                    ? <img src={s.photo_url} alt={s.name} style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `1.5px solid ${active ? C.gold : 'rgba(var(--rgb-hi),0.12)'}` }} />
                     : <div style={{ width: 20, height: 20, borderRadius: '50%', background: active ? C.goldBg : C.subtle, border: `1.5px solid ${active ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: active ? C.gold : C.muted, fontWeight: 700 }}>{s.name.charAt(0)}</div>
                   }
                   {s.name.split(' ')[0]}
@@ -214,7 +219,7 @@ export default function StudioSchedule() {
                     return (
                       <div key={key} onClick={() => hasAppts && openDay(day)}
                         className={`d-cal-day ${hasAppts ? 'has-appts' : ''}`}
-                        style={{ minHeight: 54, borderRadius: 7, padding: '5px 5px 4px', border: `1.5px solid ${isToday ? C.goldBorder : C.border}`, background: isToday ? C.goldBg : isWeekend ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.02)', opacity: isPast && !hasAppts ? 0.35 : 1, cursor: hasAppts ? 'pointer' : 'default', display: 'flex', flexDirection: 'column', transition: 'all .18s ease' }}>
+                        style={{ minHeight: 54, borderRadius: 7, padding: '5px 5px 4px', border: `1.5px solid ${isToday ? C.goldBorder : C.border}`, background: isToday ? C.goldBg : isWeekend ? 'rgba(var(--rgb-hi),0.015)' : 'rgba(var(--rgb-hi),0.02)', opacity: isPast && !hasAppts ? 0.35 : 1, cursor: hasAppts ? 'pointer' : 'default', display: 'flex', flexDirection: 'column', transition: 'all .18s ease' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 5 }}>
                           <span className="font-display" style={{ fontSize: '0.85rem', color: isToday ? C.gold : isPast ? C.muted : C.white, fontWeight: 700, lineHeight: 1 }}>{format(day, 'd')}</span>
                           {hasAppts && <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 5px', lineHeight: 1.6 }}>{appts.length}</span>}
@@ -288,7 +293,7 @@ export default function StudioSchedule() {
                 {/* Time axis */}
                 <div style={{ width: 48, flexShrink: 0, position: 'relative' }}>
                   {GRID_HOURS.map((h, i) => (
-                    <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif' }}>
+                    <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
                       {String(h).padStart(2, '0')}:00
                     </div>
                   ))}
@@ -300,10 +305,10 @@ export default function StudioSchedule() {
                   const laidOut = layoutAppts(byDate[key] || [])
                   const isToday = isSameDay(day, new Date())
                   return (
-                    <div key={i} style={{ flex: 1, position: 'relative', borderLeft: `1px solid ${C.border}`, background: isToday ? 'rgba(184,212,232,0.012)' : 'transparent' }}>
+                    <div key={i} style={{ flex: 1, position: 'relative', borderLeft: `1px solid ${C.border}`, background: isToday ? C.goldBg : 'transparent' }}>
                       {/* Hour lines */}
                       {GRID_HOURS.map((h, j) => (
-                        <div key={h} style={{ position: 'absolute', top: j * HOUR_HEIGHT, left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+                        <div key={h} style={{ position: 'absolute', top: j * HOUR_HEIGHT, left: 0, right: 0, height: 1, background: 'rgba(var(--rgb-hi),0.05)', pointerEvents: 'none' }} />
                       ))}
                       {/* Appointments */}
                       {laidOut.map(appt => {
@@ -369,7 +374,7 @@ export default function StudioSchedule() {
               {/* Time axis */}
               <div style={{ width: 48, flexShrink: 0, position: 'relative' }}>
                 {GRID_HOURS.map((h, i) => (
-                  <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif' }}>
+                  <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
                     {String(h).padStart(2, '0')}:00
                   </div>
                 ))}
@@ -379,7 +384,7 @@ export default function StudioSchedule() {
               <div style={{ flex: 1, position: 'relative', borderLeft: `1px solid ${C.border}` }}>
                 {/* Hour lines */}
                 {GRID_HOURS.map((h, i) => (
-                  <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT, left: 0, right: 0, height: 1, background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+                  <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT, left: 0, right: 0, height: 1, background: 'rgba(var(--rgb-hi),0.05)', pointerEvents: 'none' }} />
                 ))}
                 {/* Appointments */}
                 {loading ? null : layoutAppts(dayApptList).map(appt => {
@@ -515,7 +520,7 @@ export default function StudioSchedule() {
             style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
             onMouseDown={e => { if (e.target === e.currentTarget) setSelectedAppt(null) }}>
             <div
-              style={{ width: '100%', maxWidth: 420, background: '#12121a', borderRadius: 18, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid ${s.border}` }}
+              style={{ width: '100%', maxWidth: 420, background: 'var(--col-modal)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid ${s.border}` }}
               onClick={e => e.stopPropagation()}>
 
               {/* Coloured top bar */}
@@ -567,17 +572,17 @@ export default function StudioSchedule() {
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
         .d-nav:hover       { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
-        .d-today-btn:hover { background: ${C.gold} !important; color: #000 !important; }
-        .d-cal-day.has-appts:hover { border-color: ${C.goldBorder} !important; background: rgba(184,212,232,0.04) !important; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        .d-week-hdr:hover  { background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.1) !important; }
+        .d-today-btn:hover { background: ${C.gold} !important; color: var(--col-bg) !important; }
+        .d-cal-day.has-appts:hover { border-color: ${C.goldBorder} !important; background: rgba(var(--rgb-acc),0.04) !important; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .d-week-hdr:hover  { background: rgba(var(--rgb-hi),0.04) !important; border-color: rgba(var(--rgb-hi),0.1) !important; }
         .d-week-chip:hover { filter: brightness(1.15); transform: translateY(-1px); }
         .d-day-chip:hover  { filter: brightness(1.12); transform: translateX(2px); }
-        .modal-x:hover     { background: rgba(255,255,255,0.08) !important; color: ${C.white} !important; }
+        .modal-x:hover     { background: rgba(var(--rgb-hi),0.08) !important; color: ${C.white} !important; }
         .filter-pill:hover { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
-        .appt-card-row:hover { border-color: rgba(184,212,232,0.15) !important; }
+        .appt-card-row:hover { border-color: rgba(var(--rgb-acc),0.15) !important; }
         .st-btn-pending:hover   { background: rgba(245,158,11,0.2) !important; }
         .st-btn-confirmed:hover { background: rgba(52,211,153,0.2) !important; }
-        .st-btn-completed:hover { background: rgba(184,212,232,0.2) !important; }
+        .st-btn-completed:hover { background: rgba(var(--rgb-acc),0.2) !important; }
         .st-btn-cancelled:hover { background: rgba(248,113,113,0.2) !important; }
         .del-appt-btn:hover { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.4) !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }
@@ -590,7 +595,7 @@ export default function StudioSchedule() {
           100% { background-position:  400px 0 }
         }
         .sched-shimmer {
-          background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+          background: linear-gradient(90deg, rgba(var(--rgb-hi),0.04) 25%, rgba(var(--rgb-hi),0.08) 50%, rgba(var(--rgb-hi),0.04) 75%);
           background-size: 400px 100%;
           animation: sched-shimmer 1.6s ease-in-out infinite;
         }

@@ -10,10 +10,10 @@ import {
 } from 'date-fns'
 
 const C = {
-  card: '#161620',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.08)', greenBorder: 'rgba(52,211,153,0.18)',
   red: '#f87171', redBg: 'rgba(248,113,113,0.08)', redBorder: 'rgba(248,113,113,0.18)',
 }
@@ -49,7 +49,7 @@ function SessionModal({ sessions, rate, onClose }) {
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }} />
       <div style={{ position: 'fixed', inset: 0, zIndex: 201, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-        <div style={{ background: '#18181f', border: `1px solid ${C.border}`, borderRadius: 18, width: '100%', maxWidth: 360, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+        <div style={{ background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 18, width: '100%', maxWidth: 360, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
           <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
             <div>
               <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: '0 0 3px' }}>
@@ -159,8 +159,8 @@ function Pagination({ page, total, onChange }) {
     if (page < total - 3) pages.push(-2)
     pages.push(total - 1)
   }
-  const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: d ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', transition: 'all .15s' })
-  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${a ? 'rgba(184,212,232,0.3)' : C.border}`, color: a ? '#B8D4E8' : 'rgba(255,255,255,0.45)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
+  const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, color: d ? 'var(--col-text)' : 'var(--col-text)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', transition: 'all .15s' })
+  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${a ? 'var(--col-acc)' : C.border}`, color: a ? 'var(--col-acc)' : 'var(--col-text)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '0.25rem 0' }}>
       <button onClick={() => onChange(Math.max(0, page - 1))} disabled={page === 0} style={nav(page === 0)}>‹</button>
@@ -195,7 +195,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <style>{`.cal-day:hover { background: rgba(255,255,255,0.045) !important; } .ps-cal-nav:hover { color: ${C.white} !important; }`}</style>
+      <style>{`.cal-day:hover { background: rgba(var(--rgb-hi),0.045) !important; } .ps-cal-nav:hover { color: ${C.white} !important; }`}</style>
 
       {/* Month navigation */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -209,7 +209,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
       {/* Calendar grid */}
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
         {/* Day headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}` }}>
           {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
             <div key={d} style={{ padding: '0.45rem 0.25rem', textAlign: 'center', fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{d}</div>
           ))}
@@ -263,8 +263,8 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
               </div>
               {/* Week summary */}
               {wInMonth && wMins > 0 && (
-                <div style={{ padding: '0.3rem 1rem', background: 'rgba(255,255,255,0.015)', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif' }}>This week</span>
+                <div style={{ padding: '0.3rem 1rem', background: 'rgba(var(--rgb-hi),0.015)', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>This week</span>
                   <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif' }}>
                     <span style={{ color: C.gold }}>{fmtMins(wMins)}</span>
                     {rate > 0 && <span style={{ color: C.muted }}> · <span style={{ color: C.white }}>{fmt(wEarned)}</span></span>}
@@ -356,7 +356,7 @@ export default function StudioPaysheet() {
 
   if (loading) return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid rgba(184,212,232,0.18)', borderTopColor: '#B8D4E8', animation: 'spin 0.7s linear infinite' }} />
+      <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid rgba(var(--rgb-acc),0.18)', borderTopcolor: 'var(--col-acc)', animation: 'spin 0.7s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
   )
@@ -380,8 +380,8 @@ export default function StudioPaysheet() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', height: '100%', overflowY: 'auto' }}>
       <style>{`
-        .ps-row:hover      { background: rgba(255,255,255,0.025) !important; }
-        .ps-info-btn:hover { background: rgba(255,255,255,0.08) !important; color: ${C.white} !important; }
+        .ps-row:hover      { background: rgba(var(--rgb-hi),0.025) !important; }
+        .ps-info-btn:hover { background: rgba(var(--rgb-hi),0.08) !important; color: ${C.white} !important; }
       `}</style>
 
       {/* Header */}
@@ -419,10 +419,10 @@ export default function StudioPaysheet() {
       </div>
 
       {/* Tab switcher: Table | Calendar */}
-      <div style={{ flexShrink: 0, display: 'flex', gap: 3, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 3 }}>
+      <div style={{ flexShrink: 0, display: 'flex', gap: 3, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 3 }}>
         {[['calendar', 'Calendar'], ['table', 'Table']].map(([key, label]) => (
           <button key={key} onClick={() => { setActiveTab(key); setPage(0) }}
-            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'rgba(184,212,232,0.1)' : 'transparent', color: activeTab === key ? '#B8D4E8' : C.muted, border: `1px solid ${activeTab === key ? 'rgba(184,212,232,0.22)' : 'transparent'}`, transition: 'all .18s' }}>
+            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'var(--col-acc)' : 'transparent', color: activeTab === key ? 'var(--col-acc)' : C.muted, border: `1px solid ${activeTab === key ? 'var(--col-acc)' : 'transparent'}`, transition: 'all .18s' }}>
             {label}
           </button>
         ))}
@@ -452,7 +452,7 @@ export default function StudioPaysheet() {
             </div>
           ) : (
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.55rem 1rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.55rem 1rem', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem' }}>
                 {['Date', 'Hours', 'Earned', 'Status', ''].map(h => (
                   <div key={h} style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>{h}</div>
                 ))}

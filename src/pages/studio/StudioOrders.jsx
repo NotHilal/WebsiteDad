@@ -9,16 +9,16 @@ import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
-  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
-  subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)', gold: 'var(--col-acc)', goldDim: 'var(--col-acc)',
+  goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)',
+  subtle: 'rgba(var(--rgb-hi),0.06)', border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const STATUS_STYLE = {
-  active:    { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)',  label: 'Awaiting Pickup' },
+  active:    { color: 'var(--col-acc)', bg: 'var(--col-acc)',  border: 'var(--col-acc)',  label: 'Awaiting Pickup' },
   retrieved: { color: '#34d399', bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.22)',  label: 'Retrieved'       },
-  expired:   { color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', label: 'Expired' },
+  expired:   { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.06)', border: 'rgba(var(--rgb-hi),0.1)', label: 'Expired' },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)', label: 'Cancelled'      },
 }
 
@@ -132,12 +132,12 @@ export default function StudioOrders() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .o-search:focus { border-color: ${C.goldBorder} !important; }
-        .o-row:hover { background: rgba(255,255,255,0.018) !important; }
+        .o-row:hover { background: rgba(var(--rgb-hi),0.018) !important; }
         .o-row:hover .o-details-btn { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .o-retrieve:hover:not(:disabled) { background: rgba(52,211,153,0.2) !important; border-color: rgba(52,211,153,0.5) !important; }
         .o-cancel:hover:not(:disabled) { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .o-delete:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
-        .o-revert:hover:not(:disabled) { background: rgba(184,212,232,0.18) !important; border-color: rgba(184,212,232,0.45) !important; }
+        .o-revert:hover:not(:disabled) { background: rgba(var(--rgb-acc),0.18) !important; border-color: rgba(var(--rgb-acc),0.45) !important; }
       `}</style>
 
       {/* ── Header ── */}
@@ -150,7 +150,7 @@ export default function StudioOrders() {
           <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }}
             placeholder="Search by name, phone, product…" autoComplete="off" className="o-search"
-            style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.875rem 0.45rem 2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', width: 280, maxWidth: '100%', transition: 'border-color .2s' }} />
+            style={{ background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.875rem 0.45rem 2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', width: 280, maxWidth: '100%', transition: 'border-color .2s' }} />
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default function StudioOrders() {
       <div style={{ display: 'flex', gap: 4, flexShrink: 0, flexWrap: 'wrap' }}>
         {STATUS_TABS.map(t => (
           <button key={t} onClick={() => { setTab(t); setPage(0) }}
-            style={{ padding: '0.35rem 0.875rem', borderRadius: 20, fontSize: 11, letterSpacing: '0.13em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: tab === t ? 600 : 400, cursor: 'pointer', transition: 'all .18s', border: 'none', background: tab === t ? C.goldBg : 'rgba(255,255,255,0.04)', color: tab === t ? C.gold : C.muted, outline: tab === t ? `1px solid ${C.goldBorder}` : '1px solid transparent' }}>
+            style={{ padding: '0.35rem 0.875rem', borderRadius: 20, fontSize: 11, letterSpacing: '0.13em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: tab === t ? 600 : 400, cursor: 'pointer', transition: 'all .18s', border: 'none', background: tab === t ? C.goldBg : 'rgba(var(--rgb-hi),0.04)', color: tab === t ? C.gold : C.muted, outline: tab === t ? `1px solid ${C.goldBorder}` : '1px solid transparent' }}>
             {t}<span style={{ marginLeft: 5, fontSize: 9, opacity: 0.7 }}>({counts[t] || 0})</span>
           </button>
         ))}
@@ -169,13 +169,13 @@ export default function StudioOrders() {
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '0.75rem' }}>
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} style={{ height: 58, borderRadius: 8, background: 'rgba(255,255,255,0.04)' }} className="shimmer" />
+              <div key={i} style={{ height: 58, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.04)' }} className="shimmer" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 220, gap: 10 }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Package size={22} color="rgba(255,255,255,0.12)" strokeWidth={1} />
+              <Package size={22} color="rgba(var(--rgb-hi),0.12)" strokeWidth={1} />
             </div>
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
               {search ? 'No orders match your search' : 'No orders yet'}
@@ -213,20 +213,20 @@ export default function StudioOrders() {
 
                   {/* Row 2: metadata chips */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.04em' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'var(--col-text)', letterSpacing: '0.04em' }}>
                       #{order.id.slice(0, 8).toUpperCase()}
                     </span>
-                    <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
-                    <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: order.status === 'retrieved' ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: order.status === 'retrieved' ? 600 : 400 }}>
+                    <span style={{ color: 'var(--col-text)', fontSize: 10 }}>·</span>
+                    <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: order.status === 'retrieved' ? C.gold : 'var(--col-text)', fontWeight: order.status === 'retrieved' ? 600 : 400 }}>
                       ${total.toFixed(2)}
                     </span>
-                    <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'DM Sans,sans-serif' }}>
+                    <span style={{ color: 'var(--col-text)', fontSize: 10 }}>·</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
                       {format(new Date(order.created_at), 'MMM d, HH:mm')}
                     </span>
                     {order.profiles?.phone && <>
-                      <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
-                      <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif' }}>{order.profiles.phone}</span>
+                      <span style={{ color: 'var(--col-text)', fontSize: 10 }}>·</span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{order.profiles.phone}</span>
                     </>}
                   </div>
                 </div>
@@ -246,10 +246,10 @@ export default function StudioOrders() {
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 8 }}
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               onClick={e => e.stopPropagation()}
-              style={{ width: '100%', maxWidth: 460, background: '#12121c', border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.75)' }}>
+              style={{ width: '100%', maxWidth: 460, background: 'var(--col-modal)', border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.75)' }}>
 
               {/* Gold top bar */}
-              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
+              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},var(--col-acc2),rgba(var(--rgb-acc),0.15))` }} />
 
               <div style={{ padding: '1.5rem' }}>
                 {/* Header */}
@@ -261,17 +261,17 @@ export default function StudioOrders() {
                     </span>
                   </div>
                   <button onClick={() => setDetails(null)}
-                    style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                    style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
                     <X size={13} />
                   </button>
                 </div>
 
                 {/* Product card */}
-                <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 14, marginBottom: '1rem' }}>
-                  <div style={{ width: 72, height: 72, borderRadius: 12, background: '#181828', border: `1px solid ${C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: '1rem', padding: '1rem', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 14, marginBottom: '1rem' }}>
+                  <div style={{ width: 72, height: 72, borderRadius: 12, background: 'var(--col-card)', border: `1px solid ${C.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {details.products?.image_url
                       ? <img src={details.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <Package size={22} color="rgba(255,255,255,0.15)" strokeWidth={1} />
+                      : <Package size={22} color="var(--col-text)" strokeWidth={1} />
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -298,11 +298,11 @@ export default function StudioOrders() {
 
                 {/* Client + date row */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem', marginBottom: '1rem' }}>
-                  <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                  <div style={{ padding: '0.75rem', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
                     <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Client</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(184,212,232,0.1)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: 10, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
+                      <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--col-acc)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 10, color: 'var(--col-bg)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                           {(details.profiles?.full_name || '?')[0].toUpperCase()}
                         </span>
                       </div>
@@ -316,7 +316,7 @@ export default function StudioOrders() {
                       </div>
                     </div>
                   </div>
-                  <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                  <div style={{ padding: '0.75rem', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
                     <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Ordered</p>
                     <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif' }}>
                       {format(new Date(details.created_at), 'MMM d, yyyy')}
@@ -334,8 +334,8 @@ export default function StudioOrders() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.75rem 1rem', background: s.bg, border: `1px solid ${s.border}`, borderRadius: 10, marginBottom: '1.25rem' }}>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, boxShadow: `0 0 8px ${s.color}88`, flexShrink: 0 }} />
                       <span style={{ fontSize: '0.8rem', color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flex: 1 }}>{s.label}</span>
-                      <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.04em' }}>
-                        #{details.id.slice(0, 8).toUpperCase()}
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'var(--col-text)', letterSpacing: '0.04em' }}>
+                        REF {details.id.slice(0, 8).toUpperCase()}
                       </span>
                     </div>
                   )
@@ -387,7 +387,7 @@ export default function StudioOrders() {
             <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               onClick={e => e.stopPropagation()}
-              style={{ width: '100%', maxWidth: 400, background: '#12121c', border: '1px solid rgba(248,113,113,0.22)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}>
+              style={{ width: '100%', maxWidth: 400, background: 'var(--col-modal)', border: '1px solid rgba(248,113,113,0.22)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.75)' }}>
               <div style={{ height: 3, background: 'linear-gradient(90deg,#f87171,rgba(248,113,113,0.3))' }} />
               <div style={{ padding: '1.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
@@ -407,7 +407,7 @@ export default function StudioOrders() {
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={closeDelete}
-                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: C.muted, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
+                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.08)', color: C.muted, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
                     Cancel
                   </button>
                   <button onClick={confirmDelete}

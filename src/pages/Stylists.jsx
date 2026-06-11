@@ -62,7 +62,7 @@ export default function Stylists() {
         .ig-link {
           display: inline-flex; align-items: center; gap: 5px;
           font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
-          color: rgba(var(--rgb-hi),0.5); text-decoration: none;
+          color: var(--col-text); text-decoration: none;
           font-family: DM Sans,sans-serif; transition: color 0.2s;
           margin-top: 0.75rem;
         }
@@ -91,7 +91,7 @@ export default function Stylists() {
             Our Team
           </h1>
           <div className="gold-bar" />
-          <p style={{ color: 'rgba(var(--rgb-hi),0.38)', fontSize: '0.9rem', lineHeight: 1.85, maxWidth: 440, margin: '0 auto' }}>
+          <p style={{ color: 'var(--col-text)', fontSize: '0.9rem', lineHeight: 1.85, maxWidth: 440, margin: '0 auto' }}>
             Passionate experts united by one purpose — to deliver the look that's truly yours.
           </p>
         </motion.div>
@@ -108,7 +108,7 @@ export default function Stylists() {
             ))}
           </div>
         ) : team.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '6rem 0', color: 'rgba(var(--rgb-hi),0.22)', fontSize: '0.9rem' }}>
+          <div style={{ textAlign: 'center', padding: '6rem 0', color: 'var(--col-text)', fontSize: '0.9rem' }}>
             No stylists added yet.
           </div>
         ) : (
@@ -133,7 +133,7 @@ export default function Stylists() {
                   <div className="team-overlay">
                     <div className="team-overlay-bio">
                       {s.bio && (
-                        <p style={{ color: 'rgba(var(--rgb-hi),0.7)', fontSize: '0.8rem', lineHeight: 1.75, marginBottom: '0.875rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        <p style={{ color: 'var(--col-text)', fontSize: '0.8rem', lineHeight: 1.75, marginBottom: '0.875rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                           {s.bio}
                         </p>
                       )}
@@ -188,14 +188,14 @@ export default function Stylists() {
             borderRadius: 4, padding: '3.5rem 3rem',
             transition: 'border-color 0.3s',
           }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(var(--rgb-acc),0.1)', border: '1px solid rgba(var(--rgb-acc),0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.75rem' }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.75rem' }}>
               <Scissors size={18} color="var(--col-acc)" style={{ transform: 'rotate(45deg)' }} />
             </div>
             <h3 className="font-display font-light" style={{ fontSize: '2rem', color: 'var(--col-text)', marginBottom: '1rem' }}>
               Join the family
             </h3>
             <div className="gold-bar" />
-            <p style={{ color: 'rgba(var(--rgb-hi),0.35)', fontSize: '0.87rem', lineHeight: 1.9, maxWidth: 320, margin: '0 auto' }}>
+            <p style={{ color: 'var(--col-text)', fontSize: '0.87rem', lineHeight: 1.9, maxWidth: 320, margin: '0 auto' }}>
               Passionate about hair? We're always looking for talented artists to join the HairGo team.
             </p>
           </div>

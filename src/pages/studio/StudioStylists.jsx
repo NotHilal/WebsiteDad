@@ -7,16 +7,16 @@ import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
-  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
-  subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
+  card: 'var(--col-modal)', gold: 'var(--col-acc)', goldDim: 'var(--col-acc)',
+  goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)',
+  subtle: 'rgba(var(--rgb-hi),0.06)', border: 'rgba(var(--rgb-hi),0.07)', modal: 'var(--col-modal)',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.18)',
 }
 
 const EMPTY = { name: '', bio: '', photo_url: '', profile_id: '', hourly_rate: '' }
-const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp   = { width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 function CustomSelect({ value, onChange, options }) {
   const [open, setOpen] = useState(false)
@@ -32,16 +32,16 @@ function CustomSelect({ value, onChange, options }) {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button type="button" onClick={() => setOpen(p => !p)}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', background: hasValue ? 'rgba(52,211,153,0.05)' : 'rgba(255,255,255,0.05)', border: `1px solid ${hasValue ? C.greenBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, color: hasValue ? C.green : 'rgba(255,255,255,0.4)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: hasValue ? 500 : 300, cursor: 'pointer', transition: 'all .2s', textAlign: 'left', boxSizing: 'border-box' }}>
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', background: hasValue ? 'rgba(52,211,153,0.05)' : 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${hasValue ? C.greenBorder : 'rgba(var(--rgb-hi),0.1)'}`, borderRadius: 9, color: hasValue ? C.green : 'var(--col-text)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: hasValue ? 500 : 300, cursor: 'pointer', transition: 'all .2s', textAlign: 'left', boxSizing: 'border-box' }}>
         {hasValue && <div style={{ width: 7, height: 7, borderRadius: '50%', background: C.green, boxShadow: `0 0 6px ${C.green}88`, flexShrink: 0 }} />}
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {selected?.label || 'No account linked'}
         </span>
-        <ChevronDown size={12} color={hasValue ? C.green : 'rgba(255,255,255,0.25)'} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .22s', flexShrink: 0 }} />
+        <ChevronDown size={12} color={hasValue ? C.green : 'var(--col-text)'} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .22s', flexShrink: 0 }} />
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 200, background: '#131320', border: `1px solid ${C.goldBorder}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03)' }}>
-          <div style={{ height: 2, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))' }} />
+        <div style={{ position: 'absolute', top: 'calc(100% + 5px)', left: 0, right: 0, zIndex: 200, background: 'var(--col-card)', border: `1px solid ${C.goldBorder}`, borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(var(--rgb-hi),0.03)' }}>
+          <div style={{ height: 2, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.1))' }} />
           <div style={{ maxHeight: 200, overflowY: 'auto' }}>
             {options.map(opt => {
               const isActive = opt.value === value
@@ -50,10 +50,10 @@ function CustomSelect({ value, onChange, options }) {
                   onClick={() => { if (!opt.disabled) { onChange(opt.value); setOpen(false) } }}
                   disabled={opt.disabled}
                   className={opt.disabled ? '' : 'csel-opt'}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: isActive ? 'rgba(52,211,153,0.06)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: opt.disabled ? 'not-allowed' : 'pointer', color: opt.disabled ? 'rgba(255,255,255,0.18)' : isActive ? C.green : 'rgba(255,255,255,0.55)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'left', transition: 'background .12s' }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: isActive ? C.green : 'transparent', border: isActive ? 'none' : `1px solid rgba(255,255,255,0.15)`, flexShrink: 0, transition: 'all .15s' }} />
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: isActive ? 'rgba(52,211,153,0.06)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: opt.disabled ? 'not-allowed' : 'pointer', color: opt.disabled ? 'var(--col-text)' : isActive ? C.green : 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'left', transition: 'background .12s' }}>
+                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: isActive ? C.green : 'transparent', border: isActive ? 'none' : `1px solid var(--col-text)`, flexShrink: 0, transition: 'all .15s' }} />
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
-                  {opt.sublabel && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>{opt.sublabel}</span>}
+                  {opt.sublabel && <span style={{ fontSize: '0.65rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>{opt.sublabel}</span>}
                   {isActive && <Check size={10} color={C.green} style={{ flexShrink: 0 }} />}
                 </button>
               )
@@ -181,16 +181,16 @@ export default function StudioStylists() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .m-inp:focus    { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
+        .m-inp:focus    { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); }
         .sty-card       { transition: border-color .2s, box-shadow .2s; }
-        .sty-card:hover { border-color: rgba(184,212,232,0.22) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35); }
+        .sty-card:hover { border-color: rgba(var(--rgb-acc),0.22) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.35); }
         .sty-img        { transition: transform .5s ease; }
         .sty-card:hover .sty-img { transform: scale(1.05); }
-        .sty-edit:hover { background: rgba(184,212,232,0.16) !important; border-color: rgba(184,212,232,0.45) !important; color: ${C.gold} !important; }
+        .sty-edit:hover { background: rgba(var(--rgb-acc),0.16) !important; border-color: rgba(var(--rgb-acc),0.45) !important; color: ${C.gold} !important; }
         .sty-del:hover  { background: rgba(248,113,113,0.12) !important; border-color: rgba(248,113,113,0.3) !important; color: #f87171 !important; }
-        .btn-g:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,212,232,0.3); }
+        .btn-g:hover    { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(var(--rgb-acc),0.3); }
         .drop-zone:hover { border-color: ${C.goldBorder} !important; background: ${C.goldBg} !important; }
-        .csel-opt:hover { background: rgba(255,255,255,0.04) !important; }
+        .csel-opt:hover { background: rgba(var(--rgb-hi),0.04) !important; }
         @media (max-width: 520px) {
           .sty-2col { grid-template-columns: 1fr !important; }
           .sty-hdr  { flex-wrap: wrap; gap: 0.75rem !important; }
@@ -214,7 +214,7 @@ export default function StudioStylists() {
           </div>
         </div>
         <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
           <Plus size={14} /> Add Stylist
         </button>
       </div>
@@ -230,12 +230,12 @@ export default function StudioStylists() {
         ) : stylists.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 260, gap: '0.75rem', textAlign: 'center' }}>
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <User size={26} color="rgba(255,255,255,0.15)" strokeWidth={1} />
+              <User size={26} color="var(--col-text)" strokeWidth={1} />
             </div>
             <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif' }}>No team members yet</p>
             <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>Add your first stylist to get started</p>
             <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
-              style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+              style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
               <Plus size={14} /> Add Stylist
             </button>
           </div>
@@ -248,12 +248,12 @@ export default function StudioStylists() {
                   style={{ background: C.card, border: `1px solid ${s.profile_id ? C.greenBorder : C.border}`, borderRadius: 16, overflow: 'hidden', display: 'flex', minHeight: 120 }}>
 
                   {/* Photo */}
-                  <div style={{ width: 110, flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#0e0e14' }}>
+                  <div style={{ width: 110, flexShrink: 0, position: 'relative', overflow: 'hidden', background: 'var(--col-modal)' }}>
                     {s.photo_url
                       ? <img src={s.photo_url} alt={s.name} className="sty-img"
                           style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(184,212,232,0.05), rgba(122,175,201,0.03))' }}>
-                          <User size={32} color="rgba(184,212,232,0.18)" strokeWidth={1} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(var(--rgb-acc),0.05), rgba(var(--rgb-acc),0.03))' }}>
+                          <User size={32} color="rgba(var(--rgb-acc),0.18)" strokeWidth={1} />
                         </div>
                     }
                     {/* Right-side gradient for smooth blend into card */}
@@ -274,7 +274,7 @@ export default function StudioStylists() {
                       </div>
                       <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                         <button onClick={() => openEdit(s)} className="sty-edit"
-                          style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(184,212,232,0.07)', border: '1px solid rgba(184,212,232,0.18)', color: 'rgba(184,212,232,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                          style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
                           <Edit2 size={11} />
                         </button>
                         <button onClick={() => del(s.id)} className="sty-del"
@@ -309,7 +309,7 @@ export default function StudioStylists() {
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.green }} />
                             Linked
                           </span>
-                        : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}`, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                        : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}`, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                             <Link2 size={8} />
                             Not linked
                           </span>
@@ -332,7 +332,7 @@ export default function StudioStylists() {
           <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,.65)' }}
             onClick={e => e.stopPropagation()}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.15))' }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.15))' }} />
 
             <div style={{ padding: '1.75rem' }}>
               {/* Modal header */}
@@ -359,7 +359,7 @@ export default function StudioStylists() {
                 {/* Hourly rate */}
                 <div style={{ padding: '1rem', borderRadius: 12, background: C.goldBg, border: `1px solid ${C.goldBorder}` }}>
                   <label style={{ ...lbl, color: C.goldDim, marginBottom: 4 }}>Hourly Rate</label>
-                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>
                     Used to auto-calculate pay runs from timesheet hours.
                   </p>
                   <div style={{ position: 'relative', maxWidth: 160 }}>
@@ -406,10 +406,10 @@ export default function StudioStylists() {
                       onDragOver={e => { e.preventDefault(); setDragOver(true) }}
                       onDragLeave={() => setDragOver(false)}
                       onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
-                      style={{ border: `1.5px dashed ${dragOver ? C.gold : 'rgba(255,255,255,0.1)'}`, borderRadius: 12, padding: '1.25rem', textAlign: 'center', cursor: 'pointer', background: dragOver ? C.goldBg : 'rgba(255,255,255,0.02)', transition: 'all .2s' }}>
-                      <Upload size={18} color={dragOver ? C.gold : 'rgba(255,255,255,0.18)'} style={{ margin: '0 auto 0.5rem' }} />
+                      style={{ border: `1.5px dashed ${dragOver ? C.gold : 'rgba(var(--rgb-hi),0.1)'}`, borderRadius: 12, padding: '1.25rem', textAlign: 'center', cursor: 'pointer', background: dragOver ? C.goldBg : 'rgba(var(--rgb-hi),0.02)', transition: 'all .2s' }}>
+                      <Upload size={18} color={dragOver ? C.gold : 'var(--col-text)'} style={{ margin: '0 auto 0.5rem' }} />
                       <p style={{ fontSize: '0.78rem', color: dragOver ? C.gold : C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 2 }}>Click or drag & drop</p>
-                      <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif' }}>JPG, PNG, WebP · max 5 MB</p>
+                      <p style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>JPG, PNG, WebP · max 5 MB</p>
                     </div>
                   )}
                   {uploading && (
@@ -427,7 +427,7 @@ export default function StudioStylists() {
                     <Link2 size={9} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />
                     Linked Account
                   </label>
-                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>
                     Link a staff account so they can clock in/out from their own login.
                   </p>
                   <CustomSelect
@@ -457,9 +457,9 @@ export default function StudioStylists() {
                   Cancel
                 </button>
                 <button onClick={save} disabled={saving || uploading}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || uploading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || uploading) ? 0.6 : 1 }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || uploading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || uploading) ? 0.6 : 1 }}>
                   {saving
-                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Save size={13} /> {modal === 'add' ? 'Add Stylist' : 'Save Changes'}</>
                   }
                 </button>
@@ -474,7 +474,7 @@ export default function StudioStylists() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
           onMouseDown={e => { if (e.target === e.currentTarget) setDeleteTarget(null) }}>
           <div onClick={e => e.stopPropagation()}
-            style={{ width: '100%', maxWidth: 380, background: '#1a1a24', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
+            style={{ width: '100%', maxWidth: 380, background: 'var(--col-modal)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
 
             <div style={{ height: 3, background: 'linear-gradient(90deg,#f87171,#ef4444,rgba(248,113,113,0.1))' }} />
 
@@ -483,24 +483,24 @@ export default function StudioStylists() {
                 <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
                   <Trash2 size={22} color="#f87171" strokeWidth={1.5} />
                 </div>
-                <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: '#f0f0f0', lineHeight: 1.1, marginBottom: '0.4rem' }}>
+                <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: 'var(--col-text)', lineHeight: 1.1, marginBottom: '0.4rem' }}>
                   Delete Artist
                 </h2>
-                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
-                  Are you sure you want to delete <span style={{ color: '#f0f0f0', fontWeight: 600 }}>{deleteTarget.name}</span>?
+                <p style={{ fontSize: '0.78rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
+                  Are you sure you want to delete <span style={{ color: 'var(--col-text)', fontWeight: 600 }}>{deleteTarget.name}</span>?
                   <br />This will remove their profile and all related data permanently.
                 </p>
               </div>
 
               <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button onClick={() => setDeleteTarget(null)}
-                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
+                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: '1px solid rgba(var(--rgb-hi),0.09)', color: 'var(--col-text)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
                   Cancel
                 </button>
                 <button onClick={confirmDelete} disabled={deleting}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1, transition: 'all .2s' }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1, transition: 'all .2s' }}>
                   {deleting
-                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(var(--rgb-hi),.3)', borderTopcolor: 'var(--col-text)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Trash2 size={13} /> Delete Permanently</>
                   }
                 </button>

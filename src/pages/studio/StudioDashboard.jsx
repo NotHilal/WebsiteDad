@@ -7,17 +7,17 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
 const C = {
-  card: '#161620',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const STATUS = {
   pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.22)'  },
   confirmed: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.22)'  },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
-  completed: { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)'  },
+  completed: { color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)',  border: 'rgba(var(--rgb-acc),0.22)' },
 }
 
 const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
@@ -118,7 +118,7 @@ export default function StudioDashboard() {
           const clockedIn   = isClockCard && !!activeClockIn
           const elapsed     = clockedIn ? Math.floor((Date.now() - new Date(activeClockIn.clock_in)) / 60000) : 0
           const elapsedStr  = elapsed >= 60 ? `${Math.floor(elapsed/60)}h ${elapsed%60}m` : `${elapsed}m`
-          const dotColor    = clockedIn ? '#34d399' : 'rgba(255,255,255,0.18)'
+          const dotColor    = clockedIn ? '#34d399' : 'var(--col-text)'
           return (
             <button key={c.label} onClick={() => navigate(c.link)} className="d-stat"
               style={{ ...card, padding: '1.1rem 1.25rem', textAlign: 'left', cursor: 'pointer', transition: 'all .2s ease', borderColor: isClockCard && clockedIn ? 'rgba(52,211,153,0.2)' : undefined }}>
@@ -142,7 +142,7 @@ export default function StudioDashboard() {
                 </div>
               )}
               <p style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.1rem' }}>{c.label}</p>
-              <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif' }}>
+              <p style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
                 {isClockCard ? (clockedIn ? `Since ${elapsedStr} ago` : 'Not clocked in') : c.sub}
               </p>
             </button>
@@ -179,7 +179,7 @@ export default function StudioDashboard() {
                 <button key={s.id} onClick={() => setStylistFilter(active ? null : s.id)}
                   style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '4px 12px 4px 4px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : C.border}`, background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {s.photo_url
-                    ? <img src={s.photo_url} alt={s.name} style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `1.5px solid ${active ? C.gold : 'rgba(255,255,255,0.12)'}` }} />
+                    ? <img src={s.photo_url} alt={s.name} style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `1.5px solid ${active ? C.gold : 'rgba(var(--rgb-hi),0.12)'}` }} />
                     : <div style={{ width: 22, height: 22, borderRadius: '50%', background: active ? C.goldBg : C.subtle, border: `1.5px solid ${active ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: active ? C.gold : C.muted, fontWeight: 700 }}>
                         {s.name.charAt(0)}
                       </div>
@@ -208,7 +208,7 @@ export default function StudioDashboard() {
 
                     {/* Time */}
                     <span style={{ width: 40, flexShrink: 0, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'right', paddingTop: count > 0 ? 10 : 0,
-                      color: count > 1 ? '#f59e0b' : count === 1 ? C.gold : 'rgba(255,255,255,0.15)',
+                      color: count > 1 ? '#f59e0b' : count === 1 ? C.gold : 'var(--col-text)',
                       fontWeight: count > 0 ? 700 : 400,
                     }}>
                       {slot}
@@ -216,7 +216,7 @@ export default function StudioDashboard() {
 
                     {/* Separator */}
                     <div style={{ width: 1, alignSelf: 'stretch', flexShrink: 0,
-                      background: count > 1 ? 'rgba(245,158,11,0.4)' : count === 1 ? C.goldBorder : 'rgba(255,255,255,0.05)',
+                      background: count > 1 ? 'rgba(245,158,11,0.4)' : count === 1 ? C.goldBorder : 'rgba(var(--rgb-hi),0.05)',
                     }} />
 
                     {/* Content */}
@@ -224,8 +224,8 @@ export default function StudioDashboard() {
 
                       {count === 0 && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 1 }} />
-                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.1)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>Free</span>
+                          <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.04)', borderRadius: 1 }} />
+                          <span style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>Free</span>
                         </div>
                       )}
 

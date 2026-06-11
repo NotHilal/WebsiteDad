@@ -6,8 +6,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 
 const C = {
-  border: 'rgba(var(--rgb-hi),0.07)', white: 'var(--col-text)', muted: 'rgba(var(--rgb-hi),0.22)',
-  gold: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.2)',
+  border: 'rgba(var(--rgb-hi),0.07)', white: 'var(--col-text)', muted: 'var(--col-text)',
+  gold: 'var(--col-acc)', goldBg: 'var(--col-acc)', goldBorder: 'var(--col-acc)',
 }
 
 export default function UnlinkedArtistAlert() {
@@ -54,7 +54,7 @@ export default function UnlinkedArtistAlert() {
 
       <button onClick={() => setOpen(p => !p)}
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'artist-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
-        <Scissors size={13} color="#000" style={{ transform: 'rotate(45deg)' }} strokeWidth={2.5} />
+        <Scissors size={13} color="var(--col-bg)" style={{ transform: 'rotate(45deg)' }} strokeWidth={2.5} />
         {artists.length > 1 && (
           <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#ef4444', border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>
             {artists.length}

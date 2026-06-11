@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 
 const C = {
   gold: 'var(--col-acc)', border: 'rgba(var(--rgb-hi),0.07)',
-  white: 'var(--col-text)', muted: 'rgba(var(--rgb-hi),0.22)',
+  white: 'var(--col-text)', muted: 'var(--col-text)',
 }
 
 export default function AppointmentAlert() {
@@ -72,7 +72,7 @@ export default function AppointmentAlert() {
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#fb923c,#f97316)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'appt-pulse 1.8s ease-in-out infinite', flexShrink: 0 }}>
         <AlertTriangle size={14} color="#fff" strokeWidth={2.5} />
         {dueAppts.length > 1 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: C.gold, border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: C.gold, border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: 'var(--col-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>
             {dueAppts.length}
           </span>
         )}
@@ -121,7 +121,7 @@ export default function AppointmentAlert() {
                         </button>
                       )}
                       <button disabled={updatingId === a.id} onClick={() => markStatus(a, 'completed')}
-                        style={{ flex: 1, padding: '5px 0', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: updatingId === a.id ? 'not-allowed' : 'pointer', border: 'none', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', opacity: updatingId === a.id ? 0.5 : 1, transition: 'opacity .15s' }}>
+                        style={{ flex: 1, padding: '5px 0', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: updatingId === a.id ? 'not-allowed' : 'pointer', border: 'none', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: 'var(--col-bg)', opacity: updatingId === a.id ? 0.5 : 1, transition: 'opacity .15s' }}>
                         ✓ Done
                       </button>
                       <button disabled={updatingId === a.id} onClick={() => markStatus(a, 'cancelled')}

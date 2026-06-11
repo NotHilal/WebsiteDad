@@ -15,7 +15,7 @@ function saveDismissed(id) {
 }
 
 const C = {
-  border: 'rgba(var(--rgb-hi),0.07)', white: 'var(--col-text)', muted: 'rgba(var(--rgb-hi),0.22)',
+  border: 'rgba(var(--rgb-hi),0.07)', white: 'var(--col-text)', muted: 'var(--col-text)',
   success: '#4ade80', successBg: 'rgba(74,222,128,0.08)', successBorder: 'rgba(74,222,128,0.2)',
   danger: '#f87171',  dangerBg:  'rgba(248,113,113,0.08)', dangerBorder:  'rgba(248,113,113,0.2)',
 }
@@ -80,7 +80,7 @@ export default function DayOffAlert() {
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'dayoff-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
         <CalendarCheck size={14} color="#fff" strokeWidth={2.5} />
         {notes.length > 1 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: 'var(--col-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>
             {notes.length}
           </span>
         )}
@@ -131,11 +131,11 @@ export default function DayOffAlert() {
                             {ok ? 'Day off approved' : 'Day off not approved'}
                           </span>
                         </div>
-                        <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(var(--rgb-hi),0.5)' }}>
+                        <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)' }}>
                           {format(new Date(n.date + 'T00:00:00'), 'EEEE, MMMM d')}
                         </p>
                         {n.reason && (
-                          <p style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(var(--rgb-hi),0.28)', marginTop: 2 }}>{n.reason}</p>
+                          <p style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', marginTop: 2 }}>{n.reason}</p>
                         )}
                       </div>
                       <button onClick={() => dismiss(n.id)} className="doa-dismiss"

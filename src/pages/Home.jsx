@@ -107,13 +107,13 @@ export default function Home() {
             transition={{ duration:0.75, delay:0.1, ease:[0.25,0.46,0.45,0.94] }}
             style={{ display:'inline-flex', alignItems:'center', gap:10, marginBottom:'2.5rem',
               padding:'8px 20px 8px 10px', borderRadius:9999,
-              background:'rgba(var(--rgb-acc),0.07)', border:'1px solid rgba(var(--rgb-acc),0.22)',
+              background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.22)',
               boxShadow:'0 0 24px rgba(var(--rgb-acc),0.08)',
             }}
           >
             <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--col-acc)', animation:'pulse-gold 2.4s infinite' }} />
-            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.55)', fontFamily:'DM Sans,sans-serif', fontWeight:400 }}>
-              Premium Hair Studio &nbsp;<span style={{ color:'rgba(var(--rgb-acc),0.5)' }}>·</span>&nbsp; Doha, Qatar
+            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif', fontWeight:400 }}>
+              Premium Hair Studio &nbsp;<span style={{ color: 'var(--col-acc)' }}>·</span>&nbsp; Doha, Qatar
             </span>
           </motion.div>
 
@@ -131,7 +131,7 @@ export default function Home() {
 
           <motion.p initial={{ opacity:0, y:12, filter:'blur(5px)' }} animate={{ opacity:1, y:0, filter:'blur(0px)' }}
             transition={{ duration:0.85, delay:0.56, ease:[0.25,0.46,0.45,0.94] }}
-            style={{ color:'rgba(var(--rgb-hi),0.45)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
+            style={{ color: 'var(--col-text)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
             Expert stylists crafting looks that reflect who you truly are. Book your transformation today.
           </motion.p>
 
@@ -152,13 +152,13 @@ export default function Home() {
           {stats.map(({ value, label }) => (
             <div key={label} style={{ textAlign:'center' }}>
               <div className="font-display gold-gradient" style={{ fontSize:'clamp(1.4rem,2.5vw,2rem)', lineHeight:1, marginBottom:'0.35rem' }}>{value}</div>
-              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.28)', fontFamily:'DM Sans,sans-serif' }}>{label}</div>
+              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{label}</div>
             </div>
           ))}
         </motion.div>
 
         <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:1.5 }}
-          style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:'rgba(var(--rgb-hi),0.18)' }}>
+          style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, color: 'var(--col-text)' }}>
           <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase' }}>Scroll</span>
           <motion.div animate={{ y:[0,7,0] }} transition={{ repeat:Infinity, duration:1.7 }}><ChevronDown size={13} /></motion.div>
         </motion.div>
@@ -179,7 +179,7 @@ export default function Home() {
               <motion.div key={svc.id} initial="hidden" whileInView="visible" viewport={{ once:true, margin:'-40px' }}
                 custom={i} variants={cardIn} className="glass-light service-card"
                 style={{ borderRadius:24, padding:0, textAlign:'center', transition:'all 0.5s cubic-bezier(0.22,1,0.36,1)', cursor:'default', position:'relative', overflow:'hidden', willChange:'transform', backfaceVisibility:'hidden' }}
-                whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(var(--rgb-acc),0.1)', borderColor:'rgba(var(--rgb-acc),0.2)' }}>
+                whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(var(--rgb-acc),0.1)', borderColor:'var(--col-acc)' }}>
                 <div style={{ aspectRatio:'4/5', overflow:'hidden', position:'relative' }}>
                   <img src={svc.image_url} alt={svc.name} className="service-img" loading="lazy" decoding="async"
                     style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease', willChange:'transform', backfaceVisibility:'hidden' }} />
@@ -187,7 +187,7 @@ export default function Home() {
                 </div>
                 <div style={{ padding:'1.5rem 2rem 2.5rem 2rem' }}>
                   <h3 className="font-display" style={{ fontSize:'1.4rem', color:'var(--col-text)', marginBottom:'0.85rem', textAlign:'center' }}>{svc.name}</h3>
-                  <p style={{ color:'rgba(var(--rgb-hi),0.38)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{svc.description}</p>
+                  <p style={{ color: 'var(--col-text)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{svc.description}</p>
                   <span style={{ fontSize:10, color:'var(--col-acc)', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', textAlign:'center' }}>{svc.price_display}</span>
                 </div>
                 <div style={{ position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)', width:0, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', transition:'width 0.5s ease' }} className="card-accent" />
@@ -242,7 +242,7 @@ export default function Home() {
               </h2>
               <span className="sec-label">Our Story</span>
               <div className="gold-bar" style={{ margin:'0 auto 1.25rem auto' }} />
-              <p style={{ color:'rgba(var(--rgb-hi),0.42)', fontSize:'0.9rem', lineHeight:1.95, marginBottom:0, textAlign:'center' }}>
+              <p style={{ color: 'var(--col-text)', fontSize:'0.9rem', lineHeight:1.95, marginBottom:0, textAlign:'center' }}>
                 Born in the heart of Doha, HairGo brings together a team of internationally trained stylists united by one purpose: to deliver excellence. From precision cuts to transformative colour, every service is crafted with the care and expertise you deserve.
               </p>
             </motion.div>
@@ -259,8 +259,8 @@ export default function Home() {
                               style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
-                          : <div style={{ width:'100%', height:'100%', background:'rgba(var(--rgb-acc),0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(var(--rgb-acc),0.4)' }}>{m.name?.[0]}</span>
+                          : <div style={{ width:'100%', height:'100%', background:'var(--col-acc)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                              <span className="font-display" style={{ fontSize:'2.5rem', color: 'var(--col-acc)' }}>{m.name?.[0]}</span>
                             </div>
                         }
                       </div>
@@ -280,8 +280,8 @@ export default function Home() {
                               style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
-                          : <div style={{ width:'100%', height:'100%', background:'rgba(var(--rgb-acc),0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(var(--rgb-acc),0.4)' }}>{m.name?.[0]}</span>
+                          : <div style={{ width:'100%', height:'100%', background:'var(--col-acc)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                              <span className="font-display" style={{ fontSize:'2.5rem', color: 'var(--col-acc)' }}>{m.name?.[0]}</span>
                             </div>
                         }
                       </div>
@@ -316,7 +316,7 @@ export default function Home() {
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem',
             }}>
               <div style={{ position:'absolute', top:-40, left:'50%', transform:'translateX(-50%)', width:280, height:140, background:'radial-gradient(ellipse, rgba(var(--rgb-acc),0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.2)' }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.2)' }}>
                 <Star size={11} color="var(--col-acc)" />
                 <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Loyalty Program</span>
               </div>
@@ -324,7 +324,7 @@ export default function Home() {
                 Earn. Redeem.<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>Shine.</span>
               </h3>
               <div className="gold-bar" />
-              <p style={{ color:'rgba(var(--rgb-hi),0.38)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:340, margin:0 }}>
+              <p style={{ color: 'var(--col-text)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:340, margin:0 }}>
                 Come 5 times and unlock an exclusive 30% discount on your next appointment. Simple, rewarding, and made for our regulars.
               </p>
               <Link to="/register" className="btn-gold" style={{ marginTop:'0.5rem' }}>Join for Free <ArrowRight size={14} /></Link>
@@ -337,12 +337,12 @@ export default function Home() {
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem',
             }}>
               <div style={{ position:'absolute', bottom:-40, right:-40, width:240, height:240, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.3)', fontFamily:'DM Sans,sans-serif' }}>Ready?</span>
+              <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>Ready?</span>
               <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
                 Ready for your<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>transformation?</span>
               </h2>
               <div className="gold-bar" />
-              <p style={{ color:'rgba(var(--rgb-hi),0.35)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:320, margin:0 }}>
+              <p style={{ color: 'var(--col-text)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:320, margin:0 }}>
                 Book your appointment in minutes and let our experts take care of the rest.
               </p>
               <Link to="/appointments" className="btn-gold" style={{ marginTop:'0.5rem' }}>Book Now <ArrowRight size={14} /></Link>

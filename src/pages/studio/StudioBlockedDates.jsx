@@ -14,10 +14,10 @@ import {
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', modal: '#1a1a24',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)', modal: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
   danger: '#f87171', dangerBg: 'rgba(248,113,113,0.12)', dangerBorder: 'rgba(248,113,113,0.25)',
   warning: '#f59e0b', warnBg: 'rgba(245,158,11,0.1)', warnBorder: 'rgba(245,158,11,0.25)',
   info: '#60a5fa', infoBg: 'rgba(96,165,250,0.1)', infoBorder: 'rgba(96,165,250,0.25)',
@@ -29,13 +29,13 @@ const WDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 // ── Shared button / input styles ──
 const btnSecondary = { flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }
-const btnGold      = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
+const btnGold      = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
 const btnDanger    = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1.5px solid ${C.dangerBorder}`, color: C.danger, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background .18s' }
 const labelStyle   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 7 }
-const inputStyle   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const inputStyle   = { width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 
 function Spinner({ dark }) {
-  return <div style={{ width: 14, height: 14, border: `2px solid ${dark ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,0.2)'}`, borderTopColor: dark ? '#000' : '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+  return <div style={{ width: 14, height: 14, border: `2px solid ${dark ? 'rgba(0,0,0,.25)' : 'var(--col-text)'}`, borderTopColor: dark ? 'var(--col-bg)' : '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
 }
 
 function TabBtn({ id, label, icon: Icon, active, set }) {
@@ -202,7 +202,7 @@ export default function StudioBlockedDates() {
     if (pendingMap[key])                return { bg: C.infoBg,   border: C.infoBorder,   num: C.info }
     if ((hoursMap[key] || []).length)   return { bg: C.warnBg,   border: C.warnBorder,   num: C.warning }
     if (isToday(day))                   return { bg: C.goldBg,   border: C.goldBorder,   num: C.gold }
-    return { bg: 'rgba(255,255,255,0.03)', border: C.border, num: C.dim }
+    return { bg: 'rgba(var(--rgb-hi),0.03)', border: C.border, num: C.dim }
   }
 
   // ── Day click ──
@@ -334,13 +334,13 @@ export default function StudioBlockedDates() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .bd-day.clickable:hover { border-color: ${C.gold} !important; background: rgba(184,212,232,0.06) !important; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(184,212,232,0.14); cursor: pointer; }
+        .bd-day.clickable:hover { border-color: ${C.gold} !important; background: rgba(var(--rgb-acc),0.06) !important; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(var(--rgb-acc),0.14); cursor: pointer; }
         .bd-nav:hover { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .bd-today-btn:hover { background: ${C.gold} !important; color: #000 !important; }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); outline: none; }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); outline: none; }
         .hour-pill { transition: all .15s ease; }
         .hour-pill:hover { border-color: ${C.gold} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
-        .block-tab-btn:hover:not(.active) { color: ${C.dim} !important; background: rgba(255,255,255,0.04) !important; }
+        .block-tab-btn:hover:not(.active) { color: ${C.dim} !important; background: rgba(var(--rgb-hi),0.04) !important; }
         .unblock-btn:hover { background: rgba(248,113,113,0.08) !important; }
         .approve-btn:hover { background: rgba(74,222,128,0.12) !important; }
         .reject-btn:hover  { background: rgba(248,113,113,0.08) !important; }
@@ -391,7 +391,7 @@ export default function StudioBlockedDates() {
               <span style={{ fontSize: '1.4rem', fontFamily: 'Cormorant Garamond,serif', color: hoursUsed >= effectiveMaxHours ? C.danger : C.white, lineHeight: 1 }}>{hoursUsed}</span>
               <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>/ {effectiveMaxHours}</span>
             </div>
-            <div style={{ width: 110, height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, marginTop: 5 }}>
+            <div style={{ width: 110, height: 3, background: 'rgba(var(--rgb-hi),0.08)', borderRadius: 2, marginTop: 5 }}>
               <div style={{ width: `${Math.min(100, (hoursUsed / effectiveMaxHours) * 100)}%`, height: '100%', borderRadius: 2, background: hoursUsed >= effectiveMaxHours ? C.danger : C.gold, transition: 'width .3s' }} />
             </div>
           </div>
@@ -620,7 +620,7 @@ export default function StudioBlockedDates() {
           <div style={{ width: '100%', maxWidth: 460, background: C.modal, borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)', border: `1px solid ${C.goldBorder}` }}
             onClick={e => e.stopPropagation()}>
 
-            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
+            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},var(--col-acc2),rgba(var(--rgb-acc),0.15))` }} />
             <div style={{ padding: '1.5rem' }}>
 
               {/* Modal header */}
@@ -666,7 +666,7 @@ export default function StudioBlockedDates() {
                 ) : (
                   <>
                     <div style={{ marginBottom: '1.1rem' }}>
-                      <label style={labelStyle}>Reason <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(255,255,255,0.18)' }}>(optional)</span></label>
+                      <label style={labelStyle}>Reason <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--col-text)' }}>(optional)</span></label>
                       <input value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Public holiday, Team day…" className="m-inp" autoFocus style={inputStyle} />
                     </div>
                     <div style={{ display: 'flex', gap: '0.625rem' }}>
@@ -718,7 +718,7 @@ export default function StudioBlockedDates() {
                             const on = selHours.includes(h)
                             return (
                               <button key={h} onClick={() => toggleHour(h)} className="hour-pill"
-                                style={{ padding: '0.45rem 0', borderRadius: 8, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: on ? 700 : 400, cursor: 'pointer', border: on ? 'none' : `1px solid ${C.border}`, background: on ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.03)', color: on ? '#000' : C.muted, boxShadow: on ? `0 3px 10px rgba(184,212,232,0.3)` : 'none', transition: 'all .15s' }}>
+                                style={{ padding: '0.45rem 0', borderRadius: 8, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: on ? 700 : 400, cursor: 'pointer', border: on ? 'none' : `1px solid ${C.border}`, background: on ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.03)', color: on ? 'var(--col-bg)' : C.muted, boxShadow: on ? `0 3px 10px rgba(var(--rgb-acc),0.3)` : 'none', transition: 'all .15s' }}>
                                 {h}
                               </button>
                             )
@@ -787,7 +787,7 @@ export default function StudioBlockedDates() {
                     )}
 
                     <div style={{ marginBottom: '1.1rem' }}>
-                      <label style={labelStyle}>Reason <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(255,255,255,0.18)' }}>(optional)</span></label>
+                      <label style={labelStyle}>Reason <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--col-text)' }}>(optional)</span></label>
                       <input value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Medical, Personal day…" className="m-inp" autoFocus style={inputStyle} />
                     </div>
                     <div style={{ display: 'flex', gap: '0.625rem' }}>
@@ -810,7 +810,7 @@ export default function StudioBlockedDates() {
           onMouseDown={e => { if (e.target === e.currentTarget) setEditingSettings(false) }}>
           <div style={{ width: '100%', maxWidth: 420, background: C.modal, borderRadius: 18, overflow: 'hidden', border: `1px solid ${C.goldBorder}`, maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))`, flexShrink: 0 }} />
+            <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},var(--col-acc2),rgba(var(--rgb-acc),0.15))`, flexShrink: 0 }} />
 
             <div style={{ padding: '1.5rem 1.5rem 0', flexShrink: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.1rem' }}>

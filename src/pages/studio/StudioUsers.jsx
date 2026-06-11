@@ -11,16 +11,16 @@ import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
 
 const C = {
-  card: '#161620', modal: '#1a1a24',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)', modal: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const ROLE_STYLE = {
-  user:   { color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)',  label: 'User'   },
+  user:   { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.05)', border: 'rgba(var(--rgb-hi),0.1)',  label: 'User'   },
   artist: { color: '#60a5fa',              bg: 'rgba(96,165,250,0.1)',   border: 'rgba(96,165,250,0.22)', label: 'Artist' },
-  admin:  { color: '#B8D4E8',               bg: 'rgba(184,212,232,0.08)', border: 'rgba(184,212,232,0.18)', label: 'Admin'  },
+  admin:  { color: 'var(--col-acc)',               bg: 'var(--col-acc)', border: 'var(--col-acc)', label: 'Admin'  },
 }
 
 const TABS = [
@@ -34,7 +34,7 @@ function RoleOption({ rrs, isActive, label, onClick }) {
   return (
     <button onClick={onClick}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', background: isActive ? rrs.bg : hov ? 'rgba(255,255,255,0.04)' : 'transparent', border: 'none', cursor: 'pointer', color: isActive ? rrs.color : hov ? '#f0f0f0' : 'rgba(255,255,255,0.45)', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 700 : 400, letterSpacing: '0.13em', textTransform: 'uppercase', textAlign: 'left', transition: 'all .15s' }}>
+      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', background: isActive ? rrs.bg : hov ? 'rgba(var(--rgb-hi),0.04)' : 'transparent', border: 'none', cursor: 'pointer', color: isActive ? rrs.color : hov ? 'var(--col-text)' : 'var(--col-text)', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 700 : 400, letterSpacing: '0.13em', textTransform: 'uppercase', textAlign: 'left', transition: 'all .15s' }}>
       <div style={{ width: 7, height: 7, borderRadius: '50%', background: rrs.color, opacity: isActive || hov ? 1 : 0.3, flexShrink: 0, transition: 'opacity .15s', boxShadow: (isActive || hov) ? `0 0 6px ${rrs.color}88` : 'none' }} />
       {label}
       {isActive && <Check size={10} style={{ marginLeft: 'auto', color: rrs.color }} />}
@@ -69,7 +69,7 @@ function RoleSelector({ value, onChange }) {
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <button ref={btnRef} onClick={toggle}
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 8, background: hov ? rs.bg : 'transparent', border: `1px solid ${hov || open ? rs.border : 'rgba(255,255,255,0.09)'}`, color: rs.color, cursor: 'pointer', transition: 'all .2s', fontFamily: 'DM Sans,sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+        style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 8, background: hov ? rs.bg : 'transparent', border: `1px solid ${hov || open ? rs.border : 'rgba(var(--rgb-hi),0.09)'}`, color: rs.color, cursor: 'pointer', transition: 'all .2s', fontFamily: 'DM Sans,sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
         <div style={{ width: 7, height: 7, borderRadius: '50%', background: rs.color, boxShadow: hov ? `0 0 7px ${rs.color}` : 'none', transition: 'box-shadow .2s', flexShrink: 0 }} />
         {rs.label}
         <ChevronDown size={9} color={rs.color} style={{ opacity: 0.55, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .22s' }} />
@@ -77,8 +77,8 @@ function RoleSelector({ value, onChange }) {
 
       {open && createPortal(
         <div onMouseDown={e => e.stopPropagation()}
-          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: '#131320', border: '1px solid rgba(184,212,232,0.18)', borderRadius: 12, overflow: 'hidden', minWidth: 130, boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.03)' }}>
-          <div style={{ height: 2, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))' }} />
+          style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-acc),0.18)', borderRadius: 12, overflow: 'hidden', minWidth: 130, boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(var(--rgb-hi),0.03)' }}>
+          <div style={{ height: 2, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.1))' }} />
           {[
             { role: 'user',   label: 'User'   },
             { role: 'artist', label: 'Artist' },
@@ -328,14 +328,14 @@ export default function StudioUsers() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .usr-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
-        .usr-row:hover { background: rgba(255,255,255,0.02); }
+        .usr-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); }
+        .usr-row:hover { background: rgba(var(--rgb-hi),0.02); }
         .usr-pts-add:hover  { background: ${C.goldBg} !important; color: ${C.gold} !important; }
-        .usr-pts-sub:hover  { color: ${C.dim} !important; border-color: rgba(255,255,255,0.18) !important; }
+        .usr-pts-sub:hover  { color: ${C.dim} !important; border-color: var(--col-text) !important; }
         .usr-msg-btn:hover  { background: rgba(96,165,250,0.15)  !important; border-color: rgba(96,165,250,0.4)  !important; color: #93c5fd !important; }
         .usr-mail-btn:hover { background: rgba(52,211,153,0.13)  !important; border-color: rgba(52,211,153,0.35) !important; color: #6ee7b7 !important; }
-        .msg-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
-        .modal-cancel:hover { border-color: rgba(255,255,255,0.22) !important; color: ${C.dim} !important; }
+        .msg-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); }
+        .modal-cancel:hover { border-color: var(--col-text) !important; color: ${C.dim} !important; }
         .usr-unlink-btn:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .emp-sty-card:hover { border-color: rgba(96,165,250,0.4) !important; background: rgba(96,165,250,0.05) !important; }
         .emp-sty-card:hover .emp-sty-img { transform: scale(1.05); }
@@ -380,7 +380,7 @@ export default function StudioUsers() {
         <div className="usr-search-box" style={{ position: 'relative' }}>
           <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }} placeholder="Name, email or phone…"
-            style={{ width: 220, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.75rem 0.45rem 1.9rem', fontSize: '0.78rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
+            style={{ width: 220, background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.75rem 0.45rem 1.9rem', fontSize: '0.78rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
             className="usr-search" />
         </div>
       </div>
@@ -393,7 +393,7 @@ export default function StudioUsers() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${C.border}` }}>
+              <tr style={{ background: 'rgba(var(--rgb-hi),0.03)', borderBottom: `1px solid ${C.border}` }}>
                 {['Client', 'Phone', ...(isUsers ? ['Visits'] : []), 'Role', 'Joined', 'Actions'].map(h => (
                   <th key={h} style={{ padding: '0.65rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
@@ -432,7 +432,7 @@ export default function StudioUsers() {
                           <p style={{ color: u.full_name ? C.white : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontStyle: u.full_name ? 'normal' : 'italic' }}>{u.full_name || 'No name'}</p>
                           {u.email
                             ? <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{u.email}</p>
-                            : <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic', marginTop: 1 }}>no email on file</p>
+                            : <p style={{ fontSize: '0.65rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic', marginTop: 1 }}>no email on file</p>
                           }
                         </div>
                       </div>
@@ -447,7 +447,7 @@ export default function StudioUsers() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                           <Star size={10} color={C.goldDim} />
                           <span style={{ color: C.dim, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{u.points || 0}</span>
-                          <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif' }}>/ {Math.ceil(((u.points || 0) + 1) / 5) * 5}</span>
+                          <span style={{ color: 'var(--col-text)', fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif' }}>/ {Math.ceil(((u.points || 0) + 1) / 5) * 5}</span>
                         </div>
                       </td>
                     )}
@@ -514,10 +514,10 @@ export default function StudioUsers() {
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem', marginBottom: 8 }}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', flexShrink: 0 }} />
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.06)', flexShrink: 0 }} />
                   <div>
-                    <div style={{ height: 11, width: 130, background: 'rgba(255,255,255,0.06)', borderRadius: 4, marginBottom: 5 }} />
-                    <div style={{ height: 9, width: 170, background: 'rgba(255,255,255,0.04)', borderRadius: 4 }} />
+                    <div style={{ height: 11, width: 130, background: 'rgba(var(--rgb-hi),0.06)', borderRadius: 4, marginBottom: 5 }} />
+                    <div style={{ height: 9, width: 170, background: 'rgba(var(--rgb-hi),0.04)', borderRadius: 4 }} />
                   </div>
                 </div>
               </div>
@@ -543,7 +543,7 @@ export default function StudioUsers() {
                       <p style={{ color: u.full_name ? C.white : C.muted, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif', fontStyle: u.full_name ? 'normal' : 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{u.full_name || 'No name'}</p>
                       <RoleSelector value={u.role || 'user'} onChange={newRole => changeRole(u.id, newRole)} />
                     </div>
-                    <p style={{ fontSize: '0.7rem', color: u.email ? C.muted : 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif', fontStyle: u.email ? 'normal' : 'italic', marginBottom: 3 }}>{u.email || 'no email on file'}</p>
+                    <p style={{ fontSize: '0.7rem', color: u.email ? C.muted : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: u.email ? 'normal' : 'italic', marginBottom: 3 }}>{u.email || 'no email on file'}</p>
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                       {u.phone && <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{u.phone}</span>}
                       {isUsers && (
@@ -551,18 +551,18 @@ export default function StudioUsers() {
                           <Star size={9} color={C.goldDim} /> {u.points || 0} visits
                         </span>
                       )}
-                      {u.created_at && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif' }}>Joined {format(new Date(u.created_at), 'MMM d, yyyy')}</span>}
+                      {u.created_at && <span style={{ fontSize: '0.65rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>Joined {format(new Date(u.created_at), 'MMM d, yyyy')}</span>}
                     </div>
                   </div>
                 </div>
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: 5, padding: '0.625rem 1rem', borderTop: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.01)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 5, padding: '0.625rem 1rem', borderTop: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.01)', flexWrap: 'wrap' }}>
                   {isUsers && (
                     <>
                       <button onClick={() => adjustVisits(u.id, 1, u.points)} className="usr-pts-add"
                         style={{ padding: '5px 12px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>+1</button>
                       <button onClick={() => adjustVisits(u.id, -1, u.points)} className="usr-pts-sub"
-                        style={{ padding: '5px 12px', borderRadius: 7, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
+                        style={{ padding: '5px 12px', borderRadius: 7, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
                       <div style={{ width: 1, height: 18, background: C.border, alignSelf: 'center', flexShrink: 0 }} />
                     </>
                   )}
@@ -600,7 +600,7 @@ export default function StudioUsers() {
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.15))' }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.15))' }} />
 
             <div style={{ padding: '1.75rem' }}>
               {/* Icon + title */}
@@ -621,35 +621,35 @@ export default function StudioUsers() {
               {/* Linked stylist — only shown when demoting an artist */}
               {roleConfirm.linkedStylist && (
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 8 }}>
+                  <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 8 }}>
                     Linked artist profile
                   </p>
 
                   {/* Keep option */}
                   <button onClick={() => setDeleteStylist(false)}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, marginBottom: 6, background: !deleteStylist ? 'rgba(52,211,153,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${!deleteStylist ? 'rgba(52,211,153,0.3)' : C.border}`, cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
-                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${!deleteStylist ? '#34d399' : 'rgba(255,255,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, marginBottom: 6, background: !deleteStylist ? 'rgba(52,211,153,0.06)' : 'rgba(var(--rgb-hi),0.02)', border: `1px solid ${!deleteStylist ? 'rgba(52,211,153,0.3)' : C.border}`, cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${!deleteStylist ? '#34d399' : 'var(--col-text)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
                       {!deleteStylist && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#34d399' }} />}
                     </div>
                     <div>
-                      <p style={{ fontSize: '0.8rem', color: !deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: !deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
+                      <p style={{ fontSize: '0.8rem', color: !deleteStylist ? 'var(--col-text)' : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: !deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
                         Keep <span style={{ color: !deleteStylist ? '#34d399' : C.muted }}>{roleConfirm.linkedStylist.name}</span>
                       </p>
-                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>Unlink the account but keep the profile for reassignment</p>
+                      <p style={{ fontSize: '0.68rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>Unlink the account but keep the profile for reassignment</p>
                     </div>
                   </button>
 
                   {/* Delete option */}
                   <button onClick={() => setDeleteStylist(true)}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, background: deleteStylist ? 'rgba(248,113,113,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${deleteStylist ? 'rgba(248,113,113,0.35)' : C.border}`, cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
-                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${deleteStylist ? '#f87171' : 'rgba(255,255,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 10, background: deleteStylist ? 'rgba(248,113,113,0.06)' : 'rgba(var(--rgb-hi),0.02)', border: `1px solid ${deleteStylist ? 'rgba(248,113,113,0.35)' : C.border}`, cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${deleteStylist ? '#f87171' : 'var(--col-text)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}>
                       {deleteStylist && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f87171' }} />}
                     </div>
                     <div>
-                      <p style={{ fontSize: '0.8rem', color: deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
+                      <p style={{ fontSize: '0.8rem', color: deleteStylist ? 'var(--col-text)' : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
                         Delete <span style={{ color: deleteStylist ? '#f87171' : C.muted }}>{roleConfirm.linkedStylist.name}</span>
                       </p>
-                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>Permanently remove the artist profile</p>
+                      <p style={{ fontSize: '0.68rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>Permanently remove the artist profile</p>
                     </div>
                   </button>
                 </div>
@@ -662,9 +662,9 @@ export default function StudioUsers() {
                   Cancel
                 </button>
                 <button onClick={applyRoleChange} disabled={confirming}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: confirming ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: confirming ? 0.6 : 1, transition: 'all .2s' }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: confirming ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: confirming ? 0.6 : 1, transition: 'all .2s' }}>
                   {confirming
-                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                    ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                     : <><ShieldCheck size={14} /> Confirm Change</>
                   }
                 </button>
@@ -681,7 +681,7 @@ export default function StudioUsers() {
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 460, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.65)' }}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.15))' }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.15))' }} />
 
             <div style={{ padding: '1.5rem 1.75rem' }}>
               {/* Modal header */}
@@ -704,24 +704,24 @@ export default function StudioUsers() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                 {/* Subject */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>Subject</label>
+                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>Subject</label>
                   <input value={msgTitle} onChange={e => setMsgTitle(e.target.value)} placeholder="Message from HairGo"
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s' }}
+                    style={{ width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s' }}
                     className="msg-inp" />
                 </div>
 
                 {/* Message */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>
+                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>
                     Message <span style={{ color: C.gold }}>*</span>
                   </label>
                   <textarea value={msgBody} onChange={e => setMsgBody(e.target.value)} rows={5}
                     placeholder="Write your message to the client…"
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.65rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, resize: 'none', boxSizing: 'border-box', transition: 'border-color .2s' }}
+                    style={{ width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.65rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, resize: 'none', boxSizing: 'border-box', transition: 'border-color .2s' }}
                     className="msg-inp" />
                 </div>
 
-                <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
                   A support ticket will be created and the client will see it in their Messages page.
                 </p>
 
@@ -732,9 +732,9 @@ export default function StudioUsers() {
                     Cancel
                   </button>
                   <button onClick={sendMessage} disabled={sending}
-                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: sending ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: sending ? 0.6 : 1, transition: 'all .2s' }}>
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: sending ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: sending ? 0.6 : 1, transition: 'all .2s' }}>
                     {sending
-                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><Send size={13} /> Send & Open Ticket</>
                     }
                   </button>
@@ -767,7 +767,7 @@ export default function StudioUsers() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
                   {[1, 2].map(n => (
                     <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, transition: 'all .2s', background: empStep === n ? '#60a5fa' : empStep > n ? 'rgba(96,165,250,0.18)' : 'rgba(255,255,255,0.05)', color: empStep === n ? '#000' : empStep > n ? '#60a5fa' : C.muted, border: empStep > n ? '1px solid rgba(96,165,250,0.3)' : 'none' }}>
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, transition: 'all .2s', background: empStep === n ? '#60a5fa' : empStep > n ? 'rgba(96,165,250,0.18)' : 'rgba(var(--rgb-hi),0.05)', color: empStep === n ? 'var(--col-bg)' : empStep > n ? '#60a5fa' : C.muted, border: empStep > n ? '1px solid rgba(96,165,250,0.3)' : 'none' }}>
                         {empStep > n ? <Check size={9} /> : n}
                       </div>
                       {n < 2 && <div style={{ width: 18, height: 1, background: empStep > n ? 'rgba(96,165,250,0.35)' : C.border }} />}
@@ -789,7 +789,7 @@ export default function StudioUsers() {
                         style={{ display: 'flex', alignItems: 'stretch', borderRadius: 14, overflow: 'hidden', border: `1px solid ${sel ? 'rgba(96,165,250,0.6)' : C.border}`, background: sel ? 'rgba(96,165,250,0.06)' : C.card, cursor: 'pointer', transition: 'all .18s', textAlign: 'left', padding: 0, position: 'relative', boxShadow: sel ? '0 0 0 1px rgba(96,165,250,0.25)' : 'none' }}>
 
                         {/* Photo */}
-                        <div style={{ width: 76, flexShrink: 0, position: 'relative', overflow: 'hidden', background: '#0e0e14' }}>
+                        <div style={{ width: 76, flexShrink: 0, position: 'relative', overflow: 'hidden', background: 'var(--col-modal)' }}>
                           {s.photo_url
                             ? <img src={s.photo_url} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block', transition: 'transform .4s ease' }} className="emp-sty-img" />
                             : <div style={{ width: '100%', height: '100%', minHeight: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,rgba(96,165,250,0.06),rgba(59,130,246,0.03))' }}>
@@ -802,13 +802,13 @@ export default function StudioUsers() {
                         {/* Info */}
                         <div style={{ flex: 1, padding: '0.75rem 0.875rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3, minWidth: 0 }}>
                           <p className="font-display" style={{ color: sel ? C.white : C.dim, fontSize: '1rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .15s' }}>{s.name}</p>
-                          {s.title && <p style={{ color: sel ? 'rgba(184,212,232,0.65)' : C.muted, fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em', transition: 'color .15s' }}>{s.title}</p>}
+                          {s.title && <p style={{ color: sel ? 'var(--col-acc)' : C.muted, fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em', transition: 'color .15s' }}>{s.title}</p>}
                         </div>
 
                         {/* Selected checkmark */}
                         {sel && (
                           <div style={{ position: 'absolute', top: 7, right: 7, width: 18, height: 18, borderRadius: '50%', background: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Check size={10} color="#000" strokeWidth={3} />
+                            <Check size={10} color="var(--col-bg)" strokeWidth={3} />
                           </div>
                         )}
                       </button>
@@ -818,7 +818,7 @@ export default function StudioUsers() {
                   {/* Create New card */}
                   <button onClick={() => { setEmpMode('create'); setEmpSelected(null); setEmpErr('') }}
                     className="emp-sty-card"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, borderRadius: 14, border: `1px dashed ${empMode === 'create' ? 'rgba(96,165,250,0.5)' : 'rgba(255,255,255,0.12)'}`, background: empMode === 'create' ? 'rgba(96,165,250,0.05)' : 'transparent', cursor: 'pointer', transition: 'all .18s', minHeight: 80, padding: '0.875rem' }}>
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, borderRadius: 14, border: `1px dashed ${empMode === 'create' ? 'rgba(96,165,250,0.5)' : 'rgba(var(--rgb-hi),0.12)'}`, background: empMode === 'create' ? 'rgba(96,165,250,0.05)' : 'transparent', cursor: 'pointer', transition: 'all .18s', minHeight: 80, padding: '0.875rem' }}>
                     <div style={{ width: 32, height: 32, borderRadius: '50%', background: empMode === 'create' ? 'rgba(96,165,250,0.15)' : C.subtle, border: `1px solid ${empMode === 'create' ? 'rgba(96,165,250,0.35)' : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}>
                       <Plus size={14} color={empMode === 'create' ? '#60a5fa' : C.muted} />
                     </div>
@@ -842,14 +842,14 @@ export default function StudioUsers() {
                         e.target.value = ''
                       }} />
                     <div style={{ flexShrink: 0 }}>
-                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Photo</label>
+                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Photo</label>
                       <button type="button" onClick={() => empFileRef.current?.click()}
-                        style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', border: `1px dashed ${empPreview ? 'rgba(96,165,250,0.5)' : 'rgba(255,255,255,0.15)'}`, background: empPreview ? 'transparent' : 'rgba(255,255,255,0.03)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, position: 'relative', transition: 'border-color .2s' }}>
+                        style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', border: `1px dashed ${empPreview ? 'rgba(96,165,250,0.5)' : 'var(--col-text)'}`, background: empPreview ? 'transparent' : 'rgba(var(--rgb-hi),0.03)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, position: 'relative', transition: 'border-color .2s' }}>
                         {empPreview
                           ? <img src={empPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} />
                           : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                               <Upload size={16} color="rgba(96,165,250,0.4)" strokeWidth={1.5} />
-                              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>Upload</span>
+                              <span style={{ fontSize: 8, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>Upload</span>
                             </div>
                         }
                       </button>
@@ -864,14 +864,14 @@ export default function StudioUsers() {
                     {/* Name + Title */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Name <span style={{ color: '#60a5fa' }}>*</span></label>
+                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Name <span style={{ color: '#60a5fa' }}>*</span></label>
                         <input value={empName} onChange={e => { setEmpName(e.target.value); setEmpErr('') }} placeholder="Full name…" autoFocus
-                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                          style={{ width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
                       </div>
                       <div>
-                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Title</label>
+                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Title</label>
                         <input value={empTitle} onChange={e => setEmpTitle(e.target.value)} placeholder="e.g. Senior Stylist…"
-                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                          style={{ width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
                       </div>
                     </div>
 
@@ -886,7 +886,7 @@ export default function StudioUsers() {
                     Cancel
                   </button>
                   <button onClick={applyEmployeePromotion}
-                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
                     Next <ArrowRight size={13} />
                   </button>
                 </div>
@@ -919,9 +919,9 @@ export default function StudioUsers() {
                     ← Back
                   </button>
                   <button onClick={applyEmployeePromotion} disabled={empSaving}
-                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: empSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: empSaving ? 0.6 : 1 }}>
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: empSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: empSaving ? 0.6 : 1 }}>
                     {empSaving
-                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><ShieldCheck size={14} /> Confirm & Promote</>
                     }
                   </button>

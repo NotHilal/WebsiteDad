@@ -8,14 +8,14 @@ import {
 } from 'lucide-react'
 
 const C = {
-  card: '#161620', bg: '#0e0e14',
-  gold: '#B8D4E8', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
+  card: 'var(--col-modal)', bg: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
   blue: '#60a5fa', blueBg: 'rgba(96,165,250,0.08)', blueBorder: 'rgba(96,165,250,0.2)',
   purple: '#a78bfa',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.08)',
   red: '#f87171',   redBg:   'rgba(248,113,113,0.08)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
-  border: 'rgba(255,255,255,0.07)', subtle: 'rgba(255,255,255,0.04)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)',
+  border: 'rgba(var(--rgb-hi),0.07)', subtle: 'rgba(var(--rgb-hi),0.04)',
 }
 
 const ACTION_META = {
@@ -183,10 +183,10 @@ export default function StudioLogs() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <style>{`
-        .log-row:hover { background: rgba(255,255,255,0.025) !important; }
-        .log-select:focus { border-color: rgba(184,212,232,0.35) !important; }
+        .log-row:hover { background: rgba(var(--rgb-hi),0.025) !important; }
+        .log-select:focus { border-color: rgba(var(--rgb-acc),0.35) !important; }
         .log-clear:hover { background: rgba(248,113,113,0.12) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.25) !important; }
-        .log-refresh:hover { background: rgba(184,212,232,0.12) !important; color: #B8D4E8 !important; border-color: rgba(184,212,232,0.3) !important; }
+        .log-refresh:hover { background: rgba(var(--rgb-acc),0.12) !important; color: var(--col-acc) !important; border-color: rgba(var(--rgb-acc),0.3) !important; }
       `}</style>
 
       {/* Header */}
@@ -223,7 +223,7 @@ export default function StudioLogs() {
           {weekLabel(weekOffset)}
         </span>
         <button onClick={() => setWeekOffset(v => v + 1)} disabled={weekOffset >= 0}
-          style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: weekOffset >= 0 ? 'transparent' : C.subtle, border: `1px solid ${weekOffset >= 0 ? 'transparent' : C.border}`, color: weekOffset >= 0 ? 'rgba(255,255,255,0.12)' : C.dim, cursor: weekOffset >= 0 ? 'default' : 'pointer', flexShrink: 0 }}>
+          style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: weekOffset >= 0 ? 'transparent' : C.subtle, border: `1px solid ${weekOffset >= 0 ? 'transparent' : C.border}`, color: weekOffset >= 0 ? 'rgba(var(--rgb-hi),0.12)' : C.dim, cursor: weekOffset >= 0 ? 'default' : 'pointer', flexShrink: 0 }}>
           <ChevronRight size={14} />
         </button>
         {weekOffset < 0 && (
@@ -305,7 +305,7 @@ export default function StudioLogs() {
               return (
                 <div key={log.id} className="log-row"
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '0.6rem 0.875rem', borderRadius: 10, background: C.card, border: `1px solid ${C.border}`, transition: 'background .15s', cursor: 'default' }}>
-                  <span style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'rgba(255,255,255,0.22)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
+                  <span style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'var(--col-text)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
                     {format(new Date(log.created_at), 'HH:mm')}
                   </span>
                   <div style={{ width: 28, height: 28, borderRadius: 8, background: bg, border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -321,7 +321,7 @@ export default function StudioLogs() {
                       <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75 }}>{label}</span>
                       <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}>{format(new Date(log.created_at), 'MMM d, HH:mm')}</span>
                     </div>
-                    <p style={{ fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.52)', lineHeight: 1.5, margin: 0 }}>
+                    <p style={{ fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', lineHeight: 1.5, margin: 0 }}>
                       {log.details?.message || log.action}
                     </p>
                   </div>
@@ -343,7 +343,7 @@ export default function StudioLogs() {
                 {daySubLabel(dayKey)}
               </span>
               <div style={{ flex: 1, height: 1, background: C.border }} />
-              <span style={{ fontSize: '0.65rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.18)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.65rem', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', whiteSpace: 'nowrap' }}>
                 {dayLogs.length} event{dayLogs.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -362,7 +362,7 @@ export default function StudioLogs() {
                     style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '0.6rem 0.875rem', borderRadius: 10, background: C.card, border: `1px solid ${C.border}`, transition: 'background .15s', cursor: 'default' }}>
 
                     {/* Time */}
-                    <span style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'rgba(255,255,255,0.22)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
+                    <span style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'var(--col-text)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
                       {format(new Date(log.created_at), 'HH:mm')}
                     </span>
 
@@ -392,7 +392,7 @@ export default function StudioLogs() {
                       </div>
 
                       {/* Message */}
-                      <p style={{ fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.52)', lineHeight: 1.5, margin: 0 }}>
+                      <p style={{ fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', lineHeight: 1.5, margin: 0 }}>
                         {log.details?.message || log.action}
                       </p>
                     </div>

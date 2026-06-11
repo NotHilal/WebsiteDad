@@ -109,7 +109,7 @@ export default function Navbar() {
               <NavLink key={to} to={to} end={exact}
                 style={({ isActive }) => ({
                   fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
-                  color: isActive ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.52)',
+                  color: isActive ? 'var(--col-acc)' : 'var(--col-text)',
                   textDecoration: 'none', position: 'relative',
                   transition: 'color 0.3s', fontFamily: 'DM Sans, sans-serif', fontWeight: 400,
                 })}
@@ -138,22 +138,22 @@ export default function Navbar() {
             <AppointmentAlert />
             {/* Theme toggle */}
             <button onClick={toggleTheme} title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'rgba(var(--rgb-hi),0.55)', cursor: 'pointer', transition: 'all 0.3s', flexShrink: 0 }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.1)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-acc),0.3)'; e.currentTarget.style.color = 'var(--col-acc)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.05)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.1)'; e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.55)' }}>
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', cursor: 'pointer', transition: 'all 0.3s', flexShrink: 0 }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--col-acc)'; e.currentTarget.style.borderColor = 'var(--col-acc)'; e.currentTarget.style.color = 'var(--col-acc)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.05)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.1)'; e.currentTarget.style.color = 'var(--col-text)' }}>
               {isDark ? <Sun size={14} /> : <Moon size={14} />}
             </button>
             {(profile?.role === 'admin' || profile?.role === 'artist') && (
               <button onClick={() => { sessionStorage.removeItem('studio_access'); navigate('/studio') }}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
                 <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
               </button>
             )}
             {user && (
               <Link to="/profile"
-                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'rgba(var(--rgb-acc),0.1)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartCount > 0 ? 'rgba(var(--rgb-acc),0.3)' : 'rgba(var(--rgb-hi),0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
+                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
                 onClick={() => {}}>
-                <ShoppingCart size={13} color={cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.4)'} />
+                <ShoppingCart size={13} color={cartCount > 0 ? 'var(--col-acc)' : 'var(--col-text)'} />
                 {cartCount > 0 && (
                   <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, sans-serif' }}>
                     {cartCount > 9 ? '9+' : cartCount}
@@ -169,7 +169,7 @@ export default function Navbar() {
                   background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.09)',
                   cursor: 'pointer', transition: 'border-color 0.3s',
                 }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(var(--rgb-acc),0.3)'}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--col-acc)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.09)'}
                 >
                   <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#3D5A73,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(var(--rgb-acc),0.35)', flexShrink: 0 }}>
@@ -177,7 +177,7 @@ export default function Navbar() {
                       {profile?.full_name?.[0] || user.email[0].toUpperCase()}
                     </span>
                   </div>
-                  <span style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.6)', fontFamily: 'DM Sans,sans-serif' }}>
+                  <span style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
                     {profile?.full_name?.split(' ')[0] || 'Account'}
                   </span>
                   <ChevronDown size={11} color={isDark ? 'rgba(255,255,255,0.3)' : 'rgba(15,34,53,0.3)'} style={{ transform: profileOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />
@@ -193,8 +193,8 @@ export default function Navbar() {
                       style={{ position: 'absolute', right: 0, top: 'calc(100% + 10px)', width: 220, background: 'var(--col-drop)', backdropFilter: 'blur(24px)', border: '1px solid rgba(var(--rgb-acc),0.12)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}
                     >
                       <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(var(--rgb-hi),0.05)' }}>
-                        <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.28)', marginBottom: 4, fontFamily: 'DM Sans,sans-serif' }}>Signed in as</p>
-                        <p style={{ fontSize: '0.82rem', color: 'rgba(var(--rgb-hi),0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
+                        <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--col-text)', marginBottom: 4, fontFamily: 'DM Sans,sans-serif' }}>Signed in as</p>
+                        <p style={{ fontSize: '0.82rem', color: 'var(--col-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                         {(profile?.points || 0) > 0 && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>
                             <Star size={10} color={isDark ? '#B8D4E8' : '#3D5A73'} />
@@ -208,9 +208,9 @@ export default function Navbar() {
                           { to: '/chat', icon: MessageCircle, label: 'Messages' },
                         ].map(({ to, icon: Icon, label: lbl }) => (
                           <Link key={to} to={to} onClick={() => setProfile(false)}
-                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.5)', textDecoration: 'none', transition: 'color 0.2s, background 0.2s', fontFamily: 'DM Sans,sans-serif' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--col-text)', textDecoration: 'none', transition: 'color 0.2s, background 0.2s', fontFamily: 'DM Sans,sans-serif' }}
                             onMouseEnter={e => { e.currentTarget.style.color = 'var(--col-text)'; e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.04)' }}
-                            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.5)'; e.currentTarget.style.background = 'transparent' }}>
+                            onMouseLeave={e => { e.currentTarget.style.color = 'var(--col-text)'; e.currentTarget.style.background = 'transparent' }}>
                             <Icon size={13} />{lbl}
                           </Link>
                         ))}
@@ -228,9 +228,9 @@ export default function Navbar() {
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <Link to="/login"
-                  style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.42)', textDecoration: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'color 0.3s' }}
+                  style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', textDecoration: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'color 0.3s' }}
                   onMouseEnter={e => e.currentTarget.style.color = 'var(--col-text)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.42)'}>
+                  onMouseLeave={e => e.currentTarget.style.color = 'var(--col-text)'}>
                   Sign In
                 </Link>
                 <Link to="/register" className="btn-gold" style={{ padding: '9px 22px', fontSize: 11 }}>
@@ -243,10 +243,10 @@ export default function Navbar() {
           {/* Mobile burger */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, gridColumn: 3 }} className="show-mobile">
             <button onClick={toggleTheme} title={isDark ? 'Light mode' : 'Dark mode'}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'rgba(var(--rgb-hi),0.55)', cursor: 'pointer' }}>
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', cursor: 'pointer' }}>
               {isDark ? <Sun size={13} /> : <Moon size={13} />}
             </button>
-            <button onClick={() => setMenuOpen(!menuOpen)} style={{ padding: 8, color: 'rgba(var(--rgb-hi),0.55)', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <button onClick={() => setMenuOpen(!menuOpen)} style={{ padding: 8, color: 'var(--col-text)', background: 'none', border: 'none', cursor: 'pointer' }}>
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>

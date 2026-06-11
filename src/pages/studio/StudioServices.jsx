@@ -7,10 +7,10 @@ import { useLogAction } from '../../hooks/useLogAction'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', modal: '#1a1a24',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)', modal: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const CATS = ['cut', 'color', 'treatment', 'style', 'other']
@@ -19,8 +19,8 @@ const CAT = {
   cut:       { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',   gradient: 'rgba(96,165,250,0.15)',   label: 'Cut' },
   color:     { color: '#c084fc', bg: 'rgba(192,132,252,0.1)',  gradient: 'rgba(192,132,252,0.15)',  label: 'Color' },
   treatment: { color: '#34d399', bg: 'rgba(52,211,153,0.1)',   gradient: 'rgba(52,211,153,0.15)',   label: 'Treatment' },
-  style:     { color: '#B8D4E8', bg: 'rgba(184,212,232,0.1)',   gradient: 'rgba(184,212,232,0.15)',   label: 'Style' },
-  other:     { color: 'rgba(255,255,255,0.4)', bg: 'rgba(255,255,255,0.06)', gradient: 'rgba(255,255,255,0.06)', label: 'Other' },
+  style:     { color: 'var(--col-acc)', bg: 'var(--col-acc)',   gradient: 'var(--col-acc)',   label: 'Style' },
+  other:     { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.06)', gradient: 'rgba(var(--rgb-hi),0.06)', label: 'Other' },
 }
 
 const EMPTY = { name: '', description: '', price: '', duration: '', category: '', active: true, image_url: '', gender: 'mixed' }
@@ -28,16 +28,16 @@ const EMPTY = { name: '', description: '', price: '', duration: '', category: ''
 const GENDER = [
   { value: 'man',   label: 'Men',   color: '#60a5fa', border: 'rgba(96,165,250,0.35)' },
   { value: 'woman', label: 'Women', color: '#f472b6', border: 'rgba(244,114,182,0.35)' },
-  { value: 'mixed', label: 'Both',  color: '#B8D4E8', border: 'rgba(184,212,232,0.35)' },
+  { value: 'mixed', label: 'Both',  color: 'var(--col-acc)', border: 'var(--col-acc)' },
 ]
 
 const inp = (extra = {}) => ({
-  width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none',
+  width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)',
+  borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none',
   fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s, box-shadow .2s',
   boxSizing: 'border-box', ...extra,
 })
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 export default function StudioServices() {
   const log = useLogAction()
@@ -144,18 +144,18 @@ export default function StudioServices() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); }
         .svc-card { transition: transform .35s cubic-bezier(0.22,1,0.36,1), box-shadow .35s ease; }
         .svc-card:hover { transform: translateY(-6px) scale(1.01); box-shadow: 0 28px 64px rgba(0,0,0,0.6) !important; }
         .svc-card:hover .svc-img { transform: scale(1.08) !important; }
-        .svc-edit-btn:hover   { background: rgba(255,255,255,0.22) !important; color: #fff !important; border-color: rgba(255,255,255,0.3) !important; }
-        .svc-arc-btn:hover    { background: rgba(184,212,232,0.22) !important; color: #B8D4E8 !important; border-color: rgba(184,212,232,0.4) !important; }
+        .svc-edit-btn:hover   { background: var(--col-text) !important; color: #fff !important; border-color: var(--col-text) !important; }
+        .svc-arc-btn:hover    { background: rgba(var(--rgb-acc),0.22) !important; color: var(--col-acc) !important; border-color: rgba(var(--rgb-acc),0.4) !important; }
         .svc-del-btn:hover    { background: rgba(248,113,113,0.25) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.4) !important; }
-        .cat-filter:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.dim} !important; }
-        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(184,212,232,0.3); }
-        .modal-close:hover { background: rgba(255,255,255,0.1) !important; }
-        .modal-cancel:hover { border-color: rgba(255,255,255,0.2) !important; }
-        .skel { background: linear-gradient(90deg,#1a1a26 25%,#22222e 50%,#1a1a26 75%); background-size:200% 100%; animation:shimmer 1.6s infinite; }
+        .cat-filter:hover { border-color: var(--col-text) !important; color: ${C.dim} !important; }
+        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(var(--rgb-acc),0.3); }
+        .modal-close:hover { background: rgba(var(--rgb-hi),0.1) !important; }
+        .modal-cancel:hover { border-color: var(--col-text) !important; }
+        .skel { background: linear-gradient(90deg,var(--shimmer-a) 25%,var(--shimmer-b) 50%,var(--shimmer-a) 75%); background-size:200% 100%; animation:shimmer 1.6s infinite; }
       `}</style>
 
       {/* Header */}
@@ -168,7 +168,7 @@ export default function StudioServices() {
           </p>
         </div>
         <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', letterSpacing: '0.04em' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', letterSpacing: '0.04em' }}>
           <Plus size={14} /> New Service
         </button>
       </div>
@@ -222,14 +222,14 @@ export default function StudioServices() {
               const cat = CAT[s.category] || CAT.other
               return (
                 <div key={s.id} className="svc-card"
-                  style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', height: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.45)', border: `1px solid ${s.active ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)'}` }}>
+                  style={{ borderRadius: 20, overflow: 'hidden', position: 'relative', height: 320, boxShadow: '0 8px 32px rgba(0,0,0,0.45)', border: `1px solid ${s.active ? 'rgba(var(--rgb-hi),0.06)' : 'rgba(var(--rgb-hi),0.03)'}` }}>
 
                   {/* ── Background: full-bleed image or gradient ── */}
                   <div style={{ position: 'absolute', inset: 0 }}>
                     {s.image_url
                       ? <img src={s.image_url} alt={s.name} className="svc-img"
                           style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.7s cubic-bezier(0.22,1,0.36,1)', filter: s.active ? 'none' : 'brightness(0.3) saturate(0.4)' }} />
-                      : <div style={{ width: '100%', height: '100%', background: `radial-gradient(ellipse at 25% 25%, ${cat.color}28 0%, ${cat.color}08 55%, #0d0d14 100%)`, filter: s.active ? 'none' : 'brightness(0.3) saturate(0.4)' }}>
+                      : <div style={{ width: '100%', height: '100%', background: `radial-gradient(ellipse at 25% 25%, ${cat.color}28 0%, ${cat.color}08 55%, var(--col-bg2) 100%)`, filter: s.active ? 'none' : 'brightness(0.3) saturate(0.4)' }}>
                           <span className="font-display" style={{ position: 'absolute', bottom: -10, right: 12, fontSize: '9rem', color: `${cat.color}12`, lineHeight: 1, fontWeight: 700, userSelect: 'none', letterSpacing: '-0.04em' }}>
                             {s.name.charAt(0)}
                           </span>
@@ -238,7 +238,7 @@ export default function StudioServices() {
                     {/* Archived overlay icon */}
                     {!s.active && (
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                        <EyeOff size={32} color="rgba(255,255,255,0.22)" />
+                        <EyeOff size={32} color="var(--col-text)" />
                       </div>
                     )}
                     {/* Deep gradient overlay — readable text at bottom */}
@@ -266,13 +266,13 @@ export default function StudioServices() {
                     <div style={{ display: 'flex', gap: 5 }}>
                       <button onClick={() => { setForm({ ...s }); setFilePreview(s.image_url || ''); setFile(null); setModal('edit') }}
                         className="svc-edit-btn"
-                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: '1px solid rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
+                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: '1px solid rgba(255,255,255,0.28)', color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
                         <Edit2 size={12} />
                       </button>
                       <button onClick={() => toggleActive(s)}
                         className="svc-arc-btn"
                         title={s.active ? 'Archive' : 'Restore'}
-                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: `1px solid ${s.active ? 'rgba(184,212,232,0.22)' : 'rgba(184,212,232,0.45)'}`, color: s.active ? 'rgba(184,212,232,0.55)' : '#B8D4E8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
+                        style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(0,0,0,0.62)', border: `1px solid ${s.active ? 'var(--col-acc)' : 'var(--col-acc)'}`, color: s.active ? 'var(--col-acc)' : 'var(--col-acc)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all .15s' }}>
                         {s.active ? <EyeOff size={12} /> : <Eye size={12} />}
                       </button>
                       <button onClick={() => openDelete(s)}
@@ -287,13 +287,13 @@ export default function StudioServices() {
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1.25rem 1.4rem 1.35rem', zIndex: 2 }}>
 
                     {/* Service name */}
-                    <h3 className="font-display" style={{ fontSize: '1.65rem', color: '#fff', lineHeight: 1.1, marginBottom: s.description ? '0.35rem' : '0.85rem', fontWeight: 400 }}>
+                    <h3 className="font-display" style={{ fontSize: '1.65rem', color: 'var(--col-text)', lineHeight: 1.1, marginBottom: s.description ? '0.35rem' : '0.85rem', fontWeight: 400 }}>
                       {s.name}
                     </h3>
 
                     {/* Description */}
                     {s.description && (
-                      <p style={{ color: 'rgba(255,255,255,0.48)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6, marginBottom: '0.85rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      <p style={{ color: 'var(--col-text)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6, marginBottom: '0.85rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {s.description}
                       </p>
                     )}
@@ -307,9 +307,9 @@ export default function StudioServices() {
                         ${s.price}
                       </span>
                       {s.duration > 0 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                          <Clock size={10} color="rgba(255,255,255,0.5)" strokeWidth={1.5} />
-                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(var(--rgb-hi),0.1)' }}>
+                          <Clock size={10} color="var(--col-text)" strokeWidth={1.5} />
+                          <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
                             {Math.floor(s.duration / 60) > 0 ? `${Math.floor(s.duration / 60)}h ` : ''}{s.duration % 60 > 0 ? `${s.duration % 60}m` : ''}
                           </span>
                         </div>
@@ -339,7 +339,7 @@ export default function StudioServices() {
               style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.65)', maxHeight: '90vh', overflowY: 'auto' }}>
 
               {/* Gold top bar */}
-              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
+              <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},var(--col-acc2),rgba(var(--rgb-acc),0.15))` }} />
 
               <div style={{ padding: '1.75rem' }}>
                 {/* Modal header */}
@@ -378,13 +378,13 @@ export default function StudioServices() {
                         <div style={{ position: 'relative', height: 140, borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.goldBorder}` }}>
                           <img src={filePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           <button type="button" onClick={() => { setFile(null); setFilePreview(''); setForm(p => ({ ...p, image_url: '' })) }}
-                            style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                            style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.28)', color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                             <X size={12} />
                           </button>
                         </div>
                       )}
                       {/* Upload button */}
-                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: `1px dashed ${filePreview ? C.goldBorder : 'rgba(255,255,255,0.15)'}`, cursor: 'pointer', fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', borderRadius: 9, background: 'rgba(var(--rgb-hi),0.05)', border: `1px dashed ${filePreview ? C.goldBorder : 'var(--col-text)'}`, cursor: 'pointer', fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s' }}>
                         <Upload size={13} />
                         {filePreview ? 'Replace image' : 'Upload image'}
                         <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
@@ -468,9 +468,9 @@ export default function StudioServices() {
                     Cancel
                   </button>
                   <button onClick={save} disabled={saving} className="btn-g"
-                    style={{ flex: 1.5, padding: '0.7rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'all .2s' }}>
+                    style={{ flex: 1.5, padding: '0.7rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'all .2s' }}>
                     {saving
-                      ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                      ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><Save size={14} /> {modal === 'add' ? 'Add Service' : 'Save Changes'}</>
                     }
                   </button>
@@ -490,7 +490,7 @@ export default function StudioServices() {
             <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               onClick={e => e.stopPropagation()}
-              style={{ width: '100%', maxWidth: 420, background: '#12121c', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+              style={{ width: '100%', maxWidth: 420, background: 'var(--col-modal)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
               <div style={{ height: 4, background: 'linear-gradient(90deg,#f87171,#ef4444)' }} />
               <div style={{ padding: '1.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
@@ -517,9 +517,9 @@ export default function StudioServices() {
                     Cancel
                   </button>
                   <button onClick={confirmDelete} disabled={deleting}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
                     {deleting
-                      ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                      ? <div style={{ width: 14, height: 14, border: '2px solid var(--col-text)', borderTopcolor: 'var(--col-text)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                       : <><Trash2 size={13} /> Delete</>
                     }
                   </button>

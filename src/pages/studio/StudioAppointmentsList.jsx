@@ -9,12 +9,12 @@ import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
 
 const C = {
-  bg:     '#0e0e14',
-  card:   '#161620',
-  card2:  '#1a1a26',
-  gold:   '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white:  '#f0f0f0', dim: 'rgba(255,255,255,0.55)', muted: 'rgba(255,255,255,0.28)', faint: 'rgba(255,255,255,0.1)',
-  border: 'rgba(255,255,255,0.07)',
+  bg:     'var(--col-modal)',
+  card:   'var(--col-modal)',
+  card2:  'var(--shimmer-a)',
+  gold:   'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', faint: 'rgba(var(--rgb-hi),0.1)',
+  border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const STATUS_CFG = {
@@ -56,7 +56,7 @@ function StatusDropdown({ appt, onUpdate }) {
         <ChevronDown size={10} style={{ color: cfg.color, opacity: 0.7, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 100, background: '#1e1e2e', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 100, background: 'var(--col-card)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
           {ALL_STATUSES.filter(s => s !== appt.status).map(s => {
             const c = STATUS_CFG[s]
             return (
@@ -208,12 +208,12 @@ export default function StudioAppointmentsList() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.6rem' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
-        .al-row:hover { background: rgba(255,255,255,0.02) !important; }
+        .al-row:hover { background: rgba(var(--rgb-hi),0.02) !important; }
         .al-row:hover .al-info-btn { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
-        .al-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.07); }
-        .al-pill:hover  { border-color: rgba(255,255,255,0.18) !important; color: rgba(255,255,255,0.7) !important; }
-        .dd-opt:hover   { background: rgba(255,255,255,0.05) !important; }
-        .stat-card:hover { border-color: rgba(255,255,255,0.12) !important; transform: translateY(-1px); }
+        .al-search:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.07); }
+        .al-pill:hover  { border-color: var(--col-text) !important; color: var(--col-text) !important; }
+        .dd-opt:hover   { background: rgba(var(--rgb-hi),0.05) !important; }
+        .stat-card:hover { border-color: rgba(var(--rgb-hi),0.12) !important; transform: translateY(-1px); }
         .del-row-btn:hover { color: #f87171 !important; border-color: rgba(248,113,113,0.25) !important; background: rgba(248,113,113,0.08) !important; }
         @media (max-width: 480px) {
           .stat-card { padding: 0.45rem 0.55rem !important; }
@@ -257,7 +257,7 @@ export default function StudioAppointmentsList() {
           return (
             <button key={key} onClick={() => { setPeriodFilter(key); setPage(0) }}
               className="al-pill"
-              style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : 'rgba(255,255,255,0.12)'}`, background: active ? C.goldBg : 'rgba(255,255,255,0.04)', color: active ? C.gold : 'rgba(255,255,255,0.55)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em' }}>
+              style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : 'rgba(var(--rgb-hi),0.12)'}`, background: active ? C.goldBg : 'rgba(var(--rgb-hi),0.04)', color: active ? C.gold : 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em' }}>
               {label}
             </button>
           )
@@ -311,7 +311,7 @@ export default function StudioAppointmentsList() {
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 260, gap: 12 }}>
-            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Search size={22} style={{ color: C.faint }} />
             </div>
             <p style={{ color: C.dim, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif' }}>
@@ -360,25 +360,25 @@ export default function StudioAppointmentsList() {
 
                 {/* Line 2: metadata chips */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap', paddingLeft: 38 }}>
-                  <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: accent ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: accent ? 600 : 400 }}>{dateText}</span>
+                  <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: accent ? C.gold : 'var(--col-text)', fontWeight: accent ? 600 : 400 }}>{dateText}</span>
                   {appt.time && <>
-                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: isPastAppt && appt.status !== 'completed' ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif' }}>{appt.time.slice(0, 5)}</span>
+                    <span style={{ color: 'var(--col-text)' }}>·</span>
+                    <span style={{ fontSize: '0.7rem', color: isPastAppt && appt.status !== 'completed' ? 'rgba(248,113,113,0.5)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{appt.time.slice(0, 5)}</span>
                   </>}
                   {appt.services?.name && <>
-                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 160 }}>{appt.services.name}</span>
+                    <span style={{ color: 'var(--col-text)' }}>·</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 160 }}>{appt.services.name}</span>
                   </>}
                   {appt.stylists?.name && <>
-                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'DM Sans,sans-serif' }}>{appt.stylists.name}</span>
+                    <span style={{ color: 'var(--col-text)' }}>·</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{appt.stylists.name}</span>
                   </>}
                   {appt.services?.price && <>
-                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: appt.status === 'completed' ? C.gold : 'rgba(255,255,255,0.32)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>${appt.services.price}</span>
+                    <span style={{ color: 'var(--col-text)' }}>·</span>
+                    <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: appt.status === 'completed' ? C.gold : 'var(--col-text)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>${appt.services.price}</span>
                   </>}
                   {appt.payment_status === 'pay_in_store' && <>
-                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
+                    <span style={{ color: 'var(--col-text)' }}>·</span>
                     <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       Pay in store
                     </span>
@@ -405,7 +405,7 @@ export default function StudioAppointmentsList() {
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 8 }}
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               onClick={e => e.stopPropagation()}
-              style={{ width: '100%', maxWidth: 460, background: '#12121c', border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.75)' }}>
+              style={{ width: '100%', maxWidth: 460, background: 'var(--col-modal)', border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.75)' }}>
 
               {(() => {
                 const cfg = STATUS_CFG[details.status] || STATUS_CFG.confirmed
@@ -416,7 +416,7 @@ export default function StudioAppointmentsList() {
 
                 return (
                   <>
-                    <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},#7AAFC9,rgba(184,212,232,0.15))` }} />
+                    <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},var(--col-acc2),rgba(var(--rgb-acc),0.15))` }} />
                     <div style={{ padding: '1.5rem' }}>
 
                       {/* Header */}
@@ -428,13 +428,13 @@ export default function StudioAppointmentsList() {
                           </span>
                         </div>
                         <button onClick={() => setDetails(null)}
-                          style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                          style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
                           <X size={13} />
                         </button>
                       </div>
 
                       {/* Client */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.875rem 1rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: '0.875rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.875rem 1rem', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: '0.875rem' }}>
                         <div style={{ width: 42, height: 42, borderRadius: '50%', background: `linear-gradient(135deg,${cfg.color}28,${cfg.color}14)`, border: `1px solid ${cfg.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <span style={{ fontSize: 14, color: cfg.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                         </div>
@@ -458,7 +458,7 @@ export default function StudioAppointmentsList() {
 
                       {/* Info grid */}
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem', marginBottom: '0.875rem' }}>
-                        <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                        <div style={{ padding: '0.75rem', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                             <Calendar size={10} color={C.muted} />
                             <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Date</p>
@@ -466,7 +466,7 @@ export default function StudioAppointmentsList() {
                           <p style={{ fontSize: '0.82rem', color: accent ? C.gold : C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: accent ? 600 : 400 }}>{dateText}</p>
                           <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>{format(parseISO(details.date), 'EEEE')}</p>
                         </div>
-                        <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
+                        <div style={{ padding: '0.75rem', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                             <Clock size={10} color={C.muted} />
                             <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Time</p>
@@ -482,7 +482,7 @@ export default function StudioAppointmentsList() {
 
                       {/* Service + stylist */}
                       {(details.services || details.stylists) && (
-                        <div style={{ padding: '0.875rem 1rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: '0.875rem' }}>
+                        <div style={{ padding: '0.875rem 1rem', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: '0.875rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                             <div style={{ minWidth: 0 }}>
                               <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Service</p>
@@ -548,7 +548,7 @@ export default function StudioAppointmentsList() {
             <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               onClick={e => e.stopPropagation()}
-              style={{ width: '100%', maxWidth: 420, background: '#12121c', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+              style={{ width: '100%', maxWidth: 420, background: 'var(--col-modal)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
               <div style={{ height: 4, background: 'linear-gradient(90deg,#f87171,#ef4444)' }} />
               <div style={{ padding: '1.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: '1.25rem' }}>
@@ -575,8 +575,8 @@ export default function StudioAppointmentsList() {
                     Cancel
                   </button>
                   <button onClick={confirmDelete} disabled={deleting}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
-                    {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Trash2 size={13} /> Delete</>}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
+                    {deleting ? <div style={{ width: 14, height: 14, border: '2px solid var(--col-text)', borderTopcolor: 'var(--col-text)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Trash2 size={13} /> Delete</>}
                   </button>
                 </div>
               </div>

@@ -7,10 +7,10 @@ import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
-  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
-  subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)', gold: 'var(--col-acc)', goldDim: 'var(--col-acc)',
+  goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)',
+  subtle: 'rgba(var(--rgb-hi),0.06)', border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const MAX_TEAM     = 4
@@ -170,7 +170,7 @@ export default function StudioHomeDisplay() {
         ) : (
           <>
             {services.some(s => !s.image_url) && (
-              <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginBottom: '0.75rem' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginBottom: '0.75rem' }}>
                 Services without an image are greyed out — add an image in the Services page to enable them.
               </p>
             )}
@@ -193,13 +193,13 @@ export default function StudioHomeDisplay() {
                       {svc.image_url
                         ? <img src={svc.image_url} alt={svc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 6 }}>
-                            <Scissors size={20} color="rgba(255,255,255,0.15)" strokeWidth={1} />
-                            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif' }}>No image</span>
+                            <Scissors size={20} color="var(--col-text)" strokeWidth={1} />
+                            <span style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>No image</span>
                           </div>
                       }
                       {svc.featured && <CheckBadge />}
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.4rem 0.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
-                        <p style={{ color: '#fff', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
+                        <p style={{ color: 'var(--col-text)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
                         {svc.price && <p style={{ color: C.goldDim, fontSize: 9, fontFamily: 'DM Sans,sans-serif' }}>${svc.price}</p>}
                       </div>
                     </div>
@@ -244,7 +244,7 @@ export default function StudioHomeDisplay() {
                     {item.featured && <CheckBadge />}
                     {item.title && (
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.4rem 0.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
-                        <p style={{ color: '#fff', fontSize: 9, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
+                        <p style={{ color: 'var(--col-text)', fontSize: 9, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
                       </div>
                     )}
                   </div>
@@ -263,9 +263,9 @@ export default function StudioHomeDisplay() {
 
 function Section({ icon, title, badge, badgeActive, children }) {
   const C = {
-    card: '#161620', gold: '#B8D4E8',
-    white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)',
-    border: 'rgba(255,255,255,0.07)',
+    card: 'var(--col-modal)', gold: 'var(--col-acc)',
+    white: 'var(--col-text)', muted: 'var(--col-text)',
+    border: 'rgba(var(--rgb-hi),0.07)',
   }
   return (
     <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
@@ -285,8 +285,8 @@ function Section({ icon, title, badge, badgeActive, children }) {
 
 function CheckBadge() {
   return (
-    <div style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: '#B8D4E8', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
-      <Check size={12} color="#000" strokeWidth={3} />
+    <div style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: 'var(--col-acc)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+      <Check size={12} color="var(--col-bg)" strokeWidth={3} />
     </div>
   )
 }
@@ -294,7 +294,7 @@ function CheckBadge() {
 function Initials({ name }) {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span className="font-display" style={{ fontSize: '2rem', color: 'rgba(184,212,232,0.35)' }}>{name?.[0]}</span>
+      <span className="font-display" style={{ fontSize: '2rem', color: 'var(--col-acc)' }}>{name?.[0]}</span>
     </div>
   )
 }
@@ -311,7 +311,7 @@ function SkeletonGrid({ n, minW = 160, ratio }) {
 
 function Empty({ children }) {
   return (
-    <p style={{ color: 'rgba(255,255,255,0.22)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '1.5rem 0' }}>
+    <p style={{ color: 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '1.5rem 0' }}>
       {children}
     </p>
   )

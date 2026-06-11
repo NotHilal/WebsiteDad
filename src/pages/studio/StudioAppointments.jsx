@@ -10,17 +10,17 @@ import {
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', modal: '#1a1a24',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)',
+  card: 'var(--col-modal)', modal: 'var(--col-modal)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.07)',
 }
 
 const STATUS = {
   pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.22)'  },
   confirmed: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.22)'  },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
-  completed: { color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)',  border: 'rgba(184,212,232,0.22)'  },
+  completed: { color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)',  border: 'rgba(var(--rgb-acc),0.22)' }  },
 }
 
 const ALL_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled']
@@ -153,17 +153,17 @@ export default function StudioAppointments() {
       <style>{`
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
-        .cal-day-appt:hover { border-color: ${C.goldBorder} !important; background: rgba(184,212,232,0.04) !important; cursor: pointer; }
+        .cal-day-appt:hover { border-color: ${C.goldBorder} !important; background: rgba(var(--rgb-acc),0.04) !important; cursor: pointer; }
         .cal-day-appt.has-appts:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .cal-day-empty-hover:hover { border-color: ${C.border} !important; }
         .bd-nav:hover { background: ${C.goldBg} !important; border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .st-btn-pending:hover   { background: rgba(245,158,11,0.2) !important; }
         .st-btn-confirmed:hover { background: rgba(52,211,153,0.2) !important; }
-        .st-btn-completed:hover { background: rgba(184,212,232,0.2) !important; }
+        .st-btn-completed:hover { background: rgba(var(--rgb-acc),0.2) !important; }
         .st-btn-cancelled:hover { background: rgba(248,113,113,0.2) !important; }
-        .appt-card-row:hover { border-color: rgba(184,212,232,0.15) !important; }
+        .appt-card-row:hover { border-color: rgba(var(--rgb-acc),0.15) !important; }
         .filter-pill:hover { border-color: ${C.goldBorder} !important; color: ${C.goldDim} !important; }
-        .modal-x:hover { background: rgba(255,255,255,0.08) !important; color: ${C.white} !important; }
+        .modal-x:hover { background: rgba(var(--rgb-hi),0.08) !important; color: ${C.white} !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }
         .period-tab:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
         @media (max-width: 640px) {
@@ -218,9 +218,9 @@ export default function StudioAppointments() {
               className="period-tab"
               style={{
                 padding: '7px 16px', borderRadius: 20,
-                border: `1px solid ${active ? C.goldBorder : 'rgba(255,255,255,0.14)'}`,
-                background: active ? C.goldBg : 'rgba(255,255,255,0.05)',
-                color: active ? C.gold : 'rgba(255,255,255,0.6)',
+                border: `1px solid ${active ? C.goldBorder : 'rgba(var(--rgb-hi),0.14)'}`,
+                background: active ? C.goldBg : 'rgba(var(--rgb-hi),0.05)',
+                color: active ? C.gold : 'var(--col-text)',
                 fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 500,
                 cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em',
               }}>
@@ -274,7 +274,7 @@ export default function StudioAppointments() {
                     style={{
                       minHeight: 88, borderRadius: 10, padding: '8px 9px 7px',
                       border: `1.5px solid ${isToday ? C.goldBorder : C.border}`,
-                      background: isToday ? C.goldBg : isWeekend ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.02)',
+                      background: isToday ? C.goldBg : isWeekend ? 'rgba(var(--rgb-hi),0.015)' : 'rgba(var(--rgb-hi),0.02)',
                       opacity: isPast && !hasAppts ? 0.35 : 1,
                       cursor: hasAppts ? 'pointer' : 'default',
                       display: 'flex', flexDirection: 'column',
@@ -355,7 +355,7 @@ export default function StudioAppointments() {
                 const initials = appt.profiles?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
                 return (
                   <div key={appt.id} className="appt-card-row"
-                    style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: 12, transition: 'border-color .2s' }}>
+                    style={{ background: 'rgba(var(--rgb-hi),0.025)', border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: 12, transition: 'border-color .2s' }}>
                     <div style={{ width: 34, height: 34, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <span style={{ fontSize: '0.72rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{initials}</span>
                     </div>
@@ -406,13 +406,13 @@ export default function StudioAppointments() {
       {selectedDay && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
           onClick={() => setSelectedDay(null)}>
-          <div style={{ width: '100%', maxWidth: 580, maxHeight: '88vh', display: 'flex', flexDirection: 'column', background: '#12121a', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid rgba(184,212,232,0.2)` }}
+          <div style={{ width: '100%', maxWidth: 580, maxHeight: '88vh', display: 'flex', flexDirection: 'column', background: 'var(--col-modal)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', border: `1px solid rgba(var(--rgb-acc),0.2)` }}
             onClick={e => e.stopPropagation()}>
 
             {/* Header */}
             <div style={{ padding: '1.75rem 1.75rem 1.25rem', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
               {/* Ambient glow */}
-              <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(184,212,232,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: 'radial-gradient(circle, rgba(var(--rgb-acc),0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
                 <div>
@@ -450,7 +450,7 @@ export default function StudioAppointments() {
                       <button key={s} onClick={() => { setFilter(s); setPage(0) }}
                         style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${filter === s ? opt.border : C.border}`, background: filter === s ? opt.bg : 'transparent', color: filter === s ? opt.color : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: 5 }}
                         className="filter-pill">
-                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: filter === s ? opt.color : 'rgba(255,255,255,0.2)' }} />
+                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: filter === s ? opt.color : 'var(--col-text)' }} />
                         {s} · {dayCounts[s]}
                       </button>
                     )
@@ -475,7 +475,7 @@ export default function StudioAppointments() {
                     const initials = appt.profiles?.full_name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() || '?'
                     return (
                       <div key={appt.id}
-                        style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem 1.1rem', transition: 'border-color .2s' }}
+                        style={{ background: 'rgba(var(--rgb-hi),0.025)', border: `1px solid ${C.border}`, borderRadius: 14, padding: '1rem 1.1rem', transition: 'border-color .2s' }}
                         className="appt-card-row">
 
                         {/* Row 1: avatar + info + time + status */}
@@ -537,7 +537,7 @@ export default function StudioAppointments() {
                                   padding: '5px 13px', borderRadius: 8,
                                   background: isCurrent ? C.subtle : opt.bg,
                                   border: `1px solid ${isCurrent ? C.border : opt.border}`,
-                                  color: isCurrent ? 'rgba(255,255,255,0.18)' : opt.color,
+                                  color: isCurrent ? 'var(--col-text)' : opt.color,
                                   fontSize: 10, fontFamily: 'DM Sans,sans-serif',
                                   fontWeight: isCurrent ? 400 : 600,
                                   cursor: isCurrent ? 'default' : 'pointer',

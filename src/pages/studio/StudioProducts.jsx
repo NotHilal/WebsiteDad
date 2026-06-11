@@ -7,10 +7,10 @@ import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
-  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
-  subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
+  card: 'var(--col-modal)', gold: 'var(--col-acc)', goldDim: 'var(--col-acc)',
+  goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)',
+  subtle: 'rgba(var(--rgb-hi),0.06)', border: 'rgba(var(--rgb-hi),0.07)', modal: 'var(--col-modal)',
   green: '#34d399', greenBg: 'rgba(52,211,153,0.1)', greenBorder: 'rgba(52,211,153,0.18)',
   amber: '#f59e0b', amberBg: 'rgba(245,158,11,0.1)', amberBorder: 'rgba(245,158,11,0.2)',
   red: '#f87171',   redBg:   'rgba(248,113,113,0.1)', redBorder:   'rgba(248,113,113,0.2)',
@@ -18,14 +18,14 @@ const C = {
 
 const COLOR_PRESETS = [
   '#60a5fa', '#818cf8', '#c084fc', '#f472b6', '#fb7185',
-  '#f87171', '#fb923c', '#f59e0b', '#B8D4E8', '#a3e635',
+  '#f87171', '#fb923c', '#f59e0b', 'var(--col-acc)', '#a3e635',
   '#34d399', '#2dd4bf', '#22d3ee', '#38bdf8', '#94a3b8',
 ]
 
 const EMPTY = { name: '', description: '', price: '', category: '', tags: [], stock: '', available: true, image_url: '' }
 
-const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp = { width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 function stockLevel(stock) {
   if (stock === 0) return { color: C.red,   bg: C.redBg,   border: C.redBorder,   label: 'Out of stock', key: 'out'  }
@@ -212,23 +212,23 @@ export default function StudioProducts() {
       <style>{`
         @keyframes spin     { to { transform: rotate(360deg); } }
         @keyframes modalIn  { from { transform: scale(0.96) translateY(8px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); }
         .prod-card { transition: border-color .2s, box-shadow .2s; }
-        .prod-card:hover { border-color: rgba(184,212,232,0.22) !important; box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
+        .prod-card:hover { border-color: rgba(var(--rgb-acc),0.22) !important; box-shadow: 0 4px 24px rgba(0,0,0,0.35); }
         .prod-img { transition: transform .4s ease; }
         .prod-card:hover .prod-img { transform: scale(1.07); }
-        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,212,232,0.3); }
-        .btn-cat:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.08) !important; }
+        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(var(--rgb-acc),0.3); }
+        .btn-cat:hover { border-color: var(--col-text) !important; color: ${C.white} !important; background: rgba(var(--rgb-hi),0.08) !important; }
         .cat-chip:hover  { border-color: ${C.goldBorder} !important; color: ${C.white} !important; }
-        .stat-chip:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.dim} !important; }
+        .stat-chip:hover { border-color: var(--col-text) !important; color: ${C.dim} !important; }
         .stock-minus:not(:disabled):hover { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.5) !important; color: ${C.red} !important; }
-        .stock-plus:not(:disabled):hover  { background: rgba(184,212,232,0.2) !important; border-color: ${C.gold} !important; }
+        .stock-plus:not(:disabled):hover  { background: rgba(var(--rgb-acc),0.2) !important; border-color: ${C.gold} !important; }
         .prod-edit-btn:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
         .prod-del-btn:hover  { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; color: ${C.red} !important; }
-        .sp-search:focus { border-color: ${C.goldBorder} !important; background: rgba(255,255,255,0.07) !important; }
-        .sp-search::placeholder { color: rgba(255,255,255,0.2); }
+        .sp-search:focus { border-color: ${C.goldBorder} !important; background: rgba(var(--rgb-hi),0.07) !important; }
+        .sp-search::placeholder { color: var(--col-text); }
         .sp-filters { display: flex; gap: 5px; flex-wrap: wrap; }
-        .sp-modal-close:hover { background: rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.6) !important; }
+        .sp-modal-close:hover { background: rgba(var(--rgb-hi),0.1) !important; color: var(--col-text) !important; }
         .sp-tag-btn:hover:not(:disabled) { border-color: var(--tag-color, ${C.gold}) !important; color: var(--tag-color, ${C.gold}) !important; }
         .sp-newcat-btn:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
         .cat-del-row-btn:hover { background: rgba(248,113,113,0.18) !important; border-color: rgba(248,113,113,0.45) !important; color: ${C.red} !important; }
@@ -261,11 +261,11 @@ export default function StudioProducts() {
         </div>
         <div className="sp-header-btns" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button onClick={() => setCatModal(true)} className="btn-cat"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Tag size={13} /> Categories
           </button>
           <button onClick={() => openModal('add')} className="btn-g"
-            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Plus size={14} /> Add Product
           </button>
         </div>
@@ -283,12 +283,12 @@ export default function StudioProducts() {
 
       {/* ── Search ──────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, position: 'relative' }}>
-        <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+        <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
         <input type="text" placeholder="Search by name, category or tag…" value={search} onChange={e => setSearch(e.target.value)} className="sp-search"
-          style={{ width: '100%', boxSizing: 'border-box', padding: '0.6rem 36px 0.6rem 38px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 11, color: C.white, fontSize: '0.83rem', fontFamily: 'DM Sans,sans-serif', outline: 'none', transition: 'border-color .2s, background .2s' }} />
+          style={{ width: '100%', boxSizing: 'border-box', padding: '0.6rem 36px 0.6rem 38px', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, borderRadius: 11, color: C.white, fontSize: '0.83rem', fontFamily: 'DM Sans,sans-serif', outline: 'none', transition: 'border-color .2s, background .2s' }} />
         {search && (
           <button onClick={() => setSearch('')}
-            style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.09)', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.09)', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <X size={10} />
           </button>
         )}
@@ -346,7 +346,7 @@ export default function StudioProducts() {
         ) : filtered.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: '0.75rem' }}>
             <div style={{ width: 52, height: 52, borderRadius: 14, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Package size={20} color="rgba(255,255,255,0.15)" strokeWidth={1} />
+              <Package size={20} color="var(--col-text)" strokeWidth={1} />
             </div>
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
               {products.length === 0 ? 'No products yet' : search ? `No products match "${search}"` : 'No products match the filter'}
@@ -363,16 +363,16 @@ export default function StudioProducts() {
                   <div key={p.id} className="prod-card"
                     style={{ background: C.card, border: `1px solid ${stock === 0 && p.available ? C.redBorder : C.border}`, borderRadius: 14, overflow: 'hidden' }}>
                     <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                      <div style={{ width: 76, height: 76, flexShrink: 0, background: '#0d0d12', position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ width: 76, height: 76, flexShrink: 0, background: 'var(--col-modal)', position: 'relative', overflow: 'hidden' }}>
                         {p.image_url
                           ? <img src={p.image_url} alt={p.name} className="prod-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <Package size={20} color="rgba(255,255,255,0.1)" strokeWidth={1} />
+                              <Package size={20} color="rgba(var(--rgb-hi),0.1)" strokeWidth={1} />
                             </div>
                         }
                         {!p.available && (
                           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.62)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <EyeOff size={12} color="rgba(255,255,255,0.3)" />
+                            <EyeOff size={12} color="var(--col-text)" />
                           </div>
                         )}
                       </div>
@@ -401,7 +401,7 @@ export default function StudioProducts() {
                     <div style={{ borderTop: `1px solid ${C.border}`, padding: '7px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.14)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                         <button onClick={() => adjustStock(p.id, -1, stock)} disabled={stock === 0 || isAdj} className="stock-minus"
-                          style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${stock === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(248,113,113,0.25)'}`, background: stock === 0 ? 'transparent' : 'rgba(248,113,113,0.07)', color: stock === 0 ? 'rgba(255,255,255,0.15)' : C.red, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'DM Sans,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>−</button>
+                          style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${stock === 0 ? 'rgba(var(--rgb-hi),0.06)' : 'rgba(248,113,113,0.25)'}`, background: stock === 0 ? 'transparent' : 'rgba(248,113,113,0.07)', color: stock === 0 ? 'var(--col-text)' : C.red, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'DM Sans,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>−</button>
                         <div style={{ minWidth: 38, textAlign: 'center' }}>
                           <span style={{ fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: level.color, display: 'block', lineHeight: 1 }}>{isAdj ? '…' : stock}</span>
                           <span style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.05em' }}>units</span>
@@ -436,7 +436,7 @@ export default function StudioProducts() {
           <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 24, overflow: 'hidden', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 48px 120px rgba(0,0,0,.7)', animation: 'modalIn .2s ease' }}
             onClick={e => e.stopPropagation()}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))', flexShrink: 0 }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.1))', flexShrink: 0 }} />
 
             <div className="sp-modal-head" style={{ padding: '1.5rem 1.75rem 1.25rem', flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
@@ -448,7 +448,7 @@ export default function StudioProducts() {
                 </h2>
               </div>
               <button onClick={closeModal} className="sp-modal-close"
-                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .18s', marginTop: 2 }}>
+                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .18s', marginTop: 2 }}>
                 <X size={14} />
               </button>
             </div>
@@ -464,12 +464,12 @@ export default function StudioProducts() {
                     <label style={lbl}>Photo</label>
                     <label style={{ cursor: 'pointer', display: 'block' }}>
                       <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
-                      <div className="sp-modal-photo" style={{ width: 90, height: 90, borderRadius: 14, overflow: 'hidden', border: `2px dashed ${(filePreview || form.image_url) ? C.goldBorder : 'rgba(255,255,255,0.1)'}`, background: '#0d0d12', position: 'relative', transition: 'border-color .2s' }}>
+                      <div className="sp-modal-photo" style={{ width: 90, height: 90, borderRadius: 14, overflow: 'hidden', border: `2px dashed ${(filePreview || form.image_url) ? C.goldBorder : 'rgba(var(--rgb-hi),0.1)'}`, background: 'var(--col-modal)', position: 'relative', transition: 'border-color .2s' }}>
                         {(filePreview || form.image_url)
                           ? <img src={filePreview || form.image_url} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           : <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-                              <Image size={20} color="rgba(255,255,255,0.15)" />
-                              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Upload</span>
+                              <Image size={20} color="var(--col-text)" />
+                              <span style={{ fontSize: 8, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Upload</span>
                             </div>
                         }
                       </div>
@@ -532,8 +532,8 @@ export default function StudioProducts() {
                       const maxed    = (form.tags || []).length >= 3 && !selected
                       return (
                         <button key={cat.id} type="button" onClick={() => toggleCat(cat.name)} disabled={maxed} className="sp-tag-btn"
-                          style={{ '--tag-color': cat.color, padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, letterSpacing: '0.05em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? cat.color + '88' : 'rgba(255,255,255,0.1)'}`, background: selected ? cat.color + '22' : 'rgba(255,255,255,0.03)', color: selected ? cat.color : maxed ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.38)', outline: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? cat.color : 'rgba(255,255,255,0.2)', flexShrink: 0, display: 'inline-block', transition: 'background .15s' }} />
+                          style={{ '--tag-color': cat.color, padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, letterSpacing: '0.05em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? cat.color + '88' : 'rgba(var(--rgb-hi),0.1)'}`, background: selected ? cat.color + '22' : 'rgba(var(--rgb-hi),0.03)', color: selected ? cat.color : maxed ? 'rgba(var(--rgb-hi),0.12)' : 'var(--col-text)', outline: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? cat.color : 'var(--col-text)', flexShrink: 0, display: 'inline-block', transition: 'background .15s' }} />
                           {cat.name}
                         </button>
                       )
@@ -542,12 +542,12 @@ export default function StudioProducts() {
                 </div>
 
                 {/* Available toggle */}
-                <div className="sp-modal-avail" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.1rem', borderRadius: 13, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
+                <div className="sp-modal-avail" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.1rem', borderRadius: 13, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}` }}>
                   <div>
                     <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 2 }}>Available to order</p>
                     <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Visible to customers in the store</p>
                   </div>
-                  <div style={{ width: 44, height: 26, borderRadius: 13, background: form.available ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.available ? '0 0 14px rgba(184,212,232,0.4)' : 'none' }}
+                  <div style={{ width: 44, height: 26, borderRadius: 13, background: form.available ? C.gold : 'rgba(var(--rgb-hi),0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.available ? '0 0 14px rgba(var(--rgb-acc),0.4)' : 'none' }}
                     onClick={() => setForm(p => ({ ...p, available: !p.available }))}>
                     <div style={{ position: 'absolute', top: 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.25)', transition: 'left .22s', left: form.available ? 21 : 3 }} />
                   </div>
@@ -563,9 +563,9 @@ export default function StudioProducts() {
                 Cancel
               </button>
               <button onClick={save} disabled={saving}
-                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'opacity .2s, box-shadow .2s', boxShadow: saving ? 'none' : '0 4px 20px rgba(184,212,232,0.28)' }}>
+                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'opacity .2s, box-shadow .2s', boxShadow: saving ? 'none' : '0 4px 20px rgba(var(--rgb-acc),0.28)' }}>
                 {saving
-                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                   : <><Save size={13} /> {modal === 'add' ? 'Add Product' : 'Save Changes'}</>}
               </button>
             </div>
@@ -580,7 +580,7 @@ export default function StudioProducts() {
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 22, overflow: 'hidden', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 40px 100px rgba(0,0,0,.75)', animation: 'modalIn .2s ease' }}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))', flexShrink: 0 }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.1))', flexShrink: 0 }} />
 
             {/* Header */}
             <div style={{ padding: '1.25rem 1.5rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}` }}>
@@ -589,7 +589,7 @@ export default function StudioProducts() {
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1 }}>Categories</h2>
               </div>
               <button onClick={closeCatModal} className="sp-modal-close"
-                style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .18s' }}>
+                style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .18s' }}>
                 <X size={14} />
               </button>
             </div>
@@ -619,7 +619,7 @@ export default function StudioProducts() {
                       {/* Inline delete confirmation */}
                       {catDelId === cat.id && (
                         <div style={{ margin: '0 1rem 0.75rem', background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 11, padding: '0.875rem' }}>
-                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'DM Sans,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
+                          <p style={{ fontSize: '0.72rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
                             Delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>? This cannot be undone.
                           </p>
                           <div style={{ display: 'flex', gap: 6 }}>
@@ -664,9 +664,9 @@ export default function StudioProducts() {
                     style={{ ...inp, paddingLeft: '1.75rem' }} />
                 </div>
                 <button onClick={saveCategory} disabled={addingCat || !newCatName.trim()}
-                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.06)', color: newCatName.trim() ? 'var(--col-bg)' : C.muted, border: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {addingCat
-                    ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Plus size={12} /> Add</>}
                 </button>
               </div>
@@ -706,8 +706,8 @@ export default function StudioProducts() {
               </div>
               <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
-                  {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Trash2 size={13} /> Delete Product</>}
+                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
+                  {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(var(--rgb-hi),.3)', borderTopcolor: 'var(--col-text)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Trash2 size={13} /> Delete Product</>}
                 </button>
               </div>
             </div>

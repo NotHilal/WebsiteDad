@@ -4,20 +4,21 @@ import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
-  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote, Activity
+  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote, Activity, Sun, Moon
 } from 'lucide-react'
 import hairgoLogo from '../../assets/hairgo.png'
 import AppointmentAlert from '../../components/AppointmentAlert'
 import DayOffAlert from '../../components/DayOffAlert'
 import UnlinkedArtistAlert from '../../components/UnlinkedArtistAlert'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '../../contexts/ThemeContext'
 import toast from 'react-hot-toast'
 
 const C = {
-  bg: '#0e0e14', card: '#161620', sidebar: '#0a0a10', topbar: '#111118',
-  gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)', subtle: 'rgba(255,255,255,0.06)',
-  border: 'rgba(255,255,255,0.07)', danger: '#f87171',
+  bg: 'var(--col-bg)', card: 'var(--col-card)', sidebar: 'var(--col-bg2)', topbar: 'var(--col-card)',
+  gold: 'var(--col-acc)', goldDim: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)', subtle: 'rgba(var(--rgb-hi),0.06)',
+  border: 'rgba(var(--rgb-hi),0.1)', danger: '#f87171',
 }
 
 const adminNavItems = [
@@ -56,6 +57,7 @@ export default function StudioLayout() {
   const [unread,         setUnread]         = useState(0)
   const [pendingDayoffs, setPendingDayoffs] = useState(0)
   const { signOut, profile, isAdmin, user } = useAuth()
+  const { isDark, toggleTheme } = useTheme()
 
   // Refs so the realtime handler always sees the latest values
   const isAdminRef = useRef(isAdmin)
@@ -125,7 +127,7 @@ export default function StudioLayout() {
       <div className="s-brand-wrap" style={{ padding: '1.5rem 1.25rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
         <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', opacity: 1, transition: 'opacity .18s' }}
           className="s-brand">
-          <img src={hairgoLogo} alt="HairGo" className="s-logo-circle" style={{ width: 32, height: 32, borderRadius: '50%', border: `1px solid rgba(184,212,232,0.35)`, boxShadow: `0 4px 16px rgba(184,212,232,0.3)`, flexShrink: 0, objectFit: 'cover' }} />
+          <img src={hairgoLogo} alt="HairGo" className="s-logo-circle" style={{ width: 32, height: 32, borderRadius: '50%', border: `1px solid rgba(var(--rgb-acc),0.35)`, boxShadow: `0 4px 16px rgba(var(--rgb-acc),0.3)`, flexShrink: 0, objectFit: 'cover' }} />
           <div>
             <span className="font-display s-brand-name" style={{ fontSize: '1.15rem', color: C.white, lineHeight: 1 }}>
               Hair<span style={{ color: C.gold }}>Go</span>
@@ -223,6 +225,9 @@ export default function StudioLayout() {
             <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button onClick={toggleTheme} style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: C.dim, cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }}>
+              {isDark ? <Sun size={13} /> : <Moon size={13} />}
+            </button>
             <UnlinkedArtistAlert />
             <DayOffAlert />
             <AppointmentAlert />
@@ -242,7 +247,7 @@ export default function StudioLayout() {
 
       <style>{`
         .s-brand:hover { opacity: 0.75 !important; }
-        .s-nav:hover { color: ${C.white} !important; background: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.06) !important; }
+        .s-nav:hover { color: ${C.white} !important; background: rgba(var(--rgb-hi),0.04) !important; border-color: rgba(var(--rgb-hi),0.06) !important; }
         .s-signout:hover { color: ${C.danger} !important; border-color: rgba(248,113,113,0.28) !important; background: rgba(248,113,113,0.06) !important; }
         .s-menu-btn { display: flex !important; }
         @media (min-width: 1024px) { .s-menu-btn { display: none !important; } }

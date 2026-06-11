@@ -8,7 +8,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 const cardStyle = {
   style: {
     base: {
-      color: '#f0f0f0',
+      color: 'var(--col-text)',
       fontFamily: 'DM Sans, sans-serif',
       fontSize: '14px',
       fontWeight: '300',
@@ -137,7 +137,7 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
         style={{ width: '100%', justifyContent: 'center', padding: '1rem', fontSize: 12, letterSpacing: '0.2em', marginBottom: 12 }}>
         {paying ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,0.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             <span>Processing…</span>
           </div>
         ) : (

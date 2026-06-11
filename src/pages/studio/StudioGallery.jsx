@@ -7,21 +7,21 @@ import { useLogAction } from '../../hooks/useLogAction'
 import toast from 'react-hot-toast'
 
 const C = {
-  card: '#161620', gold: '#B8D4E8', goldDim: 'rgba(184,212,232,0.55)',
-  goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  white: '#f0f0f0', dim: 'rgba(255,255,255,0.45)', muted: 'rgba(255,255,255,0.22)',
-  subtle: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.07)', modal: '#1a1a24',
+  card: 'var(--col-modal)', gold: 'var(--col-acc)', goldDim: 'var(--col-acc)',
+  goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
+  white: 'var(--col-text)', dim: 'var(--col-text)', muted: 'var(--col-text)',
+  subtle: 'rgba(var(--rgb-hi),0.06)', border: 'rgba(var(--rgb-hi),0.07)', modal: 'var(--col-modal)',
   red: '#f87171', redBg: 'rgba(248,113,113,0.1)', redBorder: 'rgba(248,113,113,0.2)',
 }
 
 const COLOR_PRESETS = [
   '#60a5fa', '#818cf8', '#c084fc', '#f472b6', '#fb7185',
-  '#f87171', '#fb923c', '#f59e0b', '#B8D4E8', '#a3e635',
+  '#f87171', '#fb923c', '#f59e0b', 'var(--col-acc)', '#a3e635',
   '#34d399', '#2dd4bf', '#22d3ee', '#38bdf8', '#94a3b8',
 ]
 
-const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp = { width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 const EMPTY = { image_url: '', title: '', category: '', stylist_id: '', visible: true }
 
 function Select({ value, onChange, options }) {
@@ -50,23 +50,23 @@ function Select({ value, onChange, options }) {
   return (
     <div>
       <button ref={btnRef} type="button" onClick={toggle}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: open ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)', border: `1px solid ${open ? C.goldBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, cursor: 'pointer', transition: 'all .18s', boxSizing: 'border-box' }}>
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: open ? 'rgba(var(--rgb-hi),0.08)' : 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${open ? C.goldBorder : 'rgba(var(--rgb-hi),0.1)'}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, cursor: 'pointer', transition: 'all .18s', boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {selected?.dot && <span style={{ width: 8, height: 8, borderRadius: '50%', background: selected.dot, flexShrink: 0 }} />}
           <span>{selected?.label || '—'}</span>
         </div>
-        <ChevronDown size={13} color="rgba(255,255,255,0.35)" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
+        <ChevronDown size={13} color="var(--col-text)" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
       </button>
 
       {open && rect && (
         <div ref={panelRef}
-          style={{ position: 'fixed', top: rect.bottom + 5, left: rect.left, width: rect.width, background: '#1e1e2a', border: `1px solid ${C.goldBorder}`, borderRadius: 11, overflow: 'hidden', zIndex: 9999, boxShadow: '0 16px 48px rgba(0,0,0,0.7)', animation: 'dropIn .14s ease' }}>
+          style={{ position: 'fixed', top: rect.bottom + 5, left: rect.left, width: rect.width, background: 'var(--col-card)', border: `1px solid ${C.goldBorder}`, borderRadius: 11, overflow: 'hidden', zIndex: 9999, boxShadow: '0 16px 48px rgba(0,0,0,0.7)', animation: 'dropIn .14s ease' }}>
           {options.map(o => {
             const active = value === o.value
             return (
               <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'rgba(184,212,232,0.1)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(255,255,255,0.04)`, color: active ? C.gold : 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'var(--col-acc)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(var(--rgb-hi),0.04)`, color: active ? C.gold : 'var(--col-text)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.05)' }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}>
                 {o.dot && <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.dot, flexShrink: 0 }} />}
                 <span style={{ flex: 1 }}>{o.label}</span>
@@ -250,15 +250,15 @@ export default function StudioGallery() {
         @keyframes spin    { to { transform: rotate(360deg); } }
         @keyframes modalIn { from { transform: scale(0.96) translateY(8px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         @keyframes dropIn  { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(184,212,232,0.08); }
+        .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); }
         .gal-card  { transition: transform .22s ease, box-shadow .22s ease; }
         .gal-card:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.45); }
         .gal-img   { transition: transform .45s ease; }
         .gal-card:hover .gal-img { transform: scale(1.05); }
-        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(184,212,232,0.3); }
-        .btn-cat:hover { border-color: rgba(255,255,255,0.18) !important; color: ${C.white} !important; background: rgba(255,255,255,0.08) !important; }
-        .gal-filter:hover { border-color: rgba(255,255,255,0.2) !important; color: rgba(255,255,255,0.55) !important; }
-        .sp-modal-close:hover { background: rgba(255,255,255,0.1) !important; }
+        .btn-g:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(var(--rgb-acc),0.3); }
+        .btn-cat:hover { border-color: var(--col-text) !important; color: ${C.white} !important; background: rgba(var(--rgb-hi),0.08) !important; }
+        .gal-filter:hover { border-color: var(--col-text) !important; color: var(--col-text) !important; }
+        .sp-modal-close:hover { background: rgba(var(--rgb-hi),0.1) !important; }
         .gal-vis-btn  { transition: all .18s; }
         .gal-edit-btn { transition: all .18s; }
         .gal-del-btn  { transition: all .18s; }
@@ -287,16 +287,16 @@ export default function StudioGallery() {
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Gallery</h1>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: C.white, fontWeight: 600 }}>{images.length}</span> photos</span>
-            {hidden.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{hidden.length}</span> archived</span>}
+            {hidden.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: 'var(--col-text)', fontWeight: 600 }}>{hidden.length}</span> archived</span>}
           </div>
         </div>
         <div className="gal-hdr-btn" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button onClick={() => setCatModal(true)} className="btn-cat"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Tag size={13} /> Categories
           </button>
           <button onClick={openAdd} className="btn-g"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Plus size={14} /> Add Photo
           </button>
         </div>
@@ -345,7 +345,7 @@ export default function StudioGallery() {
         ) : filtered.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 240, gap: '0.75rem' }}>
             <div style={{ width: 52, height: 52, borderRadius: 14, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Image size={20} color="rgba(255,255,255,0.12)" strokeWidth={1} />
+              <Image size={20} color="rgba(var(--rgb-hi),0.12)" strokeWidth={1} />
             </div>
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
               {filter === 'archived' ? 'No archived photos' : filter === 'all' ? 'No photos yet' : `No ${filter} photos`}
@@ -360,19 +360,19 @@ export default function StudioGallery() {
                 const catColor = catDef?.color || C.goldDim
                 return (
                   <div key={img.id} className="gal-card"
-                    style={{ borderRadius: 14, overflow: 'hidden', border: `1px solid ${isHidden ? 'rgba(255,255,255,0.05)' : C.border}`, background: C.card }}>
+                    style={{ borderRadius: 14, overflow: 'hidden', border: `1px solid ${isHidden ? 'rgba(var(--rgb-hi),0.05)' : C.border}`, background: C.card }}>
 
                     <div style={{ aspectRatio: '4/5', overflow: 'hidden', position: 'relative' }}>
                       {img.image_url
                         ? <img src={img.image_url} alt={img.title || ''} className="gal-img"
                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', objectPosition: 'top center', filter: isHidden ? 'brightness(0.3) saturate(0.4)' : 'none', transition: 'filter .25s' }} />
-                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0d0d12' }}>
-                            <Image size={24} color="rgba(255,255,255,0.1)" strokeWidth={1} />
+                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--col-modal)' }}>
+                            <Image size={24} color="rgba(var(--rgb-hi),0.1)" strokeWidth={1} />
                           </div>
                       }
                       {isHidden && (
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                          <EyeOff size={26} color="rgba(255,255,255,0.22)" />
+                          <EyeOff size={26} color="var(--col-text)" />
                         </div>
                       )}
                       {img.category && catDef && (
@@ -387,16 +387,16 @@ export default function StudioGallery() {
                       <div style={{ flex: 1, minWidth: 0, marginRight: 4 }}>
                         {img.title
                           ? <p style={{ color: C.dim, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{img.title}</p>
-                          : <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No title</p>
+                          : <p style={{ color: 'var(--col-text)', fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No title</p>
                         }
                         {img.stylists?.name && <p style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>{img.stylists.name}</p>}
                       </div>
                       <button onClick={() => toggleVisible(img.id, img.visible !== false)} className="gal-vis-btn" title={isHidden ? 'Make visible' : 'Archive'}
-                        style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${isHidden ? C.goldBorder : C.border}`, background: isHidden ? C.goldBg : 'rgba(255,255,255,0.04)', color: isHidden ? C.gold : C.muted }}>
+                        style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${isHidden ? C.goldBorder : C.border}`, background: isHidden ? C.goldBg : 'rgba(var(--rgb-hi),0.04)', color: isHidden ? C.gold : C.muted }}>
                         {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
                       </button>
                       <button onClick={() => openEdit(img)} className="gal-edit-btn" title="Edit"
-                        style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${C.border}`, background: 'rgba(255,255,255,0.04)', color: C.muted }}>
+                        style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.04)', color: C.muted }}>
                         <Edit2 size={14} />
                       </button>
                       <button onClick={() => openDelete(img)} className="gal-del-btn" title="Delete"
@@ -420,7 +420,7 @@ export default function StudioGallery() {
           <div style={{ width: '100%', maxWidth: 480, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 24, overflow: 'hidden', maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 48px 120px rgba(0,0,0,.7)', animation: 'modalIn .2s ease' }}
             onClick={e => e.stopPropagation()}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))', flexShrink: 0 }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.1))', flexShrink: 0 }} />
 
             <div style={{ padding: '1.5rem 1.75rem 1.25rem', flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
@@ -432,7 +432,7 @@ export default function StudioGallery() {
                 </h2>
               </div>
               <button onClick={closeModal} className="sp-modal-close"
-                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .18s', marginTop: 2 }}>
+                style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .18s', marginTop: 2 }}>
                 <X size={14} />
               </button>
             </div>
@@ -446,13 +446,13 @@ export default function StudioGallery() {
                 <label style={lbl}>Photo</label>
                 <label style={{ cursor: 'pointer', display: 'block' }}>
                   <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
-                  <div style={{ borderRadius: 14, overflow: 'hidden', border: `2px dashed ${(filePreview || form.image_url) ? C.goldBorder : 'rgba(255,255,255,0.1)'}`, background: '#0d0d12', transition: 'border-color .2s', aspectRatio: '16/7', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                  <div style={{ borderRadius: 14, overflow: 'hidden', border: `2px dashed ${(filePreview || form.image_url) ? C.goldBorder : 'rgba(var(--rgb-hi),0.1)'}`, background: 'var(--col-modal)', transition: 'border-color .2s', aspectRatio: '16/7', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                     {(filePreview || form.image_url)
                       ? <img src={filePreview || form.image_url} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', objectPosition: 'top center' }} />
                       : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                          <Image size={24} color="rgba(255,255,255,0.15)" />
+                          <Image size={24} color="var(--col-text)" />
                           <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Click to upload</p>
-                          <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>JPG · PNG · WEBP</p>
+                          <p style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>JPG · PNG · WEBP</p>
                         </div>
                     }
                   </div>
@@ -496,12 +496,12 @@ export default function StudioGallery() {
               </div>
 
               {/* Visible toggle */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.1rem', borderRadius: 13, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.1rem', borderRadius: 13, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}` }}>
                 <div>
                   <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 2 }}>Visible to visitors</p>
                   <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Shown in the public gallery</p>
                 </div>
-                <div style={{ width: 44, height: 26, borderRadius: 13, background: form.visible ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.visible ? '0 0 14px rgba(184,212,232,0.4)' : 'none' }}
+                <div style={{ width: 44, height: 26, borderRadius: 13, background: form.visible ? C.gold : 'rgba(var(--rgb-hi),0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.visible ? '0 0 14px rgba(var(--rgb-acc),0.4)' : 'none' }}
                   onClick={() => setForm(p => ({ ...p, visible: !p.visible }))}>
                   <div style={{ position: 'absolute', top: 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 2px 6px rgba(0,0,0,0.25)', transition: 'left .22s', left: form.visible ? 21 : 3 }} />
                 </div>
@@ -516,9 +516,9 @@ export default function StudioGallery() {
                 Cancel
               </button>
               <button onClick={save} disabled={saving || (!file && !form.image_url)}
-                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || (!file && !form.image_url)) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || (!file && !form.image_url)) ? 0.5 : 1, boxShadow: (saving || (!file && !form.image_url)) ? 'none' : '0 4px 20px rgba(184,212,232,0.28)', transition: 'opacity .2s, box-shadow .2s' }}>
+                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || (!file && !form.image_url)) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || (!file && !form.image_url)) ? 0.5 : 1, boxShadow: (saving || (!file && !form.image_url)) ? 'none' : '0 4px 20px rgba(var(--rgb-acc),0.28)', transition: 'opacity .2s, box-shadow .2s' }}>
                 {saving
-                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                  ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                   : <><Save size={13} /> {modal === 'add' ? 'Add Photo' : 'Save Changes'}</>}
               </button>
             </div>
@@ -533,7 +533,7 @@ export default function StudioGallery() {
           <div onClick={e => e.stopPropagation()}
             style={{ width: '100%', maxWidth: 400, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 22, overflow: 'hidden', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 40px 100px rgba(0,0,0,.75)', animation: 'modalIn .2s ease' }}>
 
-            <div style={{ height: 3, background: 'linear-gradient(90deg,#B8D4E8,#7AAFC9,rgba(184,212,232,0.1))', flexShrink: 0 }} />
+            <div style={{ height: 3, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.1))', flexShrink: 0 }} />
 
             <div style={{ padding: '1.25rem 1.5rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}` }}>
               <div>
@@ -541,7 +541,7 @@ export default function StudioGallery() {
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1 }}>Categories</h2>
               </div>
               <button onClick={closeCatModal} className="sp-modal-close"
-                style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .18s' }}>
+                style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .18s' }}>
                 <X size={14} />
               </button>
             </div>
@@ -570,7 +570,7 @@ export default function StudioGallery() {
                       </div>
                       {catDelId === cat.id && (
                         <div style={{ margin: '0 1rem 0.75rem', background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 11, padding: '0.875rem' }}>
-                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'DM Sans,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
+                          <p style={{ fontSize: '0.72rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
                             Delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>? This cannot be undone.
                           </p>
                           <div style={{ display: 'flex', gap: 6 }}>
@@ -613,9 +613,9 @@ export default function StudioGallery() {
                     style={{ ...inp, paddingLeft: '1.75rem' }} />
                 </div>
                 <button onClick={saveGalCat} disabled={addingCat || !newCatName.trim()}
-                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.06)', color: newCatName.trim() ? 'var(--col-bg)' : C.muted, border: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {addingCat
-                    ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                    ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Plus size={12} /> Add</>}
                 </button>
               </div>
@@ -653,8 +653,8 @@ export default function StudioGallery() {
               </div>
               <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
-                  {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Trash2 size={13} /> Delete Photo</>}
+                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
+                  {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(var(--rgb-hi),.3)', borderTopcolor: 'var(--col-text)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Trash2 size={13} /> Delete Photo</>}
                 </button>
               </div>
             </div>

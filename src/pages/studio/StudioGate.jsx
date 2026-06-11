@@ -89,12 +89,12 @@ export default function StudioGate() {
 
   const inputStyle = {
     width: '100%',
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.08)',
+    background: 'rgba(var(--rgb-hi),0.03)',
+    border: '1px solid rgba(var(--rgb-hi),0.08)',
     borderRadius: 14,
     padding: '16px 18px 16px 48px',
     fontSize: '0.95rem',
-    color: '#fff',
+    color: 'var(--col-text)',
     outline: 'none',
     fontFamily: 'DM Sans, sans-serif',
     fontWeight: 300,
@@ -107,7 +107,7 @@ export default function StudioGate() {
     fontSize: 10,
     letterSpacing: '0.22em',
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.28)',
+    color: 'var(--col-text)',
     marginBottom: 10,
     fontFamily: 'DM Sans, sans-serif',
   }
@@ -117,7 +117,7 @@ export default function StudioGate() {
     left: 18,
     top: '50%',
     transform: 'translateY(-50%)',
-    color: 'rgba(255,255,255,0.2)',
+    color: 'var(--col-text)',
     pointerEvents: 'none',
   }
 
@@ -125,33 +125,33 @@ export default function StudioGate() {
     <div className="sg-outer" style={{ minHeight: '100vh', background: '#080808', display: 'flex', overflow: 'hidden' }}>
 
       {/* ── Left panel ── */}
-      <div className="sg-left" style={{ width: 400, flexShrink: 0, position: 'relative', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 52px', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(184,212,232,0.04) 0%, transparent 60%)' }} />
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 320, height: 320, background: 'radial-gradient(circle, rgba(184,212,232,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: 'linear-gradient(rgba(184,212,232,1) 1px,transparent 1px),linear-gradient(90deg,rgba(184,212,232,1) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
+      <div className="sg-left" style={{ width: 400, flexShrink: 0, position: 'relative', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 52px', borderRight: '1px solid rgba(var(--rgb-hi),0.05)' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(var(--rgb-acc),0.04) 0%, transparent 60%)' }} />
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 320, height: 320, background: 'radial-gradient(circle, rgba(var(--rgb-acc),0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: 'linear-gradient(rgba(var(--rgb-acc),1) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--rgb-acc),1) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
 
         <div style={{ position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(184,212,232,0.3)' }}>
-              <Scissors size={16} color="#000" style={{ transform: 'rotate(45deg)' }} />
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(var(--rgb-acc),0.3)' }}>
+              <Scissors size={16} color="var(--col-bg)" style={{ transform: 'rotate(45deg)' }} />
             </div>
-            <span className="font-display" style={{ fontSize: '1.6rem', color: '#fff' }}>Hair<span style={{ color: '#B8D4E8' }}>Go</span></span>
+            <span className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-text)' }}>Hair<span style={{ color: 'var(--col-acc)' }}>Go</span></span>
           </div>
         </div>
 
         <div style={{ position: 'relative' }}>
-          <h2 className="font-display font-light" style={{ color: '#fff', fontSize: '3.5rem', lineHeight: 1.05, marginBottom: 24 }}>
+          <h2 className="font-display font-light" style={{ color: 'var(--col-text)', fontSize: '3.5rem', lineHeight: 1.05, marginBottom: 24 }}>
             Welcome<br />
             <span className="gold-gradient" style={{ fontStyle: 'italic' }}>back.</span>
           </h2>
-          <div style={{ width: 36, height: 1, background: 'linear-gradient(90deg,#B8D4E8,transparent)', marginBottom: 20 }} />
-          <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: '0.88rem', lineHeight: 1.9, maxWidth: 280, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>
+          <div style={{ width: 36, height: 1, background: 'linear-gradient(90deg,var(--col-acc),transparent)', marginBottom: 20 }} />
+          <p style={{ color: 'var(--col-text)', fontSize: '0.88rem', lineHeight: 1.9, maxWidth: 280, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>
             The HairGo Studio is your private management hub — restricted to authorised administrators only.
           </p>
         </div>
 
         <div style={{ position: 'relative' }}>
-          <p style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.14)', fontFamily: 'DM Sans, sans-serif' }}>
+          <p style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif' }}>
             HairGo Studio · Doha, Qatar
           </p>
         </div>
@@ -168,23 +168,23 @@ export default function StudioGate() {
         >
           {/* Mobile logo */}
           <div className="sg-mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(184,212,232,0.3)' }}>
-              <Scissors size={14} color="#000" style={{ transform: 'rotate(45deg)' }} />
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(var(--rgb-acc),0.3)' }}>
+              <Scissors size={14} color="var(--col-bg)" style={{ transform: 'rotate(45deg)' }} />
             </div>
-            <span className="font-display" style={{ fontSize: '1.45rem', color: '#fff' }}>Hair<span style={{ color: '#B8D4E8' }}>Go</span></span>
+            <span className="font-display" style={{ fontSize: '1.45rem', color: 'var(--col-text)' }}>Hair<span style={{ color: 'var(--col-acc)' }}>Go</span></span>
           </div>
 
           {/* Header */}
           <div className="sg-header" style={{ marginBottom: 44 }}>
-            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 14, fontFamily: 'DM Sans, sans-serif' }}>
+            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--col-acc)', marginBottom: 14, fontFamily: 'DM Sans, sans-serif' }}>
               Studio Access
             </p>
-            <h1 className="font-display font-light sg-title" style={{ color: '#fff', lineHeight: 1.1, marginBottom: 0 }}>
+            <h1 className="font-display font-light sg-title" style={{ color: 'var(--col-text)', lineHeight: 1.1, marginBottom: 0 }}>
               {user ? 'Welcome back' : 'Sign in to continue'}
             </h1>
             {user && (
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif', marginTop: 8 }}>
-                Signed in as <span style={{ color: '#B8D4E8' }}>{user.email}</span>
+              <p style={{ color: 'var(--col-text)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif', marginTop: 8 }}>
+                Signed in as <span style={{ color: 'var(--col-acc)' }}>{user.email}</span>
               </p>
             )}
           </div>
@@ -205,8 +205,8 @@ export default function StudioGate() {
                       placeholder="admin@hairgo.com"
                       required
                       style={inputStyle}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(184,212,232,0.45)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
-                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.03)' }}
+                      onFocus={e => { e.target.style.borderColor = 'var(--col-acc)'; e.target.style.background = 'rgba(var(--rgb-hi),0.05)' }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(var(--rgb-hi),0.08)'; e.target.style.background = 'rgba(var(--rgb-hi),0.03)' }}
                     />
                   </div>
                 </div>
@@ -222,13 +222,13 @@ export default function StudioGate() {
                       placeholder="••••••••"
                       required
                       style={{ ...inputStyle, paddingRight: 50 }}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(184,212,232,0.45)'; e.target.style.background = 'rgba(255,255,255,0.05)' }}
-                      onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.03)' }}
+                      onFocus={e => { e.target.style.borderColor = 'var(--col-acc)'; e.target.style.background = 'rgba(var(--rgb-hi),0.05)' }}
+                      onBlur={e => { e.target.style.borderColor = 'rgba(var(--rgb-hi),0.08)'; e.target.style.background = 'rgba(var(--rgb-hi),0.03)' }}
                     />
                     <button type="button" onClick={() => setShowPass(!showPass)}
-                      style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
-                      onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-                      onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}
+                      style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.2s' }}
+                      onMouseEnter={e => e.currentTarget.style.color = 'var(--col-text)'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'var(--col-text)'}
                     >
                       {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
@@ -239,17 +239,17 @@ export default function StudioGate() {
 
             {/* Divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: user ? '0 0 28px 0' : '28px 0' }}>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-              <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap' }}>
+              <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.06)' }} />
+              <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap' }}>
                 Authenticator Code
               </span>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+              <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.06)' }} />
             </div>
 
             {/* OTP boxes */}
             <div style={{ marginBottom: 36 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 }}>
-                <Smartphone size={13} color="rgba(184,212,232,0.6)" />
+                <Smartphone size={13} color="rgba(var(--rgb-acc),0.6)" />
                 <label style={{ ...labelStyle, marginBottom: 0 }}>6-digit code from your authenticator app</label>
               </div>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }} onPaste={handlePaste}>
@@ -266,15 +266,15 @@ export default function StudioGate() {
                     style={{
                       width: 52, height: 62, textAlign: 'center',
                       fontSize: '1.6rem', fontWeight: 600, fontFamily: 'DM Sans, sans-serif',
-                      background: d ? 'rgba(184,212,232,0.07)' : 'rgba(255,255,255,0.03)',
-                      border: d ? '1px solid rgba(184,212,232,0.45)' : '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: 14, color: '#B8D4E8', outline: 'none',
-                      transition: 'all 0.2s', caretColor: '#B8D4E8',
+                      background: d ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)',
+                      border: d ? '1px solid rgba(var(--rgb-acc),0.45)' : '1px solid rgba(var(--rgb-hi),0.1)',
+                      borderRadius: 14, color: 'var(--col-acc)', outline: 'none',
+                      transition: 'all 0.2s', caretcolor: 'var(--col-acc)',
                     }}
-                    onFocus={e => { e.target.style.borderColor = 'rgba(184,212,232,0.6)'; e.target.style.background = 'rgba(184,212,232,0.06)' }}
+                    onFocus={e => { e.target.style.borderColor = 'var(--col-acc)'; e.target.style.background = 'var(--col-acc)' }}
                     onBlur={e => {
-                      e.target.style.borderColor = d ? 'rgba(184,212,232,0.45)' : 'rgba(255,255,255,0.1)'
-                      e.target.style.background = d ? 'rgba(184,212,232,0.07)' : 'rgba(255,255,255,0.03)'
+                      e.target.style.borderColor = d ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.1)'
+                      e.target.style.background = d ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)'
                     }}
                   />
                 ))}
@@ -289,8 +289,8 @@ export default function StudioGate() {
               style={{
                 width: '100%',
                 borderRadius: 14,
-                background: 'linear-gradient(135deg,#B8D4E8 0%,#E8D5A3 50%,#7AAFC9 100%)',
-                color: '#000',
+                background: 'linear-gradient(135deg,var(--col-acc) 0%,#E8D5A3 50%,var(--col-acc2) 100%)',
+                color: 'var(--col-bg)',
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: '0.2em',
@@ -299,7 +299,7 @@ export default function StudioGate() {
                 border: 'none',
                 cursor: (loading || digits.join('').length < 6) ? 'not-allowed' : 'pointer',
                 opacity: (loading || digits.join('').length < 6) ? 0.5 : 1,
-                boxShadow: '0 12px 40px rgba(184,212,232,0.25)',
+                boxShadow: '0 12px 40px rgba(var(--rgb-acc),0.25)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -310,14 +310,14 @@ export default function StudioGate() {
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
             >
               {loading
-                ? <div style={{ width: 18, height: 18, border: '2px solid rgba(0,0,0,0.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                ? <div style={{ width: 18, height: 18, border: '2px solid rgba(0,0,0,0.2)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                 : <><span>Enter Studio</span><ArrowRight size={15} /></>
               }
             </button>
 
           </form>
 
-          <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.1)', marginTop: 28, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em' }}>
+          <p style={{ textAlign: 'center', fontSize: 10, color: 'var(--col-text)', marginTop: 28, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em' }}>
             Unauthorised access is strictly prohibited
           </p>
 
