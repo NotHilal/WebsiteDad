@@ -145,7 +145,7 @@ export default function Navbar() {
             </button>
             {(profile?.role === 'admin' || profile?.role === 'artist') && (
               <button onClick={() => { sessionStorage.removeItem('studio_access'); navigate('/studio') }}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-bg)', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
                 <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
               </button>
             )}

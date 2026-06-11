@@ -1,7 +1,7 @@
 ﻿import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { ArrowRight, Star, ChevronDown } from 'lucide-react'
+import { ArrowRight, Star, ChevronDown, MapPin } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getOrFetch } from '../lib/cache'
 
@@ -14,10 +14,10 @@ const inView = {
 }
 
 const cardIn = {
-  hidden: { opacity: 0, y: 24, scale: 0.97, filter: 'blur(4px)' },
+  hidden: { opacity: 0, y: 28 },
   visible: (i = 0) => ({
-    opacity: 1, y: 0, scale: 1, filter: 'blur(0px)',
-    transition: { duration: 0.8, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }
+    opacity: 1, y: 0,
+    transition: { duration: 0.7, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }
   }),
 }
 
@@ -29,10 +29,10 @@ const FALLBACK_TEAM = [
 ]
 
 const FALLBACK_SERVICES = [
-  { id: 'fsvc1', name: 'Precision Cut',      description: "Sculpted to your bone structure and lifestyle — a silhouette that's perfectly yours.", price_display: 'from €45', image_url: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=600&h=260&q=80' },
-  { id: 'fsvc2', name: 'Color & Highlights', description: 'Balayage, ombré, vivid transformations. Color that moves the way you do.',            price_display: 'from €80', image_url: 'https://images.unsplash.com/photo-1614020863825-28a0bb7e3c3c?auto=format&fit=crop&w=600&h=260&q=80' },
-  { id: 'fsvc3', name: 'Blow-Out & Style',   description: 'A flawless finish for every occasion, from everyday elegance to special events.',       price_display: 'from €35', image_url: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=600&h=260&q=80' },
-  { id: 'fsvc4', name: 'Hair Treatments',    description: "Keratin, deep hydration, and repair therapies to restore your hair's vitality.",         price_display: 'from €55', image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&h=260&q=80' },
+  { id: 'fsvc1', name: 'Precision Cut',      description: "Sculpted to your bone structure and lifestyle — a silhouette that's perfectly yours.", price_display: 'from €45', image_url: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&h=1000&q=90' },
+  { id: 'fsvc2', name: 'Color & Highlights', description: 'Balayage, ombré, vivid transformations. Color that moves the way you do.',            price_display: 'from €80', image_url: 'https://images.unsplash.com/photo-1614020863825-28a0bb7e3c3c?auto=format&fit=crop&w=800&h=1000&q=90' },
+  { id: 'fsvc3', name: 'Blow-Out & Style',   description: 'A flawless finish for every occasion, from everyday elegance to special events.',       price_display: 'from €35', image_url: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&h=1000&q=90' },
+  { id: 'fsvc4', name: 'Hair Treatments',    description: "Keratin, deep hydration, and repair therapies to restore your hair's vitality.",         price_display: 'from €55', image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&h=1000&q=90' },
 ]
 
 const stats = [
@@ -105,15 +105,15 @@ export default function Home() {
             initial={{ opacity:0, y:-10, scale:0.88, filter:'blur(5px)' }}
             animate={{ opacity:1, y:0, scale:1, filter:'blur(0px)' }}
             transition={{ duration:0.75, delay:0.1, ease:[0.25,0.46,0.45,0.94] }}
-            style={{ display:'inline-flex', alignItems:'center', gap:10, marginBottom:'2.5rem',
-              padding:'8px 20px 8px 10px', borderRadius:9999,
-              background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.22)',
-              boxShadow:'0 0 24px rgba(var(--rgb-acc),0.08)',
+            style={{ display:'inline-flex', alignItems:'center', gap:8, marginBottom:'2.5rem',
+              padding:'7px 16px 7px 12px', borderRadius:9999,
+              background:'var(--col-acc)',
+              boxShadow:'0 4px 20px rgba(var(--rgb-acc),0.25)',
             }}
           >
-            <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--col-acc)', animation:'pulse-gold 2.4s infinite' }} />
-            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif', fontWeight:400 }}>
-              Premium Hair Studio &nbsp;<span style={{ color: 'var(--col-acc)' }}>·</span>&nbsp; Doha, Qatar
+            <MapPin size={11} strokeWidth={2.2} style={{ color:'var(--col-bg)', flexShrink:0 }} />
+            <span style={{ fontSize:10, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-bg)', fontFamily:'DM Sans,sans-serif', fontWeight:600 }}>
+              Auckland, New Zealand
             </span>
           </motion.div>
 
@@ -178,11 +178,11 @@ export default function Home() {
             {displayedServices.map((svc, i) => (
               <motion.div key={svc.id} initial="hidden" whileInView="visible" viewport={{ once:true, margin:'-40px' }}
                 custom={i} variants={cardIn} className="glass-light service-card"
-                style={{ borderRadius:24, padding:0, textAlign:'center', transition:'all 0.5s cubic-bezier(0.22,1,0.36,1)', cursor:'default', position:'relative', overflow:'hidden', willChange:'transform', backfaceVisibility:'hidden' }}
+                style={{ borderRadius:24, padding:0, textAlign:'center', transition:'box-shadow 0.5s cubic-bezier(0.22,1,0.36,1), border-color 0.5s cubic-bezier(0.22,1,0.36,1)', cursor:'default', position:'relative', overflow:'hidden' }}
                 whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(var(--rgb-acc),0.1)', borderColor:'var(--col-acc)' }}>
                 <div style={{ aspectRatio:'4/5', overflow:'hidden', position:'relative' }}>
                   <img src={svc.image_url} alt={svc.name} className="service-img" loading="lazy" decoding="async"
-                    style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease', willChange:'transform', backfaceVisibility:'hidden' }} />
+                    style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }} />
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.75))' }} />
                 </div>
                 <div style={{ padding:'1.5rem 2rem 2.5rem 2rem' }}>
@@ -243,7 +243,7 @@ export default function Home() {
               <span className="sec-label">Our Story</span>
               <div className="gold-bar" style={{ margin:'0 auto 1.25rem auto' }} />
               <p style={{ color: 'var(--col-text)', fontSize:'0.9rem', lineHeight:1.95, marginBottom:0, textAlign:'center' }}>
-                Born in the heart of Doha, HairGo brings together a team of internationally trained stylists united by one purpose: to deliver excellence. From precision cuts to transformative colour, every service is crafted with the care and expertise you deserve.
+                Born in the heart of Auckland, HairGo brings together a team of internationally trained stylists united by one purpose: to deliver excellence. From precision cuts to transformative colour, every service is crafted with the care and expertise you deserve.
               </p>
             </motion.div>
 

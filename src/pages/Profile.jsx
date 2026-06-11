@@ -17,9 +17,9 @@ const STATUS_MAP = {
   pending:   { label: 'Pending',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
   confirmed: { label: 'Confirmed', color: '#10b981', bg: 'rgba(16,185,129,0.12)'  },
   cancelled: { label: 'Cancelled', color: '#ef4444', bg: 'rgba(239,68,68,0.12)'   },
-  completed: { label: 'Completed', color: 'var(--col-acc)', bg: 'var(--col-acc)'  },
+  completed: { label: 'Completed', color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)'  },
   active:    { label: 'Awaiting Pickup', color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  retrieved: { label: 'Picked Up', color: 'var(--col-acc)', bg: 'var(--col-acc)'  },
+  retrieved: { label: 'Picked Up', color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)'  },
   expired:   { label: 'Expired',   color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.06)' },
 }
 
@@ -331,7 +331,7 @@ export default function Profile() {
     doc.setTextColor(...lite)
     doc.text('Thank you for shopping with HairGo.', W / 2, y, { align: 'center' })
     y += 4.5
-    doc.text('hairgo.qa  ·  Doha, Qatar', W / 2, y, { align: 'center' })
+    doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, y, { align: 'center' })
 
     // Gold bottom bar
     doc.setFillColor(...gold)
@@ -458,7 +458,7 @@ export default function Profile() {
     doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...lite)
     doc.text('Thank you for choosing HairGo.', W / 2, y, { align: 'center' })
     y += 4.5
-    doc.text('hairgo.qa  ·  Doha, Qatar', W / 2, y, { align: 'center' })
+    doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, y, { align: 'center' })
 
     doc.setFillColor(...gold); doc.rect(0, H - 4, W, 4, 'F')
     doc.save(`HairGo-Appointment-${apptId}.pdf`)
@@ -548,7 +548,7 @@ export default function Profile() {
                 <p style={{ fontSize: 11, color: 'var(--col-text)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
               </div>
             </div>
-            <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500, color: 'var(--col-acc)', background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.25)', padding: '4px 12px', borderRadius: 6, alignSelf: 'flex-start' }}>
+            <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500, color: 'var(--col-bg)', background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.25)', padding: '4px 12px', borderRadius: 6, alignSelf: 'flex-start' }}>
               {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''} total`}
             </span>
           </div>
@@ -623,7 +623,7 @@ export default function Profile() {
                               }
                             </button>
                             <button onClick={reserveInStore} disabled={payStep === 'loading' || reserving}
-                              style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: (payStep === 'loading' || reserving) ? 'var(--col-acc)' : 'var(--col-acc)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: (payStep === 'loading' || reserving) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                              style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: (payStep === 'loading' || reserving) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                               {reserving
                                 ? <div style={{ width: 12, height: 12, border: '2px solid rgba(var(--rgb-acc),0.3)', borderTopColor: 'var(--col-acc)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                 : 'Pay In Store'
@@ -727,9 +727,7 @@ export default function Profile() {
                               {appt.payment_status === 'paid' && (
                                 <button
                                   onClick={() => downloadApptReceipt(appt)}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-acc)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'var(--col-acc)'}
-                                  onMouseLeave={e => e.currentTarget.style.background = 'var(--col-acc)'}>
+                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                                   <Download size={10} /> Receipt
                                 </button>
                               )}
@@ -819,9 +817,7 @@ export default function Profile() {
                               </div>
                               <button
                                 onClick={() => setReceipt(order)}
-                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-acc)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                                onMouseEnter={e => e.currentTarget.style.background = 'var(--col-acc)'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'var(--col-acc)'}>
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                                 <Receipt size={10} /> Receipt
                               </button>
                             </div>
@@ -891,7 +887,7 @@ export default function Profile() {
                     </span>
                   </div>
                   <p style={{ fontSize: 9, color: 'var(--col-text)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>
-                    Premium Hair Studio · Doha, Qatar
+                    Premium Hair Studio · Auckland, NZ
                   </p>
                 </div>
 
@@ -995,36 +991,42 @@ function CouponCard({ coupon: c, used }) {
   }
   const discountLabel = c?.discount_type === 'percentage' ? `${c.discount_value}%` : `€${c?.discount_value}`
   return (
-    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', opacity: used ? 0.5 : 1, filter: used ? 'grayscale(0.4)' : 'none' }}>
-      <div style={{ border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.08)' : 'var(--col-acc)'}`, borderRadius: 16, display: 'flex', overflow: 'hidden', background: used ? 'rgba(var(--rgb-hi),0.02)' : 'var(--col-acc)' }}>
-        <div style={{ flexShrink: 0, width: 96, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: used ? 'rgba(var(--rgb-hi),0.03)' : 'var(--col-acc)', position: 'relative' }}>
-          <span className="font-display gold-gradient" style={{ fontSize: '2.2rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{discountLabel}</span>
-          <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
-          <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: 'var(--col-bg)', border: '1px solid rgba(var(--rgb-hi),0.07)', zIndex: 2 }} />
-          <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: 'var(--col-bg)', border: '1px solid rgba(var(--rgb-hi),0.07)', zIndex: 2 }} />
+    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', opacity: used ? 0.55 : 1 }}>
+      <div style={{ border: `1px solid ${used ? 'rgba(255,255,255,0.06)' : 'rgba(184,212,232,0.3)'}`, borderRadius: 16, display: 'flex', overflow: 'hidden', background: '#111116' }}>
+
+        {/* Left: discount badge */}
+        <div style={{ flexShrink: 0, width: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: used ? 'rgba(255,255,255,0.02)' : 'linear-gradient(160deg, #3D5A73 0%, #B8D4E8 100%)', position: 'relative' }}>
+          <span className="font-display" style={{ fontSize: '2.2rem', lineHeight: 1, fontWeight: 400, color: '#fff' }}>{discountLabel}</span>
+          <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
+          <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
+          <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
         </div>
+
+        {/* Perforated divider */}
         <div style={{ width: 1, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '8px 0', position: 'relative' }}>
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} style={{ width: 1, height: 5, background: used ? 'rgba(var(--rgb-hi),0.08)' : 'var(--col-acc)' }} />)}
-          <Scissors size={10} style={{ color: used ? 'var(--col-text)' : 'var(--col-acc)', position: 'absolute', top: '50%', transform: 'translateY(-50%) rotate(90deg)' }} />
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} style={{ width: 1, height: 5, background: 'rgba(255,255,255,0.1)' }} />)}
+          <Scissors size={10} style={{ color: 'rgba(255,255,255,0.22)', position: 'absolute', top: '50%', transform: 'translateY(-50%) rotate(90deg)' }} />
         </div>
+
+        {/* Right: code + info */}
         <div style={{ flex: 1, padding: '16px 16px 16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, minWidth: 0 }}>
-          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif' }}>{used ? 'Used reward' : 'Loyalty Reward'}</p>
+          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.25)' : '#B8D4E8', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Used reward' : 'Loyalty Reward'}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0, background: used ? 'rgba(var(--rgb-hi),0.03)' : 'var(--col-acc)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.06)' : 'var(--col-acc)'}` }}>
-              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: used ? 'var(--col-text)' : 'var(--col-acc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
+            <div style={{ flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: '#f0f0f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
             </div>
             {!used && (
-              <button onClick={copy} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, cursor: 'pointer', background: copied ? 'rgba(52,211,153,0.12)' : 'var(--col-acc)', border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'var(--col-acc)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s' }}>
-                {copied ? <CheckCheck size={13} color="#34d399" /> : <Copy size={13} color="var(--col-acc)" />}
+              <button onClick={copy} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, cursor: 'pointer', background: copied ? 'rgba(52,211,153,0.12)' : '#B8D4E8', border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'rgba(184,212,232,0.4)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s' }}>
+                {copied ? <CheckCheck size={13} color="#34d399" /> : <Copy size={13} color="#0a0a0a" />}
               </button>
             )}
           </div>
-          {c?.expiry_date && <p style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}</p>}
+          {c?.expiry_date && <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}</p>}
         </div>
       </div>
       {used && (
-        <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '2px solid rgba(var(--rgb-hi),0.12)', borderRadius: 6, padding: '3px 10px' }}>
-          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>Used</span>
+        <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '3px 10px' }}>
+          <span style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Used</span>
         </div>
       )}
     </div>
@@ -1126,7 +1128,7 @@ function Pager({ page, total, onChange }) {
 
       {Array.from({ length: total }).map((_, i) => (
         <button key={i} onClick={() => onChange(i)}
-          style={{ width: 30, height: 30, borderRadius: 8, border: i === page ? '1px solid rgba(var(--rgb-acc),0.4)' : '1px solid rgba(var(--rgb-hi),0.08)', background: i === page ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', color: i === page ? 'var(--col-acc)' : 'var(--col-text)', cursor: 'pointer', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: i === page ? 700 : 400, transition: 'all 0.2s' }}>
+          style={{ width: 30, height: 30, borderRadius: 8, border: i === page ? '1px solid rgba(var(--rgb-acc),0.4)' : '1px solid rgba(var(--rgb-hi),0.08)', background: i === page ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', color: i === page ? 'var(--col-bg)' : 'var(--col-text)', cursor: 'pointer', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: i === page ? 700 : 400, transition: 'all 0.2s' }}>
           {i + 1}
         </button>
       ))}
@@ -1148,7 +1150,7 @@ function EmptyState({ icon: Icon, text, action, link }) {
       <Icon size={22} style={{ color: 'var(--col-text)' }} />
       <p style={{ color: 'var(--col-text)', fontSize: 13, textAlign: 'center', maxWidth: 220, lineHeight: 1.6 }}>{text}</p>
       {action && link && (
-        <button onClick={() => navigate(link)} style={{ marginTop: 4, padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: 'var(--col-acc)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', cursor: 'pointer' }}>
+        <button onClick={() => navigate(link)} style={{ marginTop: 4, padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', cursor: 'pointer' }}>
           {action}
         </button>
       )}

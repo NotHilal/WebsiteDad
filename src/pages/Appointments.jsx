@@ -346,7 +346,7 @@ export default function Appointments() {
                   <div style={{ width:24, height:24, borderRadius:'50%', flexShrink:0, background:isActive?'linear-gradient(135deg,var(--col-acc),var(--col-acc2))':isDone?'var(--col-acc)':'rgba(var(--rgb-hi),0.05)', border:isActive?'none':isDone?'1px solid rgba(var(--rgb-acc),0.35)':'1px solid rgba(var(--rgb-hi),0.08)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .3s', boxShadow:isActive?'0 4px 14px rgba(var(--rgb-acc),0.45)':'none' }}>
                     {isDone ? <Check size={10} color="var(--col-acc)"/> : <span style={{ fontSize:10, fontWeight:600, color:isActive?'var(--col-bg)':'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{i+1}</span>}
                   </div>
-                  <span style={{ fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', color:isActive?'#fff':isDone?'var(--col-acc)':'var(--col-text)', fontWeight:isActive?600:300 }}>{s}</span>
+                  <span style={{ fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', color:isActive?'var(--col-text)':isDone?'var(--col-acc)':'var(--col-text)', fontWeight:isActive?600:300 }}>{s}</span>
                 </div>
                 {i < STEPS.length - 1 && <div style={{ width:20, height:1, background:isDone?'var(--col-acc)':'rgba(var(--rgb-hi),0.07)', margin:'0 6px', flexShrink:0 }} />}
               </div>
@@ -400,7 +400,7 @@ export default function Appointments() {
                   {isDone ? <Check size={13} color="var(--col-acc)"/> : <span style={{ fontSize:12, fontWeight:600, color:isActive?'var(--col-bg)':'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{i+1}</span>}
                 </div>
                 <div style={{ paddingTop:3 }}>
-                  <span style={{ fontSize:11, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', color:isActive?'#fff':isDone?'var(--col-acc)':'var(--col-text)', fontWeight:isActive?600:300, transition:'color 0.3s', display:'block' }}>{s}</span>
+                  <span style={{ fontSize:11, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', color:isActive?'var(--col-text)':isDone?'var(--col-acc)':'var(--col-text)', fontWeight:isActive?600:300, transition:'color 0.3s', display:'block' }}>{s}</span>
                   {isDone && (
                     <span style={{ fontSize:10, color: 'var(--col-acc)', fontFamily:'DM Sans,sans-serif', marginTop:3, display:'block', lineHeight:1 }}>
                       {i===0 && sel.service?.name}
@@ -521,7 +521,7 @@ export default function Appointments() {
 
                         {svc.category && (
                           <div style={{ position:'absolute', top:12, left:12, zIndex:2 }}>
-                            <span style={{ fontSize:9, padding:'4px 10px', borderRadius:20, background:'rgba(0,0,0,0.58)', backdropFilter:'blur(8px)', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif', fontWeight:600, letterSpacing:'0.15em', textTransform:'uppercase', border:'1px solid rgba(var(--rgb-hi),0.1)' }}>
+                            <span style={{ fontSize:9, padding:'4px 10px', borderRadius:20, background:'rgba(0,0,0,0.58)', backdropFilter:'blur(8px)', color: 'rgba(255,255,255,0.9)', fontFamily:'DM Sans,sans-serif', fontWeight:600, letterSpacing:'0.15em', textTransform:'uppercase', border:'1px solid rgba(255,255,255,0.12)' }}>
                               {svc.category}
                             </span>
                           </div>
@@ -529,7 +529,7 @@ export default function Appointments() {
 
                         <button onClick={e => { e.stopPropagation(); setPreview(svc) }}
                           className="appt-info-btn"
-                          style={{ position:'absolute', top:10, right:isActive?48:10, zIndex:3, width:30, height:30, borderRadius:'50%', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', border:'1px solid rgba(var(--rgb-hi),0.12)', color: 'var(--col-text)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s', flexShrink:0 }}>
+                          style={{ position:'absolute', top:10, right:isActive?48:10, zIndex:3, width:30, height:30, borderRadius:'50%', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.2s', flexShrink:0 }}>
                           <Info size={12}/>
                         </button>
 
@@ -541,13 +541,13 @@ export default function Appointments() {
 
                         <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'1.25rem 1.4rem 1.3rem', zIndex:2 }}>
                           <div style={{ height:1, background:`linear-gradient(90deg,rgba(var(--rgb-acc),${isActive?'0.5':'0.22'}),transparent)`, marginBottom:'0.7rem' }} />
-                          <h3 className="font-display" style={{ fontSize:'1.5rem', color:'var(--col-text)', lineHeight:1.1, marginBottom:'0.6rem', fontWeight:400 }}>{svc.name}</h3>
+                          <h3 className="font-display" style={{ fontSize:'1.5rem', color:'#fff', lineHeight:1.1, marginBottom:'0.6rem', fontWeight:400 }}>{svc.name}</h3>
                           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                            {svc.price && <span className="font-display" style={{ fontSize:'1.8rem', color:'var(--col-acc)', lineHeight:1, textShadow:isActive?'0 0 28px rgba(var(--rgb-acc),0.5)':'none' }}>€{svc.price}</span>}
+                            {svc.price && <span className="font-display" style={{ fontSize:'1.8rem', color:'#B8D4E8', lineHeight:1, textShadow:isActive?'0 0 28px rgba(184,212,232,0.5)':'none' }}>€{svc.price}</span>}
                             {svc.duration>0 && (
-                              <div style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 10px', borderRadius:20, background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', border:'1px solid rgba(var(--rgb-hi),0.1)' }}>
-                                <Clock size={9} color="var(--col-text)" strokeWidth={1.5}/>
-                                <span style={{ fontSize:10, color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif', fontWeight:600 }}>{fmtDur(svc.duration)}</span>
+                              <div style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 10px', borderRadius:20, background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.1)' }}>
+                                <Clock size={9} color="rgba(255,255,255,0.7)" strokeWidth={1.5}/>
+                                <span style={{ fontSize:10, color:'rgba(255,255,255,0.85)', fontFamily:'DM Sans,sans-serif', fontWeight:600 }}>{fmtDur(svc.duration)}</span>
                               </div>
                             )}
                           </div>
@@ -574,10 +574,10 @@ export default function Appointments() {
                           <div style={{ height:200, position:'relative', overflow:'hidden' }}>
                             <img src={preview.image_url} alt={preview.name} loading="lazy" decoding="async" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                             <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,transparent 30%,rgba(14,14,20,0.95) 100%)' }}/>
-                            <button onClick={() => setPreview(null)} style={{ position:'absolute', top:12, right:12, width:32, height:32, borderRadius:'50%', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', border:'1px solid var(--col-text)', color: 'var(--col-text)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }} className="preview-close"><X size={14}/></button>
+                            <button onClick={() => setPreview(null)} style={{ position:'absolute', top:12, right:12, width:32, height:32, borderRadius:'50%', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.85)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }} className="preview-close"><X size={14}/></button>
                             <div style={{ position:'absolute', bottom:14, left:18, right:18 }}>
-                              <h2 className="font-display font-light" style={{ fontSize:'1.8rem', color:'var(--col-text)', lineHeight:1.1, marginBottom:preview.category?3:0 }}>{preview.name}</h2>
-                              {preview.category && <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{preview.category}</span>}
+                              <h2 className="font-display font-light" style={{ fontSize:'1.8rem', color:'#fff', lineHeight:1.1, marginBottom:preview.category?3:0 }}>{preview.name}</h2>
+                              {preview.category && <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'#B8D4E8', fontFamily:'DM Sans,sans-serif' }}>{preview.category}</span>}
                             </div>
                           </div>
                         ) : (
@@ -597,8 +597,8 @@ export default function Appointments() {
                         <div style={{ display:'flex', gap:8, padding:'1rem 1.5rem', flexWrap:'wrap' }}>
                           {preview.price && (
                             <div style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.2)' }}>
-                              <span style={{ fontSize:10, letterSpacing:'0.12em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>Price</span>
-                              <span className="font-display" style={{ fontSize:'1.1rem', color:'var(--col-acc)' }}>€{preview.price}</span>
+                              <span style={{ fontSize:10, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--col-bg)', fontFamily:'DM Sans,sans-serif' }}>Price</span>
+                              <span className="font-display" style={{ fontSize:'1.1rem', color:'var(--col-bg)' }}>€{preview.price}</span>
                             </div>
                           )}
                           {preview.duration>0 && (
@@ -629,7 +629,7 @@ export default function Appointments() {
             {/* ── STEP 1: Stylist ── */}
             {step===1 && (
               <motion.div key="s1" {...slide}>
-                <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'flex-start', marginBottom:16 }}>
                   <button onClick={() => setStep(0)} className="appt-back-btn" style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', borderRadius:10, background:'rgba(var(--rgb-hi),0.04)', border:'1px solid rgba(var(--rgb-hi),0.07)', color: 'var(--col-text)', cursor:'pointer', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', transition:'all 0.3s' }}>
                     <ChevronLeft size={13}/> Back
                   </button>
@@ -684,7 +684,7 @@ export default function Appointments() {
             {/* ── STEP 2: Date & Time ── */}
             {step===2 && (
               <motion.div key="s2" {...slide}>
-                <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'flex-start', marginBottom:16 }}>
                   <button onClick={() => setStep(1)} className="appt-back-btn" style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', borderRadius:10, background:'rgba(var(--rgb-hi),0.04)', border:'1px solid rgba(var(--rgb-hi),0.07)', color: 'var(--col-text)', cursor:'pointer', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', transition:'all 0.3s' }}>
                     <ChevronLeft size={13}/> Back
                   </button>
@@ -734,16 +734,11 @@ export default function Appointments() {
                 <div style={{ background:'rgba(var(--rgb-hi),0.02)', border:'1px solid rgba(var(--rgb-hi),0.07)', borderRadius:16, padding:'1rem 1.4rem' }}>
                   {sel.date ? (
                     <>
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+                      <div style={{ display:'flex', alignItems:'center', marginBottom:12 }}>
                         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                           <Calendar size={11} color="var(--col-acc)" strokeWidth={1.5}/>
                           <span style={{ fontSize:10, letterSpacing:'0.13em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{format(sel.date,'EEEE, MMMM d')}</span>
                         </div>
-                        {sel.time && (
-                          <button className="btn-gold" onClick={() => setStep(3)} style={{ padding:'6px 18px', fontSize:10, gap:6 }}>
-                            Continue <ArrowRight size={12}/>
-                          </button>
-                        )}
                       </div>
                       <div style={{ display:'grid', gridTemplateColumns:'1fr 1px 1fr', gap:'0 14px' }}>
                         {[
@@ -778,7 +773,7 @@ export default function Appointments() {
                                   const isSel = sel.time===slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
-                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'DM Sans,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(var(--rgb-acc),0.1)', background:isSel?'linear-gradient(135deg,var(--col-acc),var(--col-acc2))':'var(--col-acc)', color:isSel?'var(--col-bg)':tk?'rgba(var(--rgb-hi),0.08)':'var(--col-text)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(var(--rgb-acc),0.35)':'none' }}>
+                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'0.73rem', fontFamily:'DM Sans,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(var(--rgb-acc),0.1)', background:isSel?'linear-gradient(135deg,var(--col-acc),var(--col-acc2))':'var(--col-acc)', color:isSel?'var(--col-bg)':tk?'rgba(0,0,0,0.2)':'var(--col-bg)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(var(--rgb-acc),0.35)':'none' }}>
                                       {slot}
                                     </button>
                                   )
@@ -795,13 +790,20 @@ export default function Appointments() {
                     </div>
                   )}
                 </div>
+                {sel.time && (
+                  <div style={{ marginTop:14, display:'flex', justifyContent:'flex-end' }}>
+                    <button className="btn-gold" onClick={() => setStep(3)} style={{ padding:'8px 22px', fontSize:10, gap:6 }}>
+                      Continue <ArrowRight size={12}/>
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
 
             {/* ── STEP 3: Confirm ── */}
             {step===3 && (
               <motion.div key="s3" {...slide}>
-                <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:16 }}>
+                <div style={{ display:'flex', justifyContent:'flex-start', marginBottom:16 }}>
                   <button onClick={() => setStep(2)} className="appt-back-btn" style={{ display:'flex', alignItems:'center', gap:5, padding:'7px 14px', borderRadius:10, background:'rgba(var(--rgb-hi),0.04)', border:'1px solid rgba(var(--rgb-hi),0.07)', color: 'var(--col-text)', cursor:'pointer', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', transition:'all 0.3s' }}>
                     <ChevronLeft size={13}/> Back
                   </button>

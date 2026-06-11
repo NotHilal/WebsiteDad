@@ -1,8 +1,10 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Lock, Eye, EyeOff, Scissors, Mail, Smartphone, ArrowRight } from 'lucide-react'
+import { Lock, Eye, EyeOff, Mail, Smartphone, ArrowRight, Sun, Moon } from 'lucide-react'
+import hairgoLogo from '../../assets/hairgo.png'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTheme } from '../../contexts/ThemeContext'
 import { supabase } from '../../lib/supabase'
 import toast from 'react-hot-toast'
 
@@ -14,6 +16,7 @@ export default function StudioGate() {
   const [loading,  setLoading]  = useState(false)
   const inputRefs = useRef([])
   const { user, signIn, loading: authLoading, profile } = useAuth()
+  const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -122,7 +125,26 @@ export default function StudioGate() {
   }
 
   return (
-    <div className="sg-outer" style={{ minHeight: '100vh', background: '#080808', display: 'flex', overflow: 'hidden' }}>
+    <div className="sg-outer" style={{ minHeight: '100vh', background: 'var(--col-bg)', display: 'flex', overflow: 'hidden' }}>
+
+      {/* ── Theme toggle ── */}
+      <button
+        onClick={toggleTheme}
+        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        style={{
+          position: 'fixed', top: 16, right: 16, zIndex: 100,
+          width: 36, height: 36, borderRadius: '50%',
+          background: 'rgba(var(--rgb-hi),0.06)',
+          border: '1px solid rgba(var(--rgb-hi),0.12)',
+          color: 'var(--col-text)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', transition: 'all 0.3s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'var(--col-acc)'; e.currentTarget.style.borderColor = 'var(--col-acc)'; e.currentTarget.style.color = 'var(--col-bg)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.06)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.12)'; e.currentTarget.style.color = 'var(--col-text)' }}
+      >
+        {isDark ? <Sun size={14} /> : <Moon size={14} />}
+      </button>
 
       {/* ── Left panel ── */}
       <div className="sg-left" style={{ width: 400, flexShrink: 0, position: 'relative', flexDirection: 'column', justifyContent: 'space-between', padding: '56px 52px', borderRight: '1px solid rgba(var(--rgb-hi),0.05)' }}>
@@ -131,10 +153,8 @@ export default function StudioGate() {
         <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: 'linear-gradient(rgba(var(--rgb-acc),1) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--rgb-acc),1) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
 
         <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 24px rgba(var(--rgb-acc),0.3)' }}>
-              <Scissors size={16} color="var(--col-bg)" style={{ transform: 'rotate(45deg)' }} />
-            </div>
+          <div onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+            <img src={hairgoLogo} alt="HairGo" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(184,212,232,0.4)', boxShadow: '0 8px 24px rgba(var(--rgb-acc),0.3)', flexShrink: 0 }} />
             <span className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-text)' }}>Hair<span style={{ color: 'var(--col-acc)' }}>Go</span></span>
           </div>
         </div>
@@ -152,7 +172,7 @@ export default function StudioGate() {
 
         <div style={{ position: 'relative' }}>
           <p style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif' }}>
-            HairGo Studio · Doha, Qatar
+            HairGo Studio · Auckland, NZ
           </p>
         </div>
       </div>
@@ -167,10 +187,8 @@ export default function StudioGate() {
           style={{ width: '100%', maxWidth: 480 }}
         >
           {/* Mobile logo */}
-          <div className="sg-mobile-logo" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36 }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 18px rgba(var(--rgb-acc),0.3)' }}>
-              <Scissors size={14} color="var(--col-bg)" style={{ transform: 'rotate(45deg)' }} />
-            </div>
+          <div className="sg-mobile-logo" onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36, cursor: 'pointer' }}>
+            <img src={hairgoLogo} alt="HairGo" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid rgba(184,212,232,0.4)', boxShadow: '0 6px 18px rgba(var(--rgb-acc),0.3)', flexShrink: 0 }} />
             <span className="font-display" style={{ fontSize: '1.45rem', color: 'var(--col-text)' }}>Hair<span style={{ color: 'var(--col-acc)' }}>Go</span></span>
           </div>
 
@@ -268,13 +286,15 @@ export default function StudioGate() {
                       fontSize: '1.6rem', fontWeight: 600, fontFamily: 'DM Sans, sans-serif',
                       background: d ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)',
                       border: d ? '1px solid rgba(var(--rgb-acc),0.45)' : '1px solid rgba(var(--rgb-hi),0.1)',
-                      borderRadius: 14, color: 'var(--col-acc)', outline: 'none',
-                      transition: 'all 0.2s', caretcolor: 'var(--col-acc)',
+                      borderRadius: 14, color: d ? 'var(--col-bg)' : 'var(--col-text)', outline: 'none',
+                      transition: 'all 0.2s', caretColor: 'var(--col-acc)',
                     }}
-                    onFocus={e => { e.target.style.borderColor = 'var(--col-acc)'; e.target.style.background = 'var(--col-acc)' }}
+                    onFocus={e => { e.target.style.borderColor = 'var(--col-acc)'; e.target.style.background = 'var(--col-acc)'; e.target.style.color = 'var(--col-bg)' }}
                     onBlur={e => {
-                      e.target.style.borderColor = d ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.1)'
-                      e.target.style.background = d ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)'
+                      const filled = e.target.value !== ''
+                      e.target.style.borderColor = filled ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.1)'
+                      e.target.style.background = filled ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)'
+                      e.target.style.color = filled ? 'var(--col-bg)' : 'var(--col-text)'
                     }}
                   />
                 ))}
@@ -289,7 +309,7 @@ export default function StudioGate() {
               style={{
                 width: '100%',
                 borderRadius: 14,
-                background: 'linear-gradient(135deg,var(--col-acc) 0%,#E8D5A3 50%,var(--col-acc2) 100%)',
+                background: 'linear-gradient(135deg, var(--grad-c) 0%, var(--grad-bar) 50%, var(--grad-b) 100%)',
                 color: 'var(--col-bg)',
                 fontSize: 11,
                 fontWeight: 700,
