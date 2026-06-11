@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { useLogAction } from '../../hooks/useLogAction'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Search, Package, Check, X, Trash2, AlertTriangle, ChevronRight, User, RotateCcw } from 'lucide-react'
@@ -144,13 +144,13 @@ export default function StudioOrders() {
       <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
         <div>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Orders</h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>All product pre-orders</p>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>All product pre-orders</p>
         </div>
         <div style={{ position: 'relative' }}>
           <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }}
             placeholder="Search by name, phone, product…" autoComplete="off" className="o-search"
-            style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.875rem 0.45rem 2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', width: 280, maxWidth: '100%', transition: 'border-color .2s' }} />
+            style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.875rem 0.45rem 2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', width: 280, maxWidth: '100%', transition: 'border-color .2s' }} />
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default function StudioOrders() {
       <div style={{ display: 'flex', gap: 4, flexShrink: 0, flexWrap: 'wrap' }}>
         {STATUS_TABS.map(t => (
           <button key={t} onClick={() => { setTab(t); setPage(0) }}
-            style={{ padding: '0.35rem 0.875rem', borderRadius: 20, fontSize: 11, letterSpacing: '0.13em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: tab === t ? 600 : 400, cursor: 'pointer', transition: 'all .18s', border: 'none', background: tab === t ? C.goldBg : 'rgba(255,255,255,0.04)', color: tab === t ? C.gold : C.muted, outline: tab === t ? `1px solid ${C.goldBorder}` : '1px solid transparent' }}>
+            style={{ padding: '0.35rem 0.875rem', borderRadius: 20, fontSize: 11, letterSpacing: '0.13em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: tab === t ? 600 : 400, cursor: 'pointer', transition: 'all .18s', border: 'none', background: tab === t ? C.goldBg : 'rgba(255,255,255,0.04)', color: tab === t ? C.gold : C.muted, outline: tab === t ? `1px solid ${C.goldBorder}` : '1px solid transparent' }}>
             {t}<span style={{ marginLeft: 5, fontSize: 9, opacity: 0.7 }}>({counts[t] || 0})</span>
           </button>
         ))}
@@ -177,7 +177,7 @@ export default function StudioOrders() {
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Package size={22} color="rgba(255,255,255,0.12)" strokeWidth={1} />
             </div>
-            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>
+            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
               {search ? 'No orders match your search' : 'No orders yet'}
             </p>
           </div>
@@ -193,20 +193,20 @@ export default function StudioOrders() {
 
                   {/* Row 1: client + status + info btn */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <p style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>
+                    <p style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>
                       {order.profiles?.full_name || '—'}
                     </p>
-                    <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', whiteSpace: 'nowrap', flexShrink: 0 }}>
                       {s.label}
                     </span>
                     {order.status === 'retrieved' && (
                       <button onClick={() => revertToWaiting(order)} disabled={updating === order.id} className="o-revert"
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: updating === order.id ? 'not-allowed' : 'pointer', transition: 'all .18s', flexShrink: 0, opacity: updating === order.id ? 0.5 : 1 }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: updating === order.id ? 'not-allowed' : 'pointer', transition: 'all .18s', flexShrink: 0, opacity: updating === order.id ? 0.5 : 1 }}>
                         <RotateCcw size={9} /> Revert
                       </button>
                     )}
                     <button onClick={() => setDetails(order)} className="o-details-btn"
-                      style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
                       Info <ChevronRight size={9} />
                     </button>
                   </div>
@@ -217,16 +217,16 @@ export default function StudioOrders() {
                       #{order.id.slice(0, 8).toUpperCase()}
                     </span>
                     <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
-                    <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: order.status === 'retrieved' ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: order.status === 'retrieved' ? 600 : 400 }}>
+                    <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: order.status === 'retrieved' ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: order.status === 'retrieved' ? 600 : 400 }}>
                       ${total.toFixed(2)}
                     </span>
                     <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'DM Sans,sans-serif' }}>
                       {format(new Date(order.created_at), 'MMM d, HH:mm')}
                     </span>
                     {order.profiles?.phone && <>
                       <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
-                      <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif' }}>{order.profiles.phone}</span>
+                      <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif' }}>{order.profiles.phone}</span>
                     </>}
                   </div>
                 </div>
@@ -275,22 +275,22 @@ export default function StudioOrders() {
                     }
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: C.white, fontSize: '0.92rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <p style={{ color: C.white, fontSize: '0.92rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 3, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {details.products?.name || '—'}
                     </p>
                     {details.products?.category && (
-                      <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', textTransform: 'capitalize', marginBottom: 8 }}>
+                      <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', textTransform: 'capitalize', marginBottom: 8 }}>
                         {details.products.category}
                       </p>
                     )}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>×{details.quantity || 1}</span>
+                      <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>×{details.quantity || 1}</span>
                       <span style={{ width: 1, height: 12, background: C.border }} />
-                      <span style={{ fontSize: '0.88rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                      <span style={{ fontSize: '0.88rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                         ${((parseFloat(details.products?.price) || 0) * (details.quantity || 1)).toFixed(2)}
                       </span>
                       {details.products?.price && (
-                        <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>@ ${parseFloat(details.products.price).toFixed(2)} each</span>
+                        <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>@ ${parseFloat(details.products.price).toFixed(2)} each</span>
                       )}
                     </div>
                   </div>
@@ -299,29 +299,29 @@ export default function StudioOrders() {
                 {/* Client + date row */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem', marginBottom: '1rem' }}>
                   <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
-                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Client</p>
+                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Client</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                       <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(184,212,232,0.1)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: 10, color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                        <span style={{ fontSize: 10, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                           {(details.profiles?.full_name || '?')[0].toUpperCase()}
                         </span>
                       </div>
                       <div style={{ minWidth: 0 }}>
-                        <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                        <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                           {details.profiles?.full_name || '—'}
                         </p>
                         {details.profiles?.phone && (
-                          <p style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{details.profiles.phone}</p>
+                          <p style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{details.profiles.phone}</p>
                         )}
                       </div>
                     </div>
                   </div>
                   <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
-                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Ordered</p>
-                    <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif' }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Ordered</p>
+                    <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif' }}>
                       {format(new Date(details.created_at), 'MMM d, yyyy')}
                     </p>
-                    <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+                    <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
                       {format(new Date(details.created_at), 'HH:mm')}
                     </p>
                   </div>
@@ -333,7 +333,7 @@ export default function StudioOrders() {
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.75rem 1rem', background: s.bg, border: `1px solid ${s.border}`, borderRadius: 10, marginBottom: '1.25rem' }}>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, boxShadow: `0 0 8px ${s.color}88`, flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.8rem', color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, flex: 1 }}>{s.label}</span>
+                      <span style={{ fontSize: '0.8rem', color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flex: 1 }}>{s.label}</span>
                       <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.04em' }}>
                         #{details.id.slice(0, 8).toUpperCase()}
                       </span>
@@ -345,7 +345,7 @@ export default function StudioOrders() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {details.status === 'retrieved' && (
                     <button onClick={() => revertToWaiting(details)} disabled={updating === details.id} className="o-revert"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '0.65rem', borderRadius: 10, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1 }}>
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '0.65rem', borderRadius: 10, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1 }}>
                       {updating === details.id
                         ? <div style={{ width: 12, height: 12, border: `2px solid ${C.goldBorder}`, borderTopColor: C.gold, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                         : <RotateCcw size={14} />}
@@ -355,20 +355,20 @@ export default function StudioOrders() {
                   {details.status === 'active' && (
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button onClick={() => markRetrieved(details)} disabled={updating === details.id} className="o-retrieve"
-                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '0.65rem', borderRadius: 10, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.28)', color: '#34d399', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1 }}>
+                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '0.65rem', borderRadius: 10, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.28)', color: '#34d399', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1 }}>
                         {updating === details.id
                           ? <div style={{ width: 12, height: 12, border: '2px solid rgba(52,211,153,0.3)', borderTopColor: '#34d399', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                           : <Check size={14} />}
                         Mark as Picked Up
                       </button>
                       <button onClick={() => cancelOrder(details)} disabled={updating === details.id} className="o-cancel"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.65rem 1rem', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.65rem 1rem', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: updating === details.id ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.id ? 0.5 : 1, whiteSpace: 'nowrap' }}>
                         <X size={13} /> Cancel
                       </button>
                     </div>
                   )}
                   <button onClick={() => { openDelete(details) }} className="o-delete"
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.6rem', borderRadius: 10, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.6)', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.06em' }}>
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.6rem', borderRadius: 10, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.6)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.06em' }}>
                     <Trash2 size={12} /> Delete Order
                   </button>
                 </div>
@@ -396,22 +396,22 @@ export default function StudioOrders() {
                   </div>
                   <div>
                     <h3 style={{ color: C.white, fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete order?</h3>
-                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>This is permanent and cannot be undone.</p>
+                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5 }}>This is permanent and cannot be undone.</p>
                   </div>
                 </div>
                 <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.25rem' }}>
-                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3 }}>{deleteTarget.products?.name || '—'}</p>
-                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
+                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 3 }}>{deleteTarget.products?.name || '—'}</p>
+                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif' }}>
                     {deleteTarget.profiles?.full_name} · ×{deleteTarget.quantity} · ${((parseFloat(deleteTarget.products?.price) || 0) * (deleteTarget.quantity || 1)).toFixed(2)}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={closeDelete}
-                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: C.muted, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: C.muted, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
                     Cancel
                   </button>
                   <button onClick={confirmDelete}
-                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer' }}>
+                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer' }}>
                     Delete
                   </button>
                 </div>

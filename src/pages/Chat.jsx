@@ -172,15 +172,15 @@ export default function Chat() {
 
           <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>My Tickets</p>
-              <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+              <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>My Tickets</p>
+              <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
                 {tickets.length} {tickets.length === 1 ? 'conversation' : 'conversations'}
               </p>
             </div>
             <button onClick={() => setShowNew(true)} style={{
               display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8,
               background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: '#000',
-              fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer',
+              fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer',
               letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'transform .2s',
             }}>
               <Plus size={11} /> New
@@ -197,8 +197,8 @@ export default function Chat() {
             ) : tickets.length === 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, padding: '1.5rem', textAlign: 'center' }}>
                 <MessageSquare size={24} color="rgba(var(--rgb-hi),0.08)" style={{ marginBottom: 10 }} />
-                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', marginBottom: 10 }}>No tickets yet</p>
-                <button onClick={() => setShowNew(true)} style={{ fontSize: 10, color: C.gold, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontFamily: 'Jost,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 10 }}>No tickets yet</p>
+                <button onClick={() => setShowNew(true)} style={{ fontSize: 10, color: C.gold, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                   Open first ticket
                 </button>
               </div>
@@ -212,26 +212,26 @@ export default function Chat() {
                   <div style={{ marginTop: 5, width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: isOpen ? '#34d399' : 'rgba(var(--rgb-hi),0.15)', boxShadow: isOpen ? '0 0 6px rgba(52,211,153,0.4)' : 'none' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <p style={{ fontSize: '0.8rem', color: isActive ? C.white : 'rgba(var(--rgb-hi),0.8)', fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
+                      <p style={{ fontSize: '0.8rem', color: isActive ? C.white : 'rgba(var(--rgb-hi),0.8)', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, marginLeft: 6 }}>
                         {tk.unread > 0 && (
                           <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: 'var(--col-text)', fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 3px' }}>
                             {tk.unread}
                           </span>
                         )}
-                        {tk.lastTime && <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
+                        {tk.lastTime && <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
                       </div>
                     </div>
-                    <p style={{ fontSize: '0.72rem', color: 'rgba(var(--rgb-hi),0.28)', fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <p style={{ fontSize: '0.72rem', color: 'rgba(var(--rgb-hi),0.28)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {tk.lastMsg || 'No messages yet'}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 5 }}>
-                      <span style={{ fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'rgba(var(--rgb-hi),0.2)', fontWeight: 600 }}>
+                      <span style={{ fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'rgba(var(--rgb-hi),0.2)', fontWeight: 600 }}>
                         {tk.status}
                       </span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 20, background: tk.recipient ? 'rgba(52,211,153,0.07)' : 'rgba(var(--rgb-acc),0.07)', border: `1px solid ${tk.recipient ? 'rgba(52,211,153,0.2)' : 'rgba(var(--rgb-acc),0.15)'}` }}>
                         <div style={{ width: 4, height: 4, borderRadius: '50%', background: tk.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
-                        <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', fontWeight: 600, color: tk.recipient ? 'rgba(52,211,153,0.8)' : C.goldDim, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 8, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: tk.recipient ? 'rgba(52,211,153,0.8)' : C.goldDim, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
                           {tk.recipient?.full_name || 'Store'}
                         </span>
                       </span>
@@ -245,11 +245,11 @@ export default function Chat() {
           {/* Profile footer */}
           <div style={{ padding: '0.75rem 1rem', borderTop: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: 10, color: '#000', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{displayName[0]?.toUpperCase()}</span>
+              <span style={{ fontSize: 10, color: '#000', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{displayName[0]?.toUpperCase()}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: '0.75rem', color: C.white, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{displayName}</p>
-              <p style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Client</p>
+              <p style={{ fontSize: '0.75rem', color: C.white, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{displayName}</p>
+              <p style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Client</p>
             </div>
           </div>
         </div>
@@ -262,10 +262,10 @@ export default function Chat() {
                 <Scissors size={20} color={C.gold} strokeWidth={1.5} style={{ transform: 'rotate(45deg)' }} />
               </div>
               <div>
-                <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Select a ticket</p>
-                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>or open a new one to start</p>
+                <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Select a ticket</p>
+                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>or open a new one to start</p>
               </div>
-              <button onClick={() => setShowNew(true)} style={{ padding: '8px 20px', borderRadius: 8, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: '#000', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+              <button onClick={() => setShowNew(true)} style={{ padding: '8px 20px', borderRadius: 8, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: '#000', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
                 New Ticket
               </button>
             </div>
@@ -278,20 +278,20 @@ export default function Chat() {
                     style={{ alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.06)', border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', flexShrink: 0, padding: 0 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
                   </button>
-                  <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1, margin: 0 }}>{selected.title}</p>
+                  <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1, margin: 0 }}>{selected.title}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: selected.recipient ? 'rgba(52,211,153,0.1)' : 'rgba(var(--rgb-acc),0.1)', border: `1px solid ${selected.recipient ? 'rgba(52,211,153,0.3)' : 'rgba(var(--rgb-acc),0.22)'}` }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
-                    <span style={{ fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: selected.recipient ? '#34d399' : C.gold, letterSpacing: '0.04em' }}>
+                    <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: selected.recipient ? '#34d399' : C.gold, letterSpacing: '0.04em' }}>
                       {selected.recipient?.full_name || 'HairGo Store'}
                     </span>
                   </span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: selected.status === 'open' ? 'rgba(52,211,153,0.08)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${selected.status === 'open' ? 'rgba(52,211,153,0.2)' : 'rgba(var(--rgb-hi),0.07)'}` }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'rgba(var(--rgb-hi),0.2)', boxShadow: selected.status === 'open' ? '0 0 5px rgba(52,211,153,0.4)' : 'none', flexShrink: 0 }} />
-                    <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? 'rgba(52,211,153,0.8)' : 'rgba(var(--rgb-hi),0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{selected.status}</span>
+                    <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? 'rgba(52,211,153,0.8)' : 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{selected.status}</span>
                   </span>
-                  <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.2)', fontFamily: 'Jost,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
+                  <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.2)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
                 </div>
               </div>
 
@@ -299,7 +299,7 @@ export default function Chat() {
               <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: C.msgBg }}>
                 {messages.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>No messages yet — start the conversation</p>
+                    <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No messages yet — start the conversation</p>
                   </div>
                 ) : messages.map((msg, i) => {
                   const isMe = !msg.is_from_admin
@@ -310,7 +310,7 @@ export default function Chat() {
                       {showDate && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.75rem 0' }}>
                           <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.05)' }} />
-                          <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.22)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.06)' }}>
+                          <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.22)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.06)' }}>
                             {isToday(new Date(msg.created_at)) ? 'Today' : isYesterday(new Date(msg.created_at)) ? 'Yesterday' : format(new Date(msg.created_at), 'MMMM d')}
                           </span>
                           <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.05)' }} />
@@ -320,17 +320,17 @@ export default function Chat() {
                         style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start', marginTop: prevSame ? 2 : 8 }}>
                         {!isMe && (
                           <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, rgba(var(--rgb-acc),0.22), rgba(var(--rgb-acc),0.12))', border: '1px solid rgba(var(--rgb-acc),0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ fontSize: 9, color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '-0.01em' }}>HG</span>
+                            <span style={{ fontSize: 9, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '-0.01em' }}>HG</span>
                           </div>
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
                           {!isMe && !prevSame && (
-                            <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>{msg.sender?.full_name || 'HairGo Team'}</span>
+                            <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>{msg.sender?.full_name || 'HairGo Team'}</span>
                           )}
-                          <div style={{ padding: '0.6rem 1rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: '#000', fontWeight: 500, boxShadow: '0 4px 16px rgba(var(--rgb-acc),0.22)' } : { background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.09)', color: 'rgba(var(--rgb-hi),0.88)', backdropFilter: 'blur(6px)' }) }}>
+                          <div style={{ padding: '0.6rem 1rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'DM Sans,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: '#000', fontWeight: 500, boxShadow: '0 4px 16px rgba(var(--rgb-acc),0.22)' } : { background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.09)', color: 'rgba(var(--rgb-hi),0.88)', backdropFilter: 'blur(6px)' }) }}>
                             {msg.content}
                           </div>
-                          <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.2)', fontFamily: 'Jost,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
+                          <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.2)', fontFamily: 'DM Sans,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
                         </div>
                       </motion.div>
                     </div>
@@ -343,7 +343,7 @@ export default function Chat() {
               {selected.status === 'closed' ? (
                 <div style={{ padding: '0.875rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <CheckCircle size={14} color="rgba(var(--rgb-hi),0.2)" />
-                  <p style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>This ticket has been closed by the team.</p>
+                  <p style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>This ticket has been closed by the team.</p>
                 </div>
               ) : (
                 <div style={{ padding: '0.875rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card }}>
@@ -351,9 +351,9 @@ export default function Chat() {
                     onFocus={e => e.currentTarget.style.borderColor = C.goldBorder}
                     onBlur={e => e.currentTarget.style.borderColor = C.border}>
                     <input value={input} onChange={e => setInput(e.target.value)} placeholder="Reply to the team…" className="msg-inp"
-                      style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.84rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300 }} />
+                      style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.84rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300 }} />
                     <button type="submit" disabled={!input.trim() || sending} className="send-btn"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.45rem 0.875rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.06)', color: input.trim() ? '#000' : 'rgba(var(--rgb-hi),0.25)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', flexShrink: 0, letterSpacing: '0.08em' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.45rem 0.875rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.06)', color: input.trim() ? '#000' : 'rgba(var(--rgb-hi),0.25)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', flexShrink: 0, letterSpacing: '0.08em' }}>
                       {sending ? <div style={{ width: 12, height: 12, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Send size={11} /> Send</>}
                     </button>
                   </form>
@@ -379,7 +379,7 @@ export default function Chat() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                   <div>
                     <h2 className="font-display" style={{ fontSize: '1.4rem', color: C.white, marginBottom: 2 }}>New Ticket</h2>
-                    <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Our team will reply as soon as possible</p>
+                    <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Our team will reply as soon as possible</p>
                   </div>
                   <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(var(--rgb-hi),.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                     <X size={13} />
@@ -388,32 +388,32 @@ export default function Chat() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>Send to</label>
+                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Send to</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {[{ id: null, full_name: 'Store' }, ...workers].map(w => (
                         <button key={w.id ?? 'store'} type="button" onClick={() => setRecipientId(w.id)}
-                          style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', border: `1px solid ${recipientId === w.id ? C.goldBorder : C.border}`, background: recipientId === w.id ? C.goldBg : 'transparent', color: recipientId === w.id ? C.gold : C.muted }}>
+                          style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', border: `1px solid ${recipientId === w.id ? C.goldBorder : C.border}`, background: recipientId === w.id ? C.goldBg : 'transparent', color: recipientId === w.id ? C.gold : C.muted }}>
                           {w.full_name}
                         </button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>Subject *</label>
+                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Subject *</label>
                     <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. Question about my appointment…" className="new-inp"
-                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s, box-shadow .2s' }} />
+                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s, box-shadow .2s' }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 6 }}>Message <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(var(--rgb-hi),0.18)' }}>(optional)</span></label>
+                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Message <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(var(--rgb-hi),0.18)' }}>(optional)</span></label>
                     <textarea value={newMsg} onChange={e => setNewMsg(e.target.value)} rows={3} placeholder="Describe your question or request…" className="new-inp"
-                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 300, boxSizing: 'border-box', resize: 'none', transition: 'border-color .2s, box-shadow .2s' }} />
+                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', resize: 'none', transition: 'border-color .2s, box-shadow .2s' }} />
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem' }}>
-                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
                   <button onClick={createTicket} disabled={creating || !newTitle.trim()}
-                    style={{ flex: 2, padding: '0.6rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: creating || !newTitle.trim() ? 'not-allowed' : 'pointer', opacity: creating || !newTitle.trim() ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    style={{ flex: 2, padding: '0.6rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: creating || !newTitle.trim() ? 'not-allowed' : 'pointer', opacity: creating || !newTitle.trim() ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     {creating ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : 'Create Ticket'}
                   </button>
                 </div>

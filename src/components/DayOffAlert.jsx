@@ -80,7 +80,7 @@ export default function DayOffAlert() {
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'dayoff-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
         <CalendarCheck size={14} color="#fff" strokeWidth={2.5} />
         {notes.length > 1 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>
             {notes.length}
           </span>
         )}
@@ -104,7 +104,7 @@ export default function DayOffAlert() {
               <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(96,165,250,0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#60a5fa', boxShadow: '0 0 6px #60a5fa88' }} />
-                  <span style={{ fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: C.white }}>
+                  <span style={{ fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: C.white }}>
                     Day-off update{notes.length > 1 ? 's' : ''}
                   </span>
                 </div>
@@ -127,19 +127,19 @@ export default function DayOffAlert() {
                       <div style={{ background: bg, border: `1px solid ${bdr}`, borderRadius: 10, padding: '0.625rem 0.75rem', marginBottom: 8 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                           <Icon size={13} color={col} />
-                          <span style={{ fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: col }}>
+                          <span style={{ fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: col }}>
                             {ok ? 'Day off approved' : 'Day off not approved'}
                           </span>
                         </div>
-                        <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: 'rgba(var(--rgb-hi),0.5)' }}>
+                        <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(var(--rgb-hi),0.5)' }}>
                           {format(new Date(n.date + 'T00:00:00'), 'EEEE, MMMM d')}
                         </p>
                         {n.reason && (
-                          <p style={{ fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', color: 'rgba(var(--rgb-hi),0.28)', marginTop: 2 }}>{n.reason}</p>
+                          <p style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(var(--rgb-hi),0.28)', marginTop: 2 }}>{n.reason}</p>
                         )}
                       </div>
                       <button onClick={() => dismiss(n.id)} className="doa-dismiss"
-                        style={{ width: '100%', padding: '5px 0', borderRadius: 8, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', border: `1px solid ${C.border}`, background: 'transparent', color: C.muted, transition: 'all .15s' }}>
+                        style={{ width: '100%', padding: '5px 0', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', border: `1px solid ${C.border}`, background: 'transparent', color: C.muted, transition: 'all .15s' }}>
                         Dismiss
                       </button>
                     </div>
@@ -150,7 +150,7 @@ export default function DayOffAlert() {
               {/* Footer */}
               <div style={{ padding: '0.625rem 1rem', borderTop: `1px solid ${C.border}`, textAlign: 'center' }}>
                 <button onClick={dismissAll}
-                  style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: C.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+                  style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', color: C.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
                   Dismiss all
                 </button>
               </div>

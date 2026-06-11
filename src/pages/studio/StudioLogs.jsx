@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { format, isToday, isYesterday } from 'date-fns'
 import { supabase } from '../../lib/supabase'
 import {
@@ -90,7 +90,7 @@ function daySubLabel(dateKey) {
 
 const SELECT_STYLE = {
   background: C.card, border: `1px solid ${C.border}`, borderRadius: 8,
-  color: C.dim, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif',
+  color: C.dim, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif',
   padding: '6px 10px 6px 10px', cursor: 'pointer', outline: 'none',
   appearance: 'none', WebkitAppearance: 'none',
 }
@@ -192,21 +192,21 @@ export default function StudioLogs() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem', flexShrink: 0, gap: 10 }}>
         <div>
-          <h2 style={{ fontSize: '1.1rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.white, marginBottom: 3 }}>
+          <h2 style={{ fontSize: '1.1rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.white, marginBottom: 3 }}>
             Activity Logs
           </h2>
-          <p style={{ fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', color: C.muted }}>
+          <p style={{ fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}>
             Every action, who did it, and when
           </p>
         </div>
         <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
           <button onClick={() => setGroupByDay(v => !v)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s', background: groupByDay ? C.goldBg : C.subtle, border: `1px solid ${groupByDay ? C.goldBorder : C.border}`, color: groupByDay ? C.gold : C.dim }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', transition: 'all .15s', background: groupByDay ? C.goldBg : C.subtle, border: `1px solid ${groupByDay ? C.goldBorder : C.border}`, color: groupByDay ? C.gold : C.dim }}>
             <Calendar size={12} />
             By day
           </button>
           <button onClick={() => load(weekOffset)} className="log-refresh"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
             <RefreshCw size={12} style={{ transform: loading ? 'rotate(360deg)' : 'none', transition: loading ? 'transform 0.6s linear' : 'none' }} />
             Refresh
           </button>
@@ -219,7 +219,7 @@ export default function StudioLogs() {
           style={{ width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', flexShrink: 0 }}>
           <ChevronLeft size={14} />
         </button>
-        <span style={{ flex: 1, textAlign: 'center', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', color: C.dim, letterSpacing: '0.03em' }}>
+        <span style={{ flex: 1, textAlign: 'center', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', color: C.dim, letterSpacing: '0.03em' }}>
           {weekLabel(weekOffset)}
         </span>
         <button onClick={() => setWeekOffset(v => v + 1)} disabled={weekOffset >= 0}
@@ -228,7 +228,7 @@ export default function StudioLogs() {
         </button>
         {weekOffset < 0 && (
           <button onClick={() => setWeekOffset(0)}
-            style={{ padding: '4px 10px', borderRadius: 8, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            style={{ padding: '4px 10px', borderRadius: 8, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap' }}>
             This week
           </button>
         )}
@@ -262,12 +262,12 @@ export default function StudioLogs() {
 
         {hasFilters && (
           <button onClick={() => { setFilterActor('all'); setFilterAction('all') }} className="log-clear"
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 10px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
             <X size={11} /> Clear
           </button>
         )}
 
-        <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}>
+        <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}>
           {filtered.length} event{filtered.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -288,7 +288,7 @@ export default function StudioLogs() {
             <div style={{ width: 48, height: 48, borderRadius: 14, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Activity size={20} color={C.border} />
             </div>
-            <p style={{ fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', color: C.muted }}>
+            <p style={{ fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}>
               {hasFilters ? 'No events match your filters' : 'No activity yet'}
             </p>
           </div>
@@ -305,7 +305,7 @@ export default function StudioLogs() {
               return (
                 <div key={log.id} className="log-row"
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '0.6rem 0.875rem', borderRadius: 10, background: C.card, border: `1px solid ${C.border}`, transition: 'background .15s', cursor: 'default' }}>
-                  <span style={{ fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: 'rgba(255,255,255,0.22)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
+                  <span style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'rgba(255,255,255,0.22)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
                     {format(new Date(log.created_at), 'HH:mm')}
                   </span>
                   <div style={{ width: 28, height: 28, borderRadius: 8, background: bg, border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -315,13 +315,13 @@ export default function StudioLogs() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 20, background: actorBg, border: `1px solid ${actorBorder}` }}>
                         <span style={{ width: 5, height: 5, borderRadius: '50%', background: actorColor, flexShrink: 0 }} />
-                        <span style={{ fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: actorColor, letterSpacing: '0.03em' }}>{log.actor_name}</span>
-                        <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', color: actorColor, opacity: 0.55, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{log.actor_role}</span>
+                        <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: actorColor, letterSpacing: '0.03em' }}>{log.actor_name}</span>
+                        <span style={{ fontSize: 8, fontFamily: 'DM Sans,sans-serif', color: actorColor, opacity: 0.55, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{log.actor_role}</span>
                       </span>
-                      <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 600, color, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75 }}>{label}</span>
-                      <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', color: C.muted }}>{format(new Date(log.created_at), 'MMM d, HH:mm')}</span>
+                      <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75 }}>{label}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}>{format(new Date(log.created_at), 'MMM d, HH:mm')}</span>
                     </div>
-                    <p style={{ fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.52)', lineHeight: 1.5, margin: 0 }}>
+                    <p style={{ fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.52)', lineHeight: 1.5, margin: 0 }}>
                       {log.details?.message || log.action}
                     </p>
                   </div>
@@ -336,14 +336,14 @@ export default function StudioLogs() {
             {/* Day separator */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.625rem' }}>
               <div style={{ height: 1, width: 12, background: C.border, flexShrink: 0 }} />
-              <span style={{ fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.dim, whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.72rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.dim, whiteSpace: 'nowrap' }}>
                 {dayLabel(dayKey)}
               </span>
-              <span style={{ fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', color: C.muted, whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', color: C.muted, whiteSpace: 'nowrap' }}>
                 {daySubLabel(dayKey)}
               </span>
               <div style={{ flex: 1, height: 1, background: C.border }} />
-              <span style={{ fontSize: '0.65rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.18)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.65rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.18)', whiteSpace: 'nowrap' }}>
                 {dayLogs.length} event{dayLogs.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -362,7 +362,7 @@ export default function StudioLogs() {
                     style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '0.6rem 0.875rem', borderRadius: 10, background: C.card, border: `1px solid ${C.border}`, transition: 'background .15s', cursor: 'default' }}>
 
                     {/* Time */}
-                    <span style={{ fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: 'rgba(255,255,255,0.22)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
+                    <span style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'rgba(255,255,255,0.22)', minWidth: 38, paddingTop: 2, flexShrink: 0, letterSpacing: '0.04em' }}>
                       {format(new Date(log.created_at), 'HH:mm')}
                     </span>
 
@@ -377,22 +377,22 @@ export default function StudioLogs() {
                         {/* Actor badge */}
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 20, background: actorBg, border: `1px solid ${actorBorder}` }}>
                           <span style={{ width: 5, height: 5, borderRadius: '50%', background: actorColor, flexShrink: 0 }} />
-                          <span style={{ fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: actorColor, letterSpacing: '0.03em' }}>
+                          <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: actorColor, letterSpacing: '0.03em' }}>
                             {log.actor_name}
                           </span>
-                          <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', color: actorColor, opacity: 0.55, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                          <span style={{ fontSize: 8, fontFamily: 'DM Sans,sans-serif', color: actorColor, opacity: 0.55, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                             {log.actor_role}
                           </span>
                         </span>
 
                         {/* Action type label */}
-                        <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 600, color, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75 }}>
+                        <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75 }}>
                           {label}
                         </span>
                       </div>
 
                       {/* Message */}
-                      <p style={{ fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.52)', lineHeight: 1.5, margin: 0 }}>
+                      <p style={{ fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.52)', lineHeight: 1.5, margin: 0 }}>
                         {log.details?.message || log.action}
                       </p>
                     </div>

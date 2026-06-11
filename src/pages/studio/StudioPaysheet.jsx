@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Clock, AlertCircle, ChevronLeft, ChevronRight, Info, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -52,10 +52,10 @@ function SessionModal({ sessions, rate, onClose }) {
         <div style={{ background: '#18181f', border: `1px solid ${C.border}`, borderRadius: 18, width: '100%', maxWidth: 360, maxHeight: '82vh', display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
           <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexShrink: 0 }}>
             <div>
-              <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, margin: '0 0 3px' }}>
+              <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: '0 0 3px' }}>
                 {single ? 'Session Details' : `${sessions.length} Sessions`}
               </p>
-              <h3 style={{ margin: 0, color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600, fontSize: '1rem' }}>
+              <h3 style={{ margin: 0, color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, fontSize: '1rem' }}>
                 {format(new Date(t0.clock_in), 'EEEE, MMM d, yyyy')}
               </h3>
             </div>
@@ -74,8 +74,8 @@ function SessionModal({ sessions, rate, onClose }) {
                 ['Status',    t0.paid_at ? `Paid · ${format(new Date(t0.paid_at), 'MMM d, yyyy')}` : 'Unpaid', t0.paid_at ? C.green : C.red],
               ].map(([label, value, color]) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                  <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{label}</span>
-                  <span style={{ fontSize: '0.85rem', color, fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{value}</span>
+                  <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{label}</span>
+                  <span style={{ fontSize: '0.85rem', color, fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{value}</span>
                 </div>
               ))
             ) : (
@@ -86,26 +86,26 @@ function SessionModal({ sessions, rate, onClose }) {
                   return (
                     <div key={t.id} style={{ padding: '0.6rem 0.875rem', borderRadius: 10, background: t.paid_at ? 'rgba(52,211,153,0.05)' : 'rgba(248,113,113,0.05)', border: `1px solid ${t.paid_at ? C.greenBorder : C.redBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                       <div>
-                        <p style={{ margin: 0, color: C.white, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>
+                        <p style={{ margin: 0, color: C.white, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>
                           {format(new Date(t.clock_in), 'HH:mm')} → {format(new Date(t.clock_out), 'HH:mm')}
                         </p>
-                        <p style={{ margin: '2px 0 0', color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif' }}>
+                        <p style={{ margin: '2px 0 0', color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif' }}>
                           {fmtMins(net)}{t.break_minutes ? ` · ${t.break_minutes}m break` : ''}
                         </p>
                       </div>
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <p style={{ margin: 0, color: C.white, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{rate > 0 ? fmt(earn) : '—'}</p>
-                        <span style={{ fontSize: 9, color: t.paid_at ? C.green : C.red, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{t.paid_at ? 'Paid' : 'Unpaid'}</span>
+                        <p style={{ margin: 0, color: C.white, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{rate > 0 ? fmt(earn) : '—'}</p>
+                        <span style={{ fontSize: 9, color: t.paid_at ? C.green : C.red, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{t.paid_at ? 'Paid' : 'Unpaid'}</span>
                       </div>
                     </div>
                   )
                 })}
                 <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: '0.75rem', marginTop: '0.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Day total</span>
+                  <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Day total</span>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{fmtMins(totalMins)}</span>
+                    <span style={{ fontSize: '0.85rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{fmtMins(totalMins)}</span>
                     {rate > 0 && (
-                      <span style={{ fontSize: '0.85rem', color: totalOwed > 0 ? C.red : C.green, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.85rem', color: totalOwed > 0 ? C.red : C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
                         {totalOwed > 0 ? `${fmt(totalOwed)} owed` : 'All paid'}
                       </span>
                     )}
@@ -126,17 +126,17 @@ function PayRow({ t, rate, onInfo, last }) {
   const earn = (net / 60) * rate
   return (
     <div className="ps-row" style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.65rem 1rem', borderBottom: last ? 'none' : `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
-      <div style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <div style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {format(new Date(t.clock_in), 'EEE, MMM d')}
       </div>
-      <div style={{ color: C.gold, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{fmtMins(net)}</div>
-      <div style={{ color: rate > 0 ? C.white : C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>
+      <div style={{ color: C.gold, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{fmtMins(net)}</div>
+      <div style={{ color: rate > 0 ? C.white : C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>
         {rate > 0 ? fmt(earn) : '—'}
       </div>
       <div>
         {t.paid_at
-          ? <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Paid</span>
-          : <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: C.redBg,   border: `1px solid ${C.redBorder}`,   color: C.red,   fontFamily: 'Jost,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Unpaid</span>
+          ? <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Paid</span>
+          : <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: C.redBg,   border: `1px solid ${C.redBorder}`,   color: C.red,   fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Unpaid</span>
         }
       </div>
       <button onClick={() => onInfo(t)} className="ps-info-btn"
@@ -159,14 +159,14 @@ function Pagination({ page, total, onChange }) {
     if (page < total - 3) pages.push(-2)
     pages.push(total - 1)
   }
-  const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: d ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'Jost,sans-serif', transition: 'all .15s' })
-  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${a ? 'rgba(184,212,232,0.3)' : C.border}`, color: a ? '#B8D4E8' : 'rgba(255,255,255,0.45)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
+  const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, color: d ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', transition: 'all .15s' })
+  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.04)', border: `1px solid ${a ? 'rgba(184,212,232,0.3)' : C.border}`, color: a ? '#B8D4E8' : 'rgba(255,255,255,0.45)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '0.25rem 0' }}>
       <button onClick={() => onChange(Math.max(0, page - 1))} disabled={page === 0} style={nav(page === 0)}>‹</button>
       {pages.map((p, i) =>
         p < 0
-          ? <span key={`e${i}`} style={{ color: C.muted, fontSize: '0.78rem', padding: '0 2px', fontFamily: 'Jost,sans-serif' }}>…</span>
+          ? <span key={`e${i}`} style={{ color: C.muted, fontSize: '0.78rem', padding: '0 2px', fontFamily: 'DM Sans,sans-serif' }}>…</span>
           : <button key={p} onClick={() => onChange(p)} style={num(p === page)}>{p + 1}</button>
       )}
       <button onClick={() => onChange(Math.min(total - 1, page + 1))} disabled={page === total - 1} style={nav(page === total - 1)}>›</button>
@@ -200,7 +200,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
       {/* Month navigation */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <button onClick={() => setCalDate(d => subMonths(d, 1))} style={nbtn} className="ps-cal-nav"><ChevronLeft size={14} /></button>
-        <span style={{ color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600, fontSize: '0.92rem' }}>
+        <span style={{ color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, fontSize: '0.92rem' }}>
           {format(calDate, 'MMMM yyyy')}
         </span>
         <button onClick={() => setCalDate(d => addMonths(d, 1))} style={nbtn} className="ps-cal-nav"><ChevronRight size={14} /></button>
@@ -211,7 +211,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
         {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}` }}>
           {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
-            <div key={d} style={{ padding: '0.45rem 0.25rem', textAlign: 'center', fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{d}</div>
+            <div key={d} style={{ padding: '0.45rem 0.25rem', textAlign: 'center', fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase' }}>{d}</div>
           ))}
         </div>
 
@@ -251,7 +251,7 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
                         minHeight: 46, justifyContent: 'center',
                       }}
                     >
-                      <span style={{ fontSize: '0.82rem', color: isActive ? C.white : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, lineHeight: 1 }}>
+                      <span style={{ fontSize: '0.82rem', color: isActive ? C.white : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, lineHeight: 1 }}>
                         {format(day, 'd')}
                       </span>
                       {isActive && (
@@ -264,8 +264,8 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
               {/* Week summary */}
               {wInMonth && wMins > 0 && (
                 <div style={{ padding: '0.3rem 1rem', background: 'rgba(255,255,255,0.015)', borderTop: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'Jost,sans-serif' }}>This week</span>
-                  <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif' }}>
+                  <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif' }}>This week</span>
+                  <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif' }}>
                     <span style={{ color: C.gold }}>{fmtMins(wMins)}</span>
                     {rate > 0 && <span style={{ color: C.muted }}> · <span style={{ color: C.white }}>{fmt(wEarned)}</span></span>}
                     {wOwed > 0 && <span style={{ color: C.red }}> · {fmt(wOwed)} owed</span>}
@@ -280,18 +280,18 @@ function PayCalendar({ sheets, rate, calDate, setCalDate, onDayClick }) {
 
       {/* Month summary */}
       <div style={{ background: C.card, border: `1px solid ${monthOwed > 0 ? C.redBorder : monthMins > 0 ? C.greenBorder : C.border}`, borderRadius: 12, padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+        <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           {format(calDate, 'MMM')} total
         </span>
         {monthMins === 0 ? (
-          <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>No sessions this month</span>
+          <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>No sessions this month</span>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <span style={{ fontSize: '0.85rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{fmtMins(monthMins)}</span>
-            {rate > 0 && <span style={{ fontSize: '0.85rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{fmt(monthEarned)} earned</span>}
+            <span style={{ fontSize: '0.85rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{fmtMins(monthMins)}</span>
+            {rate > 0 && <span style={{ fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{fmt(monthEarned)} earned</span>}
             {monthOwed > 0
-              ? <span style={{ fontSize: '0.85rem', color: C.red, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{fmt(monthOwed)} owed</span>
-              : <span style={{ fontSize: '0.85rem', color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>All paid ✓</span>
+              ? <span style={{ fontSize: '0.85rem', color: C.red, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{fmt(monthOwed)} owed</span>
+              : <span style={{ fontSize: '0.85rem', color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>All paid ✓</span>
             }
           </div>
         )}
@@ -364,16 +364,16 @@ export default function StudioPaysheet() {
   if (error) return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
       <AlertCircle size={28} color={C.red} />
-      <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
-      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
+      <p style={{ color: C.muted, fontFamily: 'DM Sans,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
+      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
     </div>
   )
 
   if (notLinked) return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
       <AlertCircle size={32} color={C.goldDim} />
-      <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.9rem' }}>Your account is not linked to a stylist profile.</p>
-      <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.8rem' }}>Ask an admin to link your account in the Stylists page.</p>
+      <p style={{ color: C.muted, fontFamily: 'DM Sans,sans-serif', fontSize: '0.9rem' }}>Your account is not linked to a stylist profile.</p>
+      <p style={{ color: C.muted, fontFamily: 'DM Sans,sans-serif', fontSize: '0.8rem' }}>Ask an admin to link your account in the Stylists page.</p>
     </div>
   )
 
@@ -386,10 +386,10 @@ export default function StudioPaysheet() {
 
       {/* Header */}
       <div>
-        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, margin: 0 }}>Your Pay</p>
+        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>Your Pay</p>
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem,3vw,2.4rem)', color: C.white, lineHeight: 1.1, margin: '2px 0 4px' }}>My Paysheet</h1>
         {stylist && (
-          <p style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', margin: 0 }}>
+          <p style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', margin: 0 }}>
             {stylist.name}{rate > 0 ? ` · $${rate.toFixed(2)}/h` : ' · No rate set — contact admin'}
           </p>
         )}
@@ -398,22 +398,22 @@ export default function StudioPaysheet() {
       {/* Outstanding balance card */}
       <div style={{ background: C.card, border: `1px solid ${totalOwed > 0 ? C.redBorder : allSettled ? C.greenBorder : C.border}`, borderRadius: 16, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexShrink: 0 }}>
         <div>
-          <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', margin: '0 0 8px' }}>Outstanding balance</p>
-          <p style={{ fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: totalOwed > 0 ? C.red : allSettled ? C.green : C.muted, margin: 0, lineHeight: 1 }}>
+          <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', margin: '0 0 8px' }}>Outstanding balance</p>
+          <p style={{ fontSize: 'clamp(1.8rem,3vw,2.6rem)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: totalOwed > 0 ? C.red : allSettled ? C.green : C.muted, margin: 0, lineHeight: 1 }}>
             {fmt(totalOwed)}
           </p>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif', margin: '8px 0 0' }}>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', margin: '8px 0 0' }}>
             {allSettled ? 'All sessions paid ✓' : unpaidMins > 0 ? `${fmtMins(unpaidMins)} not yet paid` : 'No hours recorded'}
           </p>
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
-            <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>Total Earned</p>
-            <p style={{ fontSize: '1.05rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600, margin: 0 }}>{fmt(totalEarned)}</p>
+            <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>Total Earned</p>
+            <p style={{ fontSize: '1.05rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>{fmt(totalEarned)}</p>
           </div>
           <div>
-            <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>Total Paid</p>
-            <p style={{ fontSize: '1.05rem', color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 600, margin: 0 }}>{fmt(totalPaid)}</p>
+            <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 3px' }}>Total Paid</p>
+            <p style={{ fontSize: '1.05rem', color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>{fmt(totalPaid)}</p>
           </div>
         </div>
       </div>
@@ -422,7 +422,7 @@ export default function StudioPaysheet() {
       <div style={{ flexShrink: 0, display: 'flex', gap: 3, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 3 }}>
         {[['calendar', 'Calendar'], ['table', 'Table']].map(([key, label]) => (
           <button key={key} onClick={() => { setActiveTab(key); setPage(0) }}
-            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'rgba(184,212,232,0.1)' : 'transparent', color: activeTab === key ? '#B8D4E8' : C.muted, border: `1px solid ${activeTab === key ? 'rgba(184,212,232,0.22)' : 'transparent'}`, transition: 'all .18s' }}>
+            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'rgba(184,212,232,0.1)' : 'transparent', color: activeTab === key ? '#B8D4E8' : C.muted, border: `1px solid ${activeTab === key ? 'rgba(184,212,232,0.22)' : 'transparent'}`, transition: 'all .18s' }}>
             {label}
           </button>
         ))}
@@ -434,10 +434,10 @@ export default function StudioPaysheet() {
           {/* Unpaid filter + count */}
           <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => { setUnpaidOnly(v => !v); setPage(0) }}
-              style={{ padding: '0.32rem 0.875rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', background: unpaidOnly ? C.redBg : C.subtle, border: `1px solid ${unpaidOnly ? C.redBorder : C.border}`, color: unpaidOnly ? C.red : C.muted, transition: 'all .15s' }}>
+              style={{ padding: '0.32rem 0.875rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', background: unpaidOnly ? C.redBg : C.subtle, border: `1px solid ${unpaidOnly ? C.redBorder : C.border}`, color: unpaidOnly ? C.red : C.muted, transition: 'all .15s' }}>
               {unpaidOnly ? '✕ Unpaid only' : 'Unpaid only'}
             </button>
-            <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+            <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
               {filteredSheets.length} session{filteredSheets.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -446,7 +446,7 @@ export default function StudioPaysheet() {
           {filteredSheets.length === 0 ? (
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '2.5rem', textAlign: 'center' }}>
               <Clock size={28} style={{ margin: '0 auto 0.6rem', color: C.border, display: 'block' }} />
-              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', margin: 0 }}>
+              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>
                 {unpaidOnly ? 'No unpaid sessions — all settled ✓' : 'No completed sessions yet'}
               </p>
             </div>
@@ -454,7 +454,7 @@ export default function StudioPaysheet() {
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
               <div style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.55rem 1rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem' }}>
                 {['Date', 'Hours', 'Earned', 'Status', ''].map(h => (
-                  <div key={h} style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>{h}</div>
+                  <div key={h} style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>{h}</div>
                 ))}
               </div>
               {visible.map((t, i) => (

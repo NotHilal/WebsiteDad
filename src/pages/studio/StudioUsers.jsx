@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Users, Search, MessageCircle, Mail, X, Send, Star, ChevronDown, ShieldCheck, Check, UserPlus, Scissors, Plus, ArrowRight, Upload } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -34,7 +34,7 @@ function RoleOption({ rrs, isActive, label, onClick }) {
   return (
     <button onClick={onClick}
       onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', background: isActive ? rrs.bg : hov ? 'rgba(255,255,255,0.04)' : 'transparent', border: 'none', cursor: 'pointer', color: isActive ? rrs.color : hov ? '#f0f0f0' : 'rgba(255,255,255,0.45)', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 700 : 400, letterSpacing: '0.13em', textTransform: 'uppercase', textAlign: 'left', transition: 'all .15s' }}>
+      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', background: isActive ? rrs.bg : hov ? 'rgba(255,255,255,0.04)' : 'transparent', border: 'none', cursor: 'pointer', color: isActive ? rrs.color : hov ? '#f0f0f0' : 'rgba(255,255,255,0.45)', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 700 : 400, letterSpacing: '0.13em', textTransform: 'uppercase', textAlign: 'left', transition: 'all .15s' }}>
       <div style={{ width: 7, height: 7, borderRadius: '50%', background: rrs.color, opacity: isActive || hov ? 1 : 0.3, flexShrink: 0, transition: 'opacity .15s', boxShadow: (isActive || hov) ? `0 0 6px ${rrs.color}88` : 'none' }} />
       {label}
       {isActive && <Check size={10} style={{ marginLeft: 'auto', color: rrs.color }} />}
@@ -69,7 +69,7 @@ function RoleSelector({ value, onChange }) {
     <div style={{ position: 'relative', display: 'inline-block' }}>
       <button ref={btnRef} onClick={toggle}
         onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-        style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 8, background: hov ? rs.bg : 'transparent', border: `1px solid ${hov || open ? rs.border : 'rgba(255,255,255,0.09)'}`, color: rs.color, cursor: 'pointer', transition: 'all .2s', fontFamily: 'Jost,sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+        style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 10px 5px 9px', borderRadius: 8, background: hov ? rs.bg : 'transparent', border: `1px solid ${hov || open ? rs.border : 'rgba(255,255,255,0.09)'}`, color: rs.color, cursor: 'pointer', transition: 'all .2s', fontFamily: 'DM Sans,sans-serif', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
         <div style={{ width: 7, height: 7, borderRadius: '50%', background: rs.color, boxShadow: hov ? `0 0 7px ${rs.color}` : 'none', transition: 'box-shadow .2s', flexShrink: 0 }} />
         {rs.label}
         <ChevronDown size={9} color={rs.color} style={{ opacity: 0.55, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .22s' }} />
@@ -355,7 +355,7 @@ export default function StudioUsers() {
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.25rem' }}>Users</h1>
         <div style={{ display: 'flex', gap: 14 }}>
           {TABS.map(({ key, label }) => (
-            <span key={key} style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}>
+            <span key={key} style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}>
               <span style={{ color: ROLE_STYLE[key].color, fontWeight: 600 }}>{byRole(key).length}</span> {label.toLowerCase()}
             </span>
           ))}
@@ -370,7 +370,7 @@ export default function StudioUsers() {
             const active = tab === key
             return (
               <button key={key} onClick={() => { setTab(key); setSearch(''); setPage(0) }}
-                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: active ? 600 : 400, cursor: 'pointer', transition: 'all .15s', border: active ? `1px solid ${rs.border}` : `1px solid ${C.border}`, background: active ? rs.bg : 'transparent', color: active ? rs.color : C.muted }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 600 : 400, cursor: 'pointer', transition: 'all .15s', border: active ? `1px solid ${rs.border}` : `1px solid ${C.border}`, background: active ? rs.bg : 'transparent', color: active ? rs.color : C.muted }}>
                 <span style={{ fontSize: 11, fontWeight: 700 }}>{byRole(key).length}</span>
                 {label}
               </button>
@@ -380,7 +380,7 @@ export default function StudioUsers() {
         <div className="usr-search-box" style={{ position: 'relative' }}>
           <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }} placeholder="Name, email or phone…"
-            style={{ width: 220, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.75rem 0.45rem 1.9rem', fontSize: '0.78rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
+            style={{ width: 220, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.45rem 0.75rem 0.45rem 1.9rem', fontSize: '0.78rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box', transition: 'border-color .2s' }}
             className="usr-search" />
         </div>
       </div>
@@ -395,7 +395,7 @@ export default function StudioUsers() {
             <thead>
               <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: `1px solid ${C.border}` }}>
                 {['Client', 'Phone', ...(isUsers ? ['Visits'] : []), 'Role', 'Joined', 'Actions'].map(h => (
-                  <th key={h} style={{ padding: '0.65rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} style={{ padding: '0.65rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.muted, fontWeight: 600, textAlign: 'left', fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -413,7 +413,7 @@ export default function StudioUsers() {
               ) : list.length === 0 ? (
                 <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center' }}>
                   <Users size={28} style={{ margin: '0 auto 0.6rem', color: C.border, display: 'block' }} />
-                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>
+                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif' }}>
                     {search ? 'No results for your search' : `No ${TABS.find(t => t.key === tab)?.label.toLowerCase()} yet`}
                   </p>
                 </td></tr>
@@ -426,28 +426,28 @@ export default function StudioUsers() {
                     <td style={{ padding: '0.75rem 1.1rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         <div style={{ width: 34, height: 34, borderRadius: '50%', background: rs.bg, border: `1px solid ${rs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <span style={{ fontSize: 12, color: rs.color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{u.full_name?.[0]?.toUpperCase() || '?'}</span>
+                          <span style={{ fontSize: 12, color: rs.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{u.full_name?.[0]?.toUpperCase() || '?'}</span>
                         </div>
                         <div>
-                          <p style={{ color: u.full_name ? C.white : C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontStyle: u.full_name ? 'normal' : 'italic' }}>{u.full_name || 'No name'}</p>
+                          <p style={{ color: u.full_name ? C.white : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontStyle: u.full_name ? 'normal' : 'italic' }}>{u.full_name || 'No name'}</p>
                           {u.email
-                            ? <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{u.email}</p>
-                            : <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', fontStyle: 'italic', marginTop: 1 }}>no email on file</p>
+                            ? <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{u.email}</p>
+                            : <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic', marginTop: 1 }}>no email on file</p>
                           }
                         </div>
                       </div>
                     </td>
 
                     {/* Phone */}
-                    <td style={{ padding: '0.75rem 1.1rem', color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{u.phone || '—'}</td>
+                    <td style={{ padding: '0.75rem 1.1rem', color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>{u.phone || '—'}</td>
 
                     {/* Visits — users only */}
                     {isUsers && (
                       <td style={{ padding: '0.75rem 1.1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                           <Star size={10} color={C.goldDim} />
-                          <span style={{ color: C.dim, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{u.points || 0}</span>
-                          <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.7rem', fontFamily: 'Jost,sans-serif' }}>/ {Math.ceil(((u.points || 0) + 1) / 5) * 5}</span>
+                          <span style={{ color: C.dim, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{u.points || 0}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif' }}>/ {Math.ceil(((u.points || 0) + 1) / 5) * 5}</span>
                         </div>
                       </td>
                     )}
@@ -458,7 +458,7 @@ export default function StudioUsers() {
                     </td>
 
                     {/* Joined */}
-                    <td style={{ padding: '0.75rem 1.1rem', color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>
+                    <td style={{ padding: '0.75rem 1.1rem', color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>
                       {u.created_at ? format(new Date(u.created_at), 'MMM d, yyyy') : '—'}
                     </td>
 
@@ -469,22 +469,22 @@ export default function StudioUsers() {
                         {isUsers && (
                           <>
                             <button onClick={() => adjustVisits(u.id, 1, u.points)} className="usr-pts-add"
-                              style={{ padding: '4px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>+1</button>
+                              style={{ padding: '4px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>+1</button>
                             <button onClick={() => adjustVisits(u.id, -1, u.points)} className="usr-pts-sub"
-                              style={{ padding: '4px 9px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
+                              style={{ padding: '4px 9px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
                             <div style={{ width: 1, height: 18, background: C.border, flexShrink: 0 }} />
                           </>
                         )}
 
                         {/* Message */}
                         <button onClick={() => openMsg(u)} className="usr-msg-btn"
-                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 11px', borderRadius: 7, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 11px', borderRadius: 7, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
                           <MessageCircle size={11} /> Message
                         </button>
 
                         {/* Email */}
                         <button onClick={() => sendEmail(u)} className="usr-mail-btn"
-                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 11px', borderRadius: 7, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)', color: '#34d399', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', opacity: u.email ? 1 : 0.3 }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 11px', borderRadius: 7, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)', color: '#34d399', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', opacity: u.email ? 1 : 0.3 }}>
                           <Mail size={11} /> Email
                         </button>
 
@@ -493,7 +493,7 @@ export default function StudioUsers() {
                           <>
                             <div style={{ width: 1, height: 18, background: C.border, flexShrink: 0 }} />
                             <button onClick={() => unlinkStylist(u.id, u.full_name)} className="usr-unlink-btn"
-                              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+                              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
                               <Scissors size={9} /> Unlink
                             </button>
                           </>
@@ -525,7 +525,7 @@ export default function StudioUsers() {
           ) : list.length === 0 ? (
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '3rem', textAlign: 'center' }}>
               <Users size={24} style={{ margin: '0 auto 0.5rem', color: C.border, display: 'block' }} />
-              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>
+              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif' }}>
                 {search ? 'No results for your search' : `No ${TABS.find(t => t.key === tab)?.label.toLowerCase()} yet`}
               </p>
             </div>
@@ -536,22 +536,22 @@ export default function StudioUsers() {
                 {/* Top */}
                 <div style={{ padding: '0.875rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                   <div style={{ width: 40, height: 40, borderRadius: '50%', background: rs.bg, border: `1px solid ${rs.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: 14, color: rs.color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{u.full_name?.[0]?.toUpperCase() || '?'}</span>
+                    <span style={{ fontSize: 14, color: rs.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{u.full_name?.[0]?.toUpperCase() || '?'}</span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 3 }}>
-                      <p style={{ color: u.full_name ? C.white : C.muted, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontStyle: u.full_name ? 'normal' : 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{u.full_name || 'No name'}</p>
+                      <p style={{ color: u.full_name ? C.white : C.muted, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif', fontStyle: u.full_name ? 'normal' : 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{u.full_name || 'No name'}</p>
                       <RoleSelector value={u.role || 'user'} onChange={newRole => changeRole(u.id, newRole)} />
                     </div>
-                    <p style={{ fontSize: '0.7rem', color: u.email ? C.muted : 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', fontStyle: u.email ? 'normal' : 'italic', marginBottom: 3 }}>{u.email || 'no email on file'}</p>
+                    <p style={{ fontSize: '0.7rem', color: u.email ? C.muted : 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif', fontStyle: u.email ? 'normal' : 'italic', marginBottom: 3 }}>{u.email || 'no email on file'}</p>
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                      {u.phone && <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{u.phone}</span>}
+                      {u.phone && <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{u.phone}</span>}
                       {isUsers && (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.68rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: '0.68rem', color: C.dim, fontFamily: 'DM Sans,sans-serif' }}>
                           <Star size={9} color={C.goldDim} /> {u.points || 0} visits
                         </span>
                       )}
-                      {u.created_at && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif' }}>Joined {format(new Date(u.created_at), 'MMM d, yyyy')}</span>}
+                      {u.created_at && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif' }}>Joined {format(new Date(u.created_at), 'MMM d, yyyy')}</span>}
                     </div>
                   </div>
                 </div>
@@ -560,23 +560,23 @@ export default function StudioUsers() {
                   {isUsers && (
                     <>
                       <button onClick={() => adjustVisits(u.id, 1, u.points)} className="usr-pts-add"
-                        style={{ padding: '5px 12px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>+1</button>
+                        style={{ padding: '5px 12px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>+1</button>
                       <button onClick={() => adjustVisits(u.id, -1, u.points)} className="usr-pts-sub"
-                        style={{ padding: '5px 12px', borderRadius: 7, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
+                        style={{ padding: '5px 12px', borderRadius: 7, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s' }}>−1</button>
                       <div style={{ width: 1, height: 18, background: C.border, alignSelf: 'center', flexShrink: 0 }} />
                     </>
                   )}
                   <button onClick={() => openMsg(u)} className="usr-msg-btn"
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
                     <MessageCircle size={11} /> Message
                   </button>
                   <button onClick={() => sendEmail(u)} className="usr-mail-btn"
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)', color: '#34d399', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', opacity: u.email ? 1 : 0.3 }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)', color: '#34d399', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', opacity: u.email ? 1 : 0.3 }}>
                     <Mail size={11} /> Email
                   </button>
                   {tab === 'artist' && (
                     <button onClick={() => unlinkStylist(u.id, u.full_name)} className="usr-unlink-btn"
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
                       <Scissors size={9} /> Unlink
                     </button>
                   )}
@@ -588,7 +588,7 @@ export default function StudioUsers() {
 
         {!loading && <Pager page={page} total={list.length} perPage={PER_PAGE} onChange={setPage} />}
 
-        <p style={{ fontSize: '0.68rem', color: C.muted, textAlign: 'center', marginTop: '0.75rem', fontFamily: 'Jost,sans-serif', opacity: 0.5 }}>
+        <p style={{ fontSize: '0.68rem', color: C.muted, textAlign: 'center', marginTop: '0.75rem', fontFamily: 'DM Sans,sans-serif', opacity: 0.5 }}>
           Role changes take effect after the user's next sign-in. · Email only available for accounts registered after the email field was added.
         </p>
       </div>
@@ -611,7 +611,7 @@ export default function StudioUsers() {
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1.1, marginBottom: '0.4rem' }}>
                   Confirm Role Change
                 </h2>
-                <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
                   You're changing <span style={{ color: C.white }}>{roleConfirm.userName}</span>'s role to{' '}
                   <span style={{ color: ROLE_STYLE[roleConfirm.newRole]?.color }}>{roleConfirm.newRole}</span>.
                   <br />This cannot be undone without changing it back manually.
@@ -621,7 +621,7 @@ export default function StudioUsers() {
               {/* Linked stylist — only shown when demoting an artist */}
               {roleConfirm.linkedStylist && (
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 8 }}>
+                  <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 8 }}>
                     Linked artist profile
                   </p>
 
@@ -632,10 +632,10 @@ export default function StudioUsers() {
                       {!deleteStylist && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#34d399' }} />}
                     </div>
                     <div>
-                      <p style={{ fontSize: '0.8rem', color: !deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: !deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
+                      <p style={{ fontSize: '0.8rem', color: !deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: !deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
                         Keep <span style={{ color: !deleteStylist ? '#34d399' : C.muted }}>{roleConfirm.linkedStylist.name}</span>
                       </p>
-                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>Unlink the account but keep the profile for reassignment</p>
+                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>Unlink the account but keep the profile for reassignment</p>
                     </div>
                   </button>
 
@@ -646,10 +646,10 @@ export default function StudioUsers() {
                       {deleteStylist && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f87171' }} />}
                     </div>
                     <div>
-                      <p style={{ fontSize: '0.8rem', color: deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
+                      <p style={{ fontSize: '0.8rem', color: deleteStylist ? '#f0f0f0' : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: deleteStylist ? 600 : 400, lineHeight: 1.2 }}>
                         Delete <span style={{ color: deleteStylist ? '#f87171' : C.muted }}>{roleConfirm.linkedStylist.name}</span>
                       </p>
-                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>Permanently remove the artist profile</p>
+                      <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>Permanently remove the artist profile</p>
                     </div>
                   </button>
                 </div>
@@ -658,11 +658,11 @@ export default function StudioUsers() {
               {/* Buttons */}
               <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button onClick={() => setRoleConfirm(null)} className="modal-cancel"
-                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
+                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
                   Cancel
                 </button>
                 <button onClick={applyRoleChange} disabled={confirming}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: confirming ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: confirming ? 0.6 : 1, transition: 'all .2s' }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: confirming ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: confirming ? 0.6 : 1, transition: 'all .2s' }}>
                   {confirming
                     ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                     : <><ShieldCheck size={14} /> Confirm Change</>
@@ -687,12 +687,12 @@ export default function StudioUsers() {
               {/* Modal header */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                 <div>
-                  <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>New Ticket</p>
+                  <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>New Ticket</p>
                   <h2 className="font-display font-light" style={{ fontSize: '1.6rem', color: C.white, lineHeight: 1.1 }}>
                     {msgModal.full_name || 'Client'}
                   </h2>
                   {msgModal.email && (
-                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 3 }}>{msgModal.email}</p>
+                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>{msgModal.email}</p>
                   )}
                 </div>
                 <button onClick={() => setMsgModal(null)}
@@ -704,35 +704,35 @@ export default function StudioUsers() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                 {/* Subject */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>Subject</label>
+                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>Subject</label>
                   <input value={msgTitle} onChange={e => setMsgTitle(e.target.value)} placeholder="Message from HairGo"
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s' }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s' }}
                     className="msg-inp" />
                 </div>
 
                 {/* Message */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
+                  <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>
                     Message <span style={{ color: C.gold }}>*</span>
                   </label>
                   <textarea value={msgBody} onChange={e => setMsgBody(e.target.value)} rows={5}
                     placeholder="Write your message to the client…"
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.65rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, resize: 'none', boxSizing: 'border-box', transition: 'border-color .2s' }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.65rem 0.8rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, resize: 'none', boxSizing: 'border-box', transition: 'border-color .2s' }}
                     className="msg-inp" />
                 </div>
 
-                <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
                   A support ticket will be created and the client will see it in their Messages page.
                 </p>
 
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: '0.625rem' }}>
                   <button onClick={() => setMsgModal(null)} className="modal-cancel"
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
                     Cancel
                   </button>
                   <button onClick={sendMessage} disabled={sending}
-                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: sending ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: sending ? 0.6 : 1, transition: 'all .2s' }}>
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: sending ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: sending ? 0.6 : 1, transition: 'all .2s' }}>
                     {sending
                       ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><Send size={13} /> Send & Open Ticket</>
@@ -759,7 +759,7 @@ export default function StudioUsers() {
               {/* Header + step indicator */}
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div>
-                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(96,165,250,0.55)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Promoting to Artist</p>
+                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(96,165,250,0.55)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Promoting to Artist</p>
                   <h2 className="font-display font-light" style={{ fontSize: '1.6rem', color: C.white, lineHeight: 1.1 }}>
                     {empStep === 1 ? empModal.userName : 'Almost done'}
                   </h2>
@@ -767,7 +767,7 @@ export default function StudioUsers() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
                   {[1, 2].map(n => (
                     <div key={n} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, transition: 'all .2s', background: empStep === n ? '#60a5fa' : empStep > n ? 'rgba(96,165,250,0.18)' : 'rgba(255,255,255,0.05)', color: empStep === n ? '#000' : empStep > n ? '#60a5fa' : C.muted, border: empStep > n ? '1px solid rgba(96,165,250,0.3)' : 'none' }}>
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, transition: 'all .2s', background: empStep === n ? '#60a5fa' : empStep > n ? 'rgba(96,165,250,0.18)' : 'rgba(255,255,255,0.05)', color: empStep === n ? '#000' : empStep > n ? '#60a5fa' : C.muted, border: empStep > n ? '1px solid rgba(96,165,250,0.3)' : 'none' }}>
                         {empStep > n ? <Check size={9} /> : n}
                       </div>
                       {n < 2 && <div style={{ width: 18, height: 1, background: empStep > n ? 'rgba(96,165,250,0.35)' : C.border }} />}
@@ -802,7 +802,7 @@ export default function StudioUsers() {
                         {/* Info */}
                         <div style={{ flex: 1, padding: '0.75rem 0.875rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 3, minWidth: 0 }}>
                           <p className="font-display" style={{ color: sel ? C.white : C.dim, fontSize: '1rem', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .15s' }}>{s.name}</p>
-                          {s.title && <p style={{ color: sel ? 'rgba(184,212,232,0.65)' : C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em', transition: 'color .15s' }}>{s.title}</p>}
+                          {s.title && <p style={{ color: sel ? 'rgba(184,212,232,0.65)' : C.muted, fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em', transition: 'color .15s' }}>{s.title}</p>}
                         </div>
 
                         {/* Selected checkmark */}
@@ -822,7 +822,7 @@ export default function StudioUsers() {
                     <div style={{ width: 32, height: 32, borderRadius: '50%', background: empMode === 'create' ? 'rgba(96,165,250,0.15)' : C.subtle, border: `1px solid ${empMode === 'create' ? 'rgba(96,165,250,0.35)' : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}>
                       <Plus size={14} color={empMode === 'create' ? '#60a5fa' : C.muted} />
                     </div>
-                    <span style={{ fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: empMode === 'create' ? '#60a5fa' : C.muted, transition: 'color .15s' }}>Create New Stylist</span>
+                    <span style={{ fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: empMode === 'create' ? '#60a5fa' : C.muted, transition: 'color .15s' }}>Create New Stylist</span>
                   </button>
                 </div>
 
@@ -842,20 +842,20 @@ export default function StudioUsers() {
                         e.target.value = ''
                       }} />
                     <div style={{ flexShrink: 0 }}>
-                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Photo</label>
+                      <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Photo</label>
                       <button type="button" onClick={() => empFileRef.current?.click()}
                         style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden', border: `1px dashed ${empPreview ? 'rgba(96,165,250,0.5)' : 'rgba(255,255,255,0.15)'}`, background: empPreview ? 'transparent' : 'rgba(255,255,255,0.03)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, position: 'relative', transition: 'border-color .2s' }}>
                         {empPreview
                           ? <img src={empPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} />
                           : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                               <Upload size={16} color="rgba(96,165,250,0.4)" strokeWidth={1.5} />
-                              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>Upload</span>
+                              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>Upload</span>
                             </div>
                         }
                       </button>
                       {empPreview && (
                         <button type="button" onClick={() => { setEmpPhoto(null); setEmpPreview(null) }}
-                          style={{ marginTop: 4, width: '100%', fontSize: 8, color: '#f87171', fontFamily: 'Jost,sans-serif', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.08em' }}>
+                          style={{ marginTop: 4, width: '100%', fontSize: 8, color: '#f87171', fontFamily: 'DM Sans,sans-serif', background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.08em' }}>
                           Remove
                         </button>
                       )}
@@ -864,29 +864,29 @@ export default function StudioUsers() {
                     {/* Name + Title */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
                       <div>
-                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Name <span style={{ color: '#60a5fa' }}>*</span></label>
+                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Name <span style={{ color: '#60a5fa' }}>*</span></label>
                         <input value={empName} onChange={e => { setEmpName(e.target.value); setEmpErr('') }} placeholder="Full name…" autoFocus
-                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
                       </div>
                       <div>
-                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>Title</label>
+                        <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>Title</label>
                         <input value={empTitle} onChange={e => setEmpTitle(e.target.value)} placeholder="e.g. Senior Stylist…"
-                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
+                          style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.5rem 0.75rem', fontSize: '0.83rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box' }} className="msg-inp" />
                       </div>
                     </div>
 
                   </div>
                 )}
 
-                {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif', marginTop: 8 }}>{empErr}</p>}
+                {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'DM Sans,sans-serif', marginTop: 8 }}>{empErr}</p>}
 
                 <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.25rem' }}>
                   <button onClick={() => setEmpModal(null)}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
                     Cancel
                   </button>
                   <button onClick={applyEmployeePromotion}
-                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
                     Next <ArrowRight size={13} />
                   </button>
                 </div>
@@ -896,13 +896,13 @@ export default function StudioUsers() {
                 <div style={{ padding: '0.875rem 1rem', borderRadius: 12, background: 'rgba(96,165,250,0.05)', border: '1px solid rgba(96,165,250,0.15)', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <UserPlus size={13} color="#60a5fa" style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>
+                    <span style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'DM Sans,sans-serif' }}>
                       <span style={{ color: C.white }}>{empModal.userName}</span> → Artist role
                     </span>
                   </div>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                     <Scissors size={13} color="#60a5fa" style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif' }}>
+                    <span style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'DM Sans,sans-serif' }}>
                       {empMode === 'create'
                         ? <>Creating: <span style={{ color: C.white }}>{empName}{empTitle ? ` — ${empTitle}` : ''}</span></>
                         : <>Linked to: <span style={{ color: C.white }}>{freeStylists.find(s => s.id === empSelected)?.name}</span></>
@@ -911,15 +911,15 @@ export default function StudioUsers() {
                   </div>
                 </div>
 
-                {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'Jost,sans-serif', marginBottom: 12 }}>{empErr}</p>}
+                {empErr && <p style={{ fontSize: '0.72rem', color: '#f87171', fontFamily: 'DM Sans,sans-serif', marginBottom: 12 }}>{empErr}</p>}
 
                 <div style={{ display: 'flex', gap: '0.625rem' }}>
                   <button onClick={() => { setEmpStep(1); setEmpErr('') }}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
                     ← Back
                   </button>
                   <button onClick={applyEmployeePromotion} disabled={empSaving}
-                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: empSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: empSaving ? 0.6 : 1 }}>
+                    style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: empSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: empSaving ? 0.6 : 1 }}>
                     {empSaving
                       ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><ShieldCheck size={14} /> Confirm & Promote</>

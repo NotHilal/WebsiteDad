@@ -55,7 +55,7 @@ export default function Stylists() {
           background: rgba(var(--rgb-acc),0.15);
           border: 1px solid rgba(var(--rgb-acc),0.25);
           font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
-          color: var(--col-acc); font-family: Jost,sans-serif;
+          color: var(--col-acc); font-family: DM Sans,sans-serif;
           white-space: nowrap;
         }
 
@@ -63,7 +63,7 @@ export default function Stylists() {
           display: inline-flex; align-items: center; gap: 5px;
           font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
           color: rgba(var(--rgb-hi),0.5); text-decoration: none;
-          font-family: Jost,sans-serif; transition: color 0.2s;
+          font-family: DM Sans,sans-serif; transition: color 0.2s;
           margin-top: 0.75rem;
         }
         .ig-link:hover { color: var(--col-acc); }
@@ -133,7 +133,7 @@ export default function Stylists() {
                   <div className="team-overlay">
                     <div className="team-overlay-bio">
                       {s.bio && (
-                        <p style={{ color: 'rgba(var(--rgb-hi),0.7)', fontSize: '0.8rem', lineHeight: 1.75, marginBottom: '0.875rem', fontFamily: 'Jost,sans-serif', fontWeight: 300, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        <p style={{ color: 'rgba(var(--rgb-hi),0.7)', fontSize: '0.8rem', lineHeight: 1.75, marginBottom: '0.875rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                           {s.bio}
                         </p>
                       )}
@@ -165,7 +165,7 @@ export default function Stylists() {
                     {s.name}
                   </h3>
                   {s.title && (
-                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'Jost,sans-serif', fontWeight: 400 }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 400 }}>
                       {s.title}
                     </p>
                   )}

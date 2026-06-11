@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Calendar, ShoppingBag, Users, MessageSquare, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch } from '../../lib/cache'
@@ -104,11 +104,11 @@ export default function StudioDashboard() {
 
       {/* Header */}
       <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}` }}>
-        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Overview</p>
+        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Overview</p>
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>
           {greeting()}.
         </h1>
-        <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
+        <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
       </div>
 
       {/* Stat cards */}
@@ -141,8 +141,8 @@ export default function StudioDashboard() {
                   {loading ? '—' : c.value}
                 </div>
               )}
-              <p style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.1rem' }}>{c.label}</p>
-              <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>
+              <p style={{ fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.1rem' }}>{c.label}</p>
+              <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif' }}>
                 {isClockCard ? (clockedIn ? `Since ${elapsedStr} ago` : 'Not clocked in') : c.sub}
               </p>
             </button>
@@ -157,11 +157,11 @@ export default function StudioDashboard() {
         <div style={{ padding: '0.875rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h2 className="font-display" style={{ fontSize: '1.05rem', color: C.white, marginBottom: 2 }}>Today's Schedule</h2>
-            <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+            <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
               {loading ? '…' : `${bookedCount} booked · ${freeCount} free slot${freeCount !== 1 ? 's' : ''}`}
             </p>
           </div>
-          <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+          <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
             {format(new Date(), 'MMM d')}
           </span>
         </div>
@@ -170,14 +170,14 @@ export default function StudioDashboard() {
         {stylists.length > 0 && (
           <div style={{ display: 'flex', gap: 6, padding: '0.625rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, overflowX: 'auto' }}>
             <button onClick={() => setStylistFilter(null)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 20, border: `1px solid ${!stylistFilter ? C.goldBorder : C.border}`, background: !stylistFilter ? C.goldBg : 'transparent', color: !stylistFilter ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 20, border: `1px solid ${!stylistFilter ? C.goldBorder : C.border}`, background: !stylistFilter ? C.goldBg : 'transparent', color: !stylistFilter ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
               All stylists
             </button>
             {stylists.map(s => {
               const active = stylistFilter === s.id
               return (
                 <button key={s.id} onClick={() => setStylistFilter(active ? null : s.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '4px 12px 4px 4px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : C.border}`, background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '4px 12px 4px 4px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : C.border}`, background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {s.photo_url
                     ? <img src={s.photo_url} alt={s.name} style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `1.5px solid ${active ? C.gold : 'rgba(255,255,255,0.12)'}` }} />
                     : <div style={{ width: 22, height: 22, borderRadius: '50%', background: active ? C.goldBg : C.subtle, border: `1.5px solid ${active ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: active ? C.gold : C.muted, fontWeight: 700 }}>
@@ -207,7 +207,7 @@ export default function StudioDashboard() {
                   <div key={slot} style={{ display: 'flex', gap: 12, minHeight: 44, alignItems: count > 0 ? 'flex-start' : 'center' }}>
 
                     {/* Time */}
-                    <span style={{ width: 40, flexShrink: 0, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', textAlign: 'right', paddingTop: count > 0 ? 10 : 0,
+                    <span style={{ width: 40, flexShrink: 0, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'right', paddingTop: count > 0 ? 10 : 0,
                       color: count > 1 ? '#f59e0b' : count === 1 ? C.gold : 'rgba(255,255,255,0.15)',
                       fontWeight: count > 0 ? 700 : 400,
                     }}>
@@ -225,7 +225,7 @@ export default function StudioDashboard() {
                       {count === 0 && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 1 }} />
-                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.1)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>Free</span>
+                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.1)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>Free</span>
                         </div>
                       )}
 
@@ -241,21 +241,21 @@ export default function StudioDashboard() {
                                 </div>
                             }
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <p style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {appt.stylists?.name || 'Stylist'}
                               </p>
-                              <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {[appt.services?.name, appt.profiles?.full_name].filter(Boolean).join(' · ')}
                               </p>
                             </div>
-                            {appt.services?.price && <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>${appt.services.price}</span>}
+                            {appt.services?.price && <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>${appt.services.price}</span>}
                             {appt.payment_status === 'pay_in_store' && (
-                              <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 5, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700, flexShrink: 0 }}>
+                              <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 5, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, flexShrink: 0 }}>
                                 Pay in store
                               </span>
                             )}
                             <div style={{ padding: '2px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, flexShrink: 0 }}>
-                              <span style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
+                              <span style={{ fontSize: 9, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
                             </div>
                           </div>
                         )
@@ -264,7 +264,7 @@ export default function StudioDashboard() {
                       {count > 1 && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           <div style={{ marginBottom: 2 }}>
-                            <span style={{ fontSize: 9, padding: '2px 9px', borderRadius: 20, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                            <span style={{ fontSize: 9, padding: '2px 9px', borderRadius: 20, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                               {count} bookings
                             </span>
                           </div>
@@ -279,22 +279,22 @@ export default function StudioDashboard() {
                                     </div>
                                 }
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {appt.stylists?.name || 'Stylist'}
                                   </p>
-                                  <p style={{ color: C.muted, fontSize: '0.65rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <p style={{ color: C.muted, fontSize: '0.65rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {[appt.services?.name, appt.profiles?.full_name].filter(Boolean).join(' · ')}
                                   </p>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                                  {appt.services?.price && <span style={{ fontSize: '0.68rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>${appt.services.price}</span>}
+                                  {appt.services?.price && <span style={{ fontSize: '0.68rem', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>${appt.services.price}</span>}
                                   {appt.payment_status === 'pay_in_store' && (
-                                    <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                                    <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                                       In store
                                     </span>
                                   )}
                                   <div style={{ padding: '2px 7px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}` }}>
-                                    <span style={{ fontSize: 8, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
+                                    <span style={{ fontSize: 8, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
                                   </div>
                                 </div>
                               </div>

@@ -197,7 +197,7 @@ export default function Gallery() {
               <button key={cat} onClick={() => changeFilter(() => setActive(cat))} style={{
                 padding:'9px 22px', borderRadius:9999, cursor:'pointer',
                 fontSize:10, letterSpacing:'0.18em', textTransform:'uppercase',
-                fontFamily:'Jost,sans-serif', fontWeight:500, transition:'all 0.3s ease',
+                fontFamily:'DM Sans,sans-serif', fontWeight:500, transition:'all 0.3s ease',
                 background: active === cat ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.04)',
                 border: active === cat ? 'none' : '1px solid rgba(var(--rgb-hi),0.1)',
                 color: active === cat ? '#000' : 'rgba(var(--rgb-hi),0.45)',
@@ -249,7 +249,7 @@ export default function Gallery() {
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                     <div>
                       <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1rem', marginBottom:4 }}>{item.title}</p>
-                      <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'Jost,sans-serif' }}>{item.category}</span>
+                      <span style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{item.category}</span>
                     </div>
                     <div style={{ width:36, height:36, borderRadius:'50%', background:'rgba(var(--rgb-acc),0.9)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                       <ZoomIn size={15} color="#000" />
@@ -282,7 +282,7 @@ export default function Gallery() {
               <button key={p} onClick={() => changePage(p)}
                 style={{
                   width:40, height:40, borderRadius:12,
-                  fontSize:13, fontFamily:'Jost,sans-serif',
+                  fontSize:13, fontFamily:'DM Sans,sans-serif',
                   display:'flex', alignItems:'center', justifyContent:'center',
                   cursor:'pointer', transition:'all 0.25s ease',
                   background: p === page ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.04)',
@@ -363,7 +363,7 @@ export default function Gallery() {
                     display:'inline-block', padding:'5px 16px', borderRadius:9999,
                     background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.2)',
                     fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase',
-                    color:'var(--col-acc)', fontFamily:'Jost,sans-serif',
+                    color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif',
                   }}>
                     {lightbox.category}
                   </span>
@@ -389,8 +389,8 @@ export default function Gallery() {
                         <User size={13} color="var(--col-acc)" />
                       </div>
                       <div>
-                        <p style={{ fontSize:9, color:'rgba(var(--rgb-hi),0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', marginBottom:2 }}>Stylist</p>
-                        <p style={{ fontSize:'0.85rem', color:'rgba(var(--rgb-hi),0.7)', fontFamily:'Jost,sans-serif' }}>{lightbox.stylist || lightbox.stylists?.name}</p>
+                        <p style={{ fontSize:9, color:'rgba(var(--rgb-hi),0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', marginBottom:2 }}>Stylist</p>
+                        <p style={{ fontSize:'0.85rem', color:'rgba(var(--rgb-hi),0.7)', fontFamily:'DM Sans,sans-serif' }}>{lightbox.stylist || lightbox.stylists?.name}</p>
                       </div>
                     </div>
                   )}
@@ -400,8 +400,8 @@ export default function Gallery() {
                         <Clock size={13} color="var(--col-acc)" />
                       </div>
                       <div>
-                        <p style={{ fontSize:9, color:'rgba(var(--rgb-hi),0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'Jost,sans-serif', marginBottom:2 }}>Duration</p>
-                        <p style={{ fontSize:'0.85rem', color:'rgba(var(--rgb-hi),0.7)', fontFamily:'Jost,sans-serif' }}>{lightbox.duration}</p>
+                        <p style={{ fontSize:9, color:'rgba(var(--rgb-hi),0.28)', letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', marginBottom:2 }}>Duration</p>
+                        <p style={{ fontSize:'0.85rem', color:'rgba(var(--rgb-hi),0.7)', fontFamily:'DM Sans,sans-serif' }}>{lightbox.duration}</p>
                       </div>
                     </div>
                   )}

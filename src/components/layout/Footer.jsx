@@ -55,7 +55,7 @@ export default function Footer() {
               </a>
             </div>
 
-            <p style={{ fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,0.75)', maxWidth: 240, marginBottom: 10, fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>
+            <p style={{ fontSize: 12, lineHeight: 1.8, color: 'rgba(255,255,255,0.75)', maxWidth: 240, marginBottom: 10, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>
               Where elegance meets artistry. Premium hair care crafted for those who dare to stand out.
             </p>
 
@@ -65,14 +65,14 @@ export default function Footer() {
           {/* ── Navigate ──────────────────────────────── */}
           <div className="footer-navigate">
             <div style={{ marginBottom: 16 }}>
-              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 8, fontFamily: 'Jost, sans-serif', fontWeight: 600 }}>Navigate</h4>
+              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 8, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>Navigate</h4>
               <div style={{ width: 20, height: 1, background: 'linear-gradient(90deg,rgba(184,212,232,0.5),transparent)' }} />
             </div>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 9 }}>
               {NAV_LINKS.map(({ to, label }) => (
                 <li key={to}>
                   <Link to={to} className="footer-link"
-                    style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', fontFamily: 'Jost, sans-serif', fontWeight: 300, display: 'inline-flex', alignItems: 'center', gap: 0, transition: 'all 0.25s ease' }}>
+                    style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif', fontWeight: 300, display: 'inline-flex', alignItems: 'center', gap: 0, transition: 'all 0.25s ease' }}>
                     <ChevronRight size={10} className="footer-link-arrow" style={{ opacity: 0, marginRight: -4, transition: 'all 0.25s ease', color: '#B8D4E8', flexShrink: 0 }} />
                     {label}
                   </Link>
@@ -84,7 +84,7 @@ export default function Footer() {
           {/* ── Contact ───────────────────────────────── */}
           <div className="footer-contact">
             <div style={{ marginBottom: 16 }}>
-              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 8, fontFamily: 'Jost, sans-serif', fontWeight: 600 }}>Contact</h4>
+              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 8, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>Contact</h4>
               <div style={{ width: 20, height: 1, background: 'linear-gradient(90deg,rgba(184,212,232,0.5),transparent)' }} />
             </div>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -93,7 +93,7 @@ export default function Footer() {
                   <div style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(184,212,232,0.05)', border: '1px solid rgba(184,212,232,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                     <Icon size={11} color="rgba(184,212,232,0.7)" strokeWidth={1.5} />
                   </div>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.65, fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>{text}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', lineHeight: 1.65, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>{text}</span>
                 </li>
               ))}
             </ul>
@@ -102,7 +102,7 @@ export default function Footer() {
           {/* ── Hours ─────────────────────────────────── */}
           <div className="footer-hours">
             <div style={{ marginBottom: 16 }}>
-              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 8, fontFamily: 'Jost, sans-serif', fontWeight: 600 }}>Hours</h4>
+              <h4 style={{ fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 8, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>Hours</h4>
               <div style={{ width: 20, height: 1, background: 'linear-gradient(90deg,rgba(184,212,232,0.5),transparent)' }} />
             </div>
 
@@ -111,15 +111,15 @@ export default function Footer() {
                 <div key={day} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: i < HOURS.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                     <div style={{ width: 4, height: 4, borderRadius: '50%', background: open ? 'rgba(52,211,153,0.6)' : 'rgba(239,68,68,0.4)', flexShrink: 0 }} />
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.72)', fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>{day}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.72)', fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>{day}</span>
                   </div>
-                  <span style={{ fontSize: 11, color: open ? 'rgba(255,255,255,0.85)' : 'rgba(239,68,68,0.45)', fontFamily: 'Jost, sans-serif', fontWeight: open ? 300 : 500, letterSpacing: open ? '0.02em' : '0.12em', textTransform: open ? 'none' : 'uppercase' }}>{time}</span>
+                  <span style={{ fontSize: 11, color: open ? 'rgba(255,255,255,0.85)' : 'rgba(239,68,68,0.45)', fontFamily: 'DM Sans, sans-serif', fontWeight: open ? 300 : 500, letterSpacing: open ? '0.02em' : '0.12em', textTransform: open ? 'none' : 'uppercase' }}>{time}</span>
                 </div>
               ))}
             </div>
 
             <Link to="/appointments" className="footer-cta"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 9999, background: 'linear-gradient(135deg,rgba(184,212,232,0.1),rgba(122,175,201,0.06))', border: '1px solid rgba(184,212,232,0.18)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#B8D4E8', textDecoration: 'none', fontFamily: 'Jost, sans-serif', fontWeight: 500, transition: 'all 0.3s ease' }}>
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 9999, background: 'linear-gradient(135deg,rgba(184,212,232,0.1),rgba(122,175,201,0.06))', border: '1px solid rgba(184,212,232,0.18)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#B8D4E8', textDecoration: 'none', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, transition: 'all 0.3s ease' }}>
               Book Now <ArrowUpRight size={10} />
             </Link>
           </div>
@@ -128,7 +128,7 @@ export default function Footer() {
 
         {/* ── Bottom bar ──────────────────────────────── */}
         <div className="footer-bottom" style={{ marginTop: 36, paddingTop: 16, paddingBottom: 20, borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.42)', letterSpacing: '0.06em', fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.42)', letterSpacing: '0.06em', fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>
             © {year} HairGo. All rights reserved.
           </p>
           <div className="footer-bottom-links" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -136,7 +136,7 @@ export default function Footer() {
               <>
                 {i > 0 && <span key={`sep-${item}`} style={{ width: 1, height: 10, background: 'rgba(255,255,255,0.08)', display: 'inline-block' }} />}
                 <a key={item} href="#" className="footer-legal"
-                  style={{ fontSize: 11, color: 'rgba(255,255,255,0.42)', textDecoration: 'none', letterSpacing: '0.06em', fontFamily: 'Jost, sans-serif', fontWeight: 300, transition: 'color 0.3s ease', padding: '0 10px' }}>
+                  style={{ fontSize: 11, color: 'rgba(255,255,255,0.42)', textDecoration: 'none', letterSpacing: '0.06em', fontFamily: 'DM Sans, sans-serif', fontWeight: 300, transition: 'color 0.3s ease', padding: '0 10px' }}>
                   {item}
                 </a>
               </>

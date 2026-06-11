@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { Plus, Edit2, Trash2, X, Save, User, Upload, Link2, ChevronDown, Check } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
@@ -15,8 +15,8 @@ const C = {
 }
 
 const EMPTY = { name: '', bio: '', photo_url: '', profile_id: '', hourly_rate: '' }
-const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 function CustomSelect({ value, onChange, options }) {
   const [open, setOpen] = useState(false)
@@ -32,7 +32,7 @@ function CustomSelect({ value, onChange, options }) {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button type="button" onClick={() => setOpen(p => !p)}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', background: hasValue ? 'rgba(52,211,153,0.05)' : 'rgba(255,255,255,0.05)', border: `1px solid ${hasValue ? C.greenBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, color: hasValue ? C.green : 'rgba(255,255,255,0.4)', fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: hasValue ? 500 : 300, cursor: 'pointer', transition: 'all .2s', textAlign: 'left', boxSizing: 'border-box' }}>
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', background: hasValue ? 'rgba(52,211,153,0.05)' : 'rgba(255,255,255,0.05)', border: `1px solid ${hasValue ? C.greenBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, color: hasValue ? C.green : 'rgba(255,255,255,0.4)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: hasValue ? 500 : 300, cursor: 'pointer', transition: 'all .2s', textAlign: 'left', boxSizing: 'border-box' }}>
         {hasValue && <div style={{ width: 7, height: 7, borderRadius: '50%', background: C.green, boxShadow: `0 0 6px ${C.green}88`, flexShrink: 0 }} />}
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {selected?.label || 'No account linked'}
@@ -50,10 +50,10 @@ function CustomSelect({ value, onChange, options }) {
                   onClick={() => { if (!opt.disabled) { onChange(opt.value); setOpen(false) } }}
                   disabled={opt.disabled}
                   className={opt.disabled ? '' : 'csel-opt'}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: isActive ? 'rgba(52,211,153,0.06)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: opt.disabled ? 'not-allowed' : 'pointer', color: opt.disabled ? 'rgba(255,255,255,0.18)' : isActive ? C.green : 'rgba(255,255,255,0.55)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', textAlign: 'left', transition: 'background .12s' }}>
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: isActive ? 'rgba(52,211,153,0.06)' : 'transparent', border: 'none', borderBottom: `1px solid ${C.border}`, cursor: opt.disabled ? 'not-allowed' : 'pointer', color: opt.disabled ? 'rgba(255,255,255,0.18)' : isActive ? C.green : 'rgba(255,255,255,0.55)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'left', transition: 'background .12s' }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: isActive ? C.green : 'transparent', border: isActive ? 'none' : `1px solid rgba(255,255,255,0.15)`, flexShrink: 0, transition: 'all .15s' }} />
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.label}</span>
-                  {opt.sublabel && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'Jost,sans-serif', flexShrink: 0 }}>{opt.sublabel}</span>}
+                  {opt.sublabel && <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>{opt.sublabel}</span>}
                   {isActive && <Check size={10} color={C.green} style={{ flexShrink: 0 }} />}
                 </button>
               )
@@ -200,21 +200,21 @@ export default function StudioStylists() {
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="sty-hdr" style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
+          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Stylists</h1>
           <div style={{ display: 'flex', gap: 12 }}>
-            <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+            <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
               <span style={{ color: C.white, fontWeight: 600 }}>{stylists.length}</span> team members
             </span>
             {linkedCount > 0 && (
-              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                 <span style={{ color: C.green, fontWeight: 600 }}>{linkedCount}</span> linked
               </span>
             )}
           </div>
         </div>
         <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
           <Plus size={14} /> Add Stylist
         </button>
       </div>
@@ -232,10 +232,10 @@ export default function StudioStylists() {
             <div style={{ width: 64, height: 64, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <User size={26} color="rgba(255,255,255,0.15)" strokeWidth={1} />
             </div>
-            <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif' }}>No team members yet</p>
-            <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>Add your first stylist to get started</p>
+            <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif' }}>No team members yet</p>
+            <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>Add your first stylist to get started</p>
             <button onClick={() => { setForm(EMPTY); setLocalPreview(null); setModal('add') }} className="btn-g"
-              style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+              style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
               <Plus size={14} /> Add Stylist
             </button>
           </div>
@@ -260,7 +260,7 @@ export default function StudioStylists() {
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 55%, rgba(22,22,32,0.85))' }} />
                     {/* Display order badge */}
                     <div style={{ position: 'absolute', top: 7, left: 7, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{(s.display_order ?? 0) + 1}</span>
+                      <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{(s.display_order ?? 0) + 1}</span>
                     </div>
                   </div>
 
@@ -289,7 +289,7 @@ export default function StudioStylists() {
 
                     {/* Bio */}
                     {s.bio && (
-                      <p style={{ color: C.muted, fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <p style={{ color: C.muted, fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {s.bio}
                       </p>
                     )}
@@ -299,17 +299,17 @@ export default function StudioStylists() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto', paddingTop: 2, gap: 4, flexWrap: 'wrap' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         {s.hourly_rate != null && s.hourly_rate !== '' && (
-                          <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.06em' }}>
+                          <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.06em' }}>
                             ${parseFloat(s.hourly_rate).toFixed(2)}/hr
                           </span>
                         )}
                       </div>
                       {s.profile_id
-                        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.green }} />
                             Linked
                           </span>
-                        : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}`, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                        : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}`, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                             <Link2 size={8} />
                             Not linked
                           </span>
@@ -338,7 +338,7 @@ export default function StudioStylists() {
               {/* Modal header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <div>
-                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>
+                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>
                     {modal === 'add' ? 'New Member' : 'Edit Member'}
                   </p>
                   <h2 className="font-display font-light" style={{ fontSize: '1.6rem', color: C.white, lineHeight: 1 }}>
@@ -359,11 +359,11 @@ export default function StudioStylists() {
                 {/* Hourly rate */}
                 <div style={{ padding: '1rem', borderRadius: 12, background: C.goldBg, border: `1px solid ${C.goldBorder}` }}>
                   <label style={{ ...lbl, color: C.goldDim, marginBottom: 4 }}>Hourly Rate</label>
-                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginBottom: 8 }}>
+                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>
                     Used to auto-calculate pay runs from timesheet hours.
                   </p>
                   <div style={{ position: 'relative', maxWidth: 160 }}>
-                    <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', pointerEvents: 'none' }}>$</span>
+                    <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontSize: '0.85rem', pointerEvents: 'none' }}>$</span>
                     <input
                       type="number" min="0" step="0.5"
                       value={form.hourly_rate || ''}
@@ -391,11 +391,11 @@ export default function StudioStylists() {
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingTop: 4 }}>
                         <button type="button" onClick={() => fileRef.current?.click()}
-                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.dim, fontSize: 10, fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
                           <Upload size={11} /> Change photo
                         </button>
                         <button type="button" onClick={() => { setLocalPreview(null); setForm(p => ({ ...p, photo_url: '', _pendingFile: undefined })) }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: 10, fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
                           <X size={11} /> Remove
                         </button>
                       </div>
@@ -408,12 +408,12 @@ export default function StudioStylists() {
                       onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
                       style={{ border: `1.5px dashed ${dragOver ? C.gold : 'rgba(255,255,255,0.1)'}`, borderRadius: 12, padding: '1.25rem', textAlign: 'center', cursor: 'pointer', background: dragOver ? C.goldBg : 'rgba(255,255,255,0.02)', transition: 'all .2s' }}>
                       <Upload size={18} color={dragOver ? C.gold : 'rgba(255,255,255,0.18)'} style={{ margin: '0 auto 0.5rem' }} />
-                      <p style={{ fontSize: '0.78rem', color: dragOver ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', marginBottom: 2 }}>Click or drag & drop</p>
-                      <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>JPG, PNG, WebP · max 5 MB</p>
+                      <p style={{ fontSize: '0.78rem', color: dragOver ? C.gold : C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 2 }}>Click or drag & drop</p>
+                      <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif' }}>JPG, PNG, WebP · max 5 MB</p>
                     </div>
                   )}
                   {uploading && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, color: C.goldDim, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, color: C.goldDim, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif' }}>
                       <div style={{ width: 12, height: 12, border: `2px solid ${C.goldBorder}`, borderTopColor: C.gold, borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       Uploading…
                     </div>
@@ -427,7 +427,7 @@ export default function StudioStylists() {
                     <Link2 size={9} style={{ display: 'inline', marginRight: 5, verticalAlign: 'middle' }} />
                     Linked Account
                   </label>
-                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginBottom: 8 }}>
+                  <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>
                     Link a staff account so they can clock in/out from their own login.
                   </p>
                   <CustomSelect
@@ -453,11 +453,11 @@ export default function StudioStylists() {
               {/* Buttons */}
               <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
                 <button onClick={() => { setModal(null); setLocalPreview(null) }}
-                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button onClick={save} disabled={saving || uploading}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || uploading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || uploading) ? 0.6 : 1 }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || uploading) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || uploading) ? 0.6 : 1 }}>
                   {saving
                     ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Save size={13} /> {modal === 'add' ? 'Add Stylist' : 'Save Changes'}</>
@@ -486,7 +486,7 @@ export default function StudioStylists() {
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: '#f0f0f0', lineHeight: 1.1, marginBottom: '0.4rem' }}>
                   Delete Artist
                 </h2>
-                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
                   Are you sure you want to delete <span style={{ color: '#f0f0f0', fontWeight: 600 }}>{deleteTarget.name}</span>?
                   <br />This will remove their profile and all related data permanently.
                 </p>
@@ -494,11 +494,11 @@ export default function StudioStylists() {
 
               <div style={{ display: 'flex', gap: '0.625rem' }}>
                 <button onClick={() => setDeleteTarget(null)}
-                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
+                  style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.45)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
                   Cancel
                 </button>
                 <button onClick={confirmDelete} disabled={deleting}
-                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1, transition: 'all .2s' }}>
+                  style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1, transition: 'all .2s' }}>
                   {deleting
                     ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Trash2 size={13} /> Delete Permanently</>

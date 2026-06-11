@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useLogAction } from '../../hooks/useLogAction'
 import { Check, UserCheck, Image, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -100,11 +100,11 @@ export default function StudioHomeDisplay() {
 
       {/* Header */}
       <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}` }}>
-        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Home Page</p>
+        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Home Page</p>
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem, 3vw, 2.4rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>
           Featured Display
         </h1>
-        <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>
+        <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>
           Pick which team members and gallery images appear on the home page. Changes apply instantly.
         </p>
       </div>
@@ -144,8 +144,8 @@ export default function StudioHomeDisplay() {
                     {s.featured && <CheckBadge />}
                   </div>
                   <div style={{ padding: '0.5rem 0.6rem', textAlign: 'center' }}>
-                    <p style={{ color: s.featured ? C.gold : C.white, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
-                    <p style={{ color: C.muted, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</p>
+                    <p style={{ color: s.featured ? C.gold : C.white, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
+                    <p style={{ color: C.muted, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</p>
                   </div>
                 </button>
               )
@@ -170,7 +170,7 @@ export default function StudioHomeDisplay() {
         ) : (
           <>
             {services.some(s => !s.image_url) && (
-              <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', marginBottom: '0.75rem' }}>
+              <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', marginBottom: '0.75rem' }}>
                 Services without an image are greyed out — add an image in the Services page to enable them.
               </p>
             )}
@@ -194,13 +194,13 @@ export default function StudioHomeDisplay() {
                         ? <img src={svc.image_url} alt={svc.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 6 }}>
                             <Scissors size={20} color="rgba(255,255,255,0.15)" strokeWidth={1} />
-                            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif' }}>No image</span>
+                            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif' }}>No image</span>
                           </div>
                       }
                       {svc.featured && <CheckBadge />}
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.4rem 0.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
-                        <p style={{ color: '#fff', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
-                        {svc.price && <p style={{ color: C.goldDim, fontSize: 9, fontFamily: 'Jost,sans-serif' }}>${svc.price}</p>}
+                        <p style={{ color: '#fff', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
+                        {svc.price && <p style={{ color: C.goldDim, fontSize: 9, fontFamily: 'DM Sans,sans-serif' }}>${svc.price}</p>}
                       </div>
                     </div>
                   </button>
@@ -244,7 +244,7 @@ export default function StudioHomeDisplay() {
                     {item.featured && <CheckBadge />}
                     {item.title && (
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.4rem 0.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
-                        <p style={{ color: '#fff', fontSize: 9, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
+                        <p style={{ color: '#fff', fontSize: 9, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
                       </div>
                     )}
                   </div>
@@ -274,7 +274,7 @@ function Section({ icon, title, badge, badgeActive, children }) {
           {icon}
           <h2 className="font-display" style={{ fontSize: '1.05rem', color: C.white }}>{title}</h2>
         </div>
-        <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: badgeActive ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+        <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: badgeActive ? C.gold : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
           {badge}
         </span>
       </div>
@@ -311,7 +311,7 @@ function SkeletonGrid({ n, minW = 160, ratio }) {
 
 function Empty({ children }) {
   return (
-    <p style={{ color: 'rgba(255,255,255,0.22)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', textAlign: 'center', padding: '1.5rem 0' }}>
+    <p style={{ color: 'rgba(255,255,255,0.22)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '1.5rem 0' }}>
       {children}
     </p>
   )

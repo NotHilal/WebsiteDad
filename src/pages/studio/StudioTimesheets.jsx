@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, CalendarDays, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Pager from '../../lib/Pager'
@@ -165,8 +165,8 @@ export default function StudioTimesheets() {
   if (error) return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
       <AlertCircle size={28} color={C.red} />
-      <p style={{ color: C.muted, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
-      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
+      <p style={{ color: C.muted, fontFamily: 'DM Sans,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
+      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
     </div>
   )
 
@@ -186,15 +186,15 @@ export default function StudioTimesheets() {
 
       {/* ── Header ──────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}` }}>
-        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
+        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem,3vw,2.4rem)', color: C.white, lineHeight: 1.1 }}>Timesheets</h1>
-        <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', marginTop: 3 }}>Track worked hours and breaks in real time</p>
+        <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>Track worked hours and breaks in real time</p>
       </div>
 
       {/* Not linked warning for employees */}
       {!isAdmin && !loading && !linkedStylist && (
         <div style={{ flexShrink: 0, padding: '1rem 1.25rem', borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
-          <p style={{ color: '#f59e0b', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>
+          <p style={{ color: '#f59e0b', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
             Your account hasn't been linked to a team member yet. Ask an admin to link your account in the <strong>Stylists</strong> page.
           </p>
         </div>
@@ -208,7 +208,7 @@ export default function StudioTimesheets() {
         ].map(s => (
           <div key={s.label} style={{ flex: 1, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '1rem 0.75rem', textAlign: 'center' }}>
             <div className="font-display" style={{ fontSize: '1.5rem', color: s.color, lineHeight: 1 }}>{s.value}</div>
-            <div style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 5 }}>{s.label}</div>
+            <div style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 5 }}>{s.label}</div>
           </div>
         ))}
 
@@ -224,12 +224,12 @@ export default function StudioTimesheets() {
                       <span style={{ fontSize: 10, color: C.gold, fontWeight: 700 }}>{filterStylist.name[0]}</span>
                     </div>
                 }
-                <span style={{ fontSize: 9, color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{filterStylist.name.split(' ')[0]}</span>
+                <span style={{ fontSize: 9, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{filterStylist.name.split(' ')[0]}</span>
               </>
             ) : (
               <>
                 <div style={{ fontSize: '1.2rem', color: C.muted, lineHeight: 1 }}>⊞</div>
-                <div style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 1 }}>Filter</div>
+                <div style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 1 }}>Filter</div>
               </>
             )}
           </button>
@@ -244,7 +244,7 @@ export default function StudioTimesheets() {
             {/* Modal header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <div>
-                <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Team</p>
+                <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Team</p>
                 <h3 className="font-display font-light" style={{ fontSize: '1.3rem', color: C.white, lineHeight: 1.1 }}>Filter by member</h3>
               </div>
               <button onClick={() => setShowFilter(false)}
@@ -267,7 +267,7 @@ export default function StudioTimesheets() {
                           <span style={{ fontSize: 16, color: isActive ? C.gold : C.muted, fontWeight: 700 }}>{s.name[0]}</span>
                         </div>
                     }
-                    <span style={{ color: isActive ? C.gold : C.white, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</span>
+                    <span style={{ color: isActive ? C.gold : C.white, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</span>
                   </button>
                 )
               })}
@@ -281,7 +281,7 @@ export default function StudioTimesheets() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '0.5rem 0.625rem' }}>
           {isAdmin && filterStylist && (
             <button onClick={() => { setFilterStylist(null); setPage(0) }} className="week-nav"
-              style={{ height: 32, padding: '0 10px', borderRadius: 9, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              style={{ height: 32, padding: '0 10px', borderRadius: 9, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
               Clear
             </button>
           )}
@@ -294,7 +294,7 @@ export default function StudioTimesheets() {
           <button onClick={() => { setShowPicker(p => !p); setPickerMonth(startOfMonth(week)) }} className="ts-date-btn"
             style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '0.35rem 0.5rem', borderRadius: 10, transition: 'background .15s' }}>
             <CalendarDays size={14} style={{ color: C.goldDim, flexShrink: 0 }} />
-            <span style={{ fontSize: '0.88rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 500, whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: '0.88rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, whiteSpace: 'nowrap' }}>
               {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
             </span>
           </button>
@@ -305,7 +305,7 @@ export default function StudioTimesheets() {
           </button>
 
           <button onClick={() => { setWeek(new Date()); setPage(0) }} className="week-nav"
-            style={{ height: 32, padding: '0 10px', borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+            style={{ height: 32, padding: '0 10px', borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
             Today
           </button>
         </div>
@@ -326,7 +326,7 @@ export default function StudioTimesheets() {
                   style={{ width: 28, height: 28, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
                   <ChevronLeft size={13} />
                 </button>
-                <span style={{ color: C.white, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', fontWeight: 600 }}>
+                <span style={{ color: C.white, fontFamily: 'DM Sans,sans-serif', fontSize: '0.85rem', fontWeight: 600 }}>
                   {format(pickerMonth, 'MMMM yyyy')}
                 </span>
                 <button onClick={() => setPickerMonth(addMonths(pickerMonth, 1))} className="week-nav"
@@ -338,7 +338,7 @@ export default function StudioTimesheets() {
               {/* Day headers */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '0.25rem' }}>
                 {['Mo','Tu','We','Th','Fr','Sa','Su'].map(d => (
-                  <div key={d} style={{ textAlign: 'center', fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em', padding: '3px 0', textTransform: 'uppercase' }}>{d}</div>
+                  <div key={d} style={{ textAlign: 'center', fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em', padding: '3px 0', textTransform: 'uppercase' }}>{d}</div>
                 ))}
               </div>
 
@@ -350,7 +350,7 @@ export default function StudioTimesheets() {
                     onClick={() => { setWeek(wk[0]); setPage(0); setShowPicker(false) }}
                     style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderRadius: 9, cursor: 'pointer', marginBottom: 2, transition: 'all .15s', background: selected ? 'rgba(184,212,232,0.12)' : 'transparent', border: selected ? `1px solid rgba(184,212,232,0.25)` : '1px solid transparent' }}>
                     {wk.map((day, di) => (
-                      <div key={di} style={{ textAlign: 'center', padding: '7px 0', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif',
+                      <div key={di} style={{ textAlign: 'center', padding: '7px 0', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif',
                         color: !isSameMonth(day, pickerMonth) ? 'rgba(255,255,255,0.15)' : isToday(day) ? C.gold : selected ? 'rgba(184,212,232,0.9)' : C.white,
                         fontWeight: isToday(day) ? 700 : 400 }}>
                         {format(day, 'd')}
@@ -369,13 +369,13 @@ export default function StudioTimesheets() {
         <div style={{ flexShrink: 0, background: '#161620', border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.875rem', borderBottom: liveClockIns.length > 0 ? `1px solid ${C.border}` : 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.muted }}>Who's In</span>
-              <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', color: C.muted }}>·</span>
-              <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', color: C.muted }}>Live</span>
+              <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.muted }}>Who's In</span>
+              <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: C.muted }}>·</span>
+              <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: C.muted }}>Live</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 20, background: liveClockIns.length > 0 ? C.greenBg : C.subtle, border: `1px solid ${liveClockIns.length > 0 ? C.greenBorder : C.border}` }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: liveClockIns.length > 0 ? C.green : 'rgba(255,255,255,0.2)', flexShrink: 0, animation: liveClockIns.length > 0 ? 'blink 2s infinite' : 'none' }} />
-              <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: liveClockIns.length > 0 ? C.green : C.muted, letterSpacing: '0.08em' }}>
+              <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: liveClockIns.length > 0 ? C.green : C.muted, letterSpacing: '0.08em' }}>
                 {liveClockIns.length} clocked in
               </span>
             </div>
@@ -395,8 +395,8 @@ export default function StudioTimesheets() {
                         </div>
                     }
                     <div>
-                      <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: C.white, lineHeight: 1.2 }}>{s?.name?.split(' ')[0] || 'Stylist'}</p>
-                      <p style={{ fontSize: '0.65rem', fontFamily: 'Jost,sans-serif', color: C.green }}>{format(new Date(entry.clock_in), 'HH:mm')} · {elapsed}</p>
+                      <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: C.white, lineHeight: 1.2 }}>{s?.name?.split(' ')[0] || 'Stylist'}</p>
+                      <p style={{ fontSize: '0.65rem', fontFamily: 'DM Sans,sans-serif', color: C.green }}>{format(new Date(entry.clock_in), 'HH:mm')} · {elapsed}</p>
                     </div>
                   </div>
                 )
@@ -430,29 +430,29 @@ export default function StudioTimesheets() {
                   {active && <div style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: C.green, border: `2px solid ${C.card}`, animation: 'blink 2s infinite' }} />}
                 </div>
 
-                <p style={{ color: C.white, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</p>
+                <p style={{ color: C.white, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</p>
 
                 {active
-                  ? <p style={{ fontSize: 10, color: C.green, fontFamily: 'Jost,sans-serif' }}>{fmtMins(sinceMin)}</p>
+                  ? <p style={{ fontSize: 10, color: C.green, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(sinceMin)}</p>
                   : todayMins > 0
-                    ? <p style={{ fontSize: 10, color: C.goldDim, fontFamily: 'Jost,sans-serif' }}>{fmtMins(todayMins)}</p>
-                    : <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif' }}>Not in</p>
+                    ? <p style={{ fontSize: 10, color: C.goldDim, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(todayMins)}</p>
+                    : <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.15)', fontFamily: 'DM Sans,sans-serif' }}>Not in</p>
                 }
 
                 {isAdmin ? (
                   active
-                    ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '3px 9px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
+                    ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '3px 9px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
                         <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> Active
                       </span>
-                    : <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', padding: '3px 9px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
+                    : <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', padding: '3px 9px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
                 ) : (
                   active
                     ? <button onClick={() => clockOut(s.id)} className="clk-out"
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
                         <StopCircle size={9} /> Out
                       </button>
                     : <button onClick={() => clockIn(s.id)} className="clk-in"
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
                         <Play size={9} /> In
                       </button>
                 )}
@@ -469,7 +469,7 @@ export default function StudioTimesheets() {
           {/* Column headers */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.5rem 0.875rem', background: 'rgba(255,255,255,0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
             {['Member', 'In', 'Out', 'Net'].map((h, i) => (
-              <div key={i} style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, textAlign: i > 0 ? 'center' : 'left' }}>{h}</div>
+              <div key={i} style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, textAlign: i > 0 ? 'center' : 'left' }}>{h}</div>
             ))}
           </div>
 
@@ -489,7 +489,7 @@ export default function StudioTimesheets() {
           ) : filtered.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center' }}>
               <Clock size={28} style={{ margin: '0 auto 0.6rem', color: C.border, display: 'block' }} />
-              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No entries this week</p>
+              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif' }}>No entries this week</p>
             </div>
           ) : paged.map((e, idx) => {
             const raw    = e.clock_out ? Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in))) : null
@@ -508,21 +508,21 @@ export default function StudioTimesheets() {
                       </div>
                   }
                   <div style={{ minWidth: 0 }}>
-                    <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.stylists?.name}</p>
-                    <p style={{ color: C.muted, fontSize: '0.67rem', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{format(new Date(e.clock_in), 'EEE d MMM')}</p>
+                    <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.stylists?.name}</p>
+                    <p style={{ color: C.muted, fontSize: '0.67rem', fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{format(new Date(e.clock_in), 'EEE d MMM')}</p>
                   </div>
                 </div>
 
                 {/* Clock in */}
                 <div style={{ textAlign: 'center' }}>
-                  <span style={{ color: C.green, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_in), 'HH:mm')}</span>
+                  <span style={{ color: C.green, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_in), 'HH:mm')}</span>
                 </div>
 
                 {/* Clock out */}
                 <div style={{ textAlign: 'center' }}>
                   {e.clock_out
-                    ? <span style={{ color: C.red, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_out), 'HH:mm')}</span>
-                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 8, color: C.green, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '2px 5px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, whiteSpace: 'nowrap' }}>
+                    ? <span style={{ color: C.red, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_out), 'HH:mm')}</span>
+                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 8, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '2px 5px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, whiteSpace: 'nowrap' }}>
                         <span style={{ width: 4, height: 4, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> On
                       </span>
                   }
@@ -530,7 +530,7 @@ export default function StudioTimesheets() {
 
                 {/* Net hours */}
                 <div style={{ textAlign: 'center' }}>
-                  <span style={{ color: net !== null ? C.gold : C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: net !== null ? 600 : 400 }}>
+                  <span style={{ color: net !== null ? C.gold : C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: net !== null ? 600 : 400 }}>
                     {net !== null ? fmtMins(net) : '—'}
                   </span>
                 </div>

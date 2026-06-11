@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import {
   ChevronLeft, ChevronRight, Lock, Unlock, X, BanIcon, Clock,
   CheckCircle, XCircle, Settings, Calendar, AlertCircle,
@@ -28,11 +28,11 @@ const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','
 const WDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 // ── Shared button / input styles ──
-const btnSecondary = { flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }
-const btnGold      = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
-const btnDanger    = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1.5px solid ${C.dangerBorder}`, color: C.danger, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background .18s' }
-const labelStyle   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 7 }
-const inputStyle   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const btnSecondary = { flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }
+const btnGold      = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }
+const btnDanger    = { flex: 1.4, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1.5px solid ${C.dangerBorder}`, color: C.danger, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background .18s' }
+const labelStyle   = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 7 }
+const inputStyle   = { width: '100%', background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
 
 function Spinner({ dark }) {
   return <div style={{ width: 14, height: 14, border: `2px solid ${dark ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,0.2)'}`, borderTopColor: dark ? '#000' : '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
@@ -42,7 +42,7 @@ function TabBtn({ id, label, icon: Icon, active, set }) {
   const on = active === id
   return (
     <button onClick={() => set(id)} className={`block-tab-btn${on ? ' active' : ''}`}
-      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.55rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, transition: 'all .18s', background: on ? C.goldBg : 'transparent', color: on ? C.gold : C.muted, outline: on ? `1px solid ${C.goldBorder}` : 'none' }}>
+      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.55rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, transition: 'all .18s', background: on ? C.goldBg : 'transparent', color: on ? C.gold : C.muted, outline: on ? `1px solid ${C.goldBorder}` : 'none' }}>
       <Icon size={12} /> {label}
     </button>
   )
@@ -356,7 +356,7 @@ export default function StudioBlockedDates() {
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>
             {isAdmin ? 'Availability Management' : 'My Availability'}
           </h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
             {isAdmin
               ? 'Block salon-wide days · Approve day-off requests · Configure monthly caps'
               : 'Block your hours freely · Full days need manager approval'}
@@ -364,7 +364,7 @@ export default function StudioBlockedDates() {
         </div>
         {isAdmin && (
           <button onClick={openSettings}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 0.875rem', borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 0.875rem', borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
             <Settings size={12} /> Caps
           </button>
         )}
@@ -375,8 +375,8 @@ export default function StudioBlockedDates() {
         <div style={{ background: C.warnBg, border: `1px solid ${C.warnBorder}`, borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1rem', display: 'flex', gap: 10 }}>
           <AlertCircle size={15} color={C.warning} style={{ flexShrink: 0, marginTop: 1 }} />
           <div>
-            <p style={{ color: C.warning, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Account not linked to a stylist</p>
-            <p style={{ color: 'rgba(245,158,11,0.6)', fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>Ask an admin to link your profile in Studio → Stylists.</p>
+            <p style={{ color: C.warning, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Account not linked to a stylist</p>
+            <p style={{ color: 'rgba(245,158,11,0.6)', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>Ask an admin to link your profile in Studio → Stylists.</p>
           </div>
         </div>
       )}
@@ -386,10 +386,10 @@ export default function StudioBlockedDates() {
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.875rem 1.25rem', marginBottom: '1rem', display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Hours */}
           <div>
-            <p style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 4 }}>Hours this month</p>
+            <p style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, marginBottom: 4 }}>Hours this month</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
               <span style={{ fontSize: '1.4rem', fontFamily: 'Cormorant Garamond,serif', color: hoursUsed >= effectiveMaxHours ? C.danger : C.white, lineHeight: 1 }}>{hoursUsed}</span>
-              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>/ {effectiveMaxHours}</span>
+              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>/ {effectiveMaxHours}</span>
             </div>
             <div style={{ width: 110, height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 2, marginTop: 5 }}>
               <div style={{ width: `${Math.min(100, (hoursUsed / effectiveMaxHours) * 100)}%`, height: '100%', borderRadius: 2, background: hoursUsed >= effectiveMaxHours ? C.danger : C.gold, transition: 'width .3s' }} />
@@ -400,13 +400,13 @@ export default function StudioBlockedDates() {
 
           {/* Days */}
           <div>
-            <p style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 4 }}>Days off this month</p>
+            <p style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, marginBottom: 4 }}>Days off this month</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
               <span style={{ fontSize: '1.4rem', fontFamily: 'Cormorant Garamond,serif', color: approvedDays >= effectiveMaxDays ? C.danger : C.white, lineHeight: 1 }}>{approvedDays}</span>
-              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>/ {effectiveMaxDays} approved</span>
+              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>/ {effectiveMaxDays} approved</span>
             </div>
             {pendingDays > 0 && (
-              <p style={{ fontSize: '0.68rem', color: C.info, fontFamily: 'Jost,sans-serif', marginTop: 3 }}>{pendingDays} pending</p>
+              <p style={{ fontSize: '0.68rem', color: C.info, fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>{pendingDays} pending</p>
             )}
           </div>
         </div>
@@ -415,23 +415,23 @@ export default function StudioBlockedDates() {
       {/* ── Admin: pending requests ── */}
       {isAdmin && pendingRequests.length > 0 && (
         <div style={{ background: C.infoBg, border: `1px solid ${C.infoBorder}`, borderRadius: 12, padding: '0.875rem 1.1rem', marginBottom: '1rem' }}>
-          <p style={{ fontSize: '0.78rem', color: C.info, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.625rem' }}>
+          <p style={{ fontSize: '0.78rem', color: C.info, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.625rem' }}>
             {pendingRequests.length} day-off request{pendingRequests.length !== 1 ? 's' : ''} awaiting approval
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
             {pendingRequests.map(req => (
               <div key={req.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(96,165,250,0.06)', borderRadius: 8, padding: '0.5rem 0.75rem' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{req.stylist?.name}</span>
-                  <span style={{ fontSize: '0.75rem', color: C.dim, fontFamily: 'Jost,sans-serif', marginLeft: 8 }}>{format(new Date(req.date + 'T00:00:00'), 'EEE, MMM d')}</span>
-                  {req.reason && <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginLeft: 8 }}>— {req.reason}</span>}
+                  <span style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{req.stylist?.name}</span>
+                  <span style={{ fontSize: '0.75rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', marginLeft: 8 }}>{format(new Date(req.date + 'T00:00:00'), 'EEE, MMM d')}</span>
+                  {req.reason && <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginLeft: 8 }}>— {req.reason}</span>}
                 </div>
                 <button onClick={() => approveRequest(req)} className="approve-btn"
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: `1px solid ${C.successBorder}`, color: C.success, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'background .15s', flexShrink: 0 }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: `1px solid ${C.successBorder}`, color: C.success, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'background .15s', flexShrink: 0 }}>
                   <CheckCircle size={11} /> Approve
                 </button>
                 <button onClick={() => rejectRequest(req)} className="reject-btn"
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: `1px solid ${C.dangerBorder}`, color: C.danger, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'background .15s', flexShrink: 0 }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'transparent', border: `1px solid ${C.dangerBorder}`, color: C.danger, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'background .15s', flexShrink: 0 }}>
                   <XCircle size={11} /> Reject
                 </button>
               </div>
@@ -454,7 +454,7 @@ export default function StudioBlockedDates() {
             </button>
             <span className="font-display" style={{ fontSize: '1.3rem', color: C.white, flex: 1, textAlign: 'center' }}>{format(month, 'MMMM yyyy')}</span>
             <button onClick={() => setMonth(new Date())} className="bd-today-btn"
-              style={{ padding: '5px 14px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
+              style={{ padding: '5px 14px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
               Today
             </button>
             <button onClick={() => setMonth(addMonths(month, 1))} className="bd-nav"
@@ -472,7 +472,7 @@ export default function StudioBlockedDates() {
               { dot: { background: C.infoBg,   border: `1px solid ${C.infoBorder}` },   label: isAdmin ? 'Pending request' : 'Awaiting approval' },
               { dot: { background: C.dangerBg, border: `1px solid ${C.dangerBorder}` }, label: 'Salon closed' },
             ].map(({ dot, label }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                 <div style={{ width: 9, height: 9, borderRadius: 3, flexShrink: 0, ...dot }} />
                 {label}
               </div>
@@ -483,7 +483,7 @@ export default function StudioBlockedDates() {
           <div style={{ flex: 1, padding: '1rem 1.5rem 1.5rem', overflow: 'auto' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 5, marginBottom: 6 }}>
               {WDAYS.map((d, i) => (
-                <div key={i} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: i === 0 || i === 6 ? C.goldDim : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, paddingBottom: 6 }}>
+                <div key={i} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: i === 0 || i === 6 ? C.goldDim : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, paddingBottom: 6 }}>
                   {d}
                 </div>
               ))}
@@ -513,14 +513,14 @@ export default function StudioBlockedDates() {
                         {closed && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                             <BanIcon size={8} color={C.danger} />
-                            <span style={{ fontSize: 8, color: C.danger, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Closed</span>
+                            <span style={{ fontSize: 8, color: C.danger, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>Closed</span>
                           </div>
                         )}
 
                         {!closed && pending && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                             <Clock size={8} color={C.info} />
-                            <span style={{ fontSize: 8, color: C.info, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                            <span style={{ fontSize: 8, color: C.info, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                               {isAdmin ? (pending.stylist?.name?.split(' ')[0] || 'Request') : (pending.status === 'approved' ? 'Day off' : pending.status === 'rejected' ? 'Rejected' : 'Pending')}
                             </span>
                           </div>
@@ -529,9 +529,9 @@ export default function StudioBlockedDates() {
                         {!closed && !pending && hours.length > 0 && (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginTop: 2 }}>
                             {hours.slice(0, 3).map(h => (
-                              <span key={h} style={{ fontSize: 7, padding: '1px 4px', borderRadius: 3, background: 'rgba(245,158,11,0.18)', color: C.warning, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{h}</span>
+                              <span key={h} style={{ fontSize: 7, padding: '1px 4px', borderRadius: 3, background: 'rgba(245,158,11,0.18)', color: C.warning, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{h}</span>
                             ))}
-                            {hours.length > 3 && <span style={{ fontSize: 7, color: C.warning, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>+{hours.length - 3}</span>}
+                            {hours.length > 3 && <span style={{ fontSize: 7, color: C.warning, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>+{hours.length - 3}</span>}
                           </div>
                         )}
                       </div>
@@ -550,21 +550,21 @@ export default function StudioBlockedDates() {
             <div style={{ padding: '0.875rem 1.1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
               <BanIcon size={12} color={C.danger} />
               <div>
-                <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Salon Closures</p>
-                <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{upcomingSalon.length} upcoming</p>
+                <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Salon Closures</p>
+                <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{upcomingSalon.length} upcoming</p>
               </div>
             </div>
             <div style={{ overflowY: 'auto', minHeight: 0, padding: '0.625rem' }}>
               {upcomingSalon.length === 0
-                ? <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', textAlign: 'center', padding: '0.75rem 0' }}>None scheduled</p>
+                ? <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '0.75rem 0' }}>None scheduled</p>
                 : upcomingSalon.map((d, i) => (
                   <div key={d.id || i}
                     onClick={() => isAdmin && handleDayClick(new Date((d.date || d) + 'T00:00:00'))}
                     style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, borderRadius: 9, padding: '0.6rem 0.875rem', marginBottom: 5, cursor: isAdmin ? 'pointer' : 'default' }}>
-                    <p style={{ color: C.danger, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+                    <p style={{ color: C.danger, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
                       {format(new Date((d.date || d) + 'T00:00:00'), 'EEE, MMM d')}
                     </p>
-                    {d.reason && <p style={{ color: 'rgba(248,113,113,0.5)', fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{d.reason}</p>}
+                    {d.reason && <p style={{ color: 'rgba(248,113,113,0.5)', fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{d.reason}</p>}
                   </div>
                 ))
               }
@@ -579,13 +579,13 @@ export default function StudioBlockedDates() {
                 <div style={{ padding: '0.875rem 1.1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Calendar size={12} color={C.info} />
                   <div>
-                    <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>My Requests</p>
-                    <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{upcoming.length} upcoming</p>
+                    <p style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>My Requests</p>
+                    <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{upcoming.length} upcoming</p>
                   </div>
                 </div>
                 <div style={{ overflowY: 'auto', minHeight: 0, padding: '0.625rem' }}>
                   {upcoming.length === 0
-                    ? <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', textAlign: 'center', padding: '0.75rem 0' }}>No requests</p>
+                    ? <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '0.75rem 0' }}>No requests</p>
                     : upcoming.map(r => {
                         const col = r.status === 'approved' ? C.success : r.status === 'rejected' ? C.danger : C.info
                         const bg2 = r.status === 'approved' ? C.successBg : r.status === 'rejected' ? C.dangerBg : C.infoBg
@@ -594,14 +594,14 @@ export default function StudioBlockedDates() {
                           <div key={r.id} onClick={() => handleDayClick(new Date(r.date + 'T00:00:00'))}
                             style={{ background: bg2, border: `1px solid ${br2}`, borderRadius: 9, padding: '0.6rem 0.875rem', marginBottom: 5, cursor: 'pointer' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <p style={{ color: col, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+                              <p style={{ color: col, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
                                 {format(new Date(r.date + 'T00:00:00'), 'EEE, MMM d')}
                               </p>
-                              <span style={{ fontSize: '0.63rem', padding: '2px 6px', borderRadius: 4, background: `${col}22`, color: col, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                              <span style={{ fontSize: '0.63rem', padding: '2px 6px', borderRadius: 4, background: `${col}22`, color: col, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                 {r.status}
                               </span>
                             </div>
-                            {r.reason && <p style={{ color: `${col}99`, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{r.reason}</p>}
+                            {r.reason && <p style={{ color: `${col}99`, fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{r.reason}</p>}
                           </div>
                         )
                       })
@@ -627,7 +627,7 @@ export default function StudioBlockedDates() {
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                 <div>
                   <h2 className="font-display" style={{ fontSize: '1.6rem', color: C.white, lineHeight: 1.1 }}>{format(selected.day, 'EEEE')}</h2>
-                  <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>{format(selected.day, 'MMMM d, yyyy')}</p>
+                  <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>{format(selected.day, 'MMMM d, yyyy')}</p>
                 </div>
                 <button onClick={closeModal} style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                   <X size={14} />
@@ -653,7 +653,7 @@ export default function StudioBlockedDates() {
               {isAdmin && blockTab === 'day' && (
                 selected.salonClosed ? (
                   <>
-                    <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                    <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: '1.25rem', lineHeight: 1.6 }}>
                       This full day is closed — no bookings are accepted.
                     </p>
                     <div style={{ display: 'flex', gap: '0.625rem' }}>
@@ -685,8 +685,8 @@ export default function StudioBlockedDates() {
                   {/* Worker quota pill */}
                   {!isAdmin && (
                     <div style={{ background: hoursUsed >= effectiveMaxHours ? C.dangerBg : C.goldBg, border: `1px solid ${hoursUsed >= effectiveMaxHours ? C.dangerBorder : C.goldBorder}`, borderRadius: 8, padding: '0.45rem 0.75rem', marginBottom: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: hoursUsed >= effectiveMaxHours ? C.danger : C.goldDim }}>Hours this month</span>
-                      <span style={{ fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: hoursUsed >= effectiveMaxHours ? C.danger : C.gold }}>
+                      <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: hoursUsed >= effectiveMaxHours ? C.danger : C.goldDim }}>Hours this month</span>
+                      <span style={{ fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: hoursUsed >= effectiveMaxHours ? C.danger : C.gold }}>
                         {(() => {
                           const existing = myHours.filter(h => h.date >= today && h.date <= monthEnd && h.date !== selected.key).length
                           const projected = existing + selHours.length
@@ -697,12 +697,12 @@ export default function StudioBlockedDates() {
                   )}
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                    <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                       {isAdmin ? 'Block slots salon-wide' : 'Select slots to block'}
                     </p>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => setSelHours([...SLOTS])} style={{ fontSize: 9, padding: '3px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, cursor: 'pointer', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>All</button>
-                      <button onClick={() => setSelHours([])} style={{ fontSize: 9, padding: '3px 9px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, cursor: 'pointer', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Clear</button>
+                      <button onClick={() => setSelHours([...SLOTS])} style={{ fontSize: 9, padding: '3px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>All</button>
+                      <button onClick={() => setSelHours([])} style={{ fontSize: 9, padding: '3px 9px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Clear</button>
                     </div>
                   </div>
 
@@ -712,13 +712,13 @@ export default function StudioBlockedDates() {
                       ['Afternoon', SLOTS.filter(s => parseInt(s) >= 13)],
                     ].map(([label, slots]) => (
                       <div key={label}>
-                        <p style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 8 }}>{label}</p>
+                        <p style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, marginBottom: 8 }}>{label}</p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 5 }}>
                           {slots.map(h => {
                             const on = selHours.includes(h)
                             return (
                               <button key={h} onClick={() => toggleHour(h)} className="hour-pill"
-                                style={{ padding: '0.45rem 0', borderRadius: 8, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: on ? 700 : 400, cursor: 'pointer', border: on ? 'none' : `1px solid ${C.border}`, background: on ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.03)', color: on ? '#000' : C.muted, boxShadow: on ? `0 3px 10px rgba(184,212,232,0.3)` : 'none', transition: 'all .15s' }}>
+                                style={{ padding: '0.45rem 0', borderRadius: 8, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: on ? 700 : 400, cursor: 'pointer', border: on ? 'none' : `1px solid ${C.border}`, background: on ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.03)', color: on ? '#000' : C.muted, boxShadow: on ? `0 3px 10px rgba(184,212,232,0.3)` : 'none', transition: 'all .15s' }}>
                                 {h}
                               </button>
                             )
@@ -753,9 +753,9 @@ export default function StudioBlockedDates() {
                         <div style={{ background: bg2, border: `1px solid ${br2}`, borderRadius: 10, padding: '0.875rem', marginBottom: '1.1rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: selected.request.reason ? 4 : 0 }}>
                             <Icon size={13} color={col} />
-                            <p style={{ fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, color: col }}>{label}</p>
+                            <p style={{ fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: col }}>{label}</p>
                           </div>
-                          {selected.request.reason && <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: C.muted, marginTop: 2 }}>{selected.request.reason}</p>}
+                          {selected.request.reason && <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', color: C.muted, marginTop: 2 }}>{selected.request.reason}</p>}
                         </div>
                       )
                     })()}
@@ -773,14 +773,14 @@ export default function StudioBlockedDates() {
                   <>
                     <div style={{ background: C.infoBg, border: `1px solid ${C.infoBorder}`, borderRadius: 10, padding: '0.75rem 0.875rem', marginBottom: '1rem', display: 'flex', gap: 8 }}>
                       <AlertCircle size={13} color={C.info} style={{ flexShrink: 0, marginTop: 1 }} />
-                      <p style={{ fontSize: '0.75rem', color: C.info, fontFamily: 'Jost,sans-serif', lineHeight: 1.55 }}>
+                      <p style={{ fontSize: '0.75rem', color: C.info, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.55 }}>
                         Full days require manager approval before they're blocked on the calendar.
                       </p>
                     </div>
 
                     {approvedDays >= effectiveMaxDays && (
                       <div style={{ background: C.warnBg, border: `1px solid ${C.warnBorder}`, borderRadius: 10, padding: '0.75rem 0.875rem', marginBottom: '1rem' }}>
-                        <p style={{ fontSize: '0.75rem', color: C.warning, fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>
+                        <p style={{ fontSize: '0.75rem', color: C.warning, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5 }}>
                           You've used your {effectiveMaxDays}-day allowance this month. This request may not be approved.
                         </p>
                       </div>
@@ -829,7 +829,7 @@ export default function StudioBlockedDates() {
                   const on = settingsTab === t.id
                   return (
                     <button key={t.id} onClick={() => setSettingsTab(t.id)}
-                      style={{ flex: 1, padding: '0.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, transition: 'all .18s', background: on ? C.goldBg : 'transparent', color: on ? C.gold : C.muted, outline: on ? `1px solid ${C.goldBorder}` : 'none' }}>
+                      style={{ flex: 1, padding: '0.5rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, transition: 'all .18s', background: on ? C.goldBg : 'transparent', color: on ? C.gold : C.muted, outline: on ? `1px solid ${C.goldBorder}` : 'none' }}>
                       {t.label}
                     </button>
                   )
@@ -842,7 +842,7 @@ export default function StudioBlockedDates() {
               {/* ── General tab ── */}
               {settingsTab === 'general' && (
                 <>
-                  <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: '1.1rem', lineHeight: 1.55 }}>
+                  <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: '1.1rem', lineHeight: 1.55 }}>
                     Default limits for all stylists. Individual overrides take priority when set.
                   </p>
                   <div style={{ marginBottom: '1rem' }}>
@@ -869,16 +869,16 @@ export default function StudioBlockedDates() {
               {/* ── Overrides tab ── */}
               {settingsTab === 'overrides' && (
                 <>
-                  <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginBottom: '1rem', lineHeight: 1.55 }}>
+                  <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: '1rem', lineHeight: 1.55 }}>
                     Leave blank to use the general limit. Set a number to give that stylist a personal cap.
                   </p>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: '1.25rem' }}>
                     {/* Header row */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px', gap: 8, paddingBottom: 6, borderBottom: `1px solid ${C.border}` }}>
-                      <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Stylist</span>
-                      <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, textAlign: 'center' }}>Days</span>
-                      <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, textAlign: 'center' }}>Hours</span>
+                      <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>Stylist</span>
+                      <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textAlign: 'center' }}>Days</span>
+                      <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textAlign: 'center' }}>Hours</span>
                     </div>
 
                     {allStylists.map(s => {
@@ -891,7 +891,7 @@ export default function StudioBlockedDates() {
                               ? <img src={s.photo_url} alt={s.name} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                               : <div style={{ width: 26, height: 26, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, flexShrink: 0 }} />
                             }
-                            <span style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
+                            <span style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</span>
                           </div>
                           <input
                             type="number" min="0" max="31"

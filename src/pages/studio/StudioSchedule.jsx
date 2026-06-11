@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import {
@@ -131,7 +131,7 @@ export default function StudioSchedule() {
       {/* Header */}
       <div style={{ flexShrink: 0, marginBottom: '0.6rem', paddingBottom: '0.6rem', borderBottom: `1px solid ${C.border}` }}>
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.1rem' }}>Schedule</h1>
-        <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appointments.length} total appointments</p>
+        <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{appointments.length} total appointments</p>
       </div>
 
       {/* Calendar card */}
@@ -145,7 +145,7 @@ export default function StudioSchedule() {
           </button>
           <span className="font-display" style={{ fontSize: '1.05rem', color: C.white, flex: 1, textAlign: 'center' }}>{navLabel}</span>
           <button onClick={navToday} className="d-today-btn"
-            style={{ padding: '4px 12px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .18s' }}>
+            style={{ padding: '4px 12px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .18s' }}>
             Today
           </button>
           <button onClick={navNext} className="d-nav"
@@ -155,7 +155,7 @@ export default function StudioSchedule() {
           <div style={{ display: 'flex', background: C.subtle, borderRadius: 10, padding: 3, gap: 2, marginLeft: 6 }}>
             {['daily', 'weekly', 'monthly'].map(v => (
               <button key={v} onClick={() => setView(v)}
-                style={{ padding: '5px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.05em', transition: 'all .18s',
+                style={{ padding: '5px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.05em', transition: 'all .18s',
                   background: view === v ? C.goldBg : 'transparent',
                   color: view === v ? C.gold : C.muted,
                   outline: view === v ? `1px solid ${C.goldBorder}` : 'none',
@@ -171,14 +171,14 @@ export default function StudioSchedule() {
         {stylists.length > 0 && (
           <div style={{ display: 'flex', gap: 6, padding: '0.35rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, overflowX: 'auto' }}>
             <button onClick={() => setStylistFilter(null)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, border: `1px solid ${!stylistFilter ? C.goldBorder : C.border}`, background: !stylistFilter ? C.goldBg : 'transparent', color: !stylistFilter ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, border: `1px solid ${!stylistFilter ? C.goldBorder : C.border}`, background: !stylistFilter ? C.goldBg : 'transparent', color: !stylistFilter ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
               All stylists
             </button>
             {stylists.map(s => {
               const active = stylistFilter === s.id
               return (
                 <button key={s.id} onClick={() => setStylistFilter(active ? null : s.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '3px 10px 3px 4px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : C.border}`, background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '3px 10px 3px 4px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : C.border}`, background: active ? C.goldBg : 'transparent', color: active ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {s.photo_url
                     ? <img src={s.photo_url} alt={s.name} style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `1.5px solid ${active ? C.gold : 'rgba(255,255,255,0.12)'}` }} />
                     : <div style={{ width: 20, height: 20, borderRadius: '50%', background: active ? C.goldBg : C.subtle, border: `1.5px solid ${active ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, color: active ? C.gold : C.muted, fontWeight: 700 }}>{s.name.charAt(0)}</div>
@@ -195,7 +195,7 @@ export default function StudioSchedule() {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0.4rem 0.75rem 0', minHeight: 0 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4, marginBottom: 4, flexShrink: 0 }}>
               {WDAYS_SUN.map((d, i) => (
-                <div key={i} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: i === 0 || i === 6 ? C.goldDim : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '3px 0' }}>{d}</div>
+                <div key={i} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: i === 0 || i === 6 ? C.goldDim : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '3px 0' }}>{d}</div>
               ))}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4, alignContent: 'start', flex: 1 }}>
@@ -217,26 +217,26 @@ export default function StudioSchedule() {
                         style={{ minHeight: 54, borderRadius: 7, padding: '5px 5px 4px', border: `1.5px solid ${isToday ? C.goldBorder : C.border}`, background: isToday ? C.goldBg : isWeekend ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.02)', opacity: isPast && !hasAppts ? 0.35 : 1, cursor: hasAppts ? 'pointer' : 'default', display: 'flex', flexDirection: 'column', transition: 'all .18s ease' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 5 }}>
                           <span className="font-display" style={{ fontSize: '0.85rem', color: isToday ? C.gold : isPast ? C.muted : C.white, fontWeight: 700, lineHeight: 1 }}>{format(day, 'd')}</span>
-                          {hasAppts && <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 5px', lineHeight: 1.6 }}>{appts.length}</span>}
+                          {hasAppts && <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 5px', lineHeight: 1.6 }}>{appts.length}</span>}
                         </div>
                         {hasAppts && (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 'auto' }}>
                             {ALL_STATUSES.map(st => counts[st] > 0 && (
                               <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <div style={{ width: 5, height: 5, borderRadius: '50%', background: STATUS[st].color }} className={st === 'pending' ? 'dot-pulse' : ''} />
-                                {counts[st] > 1 && <span style={{ fontSize: 8, color: STATUS[st].color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{counts[st]}</span>}
+                                {counts[st] > 1 && <span style={{ fontSize: 8, color: STATUS[st].color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{counts[st]}</span>}
                               </div>
                             ))}
                             {inStoreCount > 0 && (
                               <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <div style={{ width: 5, height: 5, borderRadius: '50%', background: PAY_IN_STORE_STYLE.color }} />
-                                {inStoreCount > 1 && <span style={{ fontSize: 8, color: PAY_IN_STORE_STYLE.color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{inStoreCount}</span>}
+                                {inStoreCount > 1 && <span style={{ fontSize: 8, color: PAY_IN_STORE_STYLE.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{inStoreCount}</span>}
                               </div>
                             )}
                           </div>
                         )}
                         {hasAppts && appts[0] && (
-                          <p style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {appts[0].time?.slice(0, 5)} {appts[0].stylists?.name?.split(' ')[0] || ''}
                           </p>
                         )}
@@ -247,12 +247,12 @@ export default function StudioSchedule() {
             </div>
             <div style={{ flexShrink: 0, display: 'flex', gap: 14, padding: '0.3rem 0.25rem', flexWrap: 'wrap' }}>
               {ALL_STATUSES.map(st => (
-                <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: STATUS[st].color, flexShrink: 0 }} />
                   {st.charAt(0).toUpperCase() + st.slice(1)}
                 </div>
               ))}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: PAY_IN_STORE_STYLE.color, flexShrink: 0 }} />
                 Pay in store
               </div>
@@ -274,7 +274,7 @@ export default function StudioSchedule() {
                 const isToday = isSameDay(day, new Date())
                 return (
                   <div key={i} style={{ flex: 1, textAlign: 'center', padding: '0.35rem 0.25rem', borderLeft: `1px solid ${C.border}`, background: isToday ? C.goldBg : 'transparent' }}>
-                    <p style={{ fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase', color: isToday ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 2 }}>{WDAYS_SHORT[i]}</p>
+                    <p style={{ fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase', color: isToday ? C.gold : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, marginBottom: 2 }}>{WDAYS_SHORT[i]}</p>
                     <p className="font-display" style={{ fontSize: '1rem', color: isToday ? C.gold : C.white, lineHeight: 1, fontWeight: 700 }}>{format(day, 'd')}</p>
                   </div>
                 )
@@ -288,7 +288,7 @@ export default function StudioSchedule() {
                 {/* Time axis */}
                 <div style={{ width: 48, flexShrink: 0, position: 'relative' }}>
                   {GRID_HOURS.map((h, i) => (
-                    <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'Jost,sans-serif' }}>
+                    <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif' }}>
                       {String(h).padStart(2, '0')}:00
                     </div>
                   ))}
@@ -319,18 +319,18 @@ export default function StudioSchedule() {
                                 ? <img src={appt.stylists.photo_url} alt="" style={{ width: 14, height: 14, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0 }} />
                                 : <div style={{ width: 14, height: 14, borderRadius: '50%', background: `${s.color}22`, border: `1px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, color: s.color, fontWeight: 700, flexShrink: 0 }}>{appt.stylists?.name?.charAt(0) || '?'}</div>
                               }
-                              <p style={{ fontSize: 9, color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, lineHeight: 1.2 }}>
+                              <p style={{ fontSize: 9, color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, lineHeight: 1.2 }}>
                                 {appt.stylists?.name?.split(' ')[0] || '—'}
                               </p>
                               <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color, flexShrink: 0 }} className={appt.status === 'pending' ? 'dot-pulse' : ''} />
                             </div>
                             {h >= 44 && appt.services?.name && (
-                              <p style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2, marginTop: 2 }}>
+                              <p style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2, marginTop: 2 }}>
                                 {appt.services.name}
                               </p>
                             )}
                             {h >= 60 && (
-                              <p style={{ fontSize: 8, color: s.color, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+                              <p style={{ fontSize: 8, color: s.color, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
                                 {appt.services?.duration ? `${appt.services.duration} min` : ''}
                               </p>
                             )}
@@ -346,12 +346,12 @@ export default function StudioSchedule() {
             {/* Legend */}
             <div style={{ flexShrink: 0, display: 'flex', gap: 14, padding: '0.3rem 1rem', borderTop: `1px solid ${C.border}`, flexWrap: 'wrap' }}>
               {ALL_STATUSES.map(st => (
-                <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: STATUS[st].color, flexShrink: 0 }} />
                   {st.charAt(0).toUpperCase() + st.slice(1)}
                 </div>
               ))}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: PAY_IN_STORE_STYLE.color, flexShrink: 0 }} />
                 Pay in store
               </div>
@@ -369,7 +369,7 @@ export default function StudioSchedule() {
               {/* Time axis */}
               <div style={{ width: 48, flexShrink: 0, position: 'relative' }}>
                 {GRID_HOURS.map((h, i) => (
-                  <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'Jost,sans-serif' }}>
+                  <div key={h} style={{ position: 'absolute', top: i * HOUR_HEIGHT + 4, right: 8, fontSize: '0.62rem', color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif' }}>
                     {String(h).padStart(2, '0')}:00
                   </div>
                 ))}
@@ -396,26 +396,26 @@ export default function StudioSchedule() {
                           : <div style={{ width: 24, height: 24, borderRadius: '50%', background: `${s.color}22`, border: `1.5px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: s.color, fontWeight: 700, flexShrink: 0 }}>{appt.stylists?.name?.charAt(0) || '?'}</div>
                         }
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                          <p style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
                             {appt.stylists?.name || 'Stylist'}
                           </p>
                           {h >= 44 && (
-                            <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                            <p style={{ color: C.muted, fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
                               {[appt.services?.name, appt.profiles?.full_name].filter(Boolean).join(' · ')}
                             </p>
                           )}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3, flexShrink: 0 }}>
-                          <span style={{ fontSize: '0.7rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{appt.time?.slice(0, 5)}</span>
+                          <span style={{ fontSize: '0.7rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{appt.time?.slice(0, 5)}</span>
                           {h >= 44 && (
                             <div style={{ padding: '1px 7px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}` }}>
-                              <span style={{ fontSize: 8, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
+                              <span style={{ fontSize: 8, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
                             </div>
                           )}
                         </div>
                       </div>
                       {h >= 56 && appt.services?.duration && (
-                        <p style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', marginTop: 4 }}>⏱ {appt.services.duration} min</p>
+                        <p style={{ fontSize: 9, color: s.color, fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>⏱ {appt.services.duration} min</p>
                       )}
                     </div>
                   )
@@ -434,7 +434,7 @@ export default function StudioSchedule() {
                   <div style={{ width: 48, height: 48, borderRadius: 14, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ fontSize: '1.4rem', color: C.muted }}>📅</span>
                   </div>
-                  <p style={{ color: C.muted, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif' }}>No appointments today</p>
+                  <p style={{ color: C.muted, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif' }}>No appointments today</p>
                 </div>
               ) : dayApptList.map(appt => {
                 const s = apptStyle(appt)
@@ -449,11 +449,11 @@ export default function StudioSchedule() {
                         : <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${s.color}22`, border: `1.5px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: s.color, fontWeight: 700, flexShrink: 0 }}>{appt.stylists?.name?.charAt(0) || '?'}</div>
                       }
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {appt.stylists?.name || 'Stylist'}
                         </p>
                         {appt.services?.name && (
-                          <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {appt.services.name}
                           </p>
                         )}
@@ -463,7 +463,7 @@ export default function StudioSchedule() {
                           {appt.time?.slice(0, 5)}
                         </span>
                         <div style={{ padding: '2px 8px', borderRadius: 20, background: `${s.color}18`, border: `1px solid ${s.border}` }}>
-                          <span style={{ fontSize: 8, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{appt.status}</span>
+                          <span style={{ fontSize: 8, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{appt.status}</span>
                         </div>
                       </div>
                     </div>
@@ -471,17 +471,17 @@ export default function StudioSchedule() {
                     {/* Bottom row: client + duration + price */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: '0.5rem', borderTop: `1px solid ${s.color}28` }}>
                       {appt.profiles?.full_name && (
-                        <span style={{ flex: 1, fontSize: '0.75rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ flex: 1, fontSize: '0.75rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {appt.profiles.full_name}
                         </span>
                       )}
                       {appt.services?.duration && (
-                        <span style={{ fontSize: '0.7rem', color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.7rem', color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>
                           ⏱ {appt.services.duration} min
                         </span>
                       )}
                       {appt.services?.price && (
-                        <span style={{ fontSize: '0.75rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.75rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, flexShrink: 0 }}>
                           ${appt.services.price}
                         </span>
                       )}
@@ -536,7 +536,7 @@ export default function StudioSchedule() {
                     </p>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}` }}>
                       <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={a.status === 'pending' ? 'dot-pulse' : ''} />
-                      <span style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.08em' }}>{a.status}</span>
+                      <span style={{ fontSize: 9, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.08em' }}>{a.status}</span>
                     </div>
                   </div>
                 </div>
@@ -553,8 +553,8 @@ export default function StudioSchedule() {
               <div style={{ padding: '0.875rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {rows.map(({ label, value, gold, blue }, i) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.45rem 0', borderBottom: i < rows.length - 1 ? `1px solid ${C.border}` : 'none' }}>
-                    <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0, marginRight: 16 }}>{label}</span>
-                    <span style={{ fontSize: '0.82rem', color: blue ? PAY_IN_STORE_STYLE.color : gold ? C.gold : C.dim, fontFamily: 'Jost,sans-serif', fontWeight: blue || gold ? 600 : 300, textAlign: 'right' }}>{value}</span>
+                    <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0, marginRight: 16 }}>{label}</span>
+                    <span style={{ fontSize: '0.82rem', color: blue ? PAY_IN_STORE_STYLE.color : gold ? C.gold : C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: blue || gold ? 600 : 300, textAlign: 'right' }}>{value}</span>
                   </div>
                 ))}
               </div>

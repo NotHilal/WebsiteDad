@@ -34,13 +34,13 @@ export default function Login() {
     border: '1px solid rgba(var(--rgb-hi),0.08)', borderRadius: 13,
     padding: '14px 14px 14px 46px',
     fontSize: '0.88rem', color: 'var(--col-text)', outline: 'none',
-    fontFamily: 'Jost,sans-serif', fontWeight: 300,
+    fontFamily: 'DM Sans,sans-serif', fontWeight: 300,
     transition: 'border-color 0.3s, background 0.3s',
   }
   const lbl = {
     display: 'block', fontSize: 10, letterSpacing: '0.22em',
     textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.3)',
-    marginBottom: 8, fontFamily: 'Jost,sans-serif',
+    marginBottom: 8, fontFamily: 'DM Sans,sans-serif',
   }
   const onFocus = e => { e.target.style.borderColor = 'rgba(var(--rgb-acc),0.45)'; e.target.style.background = 'rgba(var(--rgb-hi),0.06)' }
   const onBlur  = e => { e.target.style.borderColor = 'rgba(var(--rgb-hi),0.08)'; e.target.style.background = 'rgba(var(--rgb-hi),0.04)' }

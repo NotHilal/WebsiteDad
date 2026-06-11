@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, Edit2, Trash2, X, Save, Scissors, Clock, Upload, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -34,10 +34,10 @@ const GENDER = [
 const inp = (extra = {}) => ({
   width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
   borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none',
-  fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s, box-shadow .2s',
+  fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s, box-shadow .2s',
   boxSizing: 'border-box', ...extra,
 })
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 export default function StudioServices() {
   const log = useLogAction()
@@ -162,13 +162,13 @@ export default function StudioServices() {
       <div style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Services</h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
             {services.filter(s => s.active).length} active
             {archivedCount > 0 && <span style={{ color: 'rgba(248,113,113,0.5)', marginLeft: 8 }}>· {archivedCount} archived</span>}
           </p>
         </div>
         <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-g"
-          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', letterSpacing: '0.04em' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', letterSpacing: '0.04em' }}>
           <Plus size={14} /> New Service
         </button>
       </div>
@@ -176,13 +176,13 @@ export default function StudioServices() {
       {/* Category filter bar */}
       <div style={{ flexShrink: 0, display: 'flex', gap: 6, marginBottom: '1.1rem', flexWrap: 'wrap' }}>
         <button onClick={() => setCatFilter('all')}
-          style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${catFilter === 'all' ? C.goldBorder : C.border}`, background: catFilter === 'all' ? C.goldBg : 'transparent', color: catFilter === 'all' ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', textTransform: 'uppercase' }}
+          style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${catFilter === 'all' ? C.goldBorder : C.border}`, background: catFilter === 'all' ? C.goldBg : 'transparent', color: catFilter === 'all' ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', textTransform: 'uppercase' }}
           className="cat-filter">
           All · {services.length}
         </button>
         {archivedCount > 0 && (
           <button onClick={() => setCatFilter('archived')}
-            style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${catFilter === 'archived' ? 'rgba(248,113,113,0.4)' : C.border}`, background: catFilter === 'archived' ? 'rgba(248,113,113,0.1)' : 'transparent', color: catFilter === 'archived' ? '#f87171' : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}
+            style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${catFilter === 'archived' ? 'rgba(248,113,113,0.4)' : C.border}`, background: catFilter === 'archived' ? 'rgba(248,113,113,0.1)' : 'transparent', color: catFilter === 'archived' ? '#f87171' : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6 }}
             className="cat-filter">
             <EyeOff size={9} />
             Archived · {archivedCount}
@@ -192,7 +192,7 @@ export default function StudioServices() {
           const cat = CAT[c]
           return (
             <button key={c} onClick={() => setCatFilter(c)}
-              style={{ padding: '5px 14px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${catFilter === c ? cat.color + '55' : C.border}`, background: catFilter === c ? cat.bg : 'transparent', color: catFilter === c ? cat.color : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', textTransform: 'uppercase' }}
+              style={{ padding: '5px 14px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${catFilter === c ? cat.color + '55' : C.border}`, background: catFilter === c ? cat.bg : 'transparent', color: catFilter === c ? cat.color : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', textTransform: 'uppercase' }}
               className="cat-filter">
               <div style={{ width: 6, height: 6, borderRadius: '50%', background: catFilter === c ? cat.color : C.border, transition: 'background .15s' }} />
               {cat.label} · {catCounts[c]}
@@ -214,7 +214,7 @@ export default function StudioServices() {
             <div style={{ width: 60, height: 60, borderRadius: 18, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scissors size={24} color={C.muted} strokeWidth={1.2} />
             </div>
-            <p style={{ color: C.muted, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif' }}>No services found</p>
+            <p style={{ color: C.muted, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif' }}>No services found</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
@@ -250,14 +250,14 @@ export default function StudioServices() {
                   {/* ── Top row: category badge (left) + action buttons (right) ── */}
                   <div style={{ position: 'absolute', top: 12, left: 12, right: 12, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', zIndex: 3 }}>
                     <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: cat.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${cat.color}35` }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9, padding: '4px 11px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: cat.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${cat.color}35` }}>
                         <div style={{ width: 5, height: 5, borderRadius: '50%', background: cat.color }} />
                         {cat.label}
                       </span>
                       {s.gender && s.gender !== 'mixed' && (() => {
                         const g = GENDER.find(g => g.value === s.gender)
                         return g ? (
-                          <span style={{ fontSize: 9, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: g.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${g.border}` }}>
+                          <span style={{ fontSize: 9, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.58)', backdropFilter: 'blur(10px)', color: g.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', border: `1px solid ${g.border}` }}>
                             {g.label}
                           </span>
                         ) : null
@@ -293,7 +293,7 @@ export default function StudioServices() {
 
                     {/* Description */}
                     {s.description && (
-                      <p style={{ color: 'rgba(255,255,255,0.48)', fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.6, marginBottom: '0.85rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.48)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6, marginBottom: '0.85rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {s.description}
                       </p>
                     )}
@@ -309,7 +309,7 @@ export default function StudioServices() {
                       {s.duration > 0 && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                           <Clock size={10} color="rgba(255,255,255,0.5)" strokeWidth={1.5} />
-                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
+                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
                             {Math.floor(s.duration / 60) > 0 ? `${Math.floor(s.duration / 60)}h ` : ''}{s.duration % 60 > 0 ? `${s.duration % 60}m` : ''}
                           </span>
                         </div>
@@ -345,7 +345,7 @@ export default function StudioServices() {
                 {/* Modal header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                   <div>
-                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 5 }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, marginBottom: 5 }}>
                       {modal === 'add' ? 'New Service' : 'Edit Service'}
                     </p>
                     <h2 className="font-display font-light" style={{ fontSize: '1.8rem', color: C.white, lineHeight: 1 }}>
@@ -384,7 +384,7 @@ export default function StudioServices() {
                         </div>
                       )}
                       {/* Upload button */}
-                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: `1px dashed ${filePreview ? C.goldBorder : 'rgba(255,255,255,0.15)'}`, cursor: 'pointer', fontSize: '0.82rem', color: C.muted, fontFamily: 'Jost,sans-serif', transition: 'all 0.2s' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.55rem 0.8rem', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: `1px dashed ${filePreview ? C.goldBorder : 'rgba(255,255,255,0.15)'}`, cursor: 'pointer', fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s' }}>
                         <Upload size={13} />
                         {filePreview ? 'Replace image' : 'Upload image'}
                         <input type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
@@ -434,7 +434,7 @@ export default function StudioServices() {
                         const sel = form.category === c
                         return (
                           <button key={c} type="button" onClick={() => setForm(p => ({ ...p, category: c }))}
-                            style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sel ? cat.color + '66' : C.border}`, background: sel ? cat.bg : 'transparent', color: sel ? cat.color : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: 5 }}>
+                            style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sel ? cat.color + '66' : C.border}`, background: sel ? cat.bg : 'transparent', color: sel ? cat.color : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: 5 }}>
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: sel ? cat.color : C.border, transition: 'background .15s' }} />
                             {cat.label}
                           </button>
@@ -451,7 +451,7 @@ export default function StudioServices() {
                         const isSel = form.gender === g.value
                         return (
                           <button key={g.value} type="button" onClick={() => setForm(p => ({ ...p, gender: g.value }))}
-                            style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${isSel ? g.border : C.border}`, background: isSel ? `${g.color}18` : 'transparent', color: isSel ? g.color : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${isSel ? g.border : C.border}`, background: isSel ? `${g.color}18` : 'transparent', color: isSel ? g.color : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                             {g.label}
                           </button>
                         )
@@ -464,11 +464,11 @@ export default function StudioServices() {
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
                   <button onClick={closeModal} className="modal-cancel"
-                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
+                    style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s' }}>
                     Cancel
                   </button>
                   <button onClick={save} disabled={saving} className="btn-g"
-                    style={{ flex: 1.5, padding: '0.7rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'all .2s' }}>
+                    style={{ flex: 1.5, padding: '0.7rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'all .2s' }}>
                     {saving
                       ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
                       : <><Save size={14} /> {modal === 'add' ? 'Add Service' : 'Save Changes'}</>
@@ -499,25 +499,25 @@ export default function StudioServices() {
                   </div>
                   <div>
                     <h3 style={{ color: C.white, fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete service?</h3>
-                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
+                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
                   </div>
                 </div>
 
                 <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem' }}>
-                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>{deleteTarget.name}</p>
-                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
+                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 2 }}>{deleteTarget.name}</p>
+                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif' }}>
                     {[deleteTarget.category && (CAT[deleteTarget.category]?.label), deleteTarget.price && `$${deleteTarget.price}`].filter(Boolean).join(' · ')}
                   </p>
                 </div>
 
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={closeDelete}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', transition: 'all .15s' }}
                     className="modal-cancel">
                     Cancel
                   </button>
                   <button onClick={confirmDelete} disabled={deleting}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
                     {deleting
                       ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                       : <><Trash2 size={13} /> Delete</>

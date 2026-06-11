@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, X, Calendar, User } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useLogAction } from '../../hooks/useLogAction'
@@ -181,7 +181,7 @@ export default function StudioAppointments() {
       <div style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Appointments</h1>
-          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+          <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
             {totalAppts} total
             {pendingCount > 0 && <span style={{ color: '#f59e0b', marginLeft: 8 }}>· {pendingCount} pending</span>}
           </p>
@@ -201,7 +201,7 @@ export default function StudioAppointments() {
             <ChevronRight size={14} />
           </button>
           <button onClick={() => setMonth(new Date())}
-            style={{ padding: '5px 14px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .18s' }}
+            style={{ padding: '5px 14px', borderRadius: 20, background: 'transparent', border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .18s' }}
             className="bd-nav cal-today-btn">
             Today
           </button>
@@ -221,7 +221,7 @@ export default function StudioAppointments() {
                 border: `1px solid ${active ? C.goldBorder : 'rgba(255,255,255,0.14)'}`,
                 background: active ? C.goldBg : 'rgba(255,255,255,0.05)',
                 color: active ? C.gold : 'rgba(255,255,255,0.6)',
-                fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: active ? 700 : 500,
+                fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 500,
                 cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em',
               }}>
               {label}
@@ -239,7 +239,7 @@ export default function StudioAppointments() {
         {/* Weekday headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 5, marginBottom: 5, flexShrink: 0 }}>
           {WDAYS.map((d, i) => (
-            <div key={i} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: i === 0 || i === 6 ? C.goldDim : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 700, padding: '4px 0' }}>
+            <div key={i} style={{ textAlign: 'center', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: i === 0 || i === 6 ? C.goldDim : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '4px 0' }}>
               {d}
             </div>
           ))}
@@ -287,7 +287,7 @@ export default function StudioAppointments() {
                         {format(day, 'd')}
                       </span>
                       {hasAppts && (
-                        <span className="cal-appt-badge" style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 6px', lineHeight: 1.6 }}>
+                        <span className="cal-appt-badge" style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.goldDim, background: C.goldBg, border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '1px 6px', lineHeight: 1.6 }}>
                           {appts.length}
                         </span>
                       )}
@@ -301,7 +301,7 @@ export default function StudioAppointments() {
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: STATUS[st].color, flexShrink: 0 }}
                               className={st === 'pending' ? 'dot-pulse' : ''} />
                             {counts[st] > 1 && (
-                              <span style={{ fontSize: 8, color: STATUS[st].color, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{counts[st]}</span>
+                              <span style={{ fontSize: 8, color: STATUS[st].color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{counts[st]}</span>
                             )}
                           </div>
                         ))}
@@ -310,7 +310,7 @@ export default function StudioAppointments() {
 
                     {/* First appointment preview */}
                     {hasAppts && appts[0] && (
-                      <p className="cal-appt-preview" style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p className="cal-appt-preview" style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {appts[0].time?.slice(0, 5)} {appts[0].profiles?.full_name?.split(' ')[0] || ''}
                       </p>
                     )}
@@ -324,7 +324,7 @@ export default function StudioAppointments() {
       {/* Legend */}
       <div style={{ flexShrink: 0, display: 'flex', gap: 18, paddingTop: '0.875rem', marginTop: '0.5rem', borderTop: `1px solid ${C.border}`, flexWrap: 'wrap' }}>
         {ALL_STATUSES.map(st => (
-          <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+          <div key={st} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: STATUS[st].color, flexShrink: 0 }} />
             {st.charAt(0).toUpperCase() + st.slice(1)}
           </div>
@@ -337,7 +337,7 @@ export default function StudioAppointments() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
             <h3 className="font-display font-light" style={{ fontSize: '1.1rem', color: C.white, lineHeight: 1 }}>
               {PERIOD_TABS.find(t => t.key === periodFilter)?.label}
-              <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 400, marginLeft: 10 }}>
+              <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 400, marginLeft: 10 }}>
                 {periodAppts.length} appointment{periodAppts.length !== 1 ? 's' : ''}
               </span>
             </h3>
@@ -346,7 +346,7 @@ export default function StudioAppointments() {
           {periodAppts.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 80, gap: 8 }}>
               <Calendar size={22} color={C.border} />
-              <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>No appointments for this period</p>
+              <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>No appointments for this period</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
@@ -357,20 +357,20 @@ export default function StudioAppointments() {
                   <div key={appt.id} className="appt-card-row"
                     style={{ background: 'rgba(255,255,255,0.025)', border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: 12, transition: 'border-color .2s' }}>
                     <div style={{ width: 34, height: 34, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: '0.72rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{initials}</span>
+                      <span style={{ fontSize: '0.72rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{initials}</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 2 }}>{appt.profiles?.full_name || 'Unknown'}</p>
-                      <p style={{ color: C.muted, fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 2 }}>{appt.profiles?.full_name || 'Unknown'}</p>
+                      <p style={{ color: C.muted, fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {[appt.date && format(parseISO(appt.date), 'MMM d'), appt.time?.slice(0,5), appt.services?.name].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                     {appt.services?.price && (
-                      <span style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>${appt.services.price}</span>
+                      <span style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>${appt.services.price}</span>
                     )}
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, flexShrink: 0 }}>
                       <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={appt.status === 'pending' ? 'dot-pulse' : ''} />
-                      <span style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
+                      <span style={{ fontSize: 9, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize' }}>{appt.status}</span>
                     </div>
                   </div>
                 )
@@ -416,7 +416,7 @@ export default function StudioAppointments() {
 
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'relative' }}>
                 <div>
-                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, marginBottom: 6 }}>
+                  <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, marginBottom: 6 }}>
                     {format(selectedDay, 'MMMM yyyy')}
                   </p>
                   <h2 className="font-display font-light" style={{ fontSize: '2.4rem', color: C.white, lineHeight: 1, marginBottom: 6 }}>
@@ -424,7 +424,7 @@ export default function StudioAppointments() {
                   </h2>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
                     <div style={{ width: 28, height: 1, background: `linear-gradient(90deg,${C.gold},transparent)` }} />
-                    <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                    <span style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                       {allDayAppts.length} appointment{allDayAppts.length !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -440,7 +440,7 @@ export default function StudioAppointments() {
               {allDayAppts.length > 0 && (
                 <div style={{ display: 'flex', gap: 5, marginTop: '1.1rem', flexWrap: 'wrap' }}>
                   <button onClick={() => { setFilter('all'); setPage(0) }}
-                    style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${filter === 'all' ? C.goldBorder : C.border}`, background: filter === 'all' ? C.goldBg : 'transparent', color: filter === 'all' ? C.gold : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.05em' }}
+                    style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${filter === 'all' ? C.goldBorder : C.border}`, background: filter === 'all' ? C.goldBg : 'transparent', color: filter === 'all' ? C.gold : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.05em' }}
                     className="filter-pill">
                     All · {allDayAppts.length}
                   </button>
@@ -448,7 +448,7 @@ export default function StudioAppointments() {
                     const opt = STATUS[s]
                     return (
                       <button key={s} onClick={() => { setFilter(s); setPage(0) }}
-                        style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${filter === s ? opt.border : C.border}`, background: filter === s ? opt.bg : 'transparent', color: filter === s ? opt.color : C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: 5 }}
+                        style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${filter === s ? opt.border : C.border}`, background: filter === s ? opt.bg : 'transparent', color: filter === s ? opt.color : C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: 5 }}
                         className="filter-pill">
                         <div style={{ width: 5, height: 5, borderRadius: '50%', background: filter === s ? opt.color : 'rgba(255,255,255,0.2)' }} />
                         {s} · {dayCounts[s]}
@@ -466,7 +466,7 @@ export default function StudioAppointments() {
               {dayAppts.length === 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 160, gap: 10 }}>
                   <Calendar size={28} color={C.border} />
-                  <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>No appointments for this filter</p>
+                  <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>No appointments for this filter</p>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -482,22 +482,22 @@ export default function StudioAppointments() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '0.875rem' }}>
                           {/* Avatar */}
                           <div style={{ width: 38, height: 38, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <span style={{ fontSize: '0.78rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{initials}</span>
+                            <span style={{ fontSize: '0.78rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{initials}</span>
                           </div>
 
                           {/* Info */}
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 2 }}>
+                            <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 2 }}>
                               {appt.profiles?.full_name || 'Unknown'}
                             </p>
-                            <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {[appt.services?.name, appt.stylists?.name].filter(Boolean).join(' · ')}
                             </p>
                           </div>
 
                           {/* Time pill */}
                           <div style={{ padding: '4px 12px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, flexShrink: 0 }}>
-                            <span style={{ fontSize: '0.78rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+                            <span style={{ fontSize: '0.78rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                               {appt.time?.slice(0, 5)}
                             </span>
                           </div>
@@ -505,7 +505,7 @@ export default function StudioAppointments() {
                           {/* Status badge */}
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 11px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, flexShrink: 0 }}>
                             <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={appt.status === 'pending' ? 'dot-pulse' : ''} />
-                            <span style={{ fontSize: 9, color: s.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.05em' }}>{appt.status}</span>
+                            <span style={{ fontSize: 9, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.05em' }}>{appt.status}</span>
                           </div>
                         </div>
 
@@ -513,13 +513,13 @@ export default function StudioAppointments() {
                         {(appt.services?.duration || appt.services?.price || appt.profiles?.phone) && (
                           <div style={{ display: 'flex', gap: 12, marginBottom: '0.875rem', paddingLeft: 50 }}>
                             {appt.services?.duration && (
-                              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>⏱ {appt.services.duration} min</span>
+                              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>⏱ {appt.services.duration} min</span>
                             )}
                             {appt.services?.price && (
-                              <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>${appt.services.price}</span>
+                              <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>${appt.services.price}</span>
                             )}
                             {appt.profiles?.phone && (
-                              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appt.profiles.phone}</span>
+                              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{appt.profiles.phone}</span>
                             )}
                           </div>
                         )}
@@ -538,7 +538,7 @@ export default function StudioAppointments() {
                                   background: isCurrent ? C.subtle : opt.bg,
                                   border: `1px solid ${isCurrent ? C.border : opt.border}`,
                                   color: isCurrent ? 'rgba(255,255,255,0.18)' : opt.color,
-                                  fontSize: 10, fontFamily: 'Jost,sans-serif',
+                                  fontSize: 10, fontFamily: 'DM Sans,sans-serif',
                                   fontWeight: isCurrent ? 400 : 600,
                                   cursor: isCurrent ? 'default' : 'pointer',
                                   textTransform: 'capitalize', transition: 'all .15s',

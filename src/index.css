@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
   --color-gold: #B8D4E8;
@@ -9,7 +9,7 @@
   --color-rose-dark: #2A4A5E;
   --color-noir: #0F2235;
   --font-display: "Cormorant Garamond", serif;
-  --font-body: "Jost", sans-serif;
+  --font-body: "DM Sans", sans-serif;
 }
 
 /* ── Theme tokens ──────────────────────────────────── */
@@ -67,7 +67,7 @@ html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
   background-color: var(--col-bg);
   color: var(--col-text);
-  font-family: "Jost", sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -118,7 +118,7 @@ body {
   border-radius: 9999px;
   background: linear-gradient(135deg, var(--grad-c) 0%, var(--grad-bar) 50%, var(--grad-b) 100%);
   color: #0F2235;
-  font-family: "Jost", sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.18em;
@@ -164,7 +164,7 @@ body {
   background: transparent;
   border: 1px solid rgba(var(--rgb-hi),0.12);
   color: rgba(var(--rgb-hi),0.65);
-  font-family: "Jost", sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.18em;
@@ -203,7 +203,7 @@ body {
   text-transform: uppercase;
   color: var(--col-acc);
   margin-bottom: 1.5rem;
-  font-family: "Jost", sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-weight: 400;
 }
 

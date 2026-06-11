@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+﻿import { useState, useEffect, useRef, useMemo } from 'react'
 import Pager from '../../lib/Pager'
 import { Plus, Trash2, Image, X, Save, Edit2, Eye, EyeOff, ShieldAlert, ChevronDown, Check, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -20,8 +20,8 @@ const COLOR_PRESETS = [
   '#34d399', '#2dd4bf', '#22d3ee', '#38bdf8', '#94a3b8',
 ]
 
-const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 const EMPTY = { image_url: '', title: '', category: '', stylist_id: '', visible: true }
 
 function Select({ value, onChange, options }) {
@@ -50,7 +50,7 @@ function Select({ value, onChange, options }) {
   return (
     <div>
       <button ref={btnRef} type="button" onClick={toggle}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: open ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)', border: `1px solid ${open ? C.goldBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', fontFamily: 'Jost,sans-serif', fontWeight: 300, cursor: 'pointer', transition: 'all .18s', boxSizing: 'border-box' }}>
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: open ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)', border: `1px solid ${open ? C.goldBorder : 'rgba(255,255,255,0.1)'}`, borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, cursor: 'pointer', transition: 'all .18s', boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {selected?.dot && <span style={{ width: 8, height: 8, borderRadius: '50%', background: selected.dot, flexShrink: 0 }} />}
           <span>{selected?.label || '—'}</span>
@@ -65,7 +65,7 @@ function Select({ value, onChange, options }) {
             const active = value === o.value
             return (
               <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'rgba(184,212,232,0.1)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(255,255,255,0.04)`, color: active ? C.gold : 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'rgba(184,212,232,0.1)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(255,255,255,0.04)`, color: active ? C.gold : 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}>
                 {o.dot && <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.dot, flexShrink: 0 }} />}
@@ -283,20 +283,20 @@ export default function StudioGallery() {
       {/* ── Header ─────────────────────────────────────────── */}
       <div className="gal-hdr" style={{ flexShrink: 0, paddingBottom: '0.875rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Studio</p>
+          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Studio</p>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Gallery</h1>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: C.white, fontWeight: 600 }}>{images.length}</span> photos</span>
-            {hidden.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{hidden.length}</span> archived</span>}
+            <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: C.white, fontWeight: 600 }}>{images.length}</span> photos</span>
+            {hidden.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{hidden.length}</span> archived</span>}
           </div>
         </div>
         <div className="gal-hdr-btn" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button onClick={() => setCatModal(true)} className="btn-cat"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Tag size={13} /> Categories
           </button>
           <button onClick={openAdd} className="btn-g"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Plus size={14} /> Add Photo
           </button>
         </div>
@@ -306,7 +306,7 @@ export default function StudioGallery() {
       <div style={{ flexShrink: 0, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
         {/* All */}
         <button onClick={() => setFilter('all')} className="gal-filter"
-          style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${filter === 'all' ? C.goldBorder : C.border}`, background: filter === 'all' ? C.goldBg : 'transparent', color: filter === 'all' ? C.gold : C.muted, flexShrink: 0 }}>
+          style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${filter === 'all' ? C.goldBorder : C.border}`, background: filter === 'all' ? C.goldBg : 'transparent', color: filter === 'all' ? C.gold : C.muted, flexShrink: 0 }}>
           All
         </button>
 
@@ -317,7 +317,7 @@ export default function StudioGallery() {
           if (count === 0) return null
           return (
             <button key={cat.id} onClick={() => setFilter(cat.name)} className="gal-filter"
-              style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${active ? cat.color + '55' : C.border}`, background: active ? cat.color + '18' : 'transparent', color: active ? cat.color : C.muted, flexShrink: 0 }}>
+              style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${active ? cat.color + '55' : C.border}`, background: active ? cat.color + '18' : 'transparent', color: active ? cat.color : C.muted, flexShrink: 0 }}>
               {cat.name}
               <span style={{ marginLeft: 4, opacity: 0.65 }}>{count}</span>
             </button>
@@ -327,7 +327,7 @@ export default function StudioGallery() {
         {/* Archived */}
         {hidden.length > 0 && (
           <button onClick={() => setFilter('archived')} className="gal-filter"
-            style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${filter === 'archived' ? 'rgba(248,113,113,0.45)' : C.border}`, background: filter === 'archived' ? 'rgba(248,113,113,0.1)' : 'transparent', color: filter === 'archived' ? C.red : C.muted, flexShrink: 0 }}>
+            style={{ padding: '3px 11px', borderRadius: 20, fontSize: 9, letterSpacing: '0.09em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${filter === 'archived' ? 'rgba(248,113,113,0.45)' : C.border}`, background: filter === 'archived' ? 'rgba(248,113,113,0.1)' : 'transparent', color: filter === 'archived' ? C.red : C.muted, flexShrink: 0 }}>
             Archived
             <span style={{ marginLeft: 4, opacity: 0.65 }}>{hidden.length}</span>
           </button>
@@ -347,7 +347,7 @@ export default function StudioGallery() {
             <div style={{ width: 52, height: 52, borderRadius: 14, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Image size={20} color="rgba(255,255,255,0.12)" strokeWidth={1} />
             </div>
-            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>
+            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
               {filter === 'archived' ? 'No archived photos' : filter === 'all' ? 'No photos yet' : `No ${filter} photos`}
             </p>
           </div>
@@ -377,7 +377,7 @@ export default function StudioGallery() {
                       )}
                       {img.category && catDef && (
                         <div style={{ position: 'absolute', top: 8, left: 8 }}>
-                          <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', color: catColor, fontFamily: 'Jost,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{img.category}</span>
+                          <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', color: catColor, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{img.category}</span>
                         </div>
                       )}
                     </div>
@@ -386,10 +386,10 @@ export default function StudioGallery() {
                     <div className="gal-act-bar" style={{ padding: '8px 9px', borderTop: `1px solid ${C.border}`, background: 'rgba(0,0,0,0.18)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <div style={{ flex: 1, minWidth: 0, marginRight: 4 }}>
                         {img.title
-                          ? <p style={{ color: C.dim, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{img.title}</p>
-                          : <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.68rem', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>No title</p>
+                          ? <p style={{ color: C.dim, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{img.title}</p>
+                          : <p style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.68rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No title</p>
                         }
-                        {img.stylists?.name && <p style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>{img.stylists.name}</p>}
+                        {img.stylists?.name && <p style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 }}>{img.stylists.name}</p>}
                       </div>
                       <button onClick={() => toggleVisible(img.id, img.visible !== false)} className="gal-vis-btn" title={isHidden ? 'Make visible' : 'Archive'}
                         style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${isHidden ? C.goldBorder : C.border}`, background: isHidden ? C.goldBg : 'rgba(255,255,255,0.04)', color: isHidden ? C.gold : C.muted }}>
@@ -424,7 +424,7 @@ export default function StudioGallery() {
 
             <div style={{ padding: '1.5rem 1.75rem 1.25rem', flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
-                <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
+                <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>
                   {modal === 'add' ? 'New Photo' : 'Edit Photo'}
                 </p>
                 <h2 className="font-display font-light" style={{ fontSize: '1.75rem', color: C.white, lineHeight: 1.05 }}>
@@ -451,15 +451,15 @@ export default function StudioGallery() {
                       ? <img src={filePreview || form.image_url} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', objectPosition: 'top center' }} />
                       : <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                           <Image size={24} color="rgba(255,255,255,0.15)" />
-                          <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Click to upload</p>
-                          <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>JPG · PNG · WEBP</p>
+                          <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Click to upload</p>
+                          <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>JPG · PNG · WEBP</p>
                         </div>
                     }
                   </div>
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 }}>
-                  <p style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>{(filePreview || form.image_url) ? 'Click to change photo' : ''}</p>
-                  {filePreview && <button onClick={() => { setFile(null); setFilePreview('') }} style={{ fontSize: 9, color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Jost,sans-serif', padding: 0 }}>Remove</button>}
+                  <p style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{(filePreview || form.image_url) ? 'Click to change photo' : ''}</p>
+                  {filePreview && <button onClick={() => { setFile(null); setFilePreview('') }} style={{ fontSize: 9, color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', padding: 0 }}>Remove</button>}
                 </div>
               </div>
 
@@ -475,7 +475,7 @@ export default function StudioGallery() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <label style={{ ...lbl, marginBottom: 0 }}>Category</label>
                     <button type="button" onClick={() => setCatModal(true)} className="gal-newcat-btn"
-                      style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 6, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 6, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>
                       <Plus size={8} /> New
                     </button>
                   </div>
@@ -498,8 +498,8 @@ export default function StudioGallery() {
               {/* Visible toggle */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.1rem', borderRadius: 13, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
                 <div>
-                  <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>Visible to visitors</p>
-                  <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Shown in the public gallery</p>
+                  <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 2 }}>Visible to visitors</p>
+                  <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Shown in the public gallery</p>
                 </div>
                 <div style={{ width: 44, height: 26, borderRadius: 13, background: form.visible ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.visible ? '0 0 14px rgba(184,212,232,0.4)' : 'none' }}
                   onClick={() => setForm(p => ({ ...p, visible: !p.visible }))}>
@@ -512,11 +512,11 @@ export default function StudioGallery() {
             <div style={{ height: 1, background: C.border, flexShrink: 0 }} />
             <div style={{ padding: '1.1rem 1.75rem 1.5rem', flexShrink: 0, display: 'flex', gap: '0.75rem' }}>
               <button onClick={closeModal}
-                style={{ flex: 1, padding: '0.72rem', borderRadius: 12, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                style={{ flex: 1, padding: '0.72rem', borderRadius: 12, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
                 Cancel
               </button>
               <button onClick={save} disabled={saving || (!file && !form.image_url)}
-                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || (!file && !form.image_url)) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || (!file && !form.image_url)) ? 0.5 : 1, boxShadow: (saving || (!file && !form.image_url)) ? 'none' : '0 4px 20px rgba(184,212,232,0.28)', transition: 'opacity .2s, box-shadow .2s' }}>
+                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: (saving || (!file && !form.image_url)) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: (saving || (!file && !form.image_url)) ? 0.5 : 1, boxShadow: (saving || (!file && !form.image_url)) ? 'none' : '0 4px 20px rgba(184,212,232,0.28)', transition: 'opacity .2s, box-shadow .2s' }}>
                 {saving
                   ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                   : <><Save size={13} /> {modal === 'add' ? 'Add Photo' : 'Save Changes'}</>}
@@ -537,7 +537,7 @@ export default function StudioGallery() {
 
             <div style={{ padding: '1.25rem 1.5rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}` }}>
               <div>
-                <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 3 }}>Gallery</p>
+                <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 3 }}>Gallery</p>
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1 }}>Categories</h2>
               </div>
               <button onClick={closeCatModal} className="sp-modal-close"
@@ -550,7 +550,7 @@ export default function StudioGallery() {
             <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
               {galCats.length === 0 ? (
                 <div style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
-                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No categories yet — add one below.</p>
+                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif' }}>No categories yet — add one below.</p>
                 </div>
               ) : (
                 <div style={{ padding: '0.375rem 0' }}>
@@ -558,8 +558,8 @@ export default function StudioGallery() {
                     <div key={cat.id}>
                       <div style={{ display: 'flex', alignItems: 'center', padding: '0.625rem 1.5rem', gap: 10 }}>
                         <div style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color, flexShrink: 0, boxShadow: `0 0 8px ${cat.color}66` }} />
-                        <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{cat.name}</span>
-                        <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', marginRight: 6 }}>{images.filter(i => i.category === cat.name).length} photos</span>
+                        <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{cat.name}</span>
+                        <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', marginRight: 6 }}>{images.filter(i => i.category === cat.name).length} photos</span>
                         {catDelId !== cat.id && (
                           <button onClick={() => setCatDelId(cat.id)}
                             className="cat-del-row-btn"
@@ -570,16 +570,16 @@ export default function StudioGallery() {
                       </div>
                       {catDelId === cat.id && (
                         <div style={{ margin: '0 1rem 0.75rem', background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 11, padding: '0.875rem' }}>
-                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
+                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'DM Sans,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
                             Delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>? This cannot be undone.
                           </p>
                           <div style={{ display: 'flex', gap: 6 }}>
                             <button onClick={() => setCatDelId(null)}
-                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
                               Cancel
                             </button>
                             <button onClick={deleteGalCat} disabled={catDeleting}
-                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'rgba(248,113,113,0.15)', border: '1px solid rgba(248,113,113,0.35)', color: C.red, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: catDeleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'rgba(248,113,113,0.15)', border: '1px solid rgba(248,113,113,0.35)', color: C.red, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: catDeleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
                               {catDeleting
                                 ? <div style={{ width: 12, height: 12, border: '2px solid rgba(248,113,113,0.3)', borderTopColor: C.red, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                                 : <><Trash2 size={11} /> Delete</>}
@@ -613,7 +613,7 @@ export default function StudioGallery() {
                     style={{ ...inp, paddingLeft: '1.75rem' }} />
                 </div>
                 <button onClick={saveGalCat} disabled={addingCat || !newCatName.trim()}
-                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {addingCat
                     ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Plus size={12} /> Add</>}
@@ -622,8 +622,8 @@ export default function StudioGallery() {
 
               {newCatName.trim() && (
                 <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Preview:</span>
-                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500, border: `1px solid ${newCatColor}55`, background: newCatColor + '22', color: newCatColor, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Preview:</span>
+                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, border: `1px solid ${newCatColor}55`, background: newCatColor + '22', color: newCatColor, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: newCatColor, display: 'inline-block' }} />
                     {newCatName}
                   </span>
@@ -647,13 +647,13 @@ export default function StudioGallery() {
                   <ShieldAlert size={22} color={C.red} strokeWidth={1.5} />
                 </div>
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1.1, marginBottom: '0.4rem' }}>Delete Photo</h2>
-                <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
                   Permanently delete <span style={{ color: C.white }}>{deleteTarget.title}</span>?<br />This action cannot be undone.
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '0.625rem' }}>
-                <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
+                <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
                   {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Trash2 size={13} /> Delete Photo</>}
                 </button>
               </div>

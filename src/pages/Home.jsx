@@ -112,7 +112,7 @@ export default function Home() {
             }}
           >
             <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--col-acc)', animation:'pulse-gold 2.4s infinite' }} />
-            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.55)', fontFamily:'Jost,sans-serif', fontWeight:400 }}>
+            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.55)', fontFamily:'DM Sans,sans-serif', fontWeight:400 }}>
               Premium Hair Studio &nbsp;<span style={{ color:'rgba(var(--rgb-acc),0.5)' }}>·</span>&nbsp; Doha, Qatar
             </span>
           </motion.div>
@@ -152,7 +152,7 @@ export default function Home() {
           {stats.map(({ value, label }) => (
             <div key={label} style={{ textAlign:'center' }}>
               <div className="font-display gold-gradient" style={{ fontSize:'clamp(1.4rem,2.5vw,2rem)', lineHeight:1, marginBottom:'0.35rem' }}>{value}</div>
-              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.28)', fontFamily:'Jost,sans-serif' }}>{label}</div>
+              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.28)', fontFamily:'DM Sans,sans-serif' }}>{label}</div>
             </div>
           ))}
         </motion.div>
@@ -266,7 +266,7 @@ export default function Home() {
                       </div>
                       <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
                       <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', margin:'0 auto 5px auto' }} />
-                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'Jost,sans-serif' }}>{m.title}</p>
+                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'DM Sans,sans-serif' }}>{m.title}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -287,7 +287,7 @@ export default function Home() {
                       </div>
                       <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
                       <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', margin:'0 auto 5px auto' }} />
-                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'Jost,sans-serif' }}>{m.title}</p>
+                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'DM Sans,sans-serif' }}>{m.title}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -318,7 +318,7 @@ export default function Home() {
               <div style={{ position:'absolute', top:-40, left:'50%', transform:'translateX(-50%)', width:280, height:140, background:'radial-gradient(ellipse, rgba(var(--rgb-acc),0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
               <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.2)' }}>
                 <Star size={11} color="var(--col-acc)" />
-                <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'Jost,sans-serif' }}>Loyalty Program</span>
+                <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Loyalty Program</span>
               </div>
               <h3 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
                 Earn. Redeem.<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>Shine.</span>
@@ -337,7 +337,7 @@ export default function Home() {
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem',
             }}>
               <div style={{ position:'absolute', bottom:-40, right:-40, width:240, height:240, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.3)', fontFamily:'Jost,sans-serif' }}>Ready?</span>
+              <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.3)', fontFamily:'DM Sans,sans-serif' }}>Ready?</span>
               <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
                 Ready for your<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>transformation?</span>
               </h2>

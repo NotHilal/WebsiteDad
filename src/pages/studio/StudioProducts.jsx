@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, EyeOff, ShieldAlert, Search, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
@@ -24,8 +24,8 @@ const COLOR_PRESETS = [
 
 const EMPTY = { name: '', description: '', price: '', category: '', tags: [], stock: '', available: true, image_url: '' }
 
-const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp = { width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: '#f0f0f0', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 
 function stockLevel(stock) {
   if (stock === 0) return { color: C.red,   bg: C.redBg,   border: C.redBorder,   label: 'Out of stock', key: 'out'  }
@@ -251,21 +251,21 @@ export default function StudioProducts() {
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="sp-header" style={{ flexShrink: 0, paddingBottom: '0.875rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
-          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Store</p>
+          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Store</p>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.25rem' }}>Products</h1>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: C.white, fontWeight: 600 }}>{products.length}</span> products</span>
-            {outOfStock.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: C.red, fontWeight: 600 }}>{outOfStock.length}</span> out of stock</span>}
-            {lowStock.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: C.muted }}><span style={{ color: C.amber, fontWeight: 600 }}>{lowStock.length}</span> low stock</span>}
+            <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: C.white, fontWeight: 600 }}>{products.length}</span> products</span>
+            {outOfStock.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: C.red, fontWeight: 600 }}>{outOfStock.length}</span> out of stock</span>}
+            {lowStock.length > 0 && <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}><span style={{ color: C.amber, fontWeight: 600 }}>{lowStock.length}</span> low stock</span>}
           </div>
         </div>
         <div className="sp-header-btns" style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button onClick={() => setCatModal(true)} className="btn-cat"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.55rem 1rem', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.dim, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Tag size={13} /> Categories
           </button>
           <button onClick={() => openModal('add')} className="btn-g"
-            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0.55rem 1.1rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
             <Plus size={14} /> Add Product
           </button>
         </div>
@@ -275,7 +275,7 @@ export default function StudioProducts() {
       {outOfStock.length > 0 && (
         <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10, padding: '0.7rem 1rem', borderRadius: 12, background: C.redBg, border: `1px solid ${C.redBorder}` }}>
           <AlertTriangle size={13} color={C.red} style={{ flexShrink: 0 }} />
-          <p style={{ color: C.red, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif' }}>
+          <p style={{ color: C.red, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>
             <strong>{outOfStock.length} product{outOfStock.length > 1 ? 's' : ''}</strong> out of stock: {outOfStock.map(p => p.name).join(', ')}
           </p>
         </div>
@@ -285,7 +285,7 @@ export default function StudioProducts() {
       <div style={{ flexShrink: 0, position: 'relative' }}>
         <Search size={14} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
         <input type="text" placeholder="Search by name, category or tag…" value={search} onChange={e => setSearch(e.target.value)} className="sp-search"
-          style={{ width: '100%', boxSizing: 'border-box', padding: '0.6rem 36px 0.6rem 38px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 11, color: C.white, fontSize: '0.83rem', fontFamily: 'Jost,sans-serif', outline: 'none', transition: 'border-color .2s, background .2s' }} />
+          style={{ width: '100%', boxSizing: 'border-box', padding: '0.6rem 36px 0.6rem 38px', background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, borderRadius: 11, color: C.white, fontSize: '0.83rem', fontFamily: 'DM Sans,sans-serif', outline: 'none', transition: 'border-color .2s, background .2s' }} />
         {search && (
           <button onClick={() => setSearch('')}
             style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.09)', border: 'none', color: C.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -305,7 +305,7 @@ export default function StudioProducts() {
                          : { c: C.goldDim, bg: C.goldBg, border: C.goldBorder }
             return (
               <button key={f.key} onClick={() => setStatusFilter(f.key)} className="stat-chip"
-                style={{ padding: '3px 10px', borderRadius: 20, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${active ? colors.border : C.border}`, background: active ? colors.bg : 'transparent', color: active ? colors.c : C.muted, flexShrink: 0 }}>
+                style={{ padding: '3px 10px', borderRadius: 20, fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${active ? colors.border : C.border}`, background: active ? colors.bg : 'transparent', color: active ? colors.c : C.muted, flexShrink: 0 }}>
                 {f.label}
                 {f.key !== 'all' && <span style={{ marginLeft: 5, opacity: 0.7 }}>{f.key === 'out' ? outOfStock.length : f.key === 'low' ? lowStock.length : products.filter(p => (p.stock ?? 0) >= 5).length}</span>}
               </button>
@@ -319,7 +319,7 @@ export default function StudioProducts() {
               const activeColor = catDef?.color || C.gold
               return (
                 <button key={cat} onClick={() => setCatFilter(cat)} className="cat-chip"
-                  style={{ padding: '3px 9px', borderRadius: 20, fontSize: 8.5, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${catFilter === cat ? activeColor + '55' : C.border}`, background: catFilter === cat ? activeColor + '18' : 'transparent', color: catFilter === cat ? activeColor : C.muted, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  style={{ padding: '3px 9px', borderRadius: 20, fontSize: 8.5, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${catFilter === cat ? activeColor + '55' : C.border}`, background: catFilter === cat ? activeColor + '18' : 'transparent', color: catFilter === cat ? activeColor : C.muted, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
                   {cat !== 'All' && <span style={{ width: 5, height: 5, borderRadius: '50%', background: catFilter === cat ? activeColor : C.muted, display: 'inline-block', transition: 'background .15s' }} />}
                   {cat}
                 </button>
@@ -331,7 +331,7 @@ export default function StudioProducts() {
 
       {/* ── Results count ────────────────────────────────────── */}
       {!loading && (search || statusFilter !== 'all' || catFilter !== 'All') && (
-        <p style={{ flexShrink: 0, fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: -4 }}>
+        <p style={{ flexShrink: 0, fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: -4 }}>
           {filtered.length} result{filtered.length !== 1 ? 's' : ''}
           {search && <span style={{ color: C.dim }}> for "<em style={{ fontStyle: 'normal' }}>{search}</em>"</span>}
         </p>
@@ -348,7 +348,7 @@ export default function StudioProducts() {
             <div style={{ width: 52, height: 52, borderRadius: 14, background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Package size={20} color="rgba(255,255,255,0.15)" strokeWidth={1} />
             </div>
-            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>
+            <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
               {products.length === 0 ? 'No products yet' : search ? `No products match "${search}"` : 'No products match the filter'}
             </p>
           </div>
@@ -378,7 +378,7 @@ export default function StudioProducts() {
                       </div>
                       <div style={{ flex: 1, padding: '10px 13px', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                          <p style={{ color: C.white, fontSize: '0.875rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{p.name}</p>
+                          <p style={{ color: C.white, fontSize: '0.875rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{p.name}</p>
                           <span className="font-display" style={{ color: C.gold, fontSize: '0.92rem', flexShrink: 0 }}>${p.price}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
@@ -387,31 +387,31 @@ export default function StudioProducts() {
                               const tagDef = prodCats.find(c => c.name === tag)
                               const tagColor = tagDef?.color || C.goldDim
                               return (
-                                <span key={tag} style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: tagColor + '22', border: `1px solid ${tagColor}44`, color: tagColor, fontFamily: 'Jost,sans-serif', fontWeight: 500, letterSpacing: '0.06em', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <span key={tag} style={{ fontSize: 8, padding: '2px 7px', borderRadius: 9999, background: tagColor + '22', border: `1px solid ${tagColor}44`, color: tagColor, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, letterSpacing: '0.06em', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
                                   <span style={{ width: 4, height: 4, borderRadius: '50%', background: tagColor, display: 'inline-block' }} />
                                   {tag}
                                 </span>
                               )
                             })}
                           </div>
-                          <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: level.bg, border: `1px solid ${level.border}`, color: level.color, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>{level.label}</span>
+                          <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: level.bg, border: `1px solid ${level.border}`, color: level.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', flexShrink: 0, whiteSpace: 'nowrap' }}>{level.label}</span>
                         </div>
                       </div>
                     </div>
                     <div style={{ borderTop: `1px solid ${C.border}`, padding: '7px 10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.14)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                         <button onClick={() => adjustStock(p.id, -1, stock)} disabled={stock === 0 || isAdj} className="stock-minus"
-                          style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${stock === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(248,113,113,0.25)'}`, background: stock === 0 ? 'transparent' : 'rgba(248,113,113,0.07)', color: stock === 0 ? 'rgba(255,255,255,0.15)' : C.red, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'Jost,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>−</button>
+                          style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${stock === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(248,113,113,0.25)'}`, background: stock === 0 ? 'transparent' : 'rgba(248,113,113,0.07)', color: stock === 0 ? 'rgba(255,255,255,0.15)' : C.red, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'DM Sans,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>−</button>
                         <div style={{ minWidth: 38, textAlign: 'center' }}>
-                          <span style={{ fontSize: '1rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, color: level.color, display: 'block', lineHeight: 1 }}>{isAdj ? '…' : stock}</span>
-                          <span style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.05em' }}>units</span>
+                          <span style={{ fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: level.color, display: 'block', lineHeight: 1 }}>{isAdj ? '…' : stock}</span>
+                          <span style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.05em' }}>units</span>
                         </div>
                         <button onClick={() => adjustStock(p.id, 1, stock)} disabled={isAdj} className="stock-plus"
-                          style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.gold, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'Jost,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>+</button>
+                          style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.gold, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, lineHeight: 1, fontFamily: 'DM Sans,sans-serif', transition: 'all .18s', opacity: isAdj ? 0.4 : 1, flexShrink: 0 }}>+</button>
                       </div>
                       <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
                         <button onClick={() => openModal('edit', p)} className="prod-edit-btn"
-                          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s' }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 12px', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s' }}>
                           <Edit2 size={9} /> Edit
                         </button>
                         <button onClick={() => openDelete(p)} className="prod-del-btn"
@@ -440,7 +440,7 @@ export default function StudioProducts() {
 
             <div className="sp-modal-head" style={{ padding: '1.5rem 1.75rem 1.25rem', flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
-                <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 6 }}>
+                <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>
                   {modal === 'add' ? 'New Product' : 'Edit Product'}
                 </p>
                 <h2 className="font-display font-light" style={{ fontSize: '1.75rem', color: C.white, lineHeight: 1.05 }}>
@@ -469,17 +469,17 @@ export default function StudioProducts() {
                           ? <img src={filePreview || form.image_url} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                           : <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                               <Image size={20} color="rgba(255,255,255,0.15)" />
-                              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Upload</span>
+                              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans,sans-serif', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Upload</span>
                             </div>
                         }
                       </div>
                     </label>
-                    <p style={{ marginTop: 5, fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif', textAlign: 'center', display: 'block', letterSpacing: '0.03em', lineHeight: 1.4 }}>
+                    <p style={{ marginTop: 5, fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', textAlign: 'center', display: 'block', letterSpacing: '0.03em', lineHeight: 1.4 }}>
                       {(filePreview || form.image_url) ? 'Tap to change' : 'Tap to add photo'}
                     </p>
                     {filePreview && (
                       <button onClick={() => { setFile(null); setFilePreview('') }}
-                        style={{ marginTop: 5, fontSize: 9, color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Jost,sans-serif', padding: 0, letterSpacing: '0.04em', display: 'block', width: '100%', textAlign: 'center' }}>
+                        style={{ marginTop: 5, fontSize: 9, color: C.red, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', padding: 0, letterSpacing: '0.04em', display: 'block', width: '100%', textAlign: 'center' }}>
                         Remove
                       </button>
                     )}
@@ -514,9 +514,9 @@ export default function StudioProducts() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
                     <label style={{ ...lbl, marginBottom: 0 }}>Category</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', color: (form.tags || []).length >= 3 ? C.gold : C.muted }}>{(form.tags || []).length}/3 selected</span>
+                      <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: (form.tags || []).length >= 3 ? C.gold : C.muted }}>{(form.tags || []).length}/3 selected</span>
                       <button type="button" onClick={() => setCatModal(true)} className="sp-newcat-btn"
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s' }}>
                         <Plus size={9} /> New
                       </button>
                     </div>
@@ -524,7 +524,7 @@ export default function StudioProducts() {
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {prodCats.length === 0 ? (
                       <button type="button" onClick={() => setCatModal(true)}
-                        style={{ padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', cursor: 'pointer', border: `1px dashed ${C.border}`, background: 'transparent', color: C.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
+                        style={{ padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', border: `1px dashed ${C.border}`, background: 'transparent', color: C.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
                         <Plus size={9} /> Add your first category
                       </button>
                     ) : prodCats.map(cat => {
@@ -532,7 +532,7 @@ export default function StudioProducts() {
                       const maxed    = (form.tags || []).length >= 3 && !selected
                       return (
                         <button key={cat.id} type="button" onClick={() => toggleCat(cat.name)} disabled={maxed} className="sp-tag-btn"
-                          style={{ '--tag-color': cat.color, padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500, letterSpacing: '0.05em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? cat.color + '88' : 'rgba(255,255,255,0.1)'}`, background: selected ? cat.color + '22' : 'rgba(255,255,255,0.03)', color: selected ? cat.color : maxed ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.38)', outline: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          style={{ '--tag-color': cat.color, padding: '5px 13px', borderRadius: 9999, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, letterSpacing: '0.05em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? cat.color + '88' : 'rgba(255,255,255,0.1)'}`, background: selected ? cat.color + '22' : 'rgba(255,255,255,0.03)', color: selected ? cat.color : maxed ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.38)', outline: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
                           <span style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? cat.color : 'rgba(255,255,255,0.2)', flexShrink: 0, display: 'inline-block', transition: 'background .15s' }} />
                           {cat.name}
                         </button>
@@ -544,8 +544,8 @@ export default function StudioProducts() {
                 {/* Available toggle */}
                 <div className="sp-modal-avail" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.875rem 1.1rem', borderRadius: 13, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}` }}>
                   <div>
-                    <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>Available to order</p>
-                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>Visible to customers in the store</p>
+                    <p style={{ fontSize: '0.83rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 2 }}>Available to order</p>
+                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Visible to customers in the store</p>
                   </div>
                   <div style={{ width: 44, height: 26, borderRadius: 13, background: form.available ? C.gold : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background .22s', flexShrink: 0, cursor: 'pointer', boxShadow: form.available ? '0 0 14px rgba(184,212,232,0.4)' : 'none' }}
                     onClick={() => setForm(p => ({ ...p, available: !p.available }))}>
@@ -559,11 +559,11 @@ export default function StudioProducts() {
             <div style={{ height: 1, background: C.border, flexShrink: 0 }} />
             <div className="sp-modal-foot" style={{ padding: '1.1rem 1.75rem 1.5rem', flexShrink: 0, display: 'flex', gap: '0.75rem' }}>
               <button onClick={closeModal}
-                style={{ flex: 1, padding: '0.72rem', borderRadius: 12, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                style={{ flex: 1, padding: '0.72rem', borderRadius: 12, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
                 Cancel
               </button>
               <button onClick={save} disabled={saving}
-                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'opacity .2s, box-shadow .2s', boxShadow: saving ? 'none' : '0 4px 20px rgba(184,212,232,0.28)' }}>
+                style={{ flex: 2, padding: '0.72rem', borderRadius: 12, background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: saving ? 0.6 : 1, transition: 'opacity .2s, box-shadow .2s', boxShadow: saving ? 'none' : '0 4px 20px rgba(184,212,232,0.28)' }}>
                 {saving
                   ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                   : <><Save size={13} /> {modal === 'add' ? 'Add Product' : 'Save Changes'}</>}
@@ -585,7 +585,7 @@ export default function StudioProducts() {
             {/* Header */}
             <div style={{ padding: '1.25rem 1.5rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${C.border}` }}>
               <div>
-                <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 3 }}>Products</p>
+                <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 3 }}>Products</p>
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1 }}>Categories</h2>
               </div>
               <button onClick={closeCatModal} className="sp-modal-close"
@@ -598,7 +598,7 @@ export default function StudioProducts() {
             <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
               {prodCats.length === 0 ? (
                 <div style={{ padding: '2rem 1.5rem', textAlign: 'center' }}>
-                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif' }}>No categories yet — add one below.</p>
+                  <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif' }}>No categories yet — add one below.</p>
                 </div>
               ) : (
                 <div style={{ padding: '0.375rem 0' }}>
@@ -607,7 +607,7 @@ export default function StudioProducts() {
                       {/* Row */}
                       <div style={{ display: 'flex', alignItems: 'center', padding: '0.625rem 1.5rem', gap: 10 }}>
                         <div style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color, flexShrink: 0, boxShadow: `0 0 8px ${cat.color}66` }} />
-                        <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>{cat.name}</span>
+                        <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{cat.name}</span>
                         {catDelId !== cat.id && (
                           <button onClick={() => setCatDelId(cat.id)}
                             className="cat-del-row-btn"
@@ -619,16 +619,16 @@ export default function StudioProducts() {
                       {/* Inline delete confirmation */}
                       {catDelId === cat.id && (
                         <div style={{ margin: '0 1rem 0.75rem', background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 11, padding: '0.875rem' }}>
-                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
+                          <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', fontFamily: 'DM Sans,sans-serif', marginBottom: 10, lineHeight: 1.5 }}>
                             Delete <span style={{ color: C.white, fontWeight: 500 }}>{cat.name}</span>? This cannot be undone.
                           </p>
                           <div style={{ display: 'flex', gap: 6 }}>
                             <button onClick={() => setCatDelId(null)}
-                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
                               Cancel
                             </button>
                             <button onClick={deleteCategory} disabled={catDeleting}
-                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'rgba(248,113,113,0.15)', border: '1px solid rgba(248,113,113,0.35)', color: C.red, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: catDeleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
+                              style={{ flex: 1, padding: '0.5rem', borderRadius: 8, background: 'rgba(248,113,113,0.15)', border: '1px solid rgba(248,113,113,0.35)', color: C.red, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: catDeleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, transition: 'all .15s' }}>
                               {catDeleting
                                 ? <div style={{ width: 12, height: 12, border: '2px solid rgba(248,113,113,0.3)', borderTopColor: C.red, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                                 : <><Trash2 size={11} /> Delete</>}
@@ -664,7 +664,7 @@ export default function StudioProducts() {
                     style={{ ...inp, paddingLeft: '1.75rem' }} />
                 </div>
                 <button onClick={saveCategory} disabled={addingCat || !newCatName.trim()}
-                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
+                  style={{ padding: '0.55rem 1rem', borderRadius: 9, background: newCatName.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: newCatName.trim() ? '#000' : C.muted, border: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, fontSize: '0.8rem', cursor: (addingCat || !newCatName.trim()) ? 'not-allowed' : 'pointer', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap' }}>
                   {addingCat
                     ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.3)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                     : <><Plus size={12} /> Add</>}
@@ -674,8 +674,8 @@ export default function StudioProducts() {
               {/* Preview chip */}
               {newCatName.trim() && (
                 <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 9, color: C.muted, fontFamily: 'Jost,sans-serif' }}>Preview:</span>
-                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 500, border: `1px solid ${newCatColor}55`, background: newCatColor + '22', color: newCatColor, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Preview:</span>
+                  <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, border: `1px solid ${newCatColor}55`, background: newCatColor + '22', color: newCatColor, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: newCatColor, display: 'inline-block' }} />
                     {newCatName}
                   </span>
@@ -700,13 +700,13 @@ export default function StudioProducts() {
                   <ShieldAlert size={22} color={C.red} strokeWidth={1.5} />
                 </div>
                 <h2 className="font-display font-light" style={{ fontSize: '1.55rem', color: C.white, lineHeight: 1.1, marginBottom: '0.4rem' }}>Delete Product</h2>
-                <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
                   Permanently delete <span style={{ color: C.white }}>{deleteTarget.name}</span>?<br />This action cannot be undone.
                 </p>
               </div>
               <div style={{ display: 'flex', gap: '0.625rem' }}>
-                <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
+                <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                <button onClick={confirmDelete} disabled={deleting} style={{ flex: 2, padding: '0.65rem', borderRadius: 10, background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, opacity: deleting ? 0.6 : 1 }}>
                   {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Trash2 size={13} /> Delete Product</>}
                 </button>
               </div>

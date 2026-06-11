@@ -57,17 +57,17 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
         {/* Badges */}
         <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: 5 }}>
           {inCart && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: 'rgba(52,211,153,0.9)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: 'rgba(52,211,153,0.9)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               <CheckCircle size={9} /> In Cart
             </span>
           )}
           {!inCart && p.stock > 0 && p.stock < 5 && (
-            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(245,158,11,0.85)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(245,158,11,0.85)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               Only {p.stock} left
             </span>
           )}
           {outOfStock && (
-            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', fontSize: 9, color: 'rgba(var(--rgb-hi),0.5)', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', fontSize: 9, color: 'rgba(var(--rgb-hi),0.5)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               Out of stock
             </span>
           )}
@@ -75,7 +75,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
 
         {/* Quick-view hint */}
         <div style={{ position: 'absolute', bottom: 10, right: 10, opacity: 0, transition: 'opacity 0.25s' }} className="qv-btn">
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', fontSize: 9, color: 'rgba(var(--rgb-hi),0.7)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', fontSize: 9, color: 'rgba(var(--rgb-hi),0.7)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Details <ChevronRight size={9} />
           </span>
         </div>
@@ -86,7 +86,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
 
         {/* Category */}
         {p.category && (
-          <span style={{ fontSize: 9, color: 'rgba(var(--rgb-acc),0.55)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>
+          <span style={{ fontSize: 9, color: 'rgba(var(--rgb-acc),0.55)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>
             {p.category}
           </span>
         )}
@@ -104,7 +104,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 14 }}>
           <span className="font-display" style={{ fontSize: '1.45rem', color: 'var(--col-acc)', lineHeight: 1 }}>€{parseFloat(p.price).toFixed(2)}</span>
           {qty > 1 && (
-            <span style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.25)', fontFamily: 'Jost,sans-serif' }}>×{qty} = €{(p.price * qty).toFixed(2)}</span>
+            <span style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.25)', fontFamily: 'DM Sans,sans-serif' }}>×{qty} = €{(p.price * qty).toFixed(2)}</span>
           )}
         </div>
 
@@ -116,7 +116,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
         {inCart && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
             <CheckCircle size={11} color="#34d399" />
-            <span style={{ fontSize: 10, color: '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+            <span style={{ fontSize: 10, color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
               {cartItems.find(i => i.product_id === p.id)?.quantity ?? 0} in cart
             </span>
           </div>
@@ -133,7 +133,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
               color: outOfStock ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.45)',
               border: '1px solid rgba(var(--rgb-hi),0.1)',
               cursor: outOfStock ? 'not-allowed' : 'pointer',
-              fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700,
+              fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700,
               transition: 'all 0.2s',
             }}
             onMouseEnter={e => { if (!outOfStock) { e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.08)'; e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.7)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.2)' } }}
@@ -152,7 +152,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.4)'}>
                 <Minus size={11} />
               </button>
-              <span style={{ width: 28, textAlign: 'center', color: 'var(--col-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'Jost,sans-serif', userSelect: 'none' }}>
+              <span style={{ width: 28, textAlign: 'center', color: 'var(--col-text)', fontSize: '0.85rem', fontWeight: 600, fontFamily: 'DM Sans,sans-serif', userSelect: 'none' }}>
                 {qty}
               </span>
               <button
@@ -175,7 +175,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
                 color: outOfStock ? 'rgba(var(--rgb-hi),0.2)' : '#000',
                 border: outOfStock ? '1px solid rgba(var(--rgb-hi),0.07)' : 'none',
                 cursor: outOfStock ? 'not-allowed' : 'pointer',
-                fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700,
+                fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700,
                 boxShadow: outOfStock ? 'none' : '0 4px 16px rgba(var(--rgb-acc),0.25)',
                 transition: 'all 0.25s',
               }}
@@ -252,7 +252,7 @@ export default function Store() {
             <h1 className="font-display font-light" style={{ color: 'var(--col-text)', fontSize: 'clamp(2rem,4vw,3rem)', lineHeight: 1, marginBottom: 6 }}>
               Store
             </h1>
-            <p style={{ color: 'rgba(var(--rgb-hi),0.3)', fontSize: '0.83rem', fontFamily: 'Jost,sans-serif' }}>
+            <p style={{ color: 'rgba(var(--rgb-hi),0.3)', fontSize: '0.83rem', fontFamily: 'DM Sans,sans-serif' }}>
               {products.length} product{products.length !== 1 ? 's' : ''} · Pay online, pick up in-salon
             </p>
           </div>
@@ -264,10 +264,10 @@ export default function Store() {
               <div style={{ position: 'relative' }}>
                 <ShoppingCart size={16} color={cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.35)'} />
                 {cartQty > 0 && (
-                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: 'var(--col-acc)', color: '#000', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>{cartQty}</span>
+                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: 'var(--col-acc)', color: '#000', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>{cartQty}</span>
                 )}
               </div>
-              <span style={{ fontSize: 12, color: cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
                 {cartQty > 0 ? `Cart (${cartQty})` : 'Cart'}
               </span>
             </button>
@@ -283,7 +283,7 @@ export default function Store() {
               return (
                 <button key={cat} onClick={() => setActivecat(cat)} style={{
                   padding: '7px 16px', borderRadius: 8, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
-                  fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, cursor: 'pointer',
+                  fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, cursor: 'pointer',
                   background: isActive ? 'rgba(var(--rgb-acc),0.12)' : 'transparent',
                   color: isActive ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.35)',
                   border: isActive ? '1px solid rgba(var(--rgb-acc),0.3)' : '1px solid transparent',
@@ -313,7 +313,7 @@ export default function Store() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: 'rgba(var(--rgb-hi),0.2)', fontSize: '0.9rem', fontFamily: 'Jost,sans-serif' }}>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: 'rgba(var(--rgb-hi),0.2)', fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif' }}>
             No products in this category yet.
           </div>
         ) : (
@@ -335,7 +335,7 @@ export default function Store() {
         {!user && !loading && filtered.length > 0 && (
           <div style={{ textAlign: 'center', marginTop: 32, display: 'flex', justifyContent: 'center' }}>
             <button onClick={() => setShowGuestModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 12, background: 'rgba(var(--rgb-acc),0.07)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'rgba(var(--rgb-acc),0.7)', fontSize: 12, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em', transition: 'all .2s' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 12, background: 'rgba(var(--rgb-acc),0.07)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'rgba(var(--rgb-acc),0.7)', fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em', transition: 'all .2s' }}>
               <ShoppingCart size={13} /> Sign in to order
             </button>
           </div>
@@ -368,7 +368,7 @@ export default function Store() {
                 }
                 {detail.category && (
                   <div style={{ position: 'absolute', top: 16, left: 16, padding: '4px 12px', borderRadius: 6, background: 'var(--col-acc)' }}>
-                    <span style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700, color: '#000', letterSpacing: '0.16em', textTransform: 'uppercase' }}>{detail.category}</span>
+                    <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: '#000', letterSpacing: '0.16em', textTransform: 'uppercase' }}>{detail.category}</span>
                   </div>
                 )}
               </div>
@@ -385,19 +385,19 @@ export default function Store() {
 
                 <p className="font-display gold-gradient" style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '1.25rem' }}>
                   €{(parseFloat(detail.price) * dQty).toFixed(2)}
-                  {dQty > 1 && <span style={{ fontSize: '0.9rem', color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'Jost,sans-serif', backgroundImage: 'none', WebkitTextFillColor: 'rgba(var(--rgb-hi),0.3)', marginLeft: 8 }}>×{dQty}</span>}
+                  {dQty > 1 && <span style={{ fontSize: '0.9rem', color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', backgroundImage: 'none', WebkitTextFillColor: 'rgba(var(--rgb-hi),0.3)', marginLeft: 8 }}>×{dQty}</span>}
                 </p>
 
                 <div style={{ height: 1, background: 'rgba(var(--rgb-hi),0.06)', marginBottom: '1.25rem' }} />
 
                 {detail.description && (
-                  <p style={{ color: 'rgba(var(--rgb-hi),0.42)', fontSize: '0.84rem', lineHeight: 1.85, fontFamily: 'Jost,sans-serif', fontWeight: 300, marginBottom: '1.5rem', flex: 1 }}>{detail.description}</p>
+                  <p style={{ color: 'rgba(var(--rgb-hi),0.42)', fontSize: '0.84rem', lineHeight: 1.85, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, marginBottom: '1.5rem', flex: 1 }}>{detail.description}</p>
                 )}
 
                 {/* Stock */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1.5rem' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: detail.stock === 0 ? '#f87171' : detail.stock < 5 ? '#f59e0b' : '#34d399' }} />
-                  <span style={{ fontSize: 12, color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'Jost,sans-serif' }}>
+                  <span style={{ fontSize: 12, color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif' }}>
                     {detail.stock === 0 ? 'Out of stock' : detail.stock < 5 ? `Only ${detail.stock} left` : `In stock`}
                   </span>
                 </div>
@@ -405,10 +405,10 @@ export default function Store() {
                 {/* Qty */}
                 {!inCart(detail.id) && detail.stock > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1.25rem' }}>
-                    <span style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', marginRight: 4 }}>Qty</span>
+                    <span style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', marginRight: 4 }}>Qty</span>
                     <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 10 }}>
                       <button onClick={() => setDQty(q => Math.max(1, q - 1))} style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(var(--rgb-hi),0.4)', background: 'none', border: 'none', cursor: 'pointer' }}><Minus size={12} /></button>
-                      <span style={{ width: 30, textAlign: 'center', color: 'var(--col-text)', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{dQty}</span>
+                      <span style={{ width: 30, textAlign: 'center', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{dQty}</span>
                       <button onClick={() => setDQty(q => Math.min(detail.stock || 10, q + 1))} style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(var(--rgb-hi),0.4)', background: 'none', border: 'none', cursor: 'pointer' }}><Plus size={12} /></button>
                     </div>
                   </div>
@@ -417,7 +417,7 @@ export default function Store() {
                 {inCart(detail.id) && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                     <CheckCircle size={12} color="#34d399" />
-                    <span style={{ fontSize: 11, color: '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+                    <span style={{ fontSize: 11, color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
                       {cartItems.find(i => i.product_id === detail.id)?.quantity ?? 0} already in cart
                     </span>
                   </div>
@@ -437,7 +437,7 @@ export default function Store() {
                       width: '100%', padding: '11px', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                       background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.12)',
                       color: detail.stock === 0 ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.5)',
-                      fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700,
+                      fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700,
                       cursor: detail.stock === 0 ? 'not-allowed' : 'pointer', transition: 'all .2s',
                     }}
                     onMouseEnter={e => { if (detail.stock > 0) { e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.08)'; e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.8)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.22)' } }}
@@ -480,7 +480,7 @@ export default function Store() {
                   <h2 className="font-display font-light" style={{ color: 'var(--col-text)', fontSize: '1.6rem', lineHeight: 1.1, marginBottom: 10 }}>
                     Ready to order?
                   </h2>
-                  <p style={{ color: 'rgba(var(--rgb-hi),0.38)', fontSize: '0.84rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.7 }}>
+                  <p style={{ color: 'rgba(var(--rgb-hi),0.38)', fontSize: '0.84rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.7 }}>
                     Create an account or sign in to order online and have your items ready for pick-up.
                   </p>
                 </div>
@@ -490,14 +490,14 @@ export default function Store() {
                     Log in to my account
                   </button>
                   <button onClick={() => navigate('/register')}
-                    style={{ width: '100%', padding: '11px', borderRadius: 12, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.09)', color: 'rgba(var(--rgb-hi),0.55)', fontSize: 13, fontFamily: 'Jost,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .2s' }}>
+                    style={{ width: '100%', padding: '11px', borderRadius: 12, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.09)', color: 'rgba(var(--rgb-hi),0.55)', fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .2s' }}>
                     Create a free account
                   </button>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 12, background: 'rgba(var(--rgb-hi),0.03)', border: '1px solid rgba(var(--rgb-hi),0.07)' }}>
                   <MapPin size={14} color="rgba(var(--rgb-hi),0.25)" strokeWidth={1.5} style={{ flexShrink: 0, marginTop: 1 }} />
-                  <p style={{ fontSize: '0.78rem', color: 'rgba(var(--rgb-hi),0.28)', fontFamily: 'Jost,sans-serif', lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ fontSize: '0.78rem', color: 'rgba(var(--rgb-hi),0.28)', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6, margin: 0 }}>
                     Prefer to shop in person? Come visit us at the salon — all products are available to purchase directly in store.
                   </p>
                 </div>

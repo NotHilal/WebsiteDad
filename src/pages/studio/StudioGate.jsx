@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Lock, Eye, EyeOff, Scissors, Mail, Smartphone, ArrowRight } from 'lucide-react'
@@ -96,7 +96,7 @@ export default function StudioGate() {
     fontSize: '0.95rem',
     color: '#fff',
     outline: 'none',
-    fontFamily: 'Jost, sans-serif',
+    fontFamily: 'DM Sans, sans-serif',
     fontWeight: 300,
     transition: 'border-color 0.3s, background 0.3s',
     boxSizing: 'border-box',
@@ -109,7 +109,7 @@ export default function StudioGate() {
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.28)',
     marginBottom: 10,
-    fontFamily: 'Jost, sans-serif',
+    fontFamily: 'DM Sans, sans-serif',
   }
 
   const iconStyle = {
@@ -145,13 +145,13 @@ export default function StudioGate() {
             <span className="gold-gradient" style={{ fontStyle: 'italic' }}>back.</span>
           </h2>
           <div style={{ width: 36, height: 1, background: 'linear-gradient(90deg,#B8D4E8,transparent)', marginBottom: 20 }} />
-          <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: '0.88rem', lineHeight: 1.9, maxWidth: 280, fontFamily: 'Jost, sans-serif', fontWeight: 300 }}>
+          <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: '0.88rem', lineHeight: 1.9, maxWidth: 280, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>
             The HairGo Studio is your private management hub — restricted to authorised administrators only.
           </p>
         </div>
 
         <div style={{ position: 'relative' }}>
-          <p style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.14)', fontFamily: 'Jost, sans-serif' }}>
+          <p style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.14)', fontFamily: 'DM Sans, sans-serif' }}>
             HairGo Studio · Doha, Qatar
           </p>
         </div>
@@ -176,14 +176,14 @@ export default function StudioGate() {
 
           {/* Header */}
           <div className="sg-header" style={{ marginBottom: 44 }}>
-            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 14, fontFamily: 'Jost, sans-serif' }}>
+            <p style={{ fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: '#B8D4E8', marginBottom: 14, fontFamily: 'DM Sans, sans-serif' }}>
               Studio Access
             </p>
             <h1 className="font-display font-light sg-title" style={{ color: '#fff', lineHeight: 1.1, marginBottom: 0 }}>
               {user ? 'Welcome back' : 'Sign in to continue'}
             </h1>
             {user && (
-              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', fontFamily: 'Jost, sans-serif', marginTop: 8 }}>
+              <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', fontFamily: 'DM Sans, sans-serif', marginTop: 8 }}>
                 Signed in as <span style={{ color: '#B8D4E8' }}>{user.email}</span>
               </p>
             )}
@@ -240,7 +240,7 @@ export default function StudioGate() {
             {/* Divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, margin: user ? '0 0 28px 0' : '28px 0' }}>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-              <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost, sans-serif', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontFamily: 'DM Sans, sans-serif', whiteSpace: 'nowrap' }}>
                 Authenticator Code
               </span>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
@@ -265,7 +265,7 @@ export default function StudioGate() {
                     onKeyDown={e => handleDigitKey(i, e)}
                     style={{
                       width: 52, height: 62, textAlign: 'center',
-                      fontSize: '1.6rem', fontWeight: 600, fontFamily: 'Jost, sans-serif',
+                      fontSize: '1.6rem', fontWeight: 600, fontFamily: 'DM Sans, sans-serif',
                       background: d ? 'rgba(184,212,232,0.07)' : 'rgba(255,255,255,0.03)',
                       border: d ? '1px solid rgba(184,212,232,0.45)' : '1px solid rgba(255,255,255,0.1)',
                       borderRadius: 14, color: '#B8D4E8', outline: 'none',
@@ -295,7 +295,7 @@ export default function StudioGate() {
                 fontWeight: 700,
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
-                fontFamily: 'Jost, sans-serif',
+                fontFamily: 'DM Sans, sans-serif',
                 border: 'none',
                 cursor: (loading || digits.join('').length < 6) ? 'not-allowed' : 'pointer',
                 opacity: (loading || digits.join('').length < 6) ? 0.5 : 1,
@@ -317,7 +317,7 @@ export default function StudioGate() {
 
           </form>
 
-          <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.1)', marginTop: 28, fontFamily: 'Jost, sans-serif', letterSpacing: '0.08em' }}>
+          <p style={{ textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.1)', marginTop: 28, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em' }}>
             Unauthorised access is strictly prohibited
           </p>
 

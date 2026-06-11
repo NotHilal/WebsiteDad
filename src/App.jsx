@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+﻿import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { CartProvider } from './contexts/CartContext'
@@ -50,7 +50,7 @@ export default function App() {
               background: '#1a1a1a',
               color: '#f5f5f5',
               border: '1px solid rgba(184,212,232,0.2)',
-              fontFamily: 'Jost, sans-serif',
+              fontFamily: 'DM Sans, sans-serif',
               fontSize: '14px',
             },
             success: { iconTheme: { primary: '#B8D4E8', secondary: '#0a0a0a' } },

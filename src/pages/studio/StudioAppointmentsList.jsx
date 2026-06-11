@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+﻿import { useState, useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Search, X, ChevronDown, Trash2, AlertTriangle, Eye, EyeOff, ChevronRight, Calendar, Clock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -52,7 +52,7 @@ function StatusDropdown({ appt, onUpdate }) {
       <button onClick={() => setOpen(o => !o)}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px 5px 8px', borderRadius: 8, cursor: 'pointer', background: cfg.bg, border: `1px solid ${open ? cfg.color : cfg.border}`, transition: 'all .15s' }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
-        <span style={{ fontSize: 11, color: cfg.color, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>{cfg.label}</span>
+        <span style={{ fontSize: 11, color: cfg.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>{cfg.label}</span>
         <ChevronDown size={10} style={{ color: cfg.color, opacity: 0.7, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
       </button>
       {open && (
@@ -64,7 +64,7 @@ function StatusDropdown({ appt, onUpdate }) {
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer', transition: 'background .12s', textAlign: 'left' }}
                 className="dd-opt">
                 <div style={{ width: 7, height: 7, borderRadius: '50%', background: c.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 12, color: c.color, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{c.label}</span>
+                <span style={{ fontSize: 12, color: c.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{c.label}</span>
               </button>
             )
           })}
@@ -227,7 +227,7 @@ export default function StudioAppointmentsList() {
       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', paddingBottom: '0.6rem', borderBottom: `1px solid ${C.border}` }}>
         <div>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Appointments</h1>
-          <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appointments.length} total</span>
+          <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{appointments.length} total</span>
         </div>
       </div>
 
@@ -239,7 +239,7 @@ export default function StudioAppointmentsList() {
             style={{ background: statusFilter === s ? cfg.bg : C.card, border: `1px solid ${statusFilter === s ? cfg.border : C.border}`, borderRadius: 10, padding: '0.55rem 0.875rem', cursor: 'pointer', textAlign: 'left', transition: 'all .18s', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
             <div className="font-display stat-num" style={{ fontSize: '1.25rem', color: loading ? C.border : C.white, lineHeight: 1 }}>{loading ? '—' : counts[s]}</div>
-            <p className="stat-lbl" style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: statusFilter === s ? cfg.color : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, flex: 1 }}>{label}</p>
+            <p className="stat-lbl" style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: statusFilter === s ? cfg.color : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flex: 1 }}>{label}</p>
             {statusFilter === s && <X size={9} style={{ color: cfg.color, opacity: 0.7, flexShrink: 0 }} />}
           </button>
         ))}
@@ -257,7 +257,7 @@ export default function StudioAppointmentsList() {
           return (
             <button key={key} onClick={() => { setPeriodFilter(key); setPage(0) }}
               className="al-pill"
-              style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : 'rgba(255,255,255,0.12)'}`, background: active ? C.goldBg : 'rgba(255,255,255,0.04)', color: active ? C.gold : 'rgba(255,255,255,0.55)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em' }}>
+              style={{ padding: '5px 14px', borderRadius: 20, border: `1px solid ${active ? C.goldBorder : 'rgba(255,255,255,0.12)'}`, background: active ? C.goldBg : 'rgba(255,255,255,0.04)', color: active ? C.gold : 'rgba(255,255,255,0.55)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.04em' }}>
               {label}
             </button>
           )
@@ -270,7 +270,7 @@ export default function StudioAppointmentsList() {
           <Search size={13} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input value={search} onChange={e => { setSearch(e.target.value); setPage(0) }}
             placeholder="Search by client, phone, service or stylist…" autoComplete="off" className="al-search"
-            style={{ width: '100%', background: C.card, border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.42rem 0.875rem 0.42rem 2.1rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'Jost,sans-serif', fontWeight: 300, transition: 'all .2s', boxSizing: 'border-box' }} />
+            style={{ width: '100%', background: C.card, border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.42rem 0.875rem 0.42rem 2.1rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'all .2s', boxSizing: 'border-box' }} />
           {search && (
             <button onClick={() => { setSearch(''); setPage(0) }}
               style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex', alignItems: 'center' }}>
@@ -280,14 +280,14 @@ export default function StudioAppointmentsList() {
         </div>
         {(search || statusFilter !== 'all' || periodFilter !== 'all') && (
           <button onClick={() => { setSearch(''); setStatusFilter('all'); setPeriodFilter('all'); setPage(0) }} className="al-pill"
-            style={{ padding: '0.48rem 1rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .15s' }}>
+            style={{ padding: '0.48rem 1rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .15s' }}>
             Clear all
           </button>
         )}
       </div>
 
       {!loading && (search || statusFilter !== 'all' || periodFilter !== 'all') && (
-        <p style={{ flexShrink: 0, fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: -4 }}>
+        <p style={{ flexShrink: 0, fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: -4 }}>
           {filtered.length} result{filtered.length !== 1 ? 's' : ''}
           {statusFilter !== 'all' && <span style={{ color: STATUS_CFG[statusFilter]?.color }}> · {STATUS_CFG[statusFilter]?.label}</span>}
           {search && <span> matching "<span style={{ color: C.dim }}>{search}</span>"</span>}
@@ -314,12 +314,12 @@ export default function StudioAppointmentsList() {
             <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Search size={22} style={{ color: C.faint }} />
             </div>
-            <p style={{ color: C.dim, fontSize: '0.88rem', fontFamily: 'Jost,sans-serif' }}>
+            <p style={{ color: C.dim, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif' }}>
               {search || statusFilter !== 'all' ? 'No appointments match your search' : 'No appointments yet'}
             </p>
             {(search || statusFilter !== 'all' || periodFilter !== 'all') && (
               <button onClick={() => { setSearch(''); setStatusFilter('all'); setPeriodFilter('all'); setPage(0) }}
-                style={{ padding: '6px 18px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em' }}>
+                style={{ padding: '6px 18px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em' }}>
                 Clear filters
               </button>
             )}
@@ -341,13 +341,13 @@ export default function StudioAppointmentsList() {
                   <div style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg,${cfg.color}22,${cfg.color}0e)`, border: `1px solid ${cfg.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <span style={{ fontSize: 10, color: cfg.color, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                   </div>
-                  <p style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>
+                  <p style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', minWidth: 0 }}>
                     {name || <span style={{ color: C.muted, fontStyle: 'italic' }}>Unknown</span>}
-                    {isGuest(appt) && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.05em', verticalAlign: 'middle' }}>GUEST</span>}
+                    {isGuest(appt) && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', verticalAlign: 'middle' }}>GUEST</span>}
                   </p>
                   <StatusDropdown appt={appt} onUpdate={updateStatus} />
                   <button onClick={() => setDetails(appt)} className="al-info-btn"
-                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'Jost,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 3, padding: '4px 9px', borderRadius: 7, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s', flexShrink: 0 }}>
                     Info <ChevronRight size={9} />
                   </button>
                   {isAdmin && (
@@ -360,26 +360,26 @@ export default function StudioAppointmentsList() {
 
                 {/* Line 2: metadata chips */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap', paddingLeft: 38 }}>
-                  <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: accent ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: accent ? 600 : 400 }}>{dateText}</span>
+                  <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: accent ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: accent ? 600 : 400 }}>{dateText}</span>
                   {appt.time && <>
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: isPastAppt && appt.status !== 'completed' ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif' }}>{appt.time.slice(0, 5)}</span>
+                    <span style={{ fontSize: '0.7rem', color: isPastAppt && appt.status !== 'completed' ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.3)', fontFamily: 'DM Sans,sans-serif' }}>{appt.time.slice(0, 5)}</span>
                   </>}
                   {appt.services?.name && <>
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 160 }}>{appt.services.name}</span>
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: 160 }}>{appt.services.name}</span>
                   </>}
                   {appt.stylists?.name && <>
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>{appt.stylists.name}</span>
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'DM Sans,sans-serif' }}>{appt.stylists.name}</span>
                   </>}
                   {appt.services?.price && <>
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: appt.status === 'completed' ? C.gold : 'rgba(255,255,255,0.32)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>${appt.services.price}</span>
+                    <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: appt.status === 'completed' ? C.gold : 'rgba(255,255,255,0.32)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>${appt.services.price}</span>
                   </>}
                   {appt.payment_status === 'pay_in_store' && <>
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       Pay in store
                     </span>
                   </>}
@@ -391,7 +391,7 @@ export default function StudioAppointmentsList() {
       </div>
 
       {!loading && filtered.length > 0 && (
-        <p style={{ flexShrink: 0, fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', textAlign: 'right', opacity: 0.5 }}>
+        <p style={{ flexShrink: 0, fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', textAlign: 'right', opacity: 0.5 }}>
           {filtered.length} of {appointments.length} appointments
         </p>
       )}
@@ -423,7 +423,7 @@ export default function StudioAppointmentsList() {
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                         <div>
                           <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, fontWeight: 400, lineHeight: 1.1, marginBottom: 4 }}>Appointment</h2>
-                          <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.06em' }}>
+                          <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.06em' }}>
                             {format(parseISO(details.date), 'EEEE, MMMM d yyyy')}
                           </span>
                         </div>
@@ -440,18 +440,18 @@ export default function StudioAppointmentsList() {
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2, flexWrap: 'wrap' }}>
-                            <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>
+                            <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>
                               {dName || 'Unknown client'}
                             </p>
                             {isGuest(details) && (
-                              <span style={{ fontSize: 9, padding: '1px 7px', borderRadius: 5, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.05em' }}>GUEST</span>
+                              <span style={{ fontSize: 9, padding: '1px 7px', borderRadius: 5, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em' }}>GUEST</span>
                             )}
                           </div>
                           {clientPhone(details) && (
-                            <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif' }}>{clientPhone(details)}</p>
+                            <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif' }}>{clientPhone(details)}</p>
                           )}
                           {isGuest(details) && details.guest_email && (
-                            <p style={{ color: 'rgba(96,165,250,0.6)', fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', marginTop: 1 }}>{details.guest_email}</p>
+                            <p style={{ color: 'rgba(96,165,250,0.6)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{details.guest_email}</p>
                           )}
                         </div>
                       </div>
@@ -461,21 +461,21 @@ export default function StudioAppointmentsList() {
                         <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                             <Calendar size={10} color={C.muted} />
-                            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Date</p>
+                            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Date</p>
                           </div>
-                          <p style={{ fontSize: '0.82rem', color: accent ? C.gold : C.white, fontFamily: 'Jost,sans-serif', fontWeight: accent ? 600 : 400 }}>{dateText}</p>
-                          <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>{format(parseISO(details.date), 'EEEE')}</p>
+                          <p style={{ fontSize: '0.82rem', color: accent ? C.gold : C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: accent ? 600 : 400 }}>{dateText}</p>
+                          <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>{format(parseISO(details.date), 'EEEE')}</p>
                         </div>
                         <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
                             <Clock size={10} color={C.muted} />
-                            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Time</p>
+                            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Time</p>
                           </div>
-                          <p style={{ fontSize: '0.82rem', color: isPastAppt && details.status !== 'completed' ? 'rgba(248,113,113,0.7)' : C.white, fontFamily: 'Jost,sans-serif' }}>
+                          <p style={{ fontSize: '0.82rem', color: isPastAppt && details.status !== 'completed' ? 'rgba(248,113,113,0.7)' : C.white, fontFamily: 'DM Sans,sans-serif' }}>
                             {details.time?.slice(0, 5) || '—'}
                           </p>
                           {details.services?.duration && (
-                            <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>{details.services.duration} min</p>
+                            <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>{details.services.duration} min</p>
                           )}
                         </div>
                       </div>
@@ -485,17 +485,17 @@ export default function StudioAppointmentsList() {
                         <div style={{ padding: '0.875rem 1rem', background: 'rgba(255,255,255,0.03)', border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: '0.875rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                             <div style={{ minWidth: 0 }}>
-                              <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Service</p>
-                              <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                              <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Service</p>
+                              <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                                 {details.services?.name || '—'}
                               </p>
                               {details.stylists?.name && (
-                                <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', marginTop: 2 }}>with {details.stylists.name}</p>
+                                <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>with {details.stylists.name}</p>
                               )}
                             </div>
                             {details.services?.price && (
                               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Price</p>
+                                <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Price</p>
                                 <span className="font-display" style={{ fontSize: '1.3rem', color: details.status === 'completed' ? C.gold : C.dim }}>${details.services.price}</span>
                               </div>
                             )}
@@ -507,7 +507,7 @@ export default function StudioAppointmentsList() {
                       {details.payment_status === 'pay_in_store' && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.65rem 1rem', background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 10, marginBottom: '0.875rem' }}>
                           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
-                          <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Payment due in store</span>
+                          <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Payment due in store</span>
                           {details.services?.price && (
                             <span className="font-display" style={{ marginLeft: 'auto', fontSize: '1.1rem', color: '#f59e0b' }}>${details.services.price}</span>
                           )}
@@ -518,7 +518,7 @@ export default function StudioAppointmentsList() {
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: `${cfg.bg}`, border: `1px solid ${cfg.border}`, borderRadius: 10, marginBottom: isAdmin ? '0.875rem' : 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color, boxShadow: `0 0 8px ${cfg.color}88`, flexShrink: 0 }} />
-                          <span style={{ fontSize: '0.8rem', color: cfg.color, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Status</span>
+                          <span style={{ fontSize: '0.8rem', color: cfg.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Status</span>
                         </div>
                         <StatusDropdown appt={details} onUpdate={updateStatus} />
                       </div>
@@ -526,7 +526,7 @@ export default function StudioAppointmentsList() {
                       {/* Delete — admin only */}
                       {isAdmin && (
                         <button onClick={() => openDelete(details)} className="del-row-btn"
-                          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.6rem', borderRadius: 10, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.55)', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.06em' }}>
+                          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.6rem', borderRadius: 10, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.55)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.06em' }}>
                           <Trash2 size={12} /> Delete Appointment
                         </button>
                       )}
@@ -557,25 +557,25 @@ export default function StudioAppointmentsList() {
                   </div>
                   <div>
                     <h3 style={{ color: C.white, fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete appointment?</h3>
-                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
+                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
                   </div>
                 </div>
                 <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem' }}>
-                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 4 }}>
+                  <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 4 }}>
                     {clientName(deleteTarget) || 'Unknown client'}
-                    {isGuest(deleteTarget) && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'Jost,sans-serif', fontWeight: 700, verticalAlign: 'middle' }}>GUEST</span>}
+                    {isGuest(deleteTarget) && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 4, background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, verticalAlign: 'middle' }}>GUEST</span>}
                   </p>
-                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
+                  <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif' }}>
                     {[deleteTarget.services?.name, deleteTarget.date ? format(parseISO(deleteTarget.date), 'MMM d, yyyy') : null, deleteTarget.time?.slice(0, 5)].filter(Boolean).join(' · ')}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={closeDelete} className="al-pill"
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', transition: 'all .15s' }}>
                     Cancel
                   </button>
                   <button onClick={confirmDelete} disabled={deleting}
-                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: deleting ? 'not-allowed' : 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: '#fff', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.6 : 1 }}>
                     {deleting ? <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Trash2 size={13} /> Delete</>}
                   </button>
                 </div>

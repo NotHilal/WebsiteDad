@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -130,7 +130,7 @@ export default function StudioLayout() {
             <span className="font-display s-brand-name" style={{ fontSize: '1.15rem', color: C.white, lineHeight: 1 }}>
               Hair<span style={{ color: C.gold }}>Go</span>
             </span>
-            <span style={{ display: 'block', fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+            <span style={{ display: 'block', fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
               Studio
             </span>
           </div>
@@ -144,7 +144,7 @@ export default function StudioLayout() {
             style={({ isActive }) => ({
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '0.55rem 0.875rem', borderRadius: 10,
-              fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 500 : 400,
+              fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 500 : 400,
               color: isActive ? C.gold : C.dim,
               background: isActive ? C.goldBg : 'transparent',
               border: isActive ? `1px solid ${C.goldBorder}` : '1px solid transparent',
@@ -174,15 +174,15 @@ export default function StudioLayout() {
       {/* Footer */}
       <div className="s-footer-wrap" style={{ padding: '0.75rem 0.625rem', borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
         <div style={{ padding: '0.5rem 0.875rem', marginBottom: 6 }}>
-          <p style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {profile?.full_name || 'Admin'}
           </p>
-          <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', marginTop: 2 }}>
+          <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
             {isAdmin ? 'Studio Admin' : 'Artist'}
           </p>
         </div>
         <button onClick={handleSignOut} className="s-signout"
-          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.5rem 0.875rem', borderRadius: 10, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', color: 'rgba(248,113,113,0.5)', background: 'none', border: `1px solid rgba(248,113,113,0.12)`, cursor: 'pointer', transition: 'all .18s ease', textAlign: 'left' }}>
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.5rem 0.875rem', borderRadius: 10, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(248,113,113,0.5)', background: 'none', border: `1px solid rgba(248,113,113,0.12)`, cursor: 'pointer', transition: 'all .18s ease', textAlign: 'left' }}>
           <LogOut size={13} strokeWidth={1.5} />
           Sign Out
         </button>
@@ -220,7 +220,7 @@ export default function StudioLayout() {
             <button onClick={() => setOpen(true)} style={{ display: 'none', padding: 4, color: C.dim, background: 'none', border: 'none', cursor: 'pointer' }} className="lg:hidden s-menu-btn">
               <Menu size={17} />
             </button>
-            <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
+            <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <UnlinkedArtistAlert />
@@ -228,7 +228,7 @@ export default function StudioLayout() {
             <AppointmentAlert />
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.14)' }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
-              <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#34d399', fontFamily: 'Jost,sans-serif' }}>Live</span>
+              <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#34d399', fontFamily: 'DM Sans,sans-serif' }}>Live</span>
             </div>
           </div>
         </header>

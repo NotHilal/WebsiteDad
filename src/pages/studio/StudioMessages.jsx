@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Send, MessageSquare, CheckCircle, RotateCcw, Trash2, AlertTriangle, Store, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -211,7 +211,7 @@ export default function StudioMessages() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1 }}>Messages</h1>
             {totalUnread > 0 && (
-              <span style={{ padding: '2px 9px', borderRadius: 20, background: '#ef4444', fontSize: 9, color: '#fff', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
+              <span style={{ padding: '2px 9px', borderRadius: 20, background: '#ef4444', fontSize: 9, color: '#fff', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
                 {totalUnread} new
               </span>
             )}
@@ -220,7 +220,7 @@ export default function StudioMessages() {
           <div style={{ display: 'flex', gap: 4 }}>
             {FILTERS.map(f => (
               <button key={f} onClick={() => setFilter(f)}
-                style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', background: filter === f ? C.goldBg : 'transparent', border: `1px solid ${filter === f ? C.goldBorder : C.border}`, color: filter === f ? C.gold : C.muted }}>
+                style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', background: filter === f ? C.goldBg : 'transparent', border: `1px solid ${filter === f ? C.goldBorder : C.border}`, color: filter === f ? C.gold : C.muted }}>
                 {f}
               </button>
             ))}
@@ -235,7 +235,7 @@ export default function StudioMessages() {
               { key: 'direct', Icon: Scissors, label: 'My Messages',    color: C.blue,   bg: C.blueBg,  border: C.blueBorder },
             ].map(({ key, Icon, label, color, bg, border }) => (
               <button key={key} onClick={() => setTab(key)}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: tab === key ? 600 : 400, cursor: 'pointer', transition: 'all .15s', background: tab === key ? bg : 'transparent', border: `1px solid ${tab === key ? border : C.border}`, color: tab === key ? color : C.muted }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: tab === key ? 600 : 400, cursor: 'pointer', transition: 'all .15s', background: tab === key ? bg : 'transparent', border: `1px solid ${tab === key ? border : C.border}`, color: tab === key ? color : C.muted }}>
                 <Icon size={12} strokeWidth={tab === key ? 2.5 : 1.5} />
                 {label}
               </button>
@@ -249,7 +249,7 @@ export default function StudioMessages() {
         {/* ── Ticket list ──────────────────────────────────── */}
         <div className="msg-list-panel" style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '0.65rem 0.875rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
               {filter === 'All' ? `${filtered.length} tickets` : `${filtered.length} ${filter.toLowerCase()}`}
             </p>
           </div>
@@ -261,7 +261,7 @@ export default function StudioMessages() {
             ) : filtered.length === 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '1.5rem', textAlign: 'center' }}>
                 <MessageSquare size={20} color={C.border} style={{ marginBottom: 8 }} />
-                <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>No {filter !== 'All' ? filter.toLowerCase() + ' ' : ''}tickets</p>
+                <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif' }}>No {filter !== 'All' ? filter.toLowerCase() + ' ' : ''}tickets</p>
               </div>
             ) : filtered.map(tk => {
               const isActive = selected?.id === tk.id
@@ -272,13 +272,13 @@ export default function StudioMessages() {
                   style={{ width: '100%', textAlign: 'left', padding: '0.65rem 0.75rem', display: 'flex', alignItems: 'flex-start', gap: 9, background: isActive ? 'rgba(184,212,232,0.06)' : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'background .15s' }}>
                   <div style={{ position: 'relative', flexShrink: 0, marginTop: 1 }}>
                     <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(96,165,250,0.22), rgba(139,92,246,0.12))', border: `1px solid ${isActive ? 'rgba(96,165,250,0.3)' : 'rgba(96,165,250,0.18)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: 11, color: 'rgba(96,165,250,0.85)', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{clientInitial}</span>
+                      <span style={{ fontSize: 11, color: 'rgba(96,165,250,0.85)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{clientInitial}</span>
                     </div>
                     <div style={{ position: 'absolute', bottom: 0, right: 0, width: 7, height: 7, borderRadius: '50%', background: isOpen ? '#34d399' : 'rgba(255,255,255,0.18)', border: '1.5px solid #161620', boxShadow: isOpen ? '0 0 5px rgba(52,211,153,0.4)' : 'none' }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                      <p style={{ fontSize: '0.77rem', color: isActive ? C.white : 'rgba(255,255,255,0.82)', fontFamily: 'Jost,sans-serif', fontWeight: isActive ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>
+                      <p style={{ fontSize: '0.77rem', color: isActive ? C.white : 'rgba(255,255,255,0.82)', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>
                         {tk.user?.full_name || 'User'}
                       </p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 4, flexShrink: 0 }}>
@@ -287,21 +287,21 @@ export default function StudioMessages() {
                             {tk.unread}
                           </span>
                         )}
-                        {tk.lastTime && <span style={{ fontSize: 8, color: C.muted, fontFamily: 'Jost,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
+                        {tk.lastTime && <span style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
                       </div>
                     </div>
-                    <p style={{ fontSize: '0.7rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 4 }}>{tk.title}</p>
+                    <p style={{ fontSize: '0.7rem', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 4 }}>{tk.title}</p>
                     {/* Recipient badge — only shown on admin direct tab */}
                     {isAdmin && tab === 'direct' && tk.recipient?.full_name && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 20, background: C.blueBg, border: `1px solid ${C.blueBorder}` }}>
                         <div style={{ width: 4, height: 4, borderRadius: '50%', background: C.blue, flexShrink: 0 }} />
-                        <span style={{ fontSize: 8, fontFamily: 'Jost,sans-serif', fontWeight: 600, color: 'rgba(96,165,250,0.75)', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 8, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'rgba(96,165,250,0.75)', whiteSpace: 'nowrap' }}>
                           {tk.recipient.full_name}
                         </span>
                       </span>
                     )}
                     {!isAdmin && (
-                      <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{tk.lastMsg || '—'}</p>
+                      <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{tk.lastMsg || '—'}</p>
                     )}
                   </div>
                 </button>
@@ -317,7 +317,7 @@ export default function StudioMessages() {
               <div style={{ width: 46, height: 46, borderRadius: 12, background: 'rgba(255,255,255,0.04)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <MessageSquare size={18} color={C.border} />
               </div>
-              <p style={{ color: C.dim, fontSize: '0.82rem', fontFamily: 'Jost,sans-serif' }}>Select a ticket</p>
+              <p style={{ color: C.dim, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>Select a ticket</p>
             </div>
           ) : (
             <>
@@ -329,13 +329,13 @@ export default function StudioMessages() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
                   </button>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: C.white, fontSize: '1.05rem', fontFamily: 'Jost,sans-serif', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 4 }}>
+                    <p style={{ color: C.white, fontSize: '1.05rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 4 }}>
                       {selected.user?.full_name || 'Client'}
                     </p>
-                    <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.45)', marginBottom: 3, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                    <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.45)', marginBottom: 3, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       <span style={{ color: 'rgba(255,255,255,0.25)', marginRight: 4 }}>Subject :</span>{selected.title}
                     </p>
-                    <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ color: 'rgba(255,255,255,0.25)' }}>Status :</span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                         <span style={{ width: 5, height: 5, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'rgba(255,255,255,0.2)', boxShadow: selected.status === 'open' ? '0 0 5px rgba(52,211,153,0.4)' : 'none', display: 'inline-block', flexShrink: 0 }} />
@@ -345,7 +345,7 @@ export default function StudioMessages() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
                     <button onClick={toggleStatus} disabled={toggling} className="btn-g"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: toggling ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: toggling ? 0.6 : 1, ...(selected.status === 'open' ? { background: 'rgba(248,113,113,0.12)', color: '#f87171' } : { background: 'rgba(52,211,153,0.1)', color: '#34d399' }) }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: toggling ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: toggling ? 0.6 : 1, ...(selected.status === 'open' ? { background: 'rgba(248,113,113,0.12)', color: '#f87171' } : { background: 'rgba(52,211,153,0.1)', color: '#34d399' }) }}>
                       {selected.status === 'open' ? <><CheckCircle size={11} /> Close</> : <><RotateCcw size={11} /> Reopen</>}
                     </button>
                     {isAdmin && (
@@ -363,7 +363,7 @@ export default function StudioMessages() {
               <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '0.875rem 1rem', display: 'flex', flexDirection: 'column', background: '#0f0f16' }}>
                 {messages.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontStyle: 'italic' }}>No messages yet</p>
+                    <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No messages yet</p>
                   </div>
                 ) : messages.map((msg, i) => {
                   const isMe = msg.is_from_admin
@@ -376,7 +376,7 @@ export default function StudioMessages() {
                       {showDate && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.75rem 0' }}>
                           <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
-                          <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.22)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.22)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                             {isToday(new Date(msg.created_at)) ? 'Today' : isYesterday(new Date(msg.created_at)) ? 'Yesterday' : format(new Date(msg.created_at), 'MMMM d')}
                           </span>
                           <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
@@ -386,19 +386,19 @@ export default function StudioMessages() {
                         style={{ display: 'flex', alignItems: 'flex-end', gap: 7, justifyContent: isMe ? 'flex-end' : 'flex-start', marginTop: prevSame ? 2 : 8 }}>
                         {!isMe && (
                           <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, rgba(96,165,250,0.22), rgba(139,92,246,0.12))', border: '1px solid rgba(96,165,250,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ fontSize: 10, color: 'rgba(96,165,250,0.85)', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>{clientInitial}</span>
+                            <span style={{ fontSize: 10, color: 'rgba(96,165,250,0.85)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{clientInitial}</span>
                           </div>
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
                           {!prevSame && (
-                            <span style={{ fontSize: 9, color: isMe ? C.goldDim : 'rgba(96,165,250,0.6)', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.06em', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>
+                            <span style={{ fontSize: 9, color: isMe ? C.goldDim : 'rgba(96,165,250,0.6)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.06em', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>
                               {senderName}
                             </span>
                           )}
-                          <div style={{ padding: '0.55rem 0.95rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.82rem', lineHeight: 1.6, fontFamily: 'Jost,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontWeight: 500, boxShadow: '0 4px 14px rgba(184,212,232,0.2)' } : { background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.14)', color: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(4px)' }) }}>
+                          <div style={{ padding: '0.55rem 0.95rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.82rem', lineHeight: 1.6, fontFamily: 'DM Sans,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},#7AAFC9)`, color: '#000', fontWeight: 500, boxShadow: '0 4px 14px rgba(184,212,232,0.2)' } : { background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.14)', color: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(4px)' }) }}>
                             {msg.content}
                           </div>
-                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>
+                          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>
                             {format(new Date(msg.created_at), 'HH:mm')}
                           </span>
                         </div>
@@ -414,7 +414,7 @@ export default function StudioMessages() {
                 {!canReply ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <CheckCircle size={13} color="rgba(255,255,255,0.2)" />
-                    <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
+                    <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                       {selected.status === 'closed'
                         ? 'This ticket is closed. Reopen to reply.'
                         : 'Only the assigned artist can reply to this ticket.'}
@@ -425,9 +425,9 @@ export default function StudioMessages() {
                     onFocus={e => e.currentTarget.style.borderColor = C.goldBorder}
                     onBlur={e => e.currentTarget.style.borderColor = C.border}>
                     <input value={input} onChange={e => setInput(e.target.value)} placeholder={`Reply as ${profile?.full_name || 'you'}…`} className="send-inp"
-                      style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.82rem', color: C.white, fontFamily: 'Jost,sans-serif', outline: 'none' }} />
+                      style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.82rem', color: C.white, fontFamily: 'DM Sans,sans-serif', outline: 'none' }} />
                     <button type="submit" disabled={!input.trim() || sending} className="btn-g"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.4rem 0.8rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: input.trim() ? '#000' : 'rgba(255,255,255,0.22)', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: 700, border: 'none', cursor: !input.trim() || sending ? 'not-allowed' : 'pointer', flexShrink: 0, transition: 'all .2s', letterSpacing: '0.08em' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.4rem 0.8rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},#7AAFC9)` : 'rgba(255,255,255,0.06)', color: input.trim() ? '#000' : 'rgba(255,255,255,0.22)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: !input.trim() || sending ? 'not-allowed' : 'pointer', flexShrink: 0, transition: 'all .2s', letterSpacing: '0.08em' }}>
                       {sending ? <div style={{ width: 12, height: 12, border: '2px solid rgba(0,0,0,.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Send size={11} /> Send</>}
                     </button>
                   </form>
@@ -459,25 +459,25 @@ export default function StudioMessages() {
                     <AlertTriangle size={17} color="#f87171" />
                   </div>
                   <div>
-                    <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>Delete ticket?</p>
-                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>This action cannot be undone</p>
+                    <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 2 }}>Delete ticket?</p>
+                    <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>This action cannot be undone</p>
                   </div>
                 </div>
                 <div style={{ padding: '0.7rem 0.875rem', borderRadius: 9, background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', marginBottom: '1.25rem' }}>
-                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', fontFamily: 'Jost,sans-serif' }}>
+                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', fontFamily: 'DM Sans,sans-serif' }}>
                     <span style={{ color: 'rgba(255,255,255,0.35)' }}>Ticket: </span>{selected.title}
                   </p>
-                  <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif', marginTop: 3 }}>
+                  <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>
                     All messages in this thread will be permanently removed.
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button onClick={() => setConfirmDel(false)} disabled={deleting}
-                    style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', cursor: deleting ? 'not-allowed' : 'pointer', transition: 'all .2s' }}>
+                    style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: deleting ? 'not-allowed' : 'pointer', transition: 'all .2s' }}>
                     Cancel
                   </button>
                   <button onClick={deleteTicket} disabled={deleting}
-                    style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'rgba(248,113,113,0.15)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontSize: '0.8rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.5 : 1 }}>
+                    style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'rgba(248,113,113,0.15)', border: '1px solid rgba(248,113,113,0.3)', color: '#f87171', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: deleting ? 0.5 : 1 }}>
                     {deleting
                       ? <div style={{ width: 13, height: 13, border: '2px solid rgba(248,113,113,0.3)', borderTopColor: '#f87171', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                       : <><Trash2 size={13} /> Delete</>}
