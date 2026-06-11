@@ -366,7 +366,7 @@ export default function StudioAppointments() {
                       </p>
                     </div>
                     {appt.services?.price && (
-                      <span style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>€{appt.services.price}</span>
+                      <span style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>${appt.services.price}</span>
                     )}
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, flexShrink: 0 }}>
                       <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={appt.status === 'pending' ? 'dot-pulse' : ''} />
@@ -516,7 +516,7 @@ export default function StudioAppointments() {
                               <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>⏱ {appt.services.duration} min</span>
                             )}
                             {appt.services?.price && (
-                              <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>€{appt.services.price}</span>
+                              <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>${appt.services.price}</span>
                             )}
                             {appt.profiles?.phone && (
                               <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>{appt.profiles.phone}</span>

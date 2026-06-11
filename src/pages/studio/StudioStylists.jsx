@@ -300,7 +300,7 @@ export default function StudioStylists() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         {s.hourly_rate != null && s.hourly_rate !== '' && (
                           <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 9999, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.06em' }}>
-                            €{parseFloat(s.hourly_rate).toFixed(2)}/hr
+                            ${parseFloat(s.hourly_rate).toFixed(2)}/hr
                           </span>
                         )}
                       </div>
@@ -363,7 +363,7 @@ export default function StudioStylists() {
                     Used to auto-calculate pay runs from timesheet hours.
                   </p>
                   <div style={{ position: 'relative', maxWidth: 160 }}>
-                    <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', pointerEvents: 'none' }}>€</span>
+                    <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontSize: '0.85rem', pointerEvents: 'none' }}>$</span>
                     <input
                       type="number" min="0" step="0.5"
                       value={form.hourly_rate || ''}

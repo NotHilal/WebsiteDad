@@ -375,7 +375,7 @@ export default function StudioAppointmentsList() {
                   </>}
                   {appt.services?.price && <>
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                    <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: appt.status === 'completed' ? C.gold : 'rgba(255,255,255,0.32)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>€{appt.services.price}</span>
+                    <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: appt.status === 'completed' ? C.gold : 'rgba(255,255,255,0.32)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>${appt.services.price}</span>
                   </>}
                   {appt.payment_status === 'pay_in_store' && <>
                     <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
@@ -496,7 +496,7 @@ export default function StudioAppointmentsList() {
                             {details.services?.price && (
                               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                                 <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 4 }}>Price</p>
-                                <span className="font-display" style={{ fontSize: '1.3rem', color: details.status === 'completed' ? C.gold : C.dim }}>€{details.services.price}</span>
+                                <span className="font-display" style={{ fontSize: '1.3rem', color: details.status === 'completed' ? C.gold : C.dim }}>${details.services.price}</span>
                               </div>
                             )}
                           </div>
@@ -509,7 +509,7 @@ export default function StudioAppointmentsList() {
                           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
                           <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Payment due in store</span>
                           {details.services?.price && (
-                            <span className="font-display" style={{ marginLeft: 'auto', fontSize: '1.1rem', color: '#f59e0b' }}>€{details.services.price}</span>
+                            <span className="font-display" style={{ marginLeft: 'auto', fontSize: '1.1rem', color: '#f59e0b' }}>${details.services.price}</span>
                           )}
                         </div>
                       )}

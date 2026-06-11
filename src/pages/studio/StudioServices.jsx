@@ -79,7 +79,7 @@ export default function StudioServices() {
 
   async function save() {
     if (!form.name.trim()) return toast.error('Name is required')
-    if (!form.price || parseFloat(form.price) <= 0) return toast.error('Price must be greater than €0')
+    if (!form.price || parseFloat(form.price) <= 0) return toast.error('Price must be greater than $0')
     setSaving(true)
     try {
       let image_url = form.image_url || ''
@@ -304,7 +304,7 @@ export default function StudioServices() {
                     {/* Price + duration */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span className="font-display" style={{ fontSize: '2rem', color: cat.color, lineHeight: 1, textShadow: `0 0 24px ${cat.color}50` }}>
-                        €{s.price}
+                        ${s.price}
                       </span>
                       {s.duration > 0 && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -398,7 +398,7 @@ export default function StudioServices() {
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                     <div>
-                      <label style={lbl}>Price (€)</label>
+                      <label style={lbl}>Price ($)</label>
                       <input type="number" value={form.price} onChange={set('price')} placeholder="45" style={inp()} className="m-inp" />
                     </div>
                     <div>
@@ -506,7 +506,7 @@ export default function StudioServices() {
                 <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem' }}>
                   <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 2 }}>{deleteTarget.name}</p>
                   <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
-                    {[deleteTarget.category && (CAT[deleteTarget.category]?.label), deleteTarget.price && `€${deleteTarget.price}`].filter(Boolean).join(' · ')}
+                    {[deleteTarget.category && (CAT[deleteTarget.category]?.label), deleteTarget.price && `$${deleteTarget.price}`].filter(Boolean).join(' · ')}
                   </p>
                 </div>
 

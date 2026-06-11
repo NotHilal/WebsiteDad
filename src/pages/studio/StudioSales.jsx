@@ -130,9 +130,9 @@ export default function StudioSales() {
   const mobileOrders = filteredOrders.slice(mobilePage * MOBILE_PER_PAGE, (mobilePage + 1) * MOBILE_PER_PAGE)
 
   const summaryCards = [
-    { label: 'Total Revenue',  value: `€${totalRevenue.toFixed(2)}`,    sub: 'Collected via Stripe',      color: C.gold,    icon: TrendingUp },
-    { label: 'Services',       value: `€${servicesRevenue.toFixed(2)}`, sub: `${paidAppts.length} paid`,  color: '#34d399', icon: Scissors   },
-    { label: 'Product Orders', value: `€${productsRevenue.toFixed(2)}`, sub: `${paidOrders.length} paid`, color: '#a78bfa', icon: Package    },
+    { label: 'Total Revenue',  value: `$${totalRevenue.toFixed(2)}`,    sub: 'Collected via Stripe',      color: C.gold,    icon: TrendingUp },
+    { label: 'Services',       value: `$${servicesRevenue.toFixed(2)}`, sub: `${paidAppts.length} paid`,  color: '#34d399', icon: Scissors   },
+    { label: 'Product Orders', value: `$${productsRevenue.toFixed(2)}`, sub: `${paidOrders.length} paid`, color: '#a78bfa', icon: Package    },
   ]
 
   const currentPeriod = isCurrent(anchor, mode)
@@ -244,7 +244,7 @@ export default function StudioSales() {
             <div style={{ width: 200, flexShrink: 0, paddingLeft: '1.75rem', borderLeft: `1px solid ${C.border}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
                 <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Revenue Split</p>
-                <span className="font-display" style={{ color: C.gold, fontSize: '1rem' }}>€{totalRevenue.toFixed(2)}</span>
+                <span className="font-display" style={{ color: C.gold, fontSize: '1rem' }}>${totalRevenue.toFixed(2)}</span>
               </div>
               <RevenueSplit servicesRevenue={servicesRevenue} productsRevenue={productsRevenue} total={totalRevenue} />
             </div>
@@ -324,7 +324,7 @@ export default function StudioSales() {
                           }
                         </td>
                         <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.78rem', color: appt.payment_status === 'paid' ? C.gold : C.muted, fontWeight: appt.payment_status === 'paid' ? 600 : 400 }}>
-                          {appt.services?.price ? `€${appt.services.price}` : '—'}
+                          {appt.services?.price ? `$${appt.services.price}` : '—'}
                         </td>
                       </tr>
                     )
@@ -336,7 +336,7 @@ export default function StudioSales() {
                       <td colSpan={7} style={{ padding: '0.55rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
                         Revenue — paid via Stripe ({paidAppts.length})
                       </td>
-                      <td style={{ padding: '0.55rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{servicesRevenue.toFixed(2)}</td>
+                      <td style={{ padding: '0.55rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>${servicesRevenue.toFixed(2)}</td>
                     </tr>
                   </tfoot>
                 )}
@@ -366,7 +366,7 @@ export default function StudioSales() {
                           ? <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>Paid</span>
                           : <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>Unpaid</span>
                         }
-                        {appt.services?.price && <span style={{ fontSize: '0.8rem', color: paid ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: paid ? 700 : 400, flexShrink: 0 }}>€{appt.services.price}</span>}
+                        {appt.services?.price && <span style={{ fontSize: '0.8rem', color: paid ? C.gold : C.muted, fontFamily: 'Jost,sans-serif', fontWeight: paid ? 700 : 400, flexShrink: 0 }}>${appt.services.price}</span>}
                       </div>
                       {/* Line 2 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
@@ -384,7 +384,7 @@ export default function StudioSales() {
                 {paidAppts.length > 0 && !search && (
                   <div style={{ padding: '0.6rem 1rem', background: C.goldBg, borderTop: `1px solid ${C.goldBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Revenue — {paidAppts.length} paid</span>
-                    <span style={{ color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{servicesRevenue.toFixed(2)}</span>
+                    <span style={{ color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>${servicesRevenue.toFixed(2)}</span>
                   </div>
                 )}
               </div>
@@ -431,9 +431,9 @@ export default function StudioSales() {
                             : <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>Unpaid</span>
                           }
                         </td>
-                        <td style={{ padding: '0.6rem 1.1rem', color: C.muted, fontSize: '0.76rem', fontFamily: 'Jost,sans-serif' }}>{order.products?.price ? `€${order.products.price}` : '—'}</td>
+                        <td style={{ padding: '0.6rem 1.1rem', color: C.muted, fontSize: '0.76rem', fontFamily: 'Jost,sans-serif' }}>{order.products?.price ? `$${order.products.price}` : '—'}</td>
                         <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'Jost,sans-serif', fontSize: '0.78rem', color: order.payment_status === 'paid' ? C.gold : C.muted, fontWeight: order.payment_status === 'paid' ? 600 : 400 }}>
-                          {order.products?.price ? `€${lineTotal.toFixed(2)}` : '—'}
+                          {order.products?.price ? `$${lineTotal.toFixed(2)}` : '—'}
                         </td>
                       </tr>
                     )
@@ -443,7 +443,7 @@ export default function StudioSales() {
                   <tfoot>
                     <tr style={{ borderTop: `1px solid ${C.goldBorder}`, background: C.goldBg }}>
                       <td colSpan={6} style={{ padding: '0.55rem 1.1rem', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Revenue — paid via Stripe ({paidOrders.length})</td>
-                      <td style={{ padding: '0.55rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{productsRevenue.toFixed(2)}</td>
+                      <td style={{ padding: '0.55rem 1.1rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>${productsRevenue.toFixed(2)}</td>
                     </tr>
                   </tfoot>
                 )}
@@ -488,9 +488,9 @@ export default function StudioSales() {
                         {order.profiles?.full_name && <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.38)', fontFamily: 'Jost,sans-serif' }}>{order.profiles.full_name}</span>}
                         <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
                         <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>×{order.quantity || 1}</span>
-                        {order.products?.price && <><span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span><span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>€{order.products.price} each</span></>}
+                        {order.products?.price && <><span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span><span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>${order.products.price} each</span></>}
                         <span style={{ color: 'rgba(255,255,255,0.1)' }}>·</span>
-                        <span style={{ fontSize: '0.72rem', color: paid ? C.gold : 'rgba(255,255,255,0.32)', fontFamily: 'Jost,sans-serif', fontWeight: paid ? 700 : 400 }}>€{lineTotal.toFixed(2)}</span>
+                        <span style={{ fontSize: '0.72rem', color: paid ? C.gold : 'rgba(255,255,255,0.32)', fontFamily: 'Jost,sans-serif', fontWeight: paid ? 700 : 400 }}>${lineTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   )
@@ -501,7 +501,7 @@ export default function StudioSales() {
                 {paidOrders.length > 0 && !search && (
                   <div style={{ padding: '0.6rem 1rem', background: C.goldBg, borderTop: `1px solid ${C.goldBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Revenue — {paidOrders.length} paid</span>
-                    <span style={{ color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>€{productsRevenue.toFixed(2)}</span>
+                    <span style={{ color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, fontSize: '0.88rem' }}>${productsRevenue.toFixed(2)}</span>
                   </div>
                 )}
               </div>
@@ -577,7 +577,7 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
             const heightPct = total === 0 ? 0 : Math.max(5, (total / maxVal) * 100)
             const today = isToday(day)
             return (
-              <div key={i} className="bar-col" title={`Services €${apptRev.toFixed(2)} · Products €${ordRev.toFixed(2)}`}
+              <div key={i} className="bar-col" title={`Services $${apptRev.toFixed(2)} · Products $${ordRev.toFixed(2)}`}
                 style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end', cursor: 'default' }}>
                 <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
                   {total === 0
@@ -596,7 +596,7 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
                         )}
                         {total > 0 && mode !== 'month' && (
                           <span style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)', fontSize: 9, color: today ? C.gold : '#34d399', fontFamily: 'Jost,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                            €{total.toFixed(0)}
+                            ${total.toFixed(0)}
                           </span>
                         )}
                       </motion.div>
@@ -735,11 +735,11 @@ function AllTimeChart({ appointments, preorders }) {
                     fill="#1e1e2e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
                   <text x={Math.min(ptS.x - 46, W - 96) + 8} y={ptS.y - 30}
                     fill="#34d399" style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
-                    S €{ptS.sRev.toFixed(0)}
+                    S ${ptS.sRev.toFixed(0)}
                   </text>
                   <text x={Math.min(ptS.x - 46, W - 96) + 8} y={ptS.y - 15}
                     fill="#a78bfa" style={{ fontSize: 9, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
-                    P €{ptP.pRev.toFixed(0)}
+                    P ${ptP.pRev.toFixed(0)}
                   </text>
                 </g>
               )}
@@ -866,11 +866,11 @@ function RevenueSplit({ servicesRevenue, productsRevenue, total }) {
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{ width: 8, height: 8, borderRadius: 2, background: '#34d399' }} />
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif' }}>Services <span style={{ color: '#34d399', fontWeight: 600 }}>€{servicesRevenue.toFixed(2)}</span></span>
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif' }}>Services <span style={{ color: '#34d399', fontWeight: 600 }}>${servicesRevenue.toFixed(2)}</span></span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{ width: 8, height: 8, borderRadius: 2, background: '#a78bfa' }} />
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif' }}>Products <span style={{ color: '#a78bfa', fontWeight: 600 }}>€{productsRevenue.toFixed(2)}</span></span>
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'Jost,sans-serif' }}>Products <span style={{ color: '#a78bfa', fontWeight: 600 }}>${productsRevenue.toFixed(2)}</span></span>
         </div>
       </div>
     </div>

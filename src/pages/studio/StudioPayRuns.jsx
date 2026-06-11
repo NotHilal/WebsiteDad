@@ -30,7 +30,7 @@ function fmtMins(mins) {
   return `${m}m`
 }
 
-const fmt = n => `€${(n || 0).toFixed(2)}`
+const fmt = n => `$${(n || 0).toFixed(2)}`
 const inp = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '0.4rem 0.6rem 0.4rem 1.5rem', fontSize: '0.8rem', color: '#f0f0f0', outline: 'none', fontFamily: 'Jost,sans-serif', width: '100%', boxSizing: 'border-box', transition: 'border-color .2s' }
 
 function sheetMins(t) {
@@ -481,7 +481,7 @@ export default function StudioPayRuns() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <h2 style={{ margin: 0, fontSize: '1.15rem', color: C.white, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>{stylist.name}</h2>
               <p style={{ margin: '3px 0 0', fontSize: '0.75rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>
-                {stylist.hourly_rate ? `€${parseFloat(stylist.hourly_rate).toFixed(2)}/h` : 'No rate set'}
+                {stylist.hourly_rate ? `$${parseFloat(stylist.hourly_rate).toFixed(2)}/h` : 'No rate set'}
                 {totals.allMins > 0 && ` · ${fmtMins(totals.allMins)} worked`}
               </p>
             </div>
@@ -526,7 +526,7 @@ export default function StudioPayRuns() {
                 <div key={key} style={{ minWidth: 130, flex: 1 }}>
                   <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', fontFamily: 'Jost,sans-serif', fontWeight: 600, marginBottom: 5 }}>{label}</label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: C.goldDim, pointerEvents: 'none', fontFamily: 'Jost,sans-serif' }}>€</span>
+                    <span style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: C.goldDim, pointerEvents: 'none', fontFamily: 'Jost,sans-serif' }}>$</span>
                     <input type="number" min="0" step="0.01" value={editVals[key]} onChange={e => setEditVals(p => ({ ...p, [key]: e.target.value }))} className="m-inp" style={inp} />
                   </div>
                 </div>

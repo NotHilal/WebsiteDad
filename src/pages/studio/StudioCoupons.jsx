@@ -31,7 +31,7 @@ function ModalWrap({ children, onClose, maxWidth = 440 }) {
 function TypeToggle({ value, onChange }) {
   return (
     <div style={{ display: 'flex', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 9, overflow: 'hidden' }}>
-      {[['percentage', '% Percentage'], ['fixed', '€ Fixed']].map(([val, label]) => (
+      {[['percentage', '% Percentage'], ['fixed', '$ Fixed']].map(([val, label]) => (
         <button key={val} type="button" onClick={() => onChange(val)}
           style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.03)', color: value === val ? '#B8D4E8' : 'rgba(255,255,255,0.35)', fontSize: '0.82rem', fontFamily: 'Jost,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
           {label}
@@ -42,7 +42,7 @@ function TypeToggle({ value, onChange }) {
 }
 
 function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign, onAssign }) {
-  const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `€${coupon.discount_value}`
+  const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `$${coupon.discount_value}`
   const used = !coupon.active
   const sharedBorder = `1px solid ${used ? C.border : C.goldBorder}`
   return (
@@ -146,7 +146,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
 
 /* ── Selectable coupon mini card (used in assign step 1) ── */
 function SelectableCouponCard({ coupon, selected, onSelect }) {
-  const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `€${coupon.discount_value}`
+  const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `$${coupon.discount_value}`
   return (
     <button type="button" onClick={() => onSelect(coupon)}
       style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}
@@ -457,7 +457,7 @@ export default function StudioCoupons() {
           <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 44, height: 44, borderRadius: 9, background: 'rgba(184,212,232,0.08)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <span className="font-display gold-gradient" style={{ fontSize: '1rem', lineHeight: 1 }}>
-                {deleteTarget.discount_type === 'percentage' ? `${deleteTarget.discount_value}%` : `€${deleteTarget.discount_value}`}
+                {deleteTarget.discount_type === 'percentage' ? `${deleteTarget.discount_value}%` : `$${deleteTarget.discount_value}`}
               </span>
             </div>
             <div>
@@ -533,7 +533,7 @@ export default function StudioCoupons() {
               {assignCoupon && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 9, background: C.goldBg, border: `1px solid ${C.goldBorder}`, marginBottom: '1rem' }}>
                   <span className="font-display gold-gradient" style={{ fontSize: '1rem' }}>
-                    {assignCoupon.discount_type === 'percentage' ? `${assignCoupon.discount_value}%` : `€${assignCoupon.discount_value}`} OFF
+                    {assignCoupon.discount_type === 'percentage' ? `${assignCoupon.discount_value}%` : `$${assignCoupon.discount_value}`} OFF
                   </span>
                   <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.78rem', color: C.gold, letterSpacing: '0.1em' }}>{assignCoupon.code}</span>
                 </div>

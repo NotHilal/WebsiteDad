@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CalendarCheck, CalendarX } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -15,7 +15,7 @@ function saveDismissed(id) {
 }
 
 const C = {
-  border: 'rgba(255,255,255,0.07)', white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)',
+  border: 'rgba(var(--rgb-hi),0.07)', white: 'var(--col-text)', muted: 'rgba(var(--rgb-hi),0.22)',
   success: '#4ade80', successBg: 'rgba(74,222,128,0.08)', successBorder: 'rgba(74,222,128,0.2)',
   danger: '#f87171',  dangerBg:  'rgba(248,113,113,0.08)', dangerBorder:  'rgba(248,113,113,0.2)',
 }
@@ -72,7 +72,7 @@ export default function DayOffAlert() {
           0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.55); transform: scale(1); }
           50%      { box-shadow: 0 0 0 7px rgba(96,165,250,0); transform: scale(1.06); }
         }
-        .doa-dismiss:hover { background: rgba(255,255,255,0.06) !important; color: ${C.white} !important; }
+        .doa-dismiss:hover { background: rgba(var(--rgb-hi),0.06) !important; color: ${C.white} !important; }
       `}</style>
 
       {/* Bell button */}
@@ -80,7 +80,7 @@ export default function DayOffAlert() {
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#60a5fa,#3b82f6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'dayoff-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
         <CalendarCheck size={14} color="#fff" strokeWidth={2.5} />
         {notes.length > 1 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#B8D4E8', border: '2px solid #111118', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
             {notes.length}
           </span>
         )}
@@ -98,7 +98,7 @@ export default function DayOffAlert() {
               animate={{ opacity: 1, scale: 1,    y:  0 }}
               exit={{    opacity: 0, scale: 0.94, y: -8 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              style={{ position: 'fixed', top: '3.5rem', right: '1.5rem', zIndex: 120, width: 320, maxWidth: 'calc(100vw - 2rem)', background: '#161620', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
+              style={{ position: 'fixed', top: '3.5rem', right: '1.5rem', zIndex: 120, width: 320, maxWidth: 'calc(100vw - 2rem)', background: 'var(--col-modal)', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
 
               {/* Header */}
               <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(96,165,250,0.06)' }}>
@@ -131,11 +131,11 @@ export default function DayOffAlert() {
                             {ok ? 'Day off approved' : 'Day off not approved'}
                           </span>
                         </div>
-                        <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.5)' }}>
+                        <p style={{ fontSize: '0.75rem', fontFamily: 'Jost,sans-serif', color: 'rgba(var(--rgb-hi),0.5)' }}>
                           {format(new Date(n.date + 'T00:00:00'), 'EEEE, MMMM d')}
                         </p>
                         {n.reason && (
-                          <p style={{ fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.28)', marginTop: 2 }}>{n.reason}</p>
+                          <p style={{ fontSize: '0.7rem', fontFamily: 'Jost,sans-serif', color: 'rgba(var(--rgb-hi),0.28)', marginTop: 2 }}>{n.reason}</p>
                         )}
                       </div>
                       <button onClick={() => dismiss(n.id)} className="doa-dismiss"

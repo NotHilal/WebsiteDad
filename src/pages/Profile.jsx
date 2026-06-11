@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ShoppingCart, Trash2, Download, Receipt, Scissors, ChevronRight, Minus, Plus } from 'lucide-react'
 import jsPDF from 'jspdf'
@@ -17,10 +17,10 @@ const STATUS_MAP = {
   pending:   { label: 'Pending',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
   confirmed: { label: 'Confirmed', color: '#10b981', bg: 'rgba(16,185,129,0.12)'  },
   cancelled: { label: 'Cancelled', color: '#ef4444', bg: 'rgba(239,68,68,0.12)'   },
-  completed: { label: 'Completed', color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)'  },
+  completed: { label: 'Completed', color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)'  },
   active:    { label: 'Awaiting Pickup', color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  retrieved: { label: 'Picked Up', color: '#B8D4E8', bg: 'rgba(184,212,232,0.12)'  },
-  expired:   { label: 'Expired',   color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.06)' },
+  retrieved: { label: 'Picked Up', color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)'  },
+  expired:   { label: 'Expired',   color: 'rgba(var(--rgb-hi),0.3)', bg: 'rgba(var(--rgb-hi),0.06)' },
 }
 
 function StatusPill({ status }) {
@@ -52,8 +52,8 @@ function Countdown({ expiresAt, onExpired }) {
 }
 
 const ease = [0.22, 1, 0.36, 1]
-const S1 = 'rgba(255,255,255,0.04)'
-const BD = 'rgba(255,255,255,0.07)'
+const S1 = 'rgba(var(--rgb-hi),0.04)'
+const BD = 'rgba(var(--rgb-hi),0.07)'
 
 export default function Profile() {
   const { user, profile, fetchProfile } = useAuth()
@@ -484,19 +484,19 @@ export default function Profile() {
 
           {/* Loyalty stamps */}
           <div style={{ flex: '0 0 52%', padding: '22px 24px' }}>
-            <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.3)', marginBottom: 14 }}>Loyalty Visits</p>
+            <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(var(--rgb-hi),0.3)', marginBottom: 14 }}>Loyalty Visits</p>
             {totalVisits > 0 && stampsThisCycle === 0 ? (
               <>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <motion.div key={i} initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.35, delay: i * 0.06, ease }}
-                      style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #B8D4E8, #7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px rgba(184,212,232,0.4)' }}>
-                      <Check size={14} color="#0a0a0a" strokeWidth={2.5} />
+                      style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px rgba(var(--rgb-acc),0.4)' }}>
+                      <Check size={14} color="var(--col-bg)" strokeWidth={2.5} />
                     </motion.div>
                   ))}
                 </div>
-                <p style={{ fontSize: 11, color: '#B8D4E8', marginBottom: 3, fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>Reward unlocked!</p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>Check Rewards · {totalVisits} visits total</p>
+                <p style={{ fontSize: 11, color: 'var(--col-acc)', marginBottom: 3, fontFamily: 'Jost,sans-serif', fontWeight: 500 }}>Reward unlocked!</p>
+                <p style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.25)' }}>Check Rewards · {totalVisits} visits total</p>
               </>
             ) : (
               <>
@@ -505,17 +505,17 @@ export default function Profile() {
                     const filled = i < stampsThisCycle
                     return (
                       <motion.div key={i} initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.35, delay: i * 0.06, ease }}
-                        style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: filled ? 'linear-gradient(135deg, #B8D4E8, #7AAFC9)' : 'transparent', border: filled ? 'none' : '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: filled ? '0 0 12px rgba(184,212,232,0.35)' : 'none' }}>
-                        {filled && <Check size={14} color="#0a0a0a" strokeWidth={2.5} />}
+                        style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: filled ? 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))' : 'transparent', border: filled ? 'none' : '1.5px solid rgba(var(--rgb-hi),0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: filled ? '0 0 12px rgba(var(--rgb-acc),0.35)' : 'none' }}>
+                        {filled && <Check size={14} color="var(--col-bg)" strokeWidth={2.5} />}
                       </motion.div>
                     )
                   })}
                 </div>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
+                <p style={{ fontSize: 12, color: 'rgba(var(--rgb-hi),0.5)', marginBottom: 4 }}>
                   <span className="gold-gradient" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 22 }}>{stampsThisCycle}</span>
-                  <span style={{ color: 'rgba(255,255,255,0.2)' }}> / 5 visits</span>
+                  <span style={{ color: 'rgba(var(--rgb-hi),0.2)' }}> / 5 visits</span>
                 </p>
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
+                <p style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.25)' }}>
                   {totalVisits === 0 ? 'Book 5 visits to unlock 30% off' : `${remaining} more to unlock 30% off`}
                 </p>
               </>
@@ -527,28 +527,28 @@ export default function Profile() {
           {/* Profile */}
           <div style={{ flex: 1, padding: '22px 20px 22px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-              <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #B8D4E8, #7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Cormorant Garamond", serif', fontSize: 19, color: '#0a0a0a', fontWeight: 500, boxShadow: '0 0 18px rgba(184,212,232,0.35)' }}>
+              <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Cormorant Garamond", serif', fontSize: 19, color: 'var(--col-bg)', fontWeight: 500, boxShadow: '0 0 18px rgba(var(--rgb-acc),0.35)' }}>
                 {initial || '?'}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 {editName ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <input value={nameInput} onChange={e => setNameInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveName()}
-                      style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(184,212,232,0.45)', color: 'white', fontFamily: '"Cormorant Garamond", serif', fontSize: 19, outline: 'none', flex: 1, minWidth: 0 }} autoFocus />
-                    <button onClick={saveName} style={{ background: 'none', border: 'none', color: '#B8D4E8', cursor: 'pointer', padding: 2 }}><Check size={13}/></button>
-                    <button onClick={() => setEditName(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 2 }}><X size={13}/></button>
+                      style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(var(--rgb-acc),0.45)', color: 'var(--col-text)', fontFamily: '"Cormorant Garamond", serif', fontSize: 19, outline: 'none', flex: 1, minWidth: 0 }} autoFocus />
+                    <button onClick={saveName} style={{ background: 'none', border: 'none', color: 'var(--col-acc)', cursor: 'pointer', padding: 2 }}><Check size={13}/></button>
+                    <button onClick={() => setEditName(false)} style={{ background: 'none', border: 'none', color: 'rgba(var(--rgb-hi),0.3)', cursor: 'pointer', padding: 2 }}><X size={13}/></button>
                   </div>
                 ) : (
                   <button onClick={() => { setEditName(true); setNameInput(profile?.full_name || '') }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 21, color: '#f0f0f0', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>{name}</span>
-                    <Edit2 size={11} style={{ color: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+                    <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 21, color: 'var(--col-text)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>{name}</span>
+                    <Edit2 size={11} style={{ color: 'rgba(var(--rgb-hi),0.2)', flexShrink: 0 }} />
                   </button>
                 )}
-                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
+                <p style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.25)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
               </div>
             </div>
-            <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500, color: '#B8D4E8', background: 'rgba(184,212,232,0.1)', border: '1px solid rgba(184,212,232,0.25)', padding: '4px 12px', borderRadius: 6, alignSelf: 'flex-start' }}>
+            <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500, color: 'var(--col-acc)', background: 'rgba(var(--rgb-acc),0.1)', border: '1px solid rgba(var(--rgb-acc),0.25)', padding: '4px 12px', borderRadius: 6, alignSelf: 'flex-start' }}>
               {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''} total`}
             </span>
           </div>
@@ -563,8 +563,8 @@ export default function Profile() {
             { label: 'Coupons',   value: activeCoupons },
           ].map(({ label, value }, i) => (
             <div key={label} style={{ flex: 1, padding: '16px 0', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
-              <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 32, color: '#f0f0f0', lineHeight: 1, marginBottom: 4 }}>{value}</div>
-              <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.28)' }}>{label}</div>
+              <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 32, color: 'var(--col-text)', lineHeight: 1, marginBottom: 4 }}>{value}</div>
+              <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(var(--rgb-hi),0.28)' }}>{label}</div>
             </div>
           ))}
         </motion.div>
@@ -575,10 +575,10 @@ export default function Profile() {
 
           <div style={{ display: 'flex', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
             {TABS.map(t => (
-              <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} style={{ flex: 1, padding: '13px 4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', transition: 'color 0.2s', fontWeight: tab === t ? 500 : 400, color: tab === t ? '#B8D4E8' : 'rgba(255,255,255,0.28)', borderBottom: `2px solid ${tab === t ? '#B8D4E8' : 'transparent'}`, marginBottom: -1 }}>
+              <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} style={{ flex: 1, padding: '13px 4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', transition: 'color 0.2s', fontWeight: tab === t ? 500 : 400, color: tab === t ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.28)', borderBottom: `2px solid ${tab === t ? 'var(--col-acc)' : 'transparent'}`, marginBottom: -1 }}>
                 {t}
                 {t === 'Cart' && cartItems.length > 0 && (
-                  <span style={{ marginLeft: 4, fontSize: 9, background: 'rgba(184,212,232,0.2)', color: '#B8D4E8', padding: '1px 5px', borderRadius: 9999 }}>
+                  <span style={{ marginLeft: 4, fontSize: 9, background: 'rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', padding: '1px 5px', borderRadius: 9999 }}>
                     {cartItems.length}
                   </span>
                 )}
@@ -612,8 +612,8 @@ export default function Profile() {
                         {/* Cart footer */}
                         <div style={{ padding: '14px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                           <div>
-                            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost, sans-serif', marginBottom: 3 }}>Total</p>
-                            <p className="font-display" style={{ fontSize: '1.6rem', color: '#B8D4E8', lineHeight: 1 }}>€{cartTotal.toFixed(2)}</p>
+                            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.25)', fontFamily: 'Jost, sans-serif', marginBottom: 3 }}>Total</p>
+                            <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>€{cartTotal.toFixed(2)}</p>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 11, justifyContent: 'center' }}>
@@ -623,9 +623,9 @@ export default function Profile() {
                               }
                             </button>
                             <button onClick={reserveInStore} disabled={payStep === 'loading' || reserving}
-                              style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(184,212,232,0.25)', background: 'rgba(184,212,232,0.07)', color: (payStep === 'loading' || reserving) ? 'rgba(184,212,232,0.4)' : '#B8D4E8', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: (payStep === 'loading' || reserving) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                              style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'rgba(var(--rgb-acc),0.07)', color: (payStep === 'loading' || reserving) ? 'rgba(var(--rgb-acc),0.4)' : 'var(--col-acc)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: (payStep === 'loading' || reserving) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                               {reserving
-                                ? <div style={{ width: 12, height: 12, border: '2px solid rgba(184,212,232,0.3)', borderTopColor: '#B8D4E8', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                ? <div style={{ width: 12, height: 12, border: '2px solid rgba(var(--rgb-acc),0.3)', borderTopColor: 'var(--col-acc)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                 : 'Pay In Store'
                               }
                             </button>
@@ -655,17 +655,17 @@ export default function Profile() {
                         const apptDate = format(new Date(appt.date), 'MMM d, yyyy')
                         const isUpcoming = appt.status === 'confirmed' || appt.status === 'pending'
                         return (
-                          <div key={appt.id} style={{ borderRadius: 14, border: `1px solid ${isUpcoming ? 'rgba(184,212,232,0.2)' : BD}`, overflow: 'hidden', background: isUpcoming ? 'rgba(184,212,232,0.02)' : 'rgba(255,255,255,0.02)' }}>
+                          <div key={appt.id} style={{ borderRadius: 14, border: `1px solid ${isUpcoming ? 'rgba(var(--rgb-acc),0.2)' : BD}`, overflow: 'hidden', background: isUpcoming ? 'rgba(var(--rgb-acc),0.02)' : 'rgba(var(--rgb-hi),0.02)' }}>
 
                             {/* Header */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${BD}`, background: 'rgba(255,255,255,0.02)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.02)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Scissors size={10} color="rgba(255,255,255,0.25)" />
-                                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>
+                                <Scissors size={10} color="rgba(var(--rgb-hi),0.25)" />
+                                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'rgba(var(--rgb-hi),0.3)', letterSpacing: '0.08em' }}>
                                   #{appt.id.slice(0, 8).toUpperCase()}
                                 </span>
-                                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>·</span>
-                                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif' }}>
+                                <span style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.18)', fontFamily: 'Jost,sans-serif' }}>·</span>
+                                <span style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.25)', fontFamily: 'Jost,sans-serif' }}>
                                   {appt.created_at ? format(new Date(appt.created_at), 'MMM d, yyyy') : apptDate}
                                 </span>
                               </div>
@@ -679,35 +679,35 @@ export default function Profile() {
                               {/* Service + price */}
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                                 <div>
-                                  <p style={{ color: '#f0f0f0', fontSize: 14, fontWeight: 500, marginBottom: 3 }}>{appt.services?.name || '—'}</p>
+                                  <p style={{ color: 'var(--col-text)', fontSize: 14, fontWeight: 500, marginBottom: 3 }}>{appt.services?.name || '—'}</p>
                                   {appt.stylists?.name && (
-                                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, fontFamily: 'Jost,sans-serif' }}>
+                                    <p style={{ color: 'rgba(var(--rgb-hi),0.3)', fontSize: 11, fontFamily: 'Jost,sans-serif' }}>
                                       with {appt.stylists.name}
-                                      {appt.services?.duration && <span style={{ color: 'rgba(255,255,255,0.18)' }}> · {appt.services.duration} min</span>}
+                                      {appt.services?.duration && <span style={{ color: 'rgba(var(--rgb-hi),0.18)' }}> · {appt.services.duration} min</span>}
                                     </p>
                                   )}
                                 </div>
                                 {appt.services?.price && (
-                                  <span className="font-display" style={{ color: '#B8D4E8', fontSize: '1.1rem', flexShrink: 0 }}>
+                                  <span className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem', flexShrink: 0 }}>
                                     €{appt.services.price}
                                   </span>
                                 )}
                               </div>
 
                               {/* Date/time pill */}
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '7px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: `1px solid ${isUpcoming ? 'rgba(184,212,232,0.18)' : BD}` }}>
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '7px 12px', borderRadius: 8, background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${isUpcoming ? 'rgba(var(--rgb-acc),0.18)' : BD}` }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                  <Calendar size={10} color={isUpcoming ? '#B8D4E8' : 'rgba(255,255,255,0.25)'} />
-                                  <span style={{ fontSize: 11, color: isUpcoming ? '#B8D4E8' : 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>
+                                  <Calendar size={10} color={isUpcoming ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.25)'} />
+                                  <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.4)', fontFamily: 'Jost,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>
                                     {apptDate}
                                   </span>
                                 </div>
                                 {appt.time && (
                                   <>
-                                    <div style={{ width: 1, height: 10, background: 'rgba(255,255,255,0.1)' }} />
+                                    <div style={{ width: 1, height: 10, background: 'rgba(var(--rgb-hi),0.1)' }} />
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                      <Clock size={10} color={isUpcoming ? '#B8D4E8' : 'rgba(255,255,255,0.25)'} />
-                                      <span style={{ fontSize: 11, color: isUpcoming ? '#B8D4E8' : 'rgba(255,255,255,0.4)', fontFamily: 'Jost,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>
+                                      <Clock size={10} color={isUpcoming ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.25)'} />
+                                      <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.4)', fontFamily: 'Jost,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>
                                         {appt.time.slice(0, 5)}
                                       </span>
                                     </div>
@@ -717,19 +717,19 @@ export default function Profile() {
                             </div>
 
                             {/* Footer */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(255,255,255,0.01)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: appt.payment_status === 'paid' ? '#34d399' : appt.payment_status === 'pay_in_store' ? '#f59e0b' : 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-                                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: appt.payment_status === 'paid' ? '#34d399' : appt.payment_status === 'pay_in_store' ? '#f59e0b' : 'rgba(var(--rgb-hi),0.2)', flexShrink: 0 }} />
+                                <span style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.25)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>
                                   {appt.payment_status === 'paid' ? 'Paid via Stripe' : appt.payment_status === 'pay_in_store' ? 'Pay in store' : 'No payment on file'}
                                 </span>
                               </div>
                               {appt.payment_status === 'paid' && (
                                 <button
                                   onClick={() => downloadApptReceipt(appt)}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'rgba(184,212,232,0.07)', border: '1px solid rgba(184,212,232,0.18)', color: '#B8D4E8', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,212,232,0.14)'}
-                                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(184,212,232,0.07)'}>
+                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'rgba(var(--rgb-acc),0.07)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-acc)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.14)'}
+                                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.07)'}>
                                   <Download size={10} /> Receipt
                                 </button>
                               )}
@@ -762,17 +762,17 @@ export default function Profile() {
                         const total = ((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)
                         const s = STATUS_MAP[order.status] ?? STATUS_MAP.active
                         return (
-                          <div key={order.id} style={{ borderRadius: 14, border: `1px solid ${BD}`, overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
+                          <div key={order.id} style={{ borderRadius: 14, border: `1px solid ${BD}`, overflow: 'hidden', background: 'rgba(var(--rgb-hi),0.02)' }}>
 
                             {/* Order header */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${BD}`, background: 'rgba(255,255,255,0.02)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.02)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Package size={11} color="rgba(255,255,255,0.25)" />
-                                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>
+                                <Package size={11} color="rgba(var(--rgb-hi),0.25)" />
+                                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'rgba(var(--rgb-hi),0.3)', letterSpacing: '0.08em' }}>
                                   #{order.id.slice(0, 8).toUpperCase()}
                                 </span>
-                                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif' }}>·</span>
-                                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif' }}>
+                                <span style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.18)', fontFamily: 'Jost,sans-serif' }}>·</span>
+                                <span style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.25)', fontFamily: 'Jost,sans-serif' }}>
                                   {format(new Date(order.created_at), 'MMM d, yyyy')}
                                 </span>
                               </div>
@@ -783,31 +783,31 @@ export default function Profile() {
 
                             {/* Product row */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
-                              <div style={{ width: 52, height: 52, borderRadius: 8, background: '#181818', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <div style={{ width: 52, height: 52, borderRadius: 8, background: 'var(--col-card)', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {order.products?.image_url
                                   ? <img src={order.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                  : <Package size={18} color="rgba(255,255,255,0.12)" />}
+                                  : <Package size={18} color="rgba(var(--rgb-hi),0.12)" />}
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ color: '#e5e5e5', fontSize: 13, fontWeight: 500, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                <p style={{ color: 'var(--col-text)', fontSize: 13, fontWeight: 500, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                   {order.products?.name}
                                 </p>
-                                <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: 11, fontFamily: 'Jost,sans-serif' }}>
+                                <p style={{ color: 'rgba(var(--rgb-hi),0.28)', fontSize: 11, fontFamily: 'Jost,sans-serif' }}>
                                   Qty {order.quantity}
                                   {order.products?.price && ` · €${parseFloat(order.products.price).toFixed(2)} each`}
                                 </p>
                               </div>
                               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                <p className="font-display" style={{ color: '#B8D4E8', fontSize: '1.1rem', lineHeight: 1 }}>€{total}</p>
+                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem', lineHeight: 1 }}>€{total}</p>
                               </div>
                             </div>
 
                             {/* Footer */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(255,255,255,0.01)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: order.payment_status === 'paid' ? '#34d399' : '#f59e0b', flexShrink: 0 }} />
-                                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>
+                                  <span style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.25)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.08em' }}>
                                     {order.payment_status === 'paid' ? 'Paid via Stripe' : order.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
                                   </span>
                                 </div>
@@ -819,9 +819,9 @@ export default function Profile() {
                               </div>
                               <button
                                 onClick={() => setReceipt(order)}
-                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'rgba(184,212,232,0.07)', border: '1px solid rgba(184,212,232,0.18)', color: '#B8D4E8', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
-                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,212,232,0.14)'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(184,212,232,0.07)'}>
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'rgba(var(--rgb-acc),0.07)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-acc)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.14)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.07)'}>
                                 <Receipt size={10} /> Receipt
                               </button>
                             </div>
@@ -856,9 +856,9 @@ export default function Profile() {
         {/* ── Sign out ── */}
         <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35, delay: 0.2, ease }}
           onClick={handleLogout} disabled={loggingOut}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 20px', borderRadius: 10, border: `1px solid ${BD}`, background: 'transparent', color: 'rgba(255,255,255,0.35)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', cursor: 'pointer', transition: 'color 0.2s, border-color 0.2s', flexShrink: 0 }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.35)'; e.currentTarget.style.borderColor = BD }}>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 20px', borderRadius: 10, border: `1px solid ${BD}`, background: 'transparent', color: 'rgba(var(--rgb-hi),0.35)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', cursor: 'pointer', transition: 'color 0.2s, border-color 0.2s', flexShrink: 0 }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.7)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.2)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(var(--rgb-hi),0.35)'; e.currentTarget.style.borderColor = BD }}>
           {loggingOut ? <svg className="animate-spin" style={{ width: 13, height: 13 }} fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> : <LogOut size={13} />}
           {loggingOut ? 'Signing out' : 'Sign Out'}
         </motion.button>
@@ -875,22 +875,22 @@ export default function Profile() {
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               onClick={e => e.stopPropagation()}
               id="receipt-print-area"
-              style={{ width: '100%', maxWidth: 380, background: '#0e0e14', border: '1px solid rgba(184,212,232,0.18)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.9)' }}>
+              style={{ width: '100%', maxWidth: 380, background: 'var(--col-modal)', border: '1px solid rgba(var(--rgb-acc),0.18)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.9)' }}>
 
               {/* Gold top bar */}
-              <div style={{ height: 3, background: 'linear-gradient(90deg, #B8D4E8, #E8D5A3, #7AAFC9)' }} />
+              <div style={{ height: 3, background: 'linear-gradient(90deg, var(--col-acc), #E8D5A3, var(--col-acc2))' }} />
 
               <div style={{ padding: '24px 26px 26px' }}>
 
                 {/* Brand */}
-                <div style={{ textAlign: 'center', marginBottom: 20, paddingBottom: 18, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ textAlign: 'center', marginBottom: 20, paddingBottom: 18, borderBottom: '1px solid rgba(var(--rgb-hi),0.06)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginBottom: 5 }}>
-                    <Scissors size={13} color="#B8D4E8" />
-                    <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.5rem', color: '#f0f0f0', letterSpacing: '0.04em' }}>
-                      Hair<span style={{ color: '#B8D4E8' }}>Go</span>
+                    <Scissors size={13} color="var(--col-acc)" />
+                    <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '1.5rem', color: 'var(--col-text)', letterSpacing: '0.04em' }}>
+                      Hair<span style={{ color: 'var(--col-acc)' }}>Go</span>
                     </span>
                   </div>
-                  <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif' }}>
+                  <p style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.25)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif' }}>
                     Premium Hair Studio · Doha, Qatar
                   </p>
                 </div>
@@ -898,43 +898,43 @@ export default function Profile() {
                 {/* Order # + Date */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
-                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Order</p>
-                    <p style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.1em' }}>#{receipt.id.slice(0, 8).toUpperCase()}</p>
+                    <p style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Order</p>
+                    <p style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(var(--rgb-hi),0.65)', letterSpacing: '0.1em' }}>#{receipt.id.slice(0, 8).toUpperCase()}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Date</p>
-                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', fontFamily: 'Jost,sans-serif' }}>{format(new Date(receipt.created_at), 'MMM d, yyyy')}</p>
+                    <p style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Date</p>
+                    <p style={{ fontSize: 12, color: 'rgba(var(--rgb-hi),0.65)', fontFamily: 'Jost,sans-serif' }}>{format(new Date(receipt.created_at), 'MMM d, yyyy')}</p>
                   </div>
                 </div>
 
                 {/* Customer */}
-                <div style={{ marginBottom: 18, padding: '10px 12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
-                  <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Customer</p>
-                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontFamily: 'Jost,sans-serif' }}>{profile?.full_name || user?.email}</p>
+                <div style={{ marginBottom: 18, padding: '10px 12px', background: 'rgba(var(--rgb-hi),0.03)', border: '1px solid rgba(var(--rgb-hi),0.06)', borderRadius: 10 }}>
+                  <p style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', marginBottom: 4 }}>Customer</p>
+                  <p style={{ fontSize: 12, color: 'rgba(var(--rgb-hi),0.7)', fontFamily: 'Jost,sans-serif' }}>{profile?.full_name || user?.email}</p>
                 </div>
 
                 {/* Items header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif' }}>Item</span>
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif' }}>Amount</span>
+                  <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif' }}>Item</span>
+                  <span style={{ fontSize: 9, color: 'rgba(var(--rgb-hi),0.22)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif' }}>Amount</span>
                 </div>
 
                 {/* Item row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '12px 0', borderTop: '1px solid rgba(var(--rgb-hi),0.06)', borderBottom: '1px solid rgba(var(--rgb-hi),0.06)', marginBottom: 14 }}>
                   <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
-                    <p style={{ fontSize: 13, color: '#f0f0f0', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3 }}>{receipt.products?.name}</p>
-                    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>
+                    <p style={{ fontSize: 13, color: 'var(--col-text)', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3 }}>{receipt.products?.name}</p>
+                    <p style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.28)', fontFamily: 'Jost,sans-serif' }}>
                       {receipt.quantity} × €{parseFloat(receipt.products?.price || 0).toFixed(2)}
                     </p>
                   </div>
-                  <span style={{ fontSize: 14, color: '#f0f0f0', fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>
+                  <span style={{ fontSize: 14, color: 'var(--col-text)', fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>
                     €{((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
                   </span>
                 </div>
 
                 {/* Total */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                  <span style={{ fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>Total</span>
+                  <span style={{ fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', color: 'rgba(var(--rgb-hi),0.35)', fontWeight: 600 }}>Total</span>
                   <span className="font-display gold-gradient" style={{ fontSize: '1.6rem', lineHeight: 1 }}>
                     €{((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
                   </span>
@@ -948,18 +948,18 @@ export default function Profile() {
                   </span>
                 </div>
 
-                <p style={{ textAlign: 'center', fontSize: 9, color: 'rgba(255,255,255,0.15)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', marginBottom: 20 }}>
+                <p style={{ textAlign: 'center', fontSize: 9, color: 'rgba(var(--rgb-hi),0.15)', fontFamily: 'Jost,sans-serif', letterSpacing: '0.14em', marginBottom: 20 }}>
                   Thank you for shopping with HairGo.
                 </p>
 
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={() => setReceipt(null)}
-                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.08)', color: 'rgba(var(--rgb-hi),0.35)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', cursor: 'pointer' }}>
                     Close
                   </button>
                   <button onClick={() => downloadReceipt(receipt)}
-                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'linear-gradient(135deg, #B8D4E8, #7AAFC9)', border: 'none', color: '#000', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', border: 'none', color: '#000', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Jost,sans-serif', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <Download size={12} /> Download PDF
                   </button>
                 </div>
@@ -996,35 +996,35 @@ function CouponCard({ coupon: c, used }) {
   const discountLabel = c?.discount_type === 'percentage' ? `${c.discount_value}%` : `€${c?.discount_value}`
   return (
     <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', opacity: used ? 0.5 : 1, filter: used ? 'grayscale(0.4)' : 'none' }}>
-      <div style={{ border: `1px solid ${used ? 'rgba(255,255,255,0.08)' : 'rgba(184,212,232,0.25)'}`, borderRadius: 16, display: 'flex', overflow: 'hidden', background: used ? 'rgba(255,255,255,0.02)' : 'rgba(184,212,232,0.03)' }}>
-        <div style={{ flexShrink: 0, width: 96, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: used ? 'rgba(255,255,255,0.03)' : 'rgba(184,212,232,0.07)', position: 'relative' }}>
+      <div style={{ border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.08)' : 'rgba(var(--rgb-acc),0.25)'}`, borderRadius: 16, display: 'flex', overflow: 'hidden', background: used ? 'rgba(var(--rgb-hi),0.02)' : 'rgba(var(--rgb-acc),0.03)' }}>
+        <div style={{ flexShrink: 0, width: 96, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: used ? 'rgba(var(--rgb-hi),0.03)' : 'rgba(var(--rgb-acc),0.07)', position: 'relative' }}>
           <span className="font-display gold-gradient" style={{ fontSize: '2.2rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{discountLabel}</span>
-          <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : 'rgba(184,212,232,0.6)', fontFamily: 'Jost,sans-serif', marginTop: 4 }}>OFF</span>
-          <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', zIndex: 2 }} />
-          <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.07)', zIndex: 2 }} />
+          <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(var(--rgb-hi),0.2)' : 'rgba(var(--rgb-acc),0.6)', fontFamily: 'Jost,sans-serif', marginTop: 4 }}>OFF</span>
+          <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: 'var(--col-bg)', border: '1px solid rgba(var(--rgb-hi),0.07)', zIndex: 2 }} />
+          <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: 'var(--col-bg)', border: '1px solid rgba(var(--rgb-hi),0.07)', zIndex: 2 }} />
         </div>
         <div style={{ width: 1, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '8px 0', position: 'relative' }}>
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} style={{ width: 1, height: 5, background: used ? 'rgba(255,255,255,0.08)' : 'rgba(184,212,232,0.2)' }} />)}
-          <Scissors size={10} style={{ color: used ? 'rgba(255,255,255,0.15)' : 'rgba(184,212,232,0.35)', position: 'absolute', top: '50%', transform: 'translateY(-50%) rotate(90deg)' }} />
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} style={{ width: 1, height: 5, background: used ? 'rgba(var(--rgb-hi),0.08)' : 'rgba(var(--rgb-acc),0.2)' }} />)}
+          <Scissors size={10} style={{ color: used ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-acc),0.35)', position: 'absolute', top: '50%', transform: 'translateY(-50%) rotate(90deg)' }} />
         </div>
         <div style={{ flex: 1, padding: '16px 16px 16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, minWidth: 0 }}>
-          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.2)' : 'rgba(184,212,232,0.55)', fontFamily: 'Jost,sans-serif' }}>{used ? 'Used reward' : 'Loyalty Reward'}</p>
+          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(var(--rgb-hi),0.2)' : 'rgba(var(--rgb-acc),0.55)', fontFamily: 'Jost,sans-serif' }}>{used ? 'Used reward' : 'Loyalty Reward'}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0, background: used ? 'rgba(255,255,255,0.03)' : 'rgba(184,212,232,0.07)', border: `1px solid ${used ? 'rgba(255,255,255,0.06)' : 'rgba(184,212,232,0.18)'}` }}>
-              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: used ? 'rgba(255,255,255,0.25)' : '#B8D4E8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
+            <div style={{ flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0, background: used ? 'rgba(var(--rgb-hi),0.03)' : 'rgba(var(--rgb-acc),0.07)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.06)' : 'rgba(var(--rgb-acc),0.18)'}` }}>
+              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: used ? 'rgba(var(--rgb-hi),0.25)' : 'var(--col-acc)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
             </div>
             {!used && (
-              <button onClick={copy} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, cursor: 'pointer', background: copied ? 'rgba(52,211,153,0.12)' : 'rgba(184,212,232,0.08)', border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'rgba(184,212,232,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s' }}>
-                {copied ? <CheckCheck size={13} color="#34d399" /> : <Copy size={13} color="#B8D4E8" />}
+              <button onClick={copy} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, cursor: 'pointer', background: copied ? 'rgba(52,211,153,0.12)' : 'rgba(var(--rgb-acc),0.08)', border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'rgba(var(--rgb-acc),0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s' }}>
+                {copied ? <CheckCheck size={13} color="#34d399" /> : <Copy size={13} color="var(--col-acc)" />}
               </button>
             )}
           </div>
-          {c?.expiry_date && <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontFamily: 'Jost,sans-serif' }}>{used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}</p>}
+          {c?.expiry_date && <p style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.2)', fontFamily: 'Jost,sans-serif' }}>{used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}</p>}
         </div>
       </div>
       {used && (
-        <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '2px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '3px 10px' }}>
-          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.18)', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Used</span>
+        <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '2px solid rgba(var(--rgb-hi),0.12)', borderRadius: 6, padding: '3px 10px' }}>
+          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.18)', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>Used</span>
         </div>
       )}
     </div>
@@ -1063,40 +1063,40 @@ function CartItemRow({ item, isLast, onRemove, onCommit, onExpired, BD }) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', borderBottom: isLast ? 'none' : `1px solid ${BD}` }}>
-      <div style={{ width: 48, height: 48, borderRadius: 8, background: '#181818', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: 48, height: 48, borderRadius: 8, background: 'var(--col-card)', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {item.products?.image_url
           ? <img src={item.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <Package size={16} style={{ color: 'rgba(255,255,255,0.15)' }} />}
+          : <Package size={16} style={{ color: 'rgba(var(--rgb-hi),0.15)' }} />}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ color: '#e5e5e5', fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 8 }}>
+        <p style={{ color: 'var(--col-text)', fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 8 }}>
           {item.products?.name}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {/* Qty stepper */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 8 }}>
             <button
               onClick={() => change(qty - 1)}
               disabled={qty <= 1}
-              style={{ width: 30, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', color: qty <= 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: qty <= 1 ? 'not-allowed' : 'pointer', transition: 'color 0.15s' }}
+              style={{ width: 30, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', color: qty <= 1 ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.45)', background: 'none', border: 'none', cursor: qty <= 1 ? 'not-allowed' : 'pointer', transition: 'color 0.15s' }}
               onMouseEnter={e => { if (qty > 1) e.currentTarget.style.color = '#fff' }}
-              onMouseLeave={e => e.currentTarget.style.color = qty <= 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)'}>
+              onMouseLeave={e => e.currentTarget.style.color = qty <= 1 ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.45)'}>
               <Minus size={10} />
             </button>
-            <span style={{ width: 26, textAlign: 'center', color: '#fff', fontSize: 13, fontWeight: 700, fontFamily: 'Jost,sans-serif', userSelect: 'none' }}>
+            <span style={{ width: 26, textAlign: 'center', color: 'var(--col-text)', fontSize: 13, fontWeight: 700, fontFamily: 'Jost,sans-serif', userSelect: 'none' }}>
               {qty}
             </span>
             <button
               onClick={() => change(qty + 1)}
               disabled={qty >= (item.products?.stock ?? Infinity)}
-              style={{ width: 30, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', color: qty >= (item.products?.stock ?? Infinity) ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: qty >= (item.products?.stock ?? Infinity) ? 'not-allowed' : 'pointer', transition: 'color 0.15s' }}
+              style={{ width: 30, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', color: qty >= (item.products?.stock ?? Infinity) ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.45)', background: 'none', border: 'none', cursor: qty >= (item.products?.stock ?? Infinity) ? 'not-allowed' : 'pointer', transition: 'color 0.15s' }}
               onMouseEnter={e => { if (qty < (item.products?.stock ?? Infinity)) e.currentTarget.style.color = '#fff' }}
-              onMouseLeave={e => e.currentTarget.style.color = qty >= (item.products?.stock ?? Infinity) ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)'}>
+              onMouseLeave={e => e.currentTarget.style.color = qty >= (item.products?.stock ?? Infinity) ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.45)'}>
               <Plus size={10} />
             </button>
           </div>
-          <span style={{ color: '#B8D4E8', fontSize: 13, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
+          <span style={{ color: 'var(--col-acc)', fontSize: 13, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>
             €{(price * qty).toFixed(2)}
           </span>
         </div>
@@ -1120,13 +1120,13 @@ function Pager({ page, total, onChange }) {
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 0}
-        style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: page === 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', cursor: page === 0 ? 'not-allowed' : 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+        style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.08)', color: page === 0 ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.45)', cursor: page === 0 ? 'not-allowed' : 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
         ‹
       </button>
 
       {Array.from({ length: total }).map((_, i) => (
         <button key={i} onClick={() => onChange(i)}
-          style={{ width: 30, height: 30, borderRadius: 8, border: i === page ? '1px solid rgba(184,212,232,0.4)' : '1px solid rgba(255,255,255,0.08)', background: i === page ? 'rgba(184,212,232,0.12)' : 'rgba(255,255,255,0.04)', color: i === page ? '#B8D4E8' : 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: i === page ? 700 : 400, transition: 'all 0.2s' }}>
+          style={{ width: 30, height: 30, borderRadius: 8, border: i === page ? '1px solid rgba(var(--rgb-acc),0.4)' : '1px solid rgba(var(--rgb-hi),0.08)', background: i === page ? 'rgba(var(--rgb-acc),0.12)' : 'rgba(var(--rgb-hi),0.04)', color: i === page ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.35)', cursor: 'pointer', fontSize: 11, fontFamily: 'Jost,sans-serif', fontWeight: i === page ? 700 : 400, transition: 'all 0.2s' }}>
           {i + 1}
         </button>
       ))}
@@ -1134,7 +1134,7 @@ function Pager({ page, total, onChange }) {
       <button
         onClick={() => onChange(page + 1)}
         disabled={page === total - 1}
-        style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: page === total - 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.45)', cursor: page === total - 1 ? 'not-allowed' : 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+        style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.08)', color: page === total - 1 ? 'rgba(var(--rgb-hi),0.15)' : 'rgba(var(--rgb-hi),0.45)', cursor: page === total - 1 ? 'not-allowed' : 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
         ›
       </button>
     </div>
@@ -1145,10 +1145,10 @@ function EmptyState({ icon: Icon, text, action, link }) {
   const navigate = useNavigate()
   return (
     <div style={{ padding: '36px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-      <Icon size={22} style={{ color: 'rgba(255,255,255,0.12)' }} />
-      <p style={{ color: 'rgba(255,255,255,0.28)', fontSize: 13, textAlign: 'center', maxWidth: 220, lineHeight: 1.6 }}>{text}</p>
+      <Icon size={22} style={{ color: 'rgba(var(--rgb-hi),0.12)' }} />
+      <p style={{ color: 'rgba(var(--rgb-hi),0.28)', fontSize: 13, textAlign: 'center', maxWidth: 220, lineHeight: 1.6 }}>{text}</p>
       {action && link && (
-        <button onClick={() => navigate(link)} style={{ marginTop: 4, padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(184,212,232,0.25)', background: 'rgba(184,212,232,0.07)', color: '#B8D4E8', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', cursor: 'pointer' }}>
+        <button onClick={() => navigate(link)} style={{ marginTop: 4, padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'rgba(var(--rgb-acc),0.07)', color: 'var(--col-acc)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', cursor: 'pointer' }}>
           {action}
         </button>
       )}

@@ -200,7 +200,7 @@ export default function StudioHomeDisplay() {
                       {svc.featured && <CheckBadge />}
                       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.4rem 0.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
                         <p style={{ color: '#fff', fontSize: '0.78rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
-                        {svc.price && <p style={{ color: C.goldDim, fontSize: 9, fontFamily: 'Jost,sans-serif' }}>€{svc.price}</p>}
+                        {svc.price && <p style={{ color: C.goldDim, fontSize: 9, fontFamily: 'Jost,sans-serif' }}>${svc.price}</p>}
                       </div>
                     </div>
                   </button>

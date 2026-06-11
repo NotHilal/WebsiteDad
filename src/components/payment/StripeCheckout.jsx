@@ -85,7 +85,7 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
             Amount due
           </p>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: label ? 10 : 0 }}>
-            <span style={{ fontSize: '0.95rem', color: 'rgba(184,212,232,0.7)', fontFamily: 'Jost, sans-serif', fontWeight: 300, lineHeight: 1, paddingBottom: 6 }}>€</span>
+            <span style={{ fontSize: '0.95rem', color: 'rgba(184,212,232,0.7)', fontFamily: 'Jost, sans-serif', fontWeight: 300, lineHeight: 1, paddingBottom: 6 }}>$</span>
             <span className="font-display" style={{ fontSize: '3.2rem', color: '#fff', lineHeight: 1, fontWeight: 300 }}>{amount}</span>
           </div>
           {label && (
@@ -143,7 +143,7 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <ShieldCheck size={14} />
-            <span>Pay €{amount} securely</span>
+            <span>Pay ${amount} securely</span>
           </div>
         )}
       </button>

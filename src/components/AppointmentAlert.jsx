@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
 const C = {
-  gold: '#B8D4E8', border: 'rgba(255,255,255,0.07)',
-  white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)',
+  gold: 'var(--col-acc)', border: 'rgba(var(--rgb-hi),0.07)',
+  white: 'var(--col-text)', muted: 'rgba(var(--rgb-hi),0.22)',
 }
 
 export default function AppointmentAlert() {
@@ -72,7 +72,7 @@ export default function AppointmentAlert() {
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#fb923c,#f97316)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'appt-pulse 1.8s ease-in-out infinite', flexShrink: 0 }}>
         <AlertTriangle size={14} color="#fff" strokeWidth={2.5} />
         {dueAppts.length > 1 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: C.gold, border: '2px solid #111118', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: C.gold, border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
             {dueAppts.length}
           </span>
         )}
@@ -87,7 +87,7 @@ export default function AppointmentAlert() {
               style={{ position: 'fixed', inset: 0, zIndex: 110, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' }} />
             <motion.div initial={{ opacity: 0, scale: 0.94, y: -8 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94, y: -8 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              style={{ position: 'fixed', top: '3.5rem', right: '1.5rem', zIndex: 120, width: 340, maxWidth: 'calc(100vw - 2rem)', background: '#161620', border: '1px solid rgba(251,146,60,0.25)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
+              style={{ position: 'fixed', top: '3.5rem', right: '1.5rem', zIndex: 120, width: 340, maxWidth: 'calc(100vw - 2rem)', background: 'var(--col-modal)', border: '1px solid rgba(251,146,60,0.25)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
               {/* Header */}
               <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(251,146,60,0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

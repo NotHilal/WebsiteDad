@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Scissors, ArrowRight } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -6,8 +6,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 
 const C = {
-  border: 'rgba(255,255,255,0.07)', white: '#f0f0f0', muted: 'rgba(255,255,255,0.22)',
-  gold: '#B8D4E8', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.2)',
+  border: 'rgba(var(--rgb-hi),0.07)', white: 'var(--col-text)', muted: 'rgba(var(--rgb-hi),0.22)',
+  gold: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.2)',
 }
 
 export default function UnlinkedArtistAlert() {
@@ -46,17 +46,17 @@ export default function UnlinkedArtistAlert() {
     <>
       <style>{`
         @keyframes artist-pulse {
-          0%,100% { box-shadow: 0 0 0 0 rgba(184,212,232,0.55); transform: scale(1); }
-          50%      { box-shadow: 0 0 0 7px rgba(184,212,232,0); transform: scale(1.06); }
+          0%,100% { box-shadow: 0 0 0 0 rgba(var(--rgb-acc),0.55); transform: scale(1); }
+          50%      { box-shadow: 0 0 0 7px rgba(var(--rgb-acc),0); transform: scale(1.06); }
         }
-        .ula-link:hover { background: rgba(184,212,232,0.14) !important; border-color: rgba(184,212,232,0.4) !important; color: #B8D4E8 !important; }
+        .ula-link:hover { background: rgba(var(--rgb-acc),0.14) !important; border-color: rgba(var(--rgb-acc),0.4) !important; color: #B8D4E8 !important; }
       `}</style>
 
       <button onClick={() => setOpen(p => !p)}
         style={{ position: 'relative', width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'artist-pulse 2s ease-in-out infinite', flexShrink: 0 }}>
         <Scissors size={13} color="#000" style={{ transform: 'rotate(45deg)' }} strokeWidth={2.5} />
         {artists.length > 1 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#ef4444', border: '2px solid #111118', fontSize: 8, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: '#ef4444', border: '2px solid var(--col-bg)', fontSize: 8, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Jost,sans-serif' }}>
             {artists.length}
           </span>
         )}
@@ -74,7 +74,7 @@ export default function UnlinkedArtistAlert() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.94, y: -8 }}
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-              style={{ position: 'fixed', top: '3.5rem', right: '1.5rem', zIndex: 120, width: 300, maxWidth: 'calc(100vw - 2rem)', background: '#161620', border: `1px solid ${C.goldBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
+              style={{ position: 'fixed', top: '3.5rem', right: '1.5rem', zIndex: 120, width: 300, maxWidth: 'calc(100vw - 2rem)', background: 'var(--col-modal)', border: `1px solid ${C.goldBorder}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
 
               {/* Header */}
               <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.goldBg }}>

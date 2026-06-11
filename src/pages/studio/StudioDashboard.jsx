@@ -248,7 +248,7 @@ export default function StudioDashboard() {
                                 {[appt.services?.name, appt.profiles?.full_name].filter(Boolean).join(' · ')}
                               </p>
                             </div>
-                            {appt.services?.price && <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>€{appt.services.price}</span>}
+                            {appt.services?.price && <span style={{ fontSize: '0.72rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600, flexShrink: 0 }}>${appt.services.price}</span>}
                             {appt.payment_status === 'pay_in_store' && (
                               <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 5, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700, flexShrink: 0 }}>
                                 Pay in store
@@ -287,7 +287,7 @@ export default function StudioDashboard() {
                                   </p>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                                  {appt.services?.price && <span style={{ fontSize: '0.68rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>€{appt.services.price}</span>}
+                                  {appt.services?.price && <span style={{ fontSize: '0.68rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', fontWeight: 600 }}>${appt.services.price}</span>}
                                   {appt.payment_status === 'pay_in_store' && (
                                     <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
                                       In store

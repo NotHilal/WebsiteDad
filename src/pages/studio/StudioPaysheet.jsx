@@ -34,7 +34,7 @@ function fmtMins(mins) {
   return `${m}m`
 }
 
-const fmt = n => `€${(n || 0).toFixed(2)}`
+const fmt = n => `$${(n || 0).toFixed(2)}`
 
 // ── Session / Day info modal ──────────────────────────────────────
 function SessionModal({ sessions, rate, onClose }) {
@@ -390,7 +390,7 @@ export default function StudioPaysheet() {
         <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem,3vw,2.4rem)', color: C.white, lineHeight: 1.1, margin: '2px 0 4px' }}>My Paysheet</h1>
         {stylist && (
           <p style={{ fontSize: '0.78rem', color: C.goldDim, fontFamily: 'Jost,sans-serif', margin: 0 }}>
-            {stylist.name}{rate > 0 ? ` · €${rate.toFixed(2)}/h` : ' · No rate set — contact admin'}
+            {stylist.name}{rate > 0 ? ` · $${rate.toFixed(2)}/h` : ' · No rate set — contact admin'}
           </p>
         )}
       </div>

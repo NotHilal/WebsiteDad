@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+﻿import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, Star, ChevronDown } from 'lucide-react'
@@ -93,12 +93,12 @@ export default function Home() {
       {/* ══ HERO ══════════════════════════════════════════════ */}
       <section ref={heroRef} className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop:'6vh', paddingBottom:'8vh' }}>
         <div className="absolute inset-0 pointer-events-none">
-          <div style={{ position:'absolute', top:'30%', left:'50%', transform:'translate(-50%,-50%)', width:800, height:800, background:'radial-gradient(circle, rgba(184,212,232,0.07) 0%, transparent 70%)', borderRadius:'50%' }} />
-          <div style={{ position:'absolute', top:'20%', left:'20%', width:500, height:500, background:'radial-gradient(circle, rgba(184,212,232,0.05) 0%, transparent 70%)', borderRadius:'50%' }} />
-          <div style={{ position:'absolute', bottom:'20%', right:'18%', width:400, height:400, background:'radial-gradient(circle, rgba(122,175,201,0.05) 0%, transparent 70%)', borderRadius:'50%' }} />
+          <div style={{ position:'absolute', top:'30%', left:'50%', transform:'translate(-50%,-50%)', width:800, height:800, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.07) 0%, transparent 70%)', borderRadius:'50%' }} />
+          <div style={{ position:'absolute', top:'20%', left:'20%', width:500, height:500, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.05) 0%, transparent 70%)', borderRadius:'50%' }} />
+          <div style={{ position:'absolute', bottom:'20%', right:'18%', width:400, height:400, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.05) 0%, transparent 70%)', borderRadius:'50%' }} />
         </div>
         <div className="absolute inset-0 pointer-events-none opacity-[0.022]"
-          style={{ backgroundImage:'linear-gradient(rgba(184,212,232,1) 1px,transparent 1px),linear-gradient(90deg,rgba(184,212,232,1) 1px,transparent 1px)', backgroundSize:'80px 80px' }} />
+          style={{ backgroundImage:'linear-gradient(rgba(var(--rgb-acc),1) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--rgb-acc),1) 1px,transparent 1px)', backgroundSize:'80px 80px' }} />
 
         <motion.div style={{ opacity }} className="relative z-10 wrap text-center">
           <motion.div
@@ -107,19 +107,19 @@ export default function Home() {
             transition={{ duration:0.75, delay:0.1, ease:[0.25,0.46,0.45,0.94] }}
             style={{ display:'inline-flex', alignItems:'center', gap:10, marginBottom:'2.5rem',
               padding:'8px 20px 8px 10px', borderRadius:9999,
-              background:'rgba(184,212,232,0.07)', border:'1px solid rgba(184,212,232,0.22)',
-              boxShadow:'0 0 24px rgba(184,212,232,0.08)',
+              background:'rgba(var(--rgb-acc),0.07)', border:'1px solid rgba(var(--rgb-acc),0.22)',
+              boxShadow:'0 0 24px rgba(var(--rgb-acc),0.08)',
             }}
           >
-            <div style={{ width:6, height:6, borderRadius:'50%', background:'#B8D4E8', animation:'pulse-gold 2.4s infinite' }} />
-            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(255,255,255,0.55)', fontFamily:'Jost,sans-serif', fontWeight:400 }}>
-              Premium Hair Studio &nbsp;<span style={{ color:'rgba(184,212,232,0.5)' }}>·</span>&nbsp; Doha, Qatar
+            <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--col-acc)', animation:'pulse-gold 2.4s infinite' }} />
+            <span style={{ fontSize:10, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.55)', fontFamily:'Jost,sans-serif', fontWeight:400 }}>
+              Premium Hair Studio &nbsp;<span style={{ color:'rgba(var(--rgb-acc),0.5)' }}>·</span>&nbsp; Doha, Qatar
             </span>
           </motion.div>
 
           <h1 className="font-display font-light" style={{ fontSize:'clamp(4rem, 11vw, 8.5rem)', lineHeight:0.88, marginBottom:'2rem' }}>
             <motion.span initial={{ opacity:0, y:32, filter:'blur(10px)' }} animate={{ opacity:1, y:0, filter:'blur(0px)' }}
-              transition={{ duration:1.05, delay:0.22, ease:[0.16,1,0.3,1] }} style={{ color:'#fff', display:'block' }}>Your hair,</motion.span>
+              transition={{ duration:1.05, delay:0.22, ease:[0.16,1,0.3,1] }} style={{ color:'var(--col-text)', display:'block' }}>Your hair,</motion.span>
             <motion.span initial={{ opacity:0, y:32, filter:'blur(10px)' }} animate={{ opacity:1, y:0, filter:'blur(0px)' }}
               transition={{ duration:1.05, delay:0.38, ease:[0.16,1,0.3,1] }}
               className="gold-gradient" style={{ fontStyle:'italic', display:'block' }}>your story.</motion.span>
@@ -131,7 +131,7 @@ export default function Home() {
 
           <motion.p initial={{ opacity:0, y:12, filter:'blur(5px)' }} animate={{ opacity:1, y:0, filter:'blur(0px)' }}
             transition={{ duration:0.85, delay:0.56, ease:[0.25,0.46,0.45,0.94] }}
-            style={{ color:'rgba(255,255,255,0.45)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
+            style={{ color:'rgba(var(--rgb-hi),0.45)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
             Expert stylists crafting looks that reflect who you truly are. Book your transformation today.
           </motion.p>
 
@@ -152,13 +152,13 @@ export default function Home() {
           {stats.map(({ value, label }) => (
             <div key={label} style={{ textAlign:'center' }}>
               <div className="font-display gold-gradient" style={{ fontSize:'clamp(1.4rem,2.5vw,2rem)', lineHeight:1, marginBottom:'0.35rem' }}>{value}</div>
-              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(255,255,255,0.28)', fontFamily:'Jost,sans-serif' }}>{label}</div>
+              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.28)', fontFamily:'Jost,sans-serif' }}>{label}</div>
             </div>
           ))}
         </motion.div>
 
         <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:1.5 }}
-          style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:'rgba(255,255,255,0.18)' }}>
+          style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:'rgba(var(--rgb-hi),0.18)' }}>
           <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase' }}>Scroll</span>
           <motion.div animate={{ y:[0,7,0] }} transition={{ repeat:Infinity, duration:1.7 }}><ChevronDown size={13} /></motion.div>
         </motion.div>
@@ -169,7 +169,7 @@ export default function Home() {
         <div className="wrap">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView}
             style={{ textAlign:'center', marginBottom:24 }}>
-            <h2 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(2.8rem,5vw,4.5rem)', textAlign:'center', marginBottom:'0.5rem' }}>Our Services</h2>
+            <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.8rem,5vw,4.5rem)', textAlign:'center', marginBottom:'0.5rem' }}>Our Services</h2>
             <span className="sec-label">What We Offer</span>
             <div className="gold-bar" style={{ marginTop:'1rem' }} />
           </motion.div>
@@ -179,18 +179,18 @@ export default function Home() {
               <motion.div key={svc.id} initial="hidden" whileInView="visible" viewport={{ once:true, margin:'-40px' }}
                 custom={i} variants={cardIn} className="glass-light service-card"
                 style={{ borderRadius:24, padding:0, textAlign:'center', transition:'all 0.5s cubic-bezier(0.22,1,0.36,1)', cursor:'default', position:'relative', overflow:'hidden', willChange:'transform', backfaceVisibility:'hidden' }}
-                whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(184,212,232,0.1)', borderColor:'rgba(184,212,232,0.2)' }}>
+                whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(var(--rgb-acc),0.1)', borderColor:'rgba(var(--rgb-acc),0.2)' }}>
                 <div style={{ aspectRatio:'4/5', overflow:'hidden', position:'relative' }}>
                   <img src={svc.image_url} alt={svc.name} className="service-img" loading="lazy" decoding="async"
                     style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease', willChange:'transform', backfaceVisibility:'hidden' }} />
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.75))' }} />
                 </div>
                 <div style={{ padding:'1.5rem 2rem 2.5rem 2rem' }}>
-                  <h3 className="font-display" style={{ fontSize:'1.4rem', color:'#fff', marginBottom:'0.85rem', textAlign:'center' }}>{svc.name}</h3>
-                  <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{svc.description}</p>
-                  <span style={{ fontSize:10, color:'#B8D4E8', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', textAlign:'center' }}>{svc.price_display}</span>
+                  <h3 className="font-display" style={{ fontSize:'1.4rem', color:'var(--col-text)', marginBottom:'0.85rem', textAlign:'center' }}>{svc.name}</h3>
+                  <p style={{ color:'rgba(var(--rgb-hi),0.38)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{svc.description}</p>
+                  <span style={{ fontSize:10, color:'var(--col-acc)', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', textAlign:'center' }}>{svc.price_display}</span>
                 </div>
-                <div style={{ position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)', width:0, height:1, background:'linear-gradient(90deg,transparent,#B8D4E8,transparent)', transition:'width 0.5s ease' }} className="card-accent" />
+                <div style={{ position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)', width:0, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', transition:'width 0.5s ease' }} className="card-accent" />
               </motion.div>
             ))}
           </div>
@@ -206,7 +206,7 @@ export default function Home() {
         <div className="wrap">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView}
             style={{ textAlign:'center', marginBottom:18 }}>
-            <h2 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(2.8rem,5vw,4.5rem)', textAlign:'center', marginBottom:'0.5rem' }}>Gallery</h2>
+            <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.8rem,5vw,4.5rem)', textAlign:'center', marginBottom:'0.5rem' }}>Gallery</h2>
             <span className="sec-label">Our Work</span>
             <div className="gold-bar" style={{ marginTop:'1rem', marginBottom:0 }} />
           </motion.div>
@@ -237,12 +237,12 @@ export default function Home() {
         <div className="wrap">
           <div className="home-about-grid">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView} style={{ textAlign:'center' }}>
-              <h2 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(2.8rem,5vw,4.5rem)', lineHeight:1.08, marginBottom:'0.5rem', textAlign:'center' }}>
+              <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.8rem,5vw,4.5rem)', lineHeight:1.08, marginBottom:'0.5rem', textAlign:'center' }}>
                 Art meets<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>precision.</span>
               </h2>
               <span className="sec-label">Our Story</span>
               <div className="gold-bar" style={{ margin:'0 auto 1.25rem auto' }} />
-              <p style={{ color:'rgba(255,255,255,0.42)', fontSize:'0.9rem', lineHeight:1.95, marginBottom:0, textAlign:'center' }}>
+              <p style={{ color:'rgba(var(--rgb-hi),0.42)', fontSize:'0.9rem', lineHeight:1.95, marginBottom:0, textAlign:'center' }}>
                 Born in the heart of Doha, HairGo brings together a team of internationally trained stylists united by one purpose: to deliver excellence. From precision cuts to transformative colour, every service is crafted with the care and expertise you deserve.
               </p>
             </motion.div>
@@ -253,20 +253,20 @@ export default function Home() {
                   {displayedTeam.slice(0, 2).map((m, i) => (
                     <motion.div key={m.id} initial={{ opacity:0, x:-28, filter:'blur(5px)' }} whileInView={{ opacity:1, x:0, filter:'blur(0px)' }}
                       viewport={{ once:true, margin:'-40px' }} transition={{ duration:0.85, delay:i * 0.13, ease:[0.16,1,0.3,1] }}>
-                      <div style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', border:'1px solid rgba(184,212,232,0.18)', boxShadow:'0 16px 48px rgba(0,0,0,0.5)', marginBottom:'0.4rem' }}>
+                      <div style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', border:'1px solid rgba(var(--rgb-acc),0.18)', boxShadow:'0 16px 48px rgba(0,0,0,0.5)', marginBottom:'0.4rem' }}>
                         {m.photo_url
                           ? <img src={m.photo_url} alt={m.name} loading="lazy" decoding="async"
                               style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
-                          : <div style={{ width:'100%', height:'100%', background:'rgba(184,212,232,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(184,212,232,0.4)' }}>{m.name?.[0]}</span>
+                          : <div style={{ width:'100%', height:'100%', background:'rgba(var(--rgb-acc),0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(var(--rgb-acc),0.4)' }}>{m.name?.[0]}</span>
                             </div>
                         }
                       </div>
-                      <p className="font-display" style={{ color:'#fff', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
-                      <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,#B8D4E8,transparent)', margin:'0 auto 5px auto' }} />
-                      <p style={{ color:'rgba(184,212,232,0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'Jost,sans-serif' }}>{m.title}</p>
+                      <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
+                      <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', margin:'0 auto 5px auto' }} />
+                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'Jost,sans-serif' }}>{m.title}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -274,20 +274,20 @@ export default function Home() {
                   {displayedTeam.slice(2, 4).map((m, i) => (
                     <motion.div key={m.id} initial={{ opacity:0, x:28, filter:'blur(5px)' }} whileInView={{ opacity:1, x:0, filter:'blur(0px)' }}
                       viewport={{ once:true, margin:'-40px' }} transition={{ duration:0.85, delay:i * 0.13 + 0.1, ease:[0.16,1,0.3,1] }}>
-                      <div style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', border:'1px solid rgba(184,212,232,0.18)', boxShadow:'0 16px 48px rgba(0,0,0,0.5)', marginBottom:'0.4rem' }}>
+                      <div style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', border:'1px solid rgba(var(--rgb-acc),0.18)', boxShadow:'0 16px 48px rgba(0,0,0,0.5)', marginBottom:'0.4rem' }}>
                         {m.photo_url
                           ? <img src={m.photo_url} alt={m.name} loading="lazy" decoding="async"
                               style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
-                          : <div style={{ width:'100%', height:'100%', background:'rgba(184,212,232,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(184,212,232,0.4)' }}>{m.name?.[0]}</span>
+                          : <div style={{ width:'100%', height:'100%', background:'rgba(var(--rgb-acc),0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                              <span className="font-display" style={{ fontSize:'2.5rem', color:'rgba(var(--rgb-acc),0.4)' }}>{m.name?.[0]}</span>
                             </div>
                         }
                       </div>
-                      <p className="font-display" style={{ color:'#fff', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
-                      <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,#B8D4E8,transparent)', margin:'0 auto 5px auto' }} />
-                      <p style={{ color:'rgba(184,212,232,0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'Jost,sans-serif' }}>{m.title}</p>
+                      <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
+                      <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', margin:'0 auto 5px auto' }} />
+                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'Jost,sans-serif' }}>{m.title}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -297,8 +297,8 @@ export default function Home() {
                 <Link to="/stylists" className="btn-gold">Meet the Team <ArrowRight size={15} /></Link>
               </div>
 
-              <div style={{ position:'absolute', top:-24, right:-24, width:160, height:160, background:'radial-gradient(circle, rgba(184,212,232,0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <div style={{ position:'absolute', bottom:-16, left:-16, width:120, height:120, background:'radial-gradient(circle, rgba(122,175,201,0.08) 0%, transparent 70%)', pointerEvents:'none' }} />
+              <div style={{ position:'absolute', top:-24, right:-24, width:160, height:160, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
+              <div style={{ position:'absolute', bottom:-16, left:-16, width:120, height:120, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.08) 0%, transparent 70%)', pointerEvents:'none' }} />
             </motion.div>
           </div>
         </div>
@@ -311,20 +311,20 @@ export default function Home() {
 
             <div style={{
               borderRadius:28, padding:'3rem 2.5rem', textAlign:'center', position:'relative', overflow:'hidden',
-              background:'linear-gradient(135deg, rgba(184,212,232,0.08) 0%, rgba(61,90,115,0.04) 100%)',
-              border:'1px solid rgba(184,212,232,0.18)',
+              background:'linear-gradient(135deg, rgba(var(--rgb-acc),0.08) 0%, rgba(61,90,115,0.04) 100%)',
+              border:'1px solid rgba(var(--rgb-acc),0.18)',
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem',
             }}>
-              <div style={{ position:'absolute', top:-40, left:'50%', transform:'translateX(-50%)', width:280, height:140, background:'radial-gradient(ellipse, rgba(184,212,232,0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(184,212,232,0.1)', border:'1px solid rgba(184,212,232,0.2)' }}>
-                <Star size={11} color="#B8D4E8" />
-                <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'#B8D4E8', fontFamily:'Jost,sans-serif' }}>Loyalty Program</span>
+              <div style={{ position:'absolute', top:-40, left:'50%', transform:'translateX(-50%)', width:280, height:140, background:'radial-gradient(ellipse, rgba(var(--rgb-acc),0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.2)' }}>
+                <Star size={11} color="var(--col-acc)" />
+                <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'Jost,sans-serif' }}>Loyalty Program</span>
               </div>
-              <h3 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
+              <h3 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
                 Earn. Redeem.<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>Shine.</span>
               </h3>
               <div className="gold-bar" />
-              <p style={{ color:'rgba(255,255,255,0.38)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:340, margin:0 }}>
+              <p style={{ color:'rgba(var(--rgb-hi),0.38)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:340, margin:0 }}>
                 Come 5 times and unlock an exclusive 30% discount on your next appointment. Simple, rewarding, and made for our regulars.
               </p>
               <Link to="/register" className="btn-gold" style={{ marginTop:'0.5rem' }}>Join for Free <ArrowRight size={14} /></Link>
@@ -332,17 +332,17 @@ export default function Home() {
 
             <div style={{
               borderRadius:28, padding:'3rem 2.5rem', textAlign:'center', position:'relative', overflow:'hidden',
-              background:'linear-gradient(135deg, rgba(61,90,115,0.06) 0%, rgba(184,212,232,0.08) 100%)',
-              border:'1px solid rgba(184,212,232,0.12)',
+              background:'linear-gradient(135deg, rgba(61,90,115,0.06) 0%, rgba(var(--rgb-acc),0.08) 100%)',
+              border:'1px solid rgba(var(--rgb-acc),0.12)',
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem',
             }}>
-              <div style={{ position:'absolute', bottom:-40, right:-40, width:240, height:240, background:'radial-gradient(circle, rgba(184,212,232,0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', fontFamily:'Jost,sans-serif' }}>Ready?</span>
-              <h2 className="font-display font-light" style={{ color:'#fff', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
+              <div style={{ position:'absolute', bottom:-40, right:-40, width:240, height:240, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
+              <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(var(--rgb-hi),0.3)', fontFamily:'Jost,sans-serif' }}>Ready?</span>
+              <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
                 Ready for your<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>transformation?</span>
               </h2>
               <div className="gold-bar" />
-              <p style={{ color:'rgba(255,255,255,0.35)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:320, margin:0 }}>
+              <p style={{ color:'rgba(var(--rgb-hi),0.35)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:320, margin:0 }}>
                 Book your appointment in minutes and let our experts take care of the rest.
               </p>
               <Link to="/appointments" className="btn-gold" style={{ marginTop:'0.5rem' }}>Book Now <ArrowRight size={14} /></Link>

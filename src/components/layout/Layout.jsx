@@ -16,7 +16,7 @@ export default function Layout() {
   const hideFooter   = NO_FOOTER.includes(pathname)
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#0a0a0a' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--col-bg)' }}>
       <ScrollToTop />
       <Navbar />
       <main style={{ flex: 1 }}>

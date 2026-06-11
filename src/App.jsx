@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
 import { CartProvider } from './contexts/CartContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
 import Gallery from './pages/Gallery'
@@ -38,6 +39,7 @@ import AdminOnlyRoute from './components/auth/AdminOnlyRoute'
 
 export default function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
@@ -73,7 +75,7 @@ export default function App() {
           <Route path="/studio" element={<StudioGate />} />
           <Route path="/studio/*" element={<AdminRoute><StudioLayout /></AdminRoute>}>
             <Route path="dashboard"    element={<StudioDashboard />} />
-            <Route path="appointments" element={<AdminRoute><StudioAppointmentsList /></AdminRoute>} />
+            <Route path="appointments" element={<StudioAppointmentsList />} />
             <Route path="schedule"     element={<StudioSchedule />} />
             <Route path="sales"        element={<AdminOnlyRoute><StudioSales /></AdminOnlyRoute>} />
             <Route path="blocked-dates" element={<AdminRoute><StudioBlockedDates /></AdminRoute>} />
@@ -95,5 +97,6 @@ export default function App() {
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>
+    </ThemeProvider>
   )
 }

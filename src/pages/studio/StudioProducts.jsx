@@ -379,7 +379,7 @@ export default function StudioProducts() {
                       <div style={{ flex: 1, padding: '10px 13px', minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                           <p style={{ color: C.white, fontSize: '0.875rem', fontFamily: 'Jost,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{p.name}</p>
-                          <span className="font-display" style={{ color: C.gold, fontSize: '0.92rem', flexShrink: 0 }}>€{p.price}</span>
+                          <span className="font-display" style={{ color: C.gold, fontSize: '0.92rem', flexShrink: 0 }}>${p.price}</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
                           <div style={{ display: 'flex', gap: 4, flexWrap: 'nowrap', overflow: 'hidden', minWidth: 0 }}>
@@ -492,7 +492,7 @@ export default function StudioProducts() {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
                       <div>
-                        <label style={lbl}>Price (€)</label>
+                        <label style={lbl}>Price ($)</label>
                         <input type="number" min="0" step="0.01" value={form.price || ''} onChange={set('price')} placeholder="0.00" className="m-inp" style={inp} />
                       </div>
                       <div>

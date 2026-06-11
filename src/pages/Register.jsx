@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Mail, Lock, Eye, EyeOff, User, Phone, Scissors, ArrowRight } from 'lucide-react'
@@ -31,25 +31,25 @@ export default function Register() {
   }
 
   const inp = {
-    width: '100%', background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 13,
+    width: '100%', background: 'rgba(var(--rgb-hi),0.04)',
+    border: '1px solid rgba(var(--rgb-hi),0.08)', borderRadius: 13,
     padding: '13px 13px 13px 44px',
-    fontSize: '0.85rem', color: '#f0f0f0', outline: 'none',
+    fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none',
     fontFamily: 'Jost,sans-serif', fontWeight: 300,
     transition: 'border-color 0.3s, background 0.3s',
   }
   const lbl = {
     display: 'block', fontSize: 10, letterSpacing: '0.22em',
-    textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
+    textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.3)',
     marginBottom: 7, fontFamily: 'Jost,sans-serif',
   }
-  const onFocus = e => { e.target.style.borderColor = 'rgba(184,212,232,0.45)'; e.target.style.background = 'rgba(255,255,255,0.06)' }
-  const onBlur  = e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.background = 'rgba(255,255,255,0.04)' }
+  const onFocus = e => { e.target.style.borderColor = 'rgba(var(--rgb-acc),0.45)'; e.target.style.background = 'rgba(var(--rgb-hi),0.06)' }
+  const onBlur  = e => { e.target.style.borderColor = 'rgba(var(--rgb-hi),0.08)'; e.target.style.background = 'rgba(var(--rgb-hi),0.04)' }
 
   return (
     <div style={{ height: 'calc(100vh - 72px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1.5rem', overflow: 'hidden', paddingBottom: '4vh' }}>
       {/* Ambient glow */}
-      <div style={{ position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%,-50%)', width: 560, height: 420, background: 'radial-gradient(circle, rgba(122,175,201,0.06) 0%, transparent 70%)', pointerEvents: 'none', borderRadius: '50%' }} />
+      <div style={{ position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%,-50%)', width: 560, height: 420, background: 'radial-gradient(circle, rgba(var(--rgb-acc),0.06) 0%, transparent 70%)', pointerEvents: 'none', borderRadius: '50%' }} />
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -59,10 +59,10 @@ export default function Register() {
       >
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,#B8D4E8,#7AAFC9)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px auto', boxShadow: '0 8px 36px rgba(184,212,232,0.38)' }}>
+          <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px auto', boxShadow: '0 8px 36px rgba(var(--rgb-acc),0.38)' }}>
             <Scissors size={21} color="#000" style={{ transform: 'rotate(45deg)' }} />
           </div>
-          <h1 className="font-display font-light" style={{ fontSize: '2.6rem', color: '#fff', textAlign: 'center', marginBottom: '0.8rem', lineHeight: 1 }}>
+          <h1 className="font-display font-light" style={{ fontSize: '2.6rem', color: 'var(--col-text)', textAlign: 'center', marginBottom: '0.8rem', lineHeight: 1 }}>
             Join HairGo
           </h1>
           <div className="gold-bar" style={{ margin: '0 auto' }} />
@@ -77,16 +77,16 @@ export default function Register() {
               <div>
                 <label style={lbl}>Full Name</label>
                 <div style={{ position: 'relative' }}>
-                  <User size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+                  <User size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(var(--rgb-hi),0.22)', pointerEvents: 'none' }} />
                   <input type="text" value={form.fullName} onChange={set('fullName')} required placeholder="Your name" style={inp} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
               <div>
                 <label style={lbl}>
-                  Phone <span style={{ color: 'rgba(255,255,255,0.18)', fontSize: 9 }}>(opt.)</span>
+                  Phone <span style={{ color: 'rgba(var(--rgb-hi),0.18)', fontSize: 9 }}>(opt.)</span>
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <Phone size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+                  <Phone size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(var(--rgb-hi),0.22)', pointerEvents: 'none' }} />
                   <input type="tel" value={form.phone} onChange={set('phone')} placeholder="+33 6 ..." style={inp} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
@@ -96,7 +96,7 @@ export default function Register() {
             <div style={{ marginBottom: 14 }}>
               <label style={lbl}>Email Address</label>
               <div style={{ position: 'relative' }}>
-                <Mail size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+                <Mail size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(var(--rgb-hi),0.22)', pointerEvents: 'none' }} />
                 <input type="email" value={form.email} onChange={set('email')} required placeholder="your@email.com" style={inp} onFocus={onFocus} onBlur={onBlur} />
               </div>
             </div>
@@ -106,9 +106,9 @@ export default function Register() {
               <div>
                 <label style={lbl}>Password</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+                  <Lock size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(var(--rgb-hi),0.22)', pointerEvents: 'none' }} />
                   <input type={show ? 'text' : 'password'} value={form.password} onChange={set('password')} required placeholder="Min. 6 chars" style={{ ...inp, paddingRight: 38 }} onFocus={onFocus} onBlur={onBlur} />
-                  <button type="button" onClick={() => setShow(!show)} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  <button type="button" onClick={() => setShow(!show)} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'rgba(var(--rgb-hi),0.25)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                     {show ? <EyeOff size={12} /> : <Eye size={12} />}
                   </button>
                 </div>
@@ -116,7 +116,7 @@ export default function Register() {
               <div>
                 <label style={lbl}>Confirm</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.22)', pointerEvents: 'none' }} />
+                  <Lock size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'rgba(var(--rgb-hi),0.22)', pointerEvents: 'none' }} />
                   <input type="password" value={form.confirm} onChange={set('confirm')} required placeholder="Repeat" style={inp} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
@@ -130,12 +130,12 @@ export default function Register() {
             </button>
           </form>
 
-          <div style={{ marginTop: 22, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)' }}>
+          <div style={{ marginTop: 22, paddingTop: 20, borderTop: '1px solid rgba(var(--rgb-hi),0.06)', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.85rem', color: 'rgba(var(--rgb-hi),0.3)' }}>
               Already have an account?{' '}
-              <Link to="/login" style={{ color: '#B8D4E8', textDecoration: 'none', fontWeight: 400 }}
+              <Link to="/login" style={{ color: 'var(--col-acc)', textDecoration: 'none', fontWeight: 400 }}
                 onMouseEnter={e => e.currentTarget.style.color = '#E8D5A3'}
-                onMouseLeave={e => e.currentTarget.style.color = '#B8D4E8'}>
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--col-acc)'}>
                 Sign in
               </Link>
             </p>

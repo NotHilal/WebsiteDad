@@ -218,7 +218,7 @@ export default function StudioOrders() {
                     </span>
                     <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
                     <span style={{ fontSize: '0.72rem', fontFamily: 'Jost,sans-serif', color: order.status === 'retrieved' ? C.gold : 'rgba(255,255,255,0.38)', fontWeight: order.status === 'retrieved' ? 600 : 400 }}>
-                      €{total.toFixed(2)}
+                      ${total.toFixed(2)}
                     </span>
                     <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>·</span>
                     <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.28)', fontFamily: 'Jost,sans-serif' }}>
@@ -287,10 +287,10 @@ export default function StudioOrders() {
                       <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>×{details.quantity || 1}</span>
                       <span style={{ width: 1, height: 12, background: C.border }} />
                       <span style={{ fontSize: '0.88rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700 }}>
-                        €{((parseFloat(details.products?.price) || 0) * (details.quantity || 1)).toFixed(2)}
+                        ${((parseFloat(details.products?.price) || 0) * (details.quantity || 1)).toFixed(2)}
                       </span>
                       {details.products?.price && (
-                        <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>@ €{parseFloat(details.products.price).toFixed(2)} each</span>
+                        <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'Jost,sans-serif' }}>@ ${parseFloat(details.products.price).toFixed(2)} each</span>
                       )}
                     </div>
                   </div>
@@ -402,7 +402,7 @@ export default function StudioOrders() {
                 <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.25rem' }}>
                   <p style={{ color: C.white, fontSize: '0.85rem', fontFamily: 'Jost,sans-serif', fontWeight: 500, marginBottom: 3 }}>{deleteTarget.products?.name || '—'}</p>
                   <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'Jost,sans-serif' }}>
-                    {deleteTarget.profiles?.full_name} · ×{deleteTarget.quantity} · €{((parseFloat(deleteTarget.products?.price) || 0) * (deleteTarget.quantity || 1)).toFixed(2)}
+                    {deleteTarget.profiles?.full_name} · ×{deleteTarget.quantity} · ${((parseFloat(deleteTarget.products?.price) || 0) * (deleteTarget.quantity || 1)).toFixed(2)}
                   </p>
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>

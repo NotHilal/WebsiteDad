@@ -482,7 +482,7 @@ export default function StudioSchedule() {
                       )}
                       {appt.services?.price && (
                         <span style={{ fontSize: '0.75rem', color: C.gold, fontFamily: 'Jost,sans-serif', fontWeight: 700, flexShrink: 0 }}>
-                          €{appt.services.price}
+                          ${appt.services.price}
                         </span>
                       )}
                     </div>
@@ -505,7 +505,7 @@ export default function StudioSchedule() {
           { label: 'Phone',    value: a.profiles?.phone || '—' },
           { label: 'Service',  value: a.services?.name || '—' },
           { label: 'Duration', value: a.services?.duration ? `${a.services.duration} min` : '—' },
-          { label: 'Price',    value: a.services?.price ? `€${a.services.price}` : '—', gold: true },
+          { label: 'Price',    value: a.services?.price ? `$${a.services.price}` : '—', gold: true },
           { label: 'Stylist',  value: a.stylists?.name || '—' },
           ...(a.payment_status === 'pay_in_store' ? [{ label: 'Payment', value: 'Pay in store', blue: true }] : []),
           ...(a.notes ? [{ label: 'Notes', value: a.notes }] : []),
