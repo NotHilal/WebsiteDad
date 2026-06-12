@@ -32,6 +32,7 @@ function slotOverlapsBlocked(slot, durationMins, blockedSlots) {
 
 const STEPS = ['Service', 'Stylist', 'Date & Time', 'Confirm']
 const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
+const SERVICES_PER_PAGE = 4
 
 const slide = {
   initial: { opacity:0, x:24 },
@@ -61,6 +62,7 @@ export default function Appointments() {
   const [availableCoupons, setAvailableCoupons] = useState([])
   const [appliedCoupon,    setAppliedCoupon]    = useState(null)
   const [stylistDayOffs,   setStylistDayOffs]   = useState([])
+  const [servicesPage,     setServicesPage]     = useState(0)
 
   useEffect(() => {
     const TTL = 5 * 60_000
@@ -330,6 +332,16 @@ export default function Appointments() {
     </div>
   )
 
+  const filteredServices = genderFilter === 'all'
+    ? services
+    : services.filter(s => s.gender === genderFilter || s.gender === 'mixed' || !s.gender)
+  const totalServicePages = Math.max(1, Math.ceil(filteredServices.length / SERVICES_PER_PAGE))
+  const pagedServices = filteredServices.length
+    ? filteredServices.slice(servicesPage * SERVICES_PER_PAGE, (servicesPage + 1) * SERVICES_PER_PAGE)
+    : services.length
+      ? []
+      : Array.from({length: SERVICES_PER_PAGE}, (_, i) => ({id:i,name:'',price:'',duration:0,category:''}))
+
   /* ── Main layout ── */
   return (
     <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', paddingTop:68, paddingBottom:(sel.service||sel.stylist||sel.date)?88:0 }}>
@@ -469,7 +481,7 @@ export default function Appointments() {
                   ].map(({ value, label, color }) => {
                     const isActive = genderFilter === value
                     return (
-                      <button key={value} onClick={() => setGenderFilter(value)}
+                      <button key={value} onClick={() => { setGenderFilter(value); setServicesPage(0) }}
                         style={{ padding:'7px 20px', borderRadius:9999, border:`1px solid ${isActive ? color+'55' : 'rgba(var(--rgb-hi),0.08)'}`, background:isActive ? `${color}18` : 'transparent', color:isActive ? color : 'var(--col-text)', fontSize:11, fontFamily:'DM Sans,sans-serif', fontWeight:700, cursor:'pointer', transition:'all .2s', letterSpacing:'0.12em', textTransform:'uppercase' }}>
                         {label}
                       </button>
@@ -493,11 +505,7 @@ export default function Appointments() {
                 )}
 
                 <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(270px, 1fr))', gap:'1.25rem' }}>
-                  {(() => {
-                    const filtered = genderFilter === 'all'
-                      ? services
-                      : services.filter(s => s.gender === genderFilter || s.gender === 'mixed' || !s.gender)
-                    return (filtered.length ? filtered : services.length ? [] : Array.from({length:6},(_,i)=>({id:i,name:'',price:'',duration:0,category:''}))).map((svc) => {
+                  {pagedServices.map((svc) => {
                     const isActive = sel.service?.id === svc.id
                     return (
                       <div key={svc.id} className="appt-svc-card"
@@ -554,9 +562,33 @@ export default function Appointments() {
                         </div>
                       </div>
                     )
-                    })
-                  })()}
+                  })}
                 </div>
+
+                {filteredServices.length > SERVICES_PER_PAGE && (
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:16, marginTop:28 }}>
+                    <button
+                      disabled={servicesPage === 0}
+                      onClick={() => { setServicesPage(p => p - 1); window.scrollTo({top:0,behavior:'smooth'}) }}
+                      className="appt-back-btn"
+                      style={{ width:38, height:38, borderRadius:10, background:'rgba(var(--rgb-hi),0.04)', border:'1px solid rgba(var(--rgb-hi),0.07)', color:'var(--col-text)', display:'flex', alignItems:'center', justifyContent:'center', cursor:servicesPage===0?'not-allowed':'pointer', opacity:servicesPage===0?0.3:1, transition:'all 0.25s', flexShrink:0 }}>
+                      <ChevronLeft size={14}/>
+                    </button>
+                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      {Array.from({length:totalServicePages}).map((_,i) => (
+                        <button key={i} onClick={() => { setServicesPage(i); window.scrollTo({top:0,behavior:'smooth'}) }}
+                          style={{ width:i===servicesPage?28:8, height:8, borderRadius:9999, border:'none', cursor:'pointer', transition:'all 0.3s cubic-bezier(0.22,1,0.36,1)', background:i===servicesPage?'var(--col-acc)':'rgba(var(--rgb-hi),0.12)', flexShrink:0 }}/>
+                      ))}
+                    </div>
+                    <button
+                      disabled={servicesPage >= totalServicePages - 1}
+                      onClick={() => { setServicesPage(p => p + 1); window.scrollTo({top:0,behavior:'smooth'}) }}
+                      className="appt-back-btn"
+                      style={{ width:38, height:38, borderRadius:10, background:'rgba(var(--rgb-hi),0.04)', border:'1px solid rgba(var(--rgb-hi),0.07)', color:'var(--col-text)', display:'flex', alignItems:'center', justifyContent:'center', cursor:servicesPage>=totalServicePages-1?'not-allowed':'pointer', opacity:servicesPage>=totalServicePages-1?0.3:1, transition:'all 0.25s', flexShrink:0 }}>
+                      <ChevronRight size={14}/>
+                    </button>
+                  </div>
+                )}
 
                 {/* Service detail modal */}
                 <AnimatePresence>
@@ -919,14 +951,14 @@ export default function Appointments() {
                 )}
 
                 <div style={{ display:'flex', gap:10 }}>
-                  <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||saving||!guestInfoValid} style={{ flex:1, justifyContent:'center' }}>
+                  <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||saving||!guestInfoValid} style={{ flex:1, justifyContent:'center', borderRadius:10 }}>
                     {payStep==='loading'
                       ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopcolor: 'var(--col-bg)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
                       : <>Pay Online &nbsp;€{finalPrice.toFixed(2)} <ArrowRight size={15}/></>
                     }
                   </button>
                   <button onClick={bookInStore} disabled={saving||payStep==='loading'||!guestInfoValid}
-                    style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:12, border:'1px solid rgba(var(--rgb-acc),0.28)', background:'var(--col-acc)', color: (saving||!guestInfoValid) ? 'var(--col-acc)' : 'var(--col-acc)', cursor: (saving||payStep==='loading'||!guestInfoValid) ? 'not-allowed' : 'pointer', fontSize:13, fontFamily:'DM Sans,sans-serif', fontWeight:500, letterSpacing:'0.04em', transition:'all 0.25s' }}
+                    style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:10, border:'1px solid rgba(var(--rgb-acc),0.28)', background:'var(--col-acc)', color:'var(--col-bg)', cursor: (saving||payStep==='loading'||!guestInfoValid) ? 'not-allowed' : 'pointer', opacity:(saving||payStep==='loading'||!guestInfoValid)?0.5:1, fontSize:13, fontFamily:'DM Sans,sans-serif', fontWeight:500, letterSpacing:'0.04em', transition:'all 0.25s' }}
                     onMouseEnter={e => { if (!saving && !payStep && guestInfoValid) { e.currentTarget.style.background='var(--col-acc)'; e.currentTarget.style.borderColor='var(--col-acc)' } }}
                     onMouseLeave={e => { e.currentTarget.style.background='var(--col-acc)'; e.currentTarget.style.borderColor='var(--col-acc)' }}>
                     {saving

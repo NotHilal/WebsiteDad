@@ -475,15 +475,15 @@ export default function Profile() {
   const card = { background: S1, border: `1px solid ${BD}`, borderRadius: 16 }
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '78px 20px 20px', overflow: 'hidden', boxSizing: 'border-box' }}>
-      <div style={{ width: '100%', maxWidth: 600, height: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '78px 20px 20px', boxSizing: 'border-box' }}>
+      <div style={{ width: '100%', maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 10 }}>
 
         {/* ── Top card ── */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }}
-          style={{ ...card, display: 'flex', overflow: 'hidden' }}>
+          className="profile-top-card" style={{ ...card, display: 'flex', overflow: 'hidden' }}>
 
           {/* Loyalty stamps */}
-          <div style={{ flex: '0 0 52%', padding: '22px 24px' }}>
+          <div className="profile-loyalty" style={{ flex: '0 0 52%', padding: '22px 24px' }}>
             <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--col-text)', marginBottom: 14 }}>Loyalty Visits</p>
             {totalVisits > 0 && stampsThisCycle === 0 ? (
               <>
@@ -522,10 +522,10 @@ export default function Profile() {
             )}
           </div>
 
-          <div style={{ width: 1, background: BD, flexShrink: 0, margin: '16px 0' }} />
+          <div className="profile-divider" style={{ width: 1, background: BD, flexShrink: 0, margin: '16px 0' }} />
 
           {/* Profile */}
-          <div style={{ flex: 1, padding: '22px 20px 22px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div className="profile-info" style={{ flex: 1, padding: '22px 20px 22px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
               <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Cormorant Garamond", serif', fontSize: 19, color: 'var(--col-bg)', fontWeight: 500, boxShadow: '0 0 18px rgba(var(--rgb-acc),0.35)' }}>
                 {initial || '?'}
@@ -571,11 +571,11 @@ export default function Profile() {
 
         {/* ── Tabs + content ── */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.13, ease }}
-          style={{ ...card, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          className="profile-tab-panel" style={{ ...card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           <div style={{ display: 'flex', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
             {TABS.map(t => (
-              <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} style={{ flex: 1, padding: '13px 4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', transition: 'color 0.2s', fontWeight: tab === t ? 500 : 400, color: tab === t ? 'var(--col-acc)' : 'var(--col-text)', borderBottom: `2px solid ${tab === t ? 'var(--col-acc)' : 'transparent'}`, marginBottom: -1 }}>
+              <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} className="profile-tab-btn" style={{ flex: 1, padding: '13px 4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', transition: 'color 0.2s', fontWeight: tab === t ? 500 : 400, color: tab === t ? 'var(--col-acc)' : 'var(--col-text)', borderBottom: `2px solid ${tab === t ? 'var(--col-acc)' : 'transparent'}`, marginBottom: -1 }}>
                 {t}
                 {t === 'Cart' && cartItems.length > 0 && (
                   <span style={{ marginLeft: 4, fontSize: 9, background: 'var(--col-acc)', color: 'var(--col-acc)', padding: '1px 5px', borderRadius: 9999 }}>
@@ -783,7 +783,7 @@ export default function Profile() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
                               <div style={{ width: 52, height: 52, borderRadius: 8, background: 'var(--col-card)', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 {order.products?.image_url
-                                  ? <img src={order.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  ? <img src={order.products.image_url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s ease' }} onLoad={e => { e.currentTarget.style.opacity = '1' }} />
                                   : <Package size={18} color="rgba(var(--rgb-hi),0.12)" />}
                               </div>
                               <div style={{ flex: 1, minWidth: 0 }}>
@@ -976,7 +976,29 @@ export default function Profile() {
         />
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+          .profile-top-card { flex-direction: column !important; }
+          .profile-loyalty {
+            flex: unset !important;
+            padding: 18px 18px 16px !important;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+          }
+          .profile-divider { display: none !important; }
+          .profile-info {
+            flex: unset !important;
+            padding: 16px 18px 18px !important;
+          }
+          .profile-tab-panel { min-height: 320px; }
+          .profile-tab-btn {
+            padding: 11px 2px !important;
+            font-size: 9px !important;
+            letter-spacing: 0.08em !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }
@@ -1067,7 +1089,7 @@ function CartItemRow({ item, isLast, onRemove, onCommit, onExpired, BD }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', borderBottom: isLast ? 'none' : `1px solid ${BD}` }}>
       <div style={{ width: 48, height: 48, borderRadius: 8, background: 'var(--col-card)', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {item.products?.image_url
-          ? <img src={item.products.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ? <img src={item.products.image_url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s ease' }} onLoad={e => { e.currentTarget.style.opacity = '1' }} />
           : <Package size={16} style={{ color: 'var(--col-text)' }} />}
       </div>
 

@@ -361,7 +361,7 @@ export default function Store() {
               {/* Image */}
               <div style={{ position: 'relative', background: 'var(--col-modal)', minHeight: 'clamp(240px, 50vh, 380px)' }}>
                 {detail.image_url
-                  ? <img src={detail.image_url} alt={detail.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+                  ? <img src={detail.image_url} alt={detail.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, opacity: 0, transition: 'opacity 0.4s ease' }} onLoad={e => { e.currentTarget.style.opacity = '1' }} />
                   : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Package size={56} color="rgba(var(--rgb-hi),0.05)" />
                     </div>
