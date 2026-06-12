@@ -47,7 +47,7 @@ export default function Register() {
   const onBlur  = e => { e.target.style.borderColor = 'rgba(var(--rgb-hi),0.08)'; e.target.style.background = 'rgba(var(--rgb-hi),0.04)' }
 
   return (
-    <div style={{ height: 'calc(100vh - 72px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1.5rem', overflow: 'hidden', paddingBottom: '4vh' }}>
+    <div style={{ minHeight: 'calc(100vh - 72px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem', overflowY: 'auto' }}>
       {/* Ambient glow */}
       <div style={{ position: 'fixed', top: '40%', left: '50%', transform: 'translate(-50%,-50%)', width: 560, height: 420, background: 'radial-gradient(circle, rgba(var(--rgb-acc),0.06) 0%, transparent 70%)', pointerEvents: 'none', borderRadius: '50%' }} />
 

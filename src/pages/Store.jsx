@@ -356,10 +356,10 @@ export default function Store() {
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               onClick={e => e.stopPropagation()}
               className="store-detail-modal"
-              style={{ width: '100%', maxWidth: 780, background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-hi),0.09)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.8)', display: 'grid', gridTemplateColumns: '1fr 1fr', maxHeight: '90vh' }}>
+              style={{ width: '100%', maxWidth: 780, background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-hi),0.09)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.8)', display: 'grid', gridTemplateColumns: '1fr 1fr', maxHeight: '92vh' }}>
 
               {/* Image */}
-              <div style={{ position: 'relative', background: 'var(--col-modal)', minHeight: 380 }}>
+              <div style={{ position: 'relative', background: 'var(--col-modal)', minHeight: 'clamp(240px, 50vh, 380px)' }}>
                 {detail.image_url
                   ? <img src={detail.image_url} alt={detail.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
                   : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -510,15 +510,15 @@ export default function Store() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .product-card:hover .qv-btn { opacity: 1 !important; }
-        @media (max-width: 600px) {
+        @media (max-width: 720px) {
           .store-detail-modal {
             grid-template-columns: 1fr !important;
             max-height: 92vh;
             overflow-y: auto;
           }
           .store-detail-modal > div:first-child {
-            min-height: 240px !important;
-            max-height: 260px;
+            min-height: 200px !important;
+            max-height: clamp(200px, 35vh, 260px);
           }
         }
       `}</style>

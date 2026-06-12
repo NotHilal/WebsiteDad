@@ -195,7 +195,7 @@ export default function StudioLayout() {
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', background: C.bg, overflow: 'hidden' }}>
 
-      <aside style={{ width: 210, flexShrink: 0, background: C.sidebar, borderRight: `1px solid ${C.border}` }} className="hidden lg:block">
+      <aside style={{ width: 210, flexShrink: 0, background: C.sidebar, borderRight: `1px solid ${C.border}` }} className="s-sidebar">
         <Sidebar />
       </aside>
 
@@ -204,11 +204,10 @@ export default function StudioLayout() {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,.7)', backdropFilter: 'blur(4px)' }}
-              className="lg:hidden" onClick={() => setOpen(false)} />
+              onClick={() => setOpen(false)} />
             <motion.aside initial={{ x: -210 }} animate={{ x: 0 }} exit={{ x: -210 }}
               transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-              style={{ position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50, width: 210, background: C.sidebar, borderRight: `1px solid ${C.border}` }}
-              className="lg:hidden">
+              style={{ position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50, width: 210, background: C.sidebar, borderRight: `1px solid ${C.border}` }}>
               <Sidebar />
             </motion.aside>
           </>
@@ -219,7 +218,7 @@ export default function StudioLayout() {
         {/* Topbar */}
         <header style={{ height: 50, flexShrink: 0, borderBottom: `1px solid ${C.border}`, background: C.topbar, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button onClick={() => setOpen(true)} style={{ display: 'none', padding: 4, color: C.dim, background: 'none', border: 'none', cursor: 'pointer' }} className="lg:hidden s-menu-btn">
+            <button onClick={() => setOpen(true)} style={{ display: 'none', padding: 4, color: C.dim, background: 'none', border: 'none', cursor: 'pointer' }} className="s-menu-btn">
               <Menu size={17} />
             </button>
             <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
@@ -249,9 +248,13 @@ export default function StudioLayout() {
         .s-brand:hover { opacity: 0.75 !important; }
         .s-nav:hover { color: ${C.white} !important; background: rgba(var(--rgb-hi),0.04) !important; border-color: rgba(var(--rgb-hi),0.06) !important; }
         .s-signout:hover { color: ${C.danger} !important; border-color: rgba(248,113,113,0.28) !important; background: rgba(248,113,113,0.06) !important; }
+        .s-sidebar  { display: none; }
         .s-menu-btn { display: flex !important; }
-        @media (min-width: 1024px) { .s-menu-btn { display: none !important; } }
-        @media (max-width: 1023px) {
+        @media (min-width: 1200px) {
+          .s-sidebar  { display: block !important; }
+          .s-menu-btn { display: none  !important; }
+        }
+        @media (max-width: 1199px) {
           .studio-main { padding: 0.875rem !important; }
           .studio-outlet { overflow-y: auto !important; }
           .s-brand-wrap { padding: 0.75rem 1rem !important; }

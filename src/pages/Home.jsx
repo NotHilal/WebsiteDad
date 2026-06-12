@@ -91,7 +91,8 @@ export default function Home() {
     <div>
 
       {/* ══ HERO ══════════════════════════════════════════════ */}
-      <section ref={heroRef} className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden" style={{ paddingTop:'6vh', paddingBottom:'8vh' }}>
+      <section ref={heroRef} className="hero-section relative min-h-screen overflow-hidden"
+        style={{ display:'flex', flexDirection:'column', justifyContent:'space-between', paddingTop:'6vh' }}>
         <div className="absolute inset-0 pointer-events-none">
           <div style={{ position:'absolute', top:'30%', left:'50%', transform:'translate(-50%,-50%)', width:800, height:800, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.07) 0%, transparent 70%)', borderRadius:'50%' }} />
           <div style={{ position:'absolute', top:'20%', left:'20%', width:500, height:500, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.05) 0%, transparent 70%)', borderRadius:'50%' }} />
@@ -100,7 +101,9 @@ export default function Home() {
         <div className="absolute inset-0 pointer-events-none opacity-[0.022]"
           style={{ backgroundImage:'linear-gradient(rgba(var(--rgb-acc),1) 1px,transparent 1px),linear-gradient(90deg,rgba(var(--rgb-acc),1) 1px,transparent 1px)', backgroundSize:'80px 80px' }} />
 
-        <motion.div style={{ opacity }} className="relative z-10 wrap text-center">
+        {/* Main content — grows to fill available space and centers itself */}
+        <motion.div style={{ opacity }} className="relative z-10 wrap text-center"
+          style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', opacity, paddingBottom:'2rem' }}>
           <motion.div
             initial={{ opacity:0, y:-10, scale:0.88, filter:'blur(5px)' }}
             animate={{ opacity:1, y:0, scale:1, filter:'blur(0px)' }}
@@ -131,7 +134,7 @@ export default function Home() {
 
           <motion.p initial={{ opacity:0, y:12, filter:'blur(5px)' }} animate={{ opacity:1, y:0, filter:'blur(0px)' }}
             transition={{ duration:0.85, delay:0.56, ease:[0.25,0.46,0.45,0.94] }}
-            style={{ color: 'var(--col-text)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
+            style={{ color:'var(--col-text)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
             Expert stylists crafting looks that reflect who you truly are. Book your transformation today.
           </motion.p>
 
@@ -146,19 +149,22 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
+        {/* Stats — in normal flow, always below the main content */}
         <motion.div initial={{ opacity:0, y:10, filter:'blur(4px)' }} animate={{ opacity:1, y:0, filter:'blur(0px)' }}
           transition={{ delay:1.05, duration:0.85, ease:[0.25,0.46,0.45,0.94] }}
-          style={{ position:'absolute', bottom:120, left:0, right:0, display:'flex', justifyContent:'center', flexWrap:'wrap', gap:'clamp(1.25rem,5vw,6rem)', padding:'0 1.5rem' }}>
+          className="relative z-10"
+          style={{ display:'flex', justifyContent:'center', flexWrap:'wrap', gap:'clamp(1.25rem,5vw,6rem)', padding:'0 1.5rem 7rem' }}>
           {stats.map(({ value, label }) => (
             <div key={label} style={{ textAlign:'center' }}>
               <div className="font-display gold-gradient" style={{ fontSize:'clamp(1.4rem,2.5vw,2rem)', lineHeight:1, marginBottom:'0.35rem' }}>{value}</div>
-              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{label}</div>
+              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{label}</div>
             </div>
           ))}
         </motion.div>
 
+        {/* Scroll indicator */}
         <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:1.5 }}
-          style={{ position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, color: 'var(--col-text)' }}>
+          style={{ position:'absolute', bottom:'clamp(20px, 4vh, 40px)', left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:'var(--col-text)' }}>
           <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase' }}>Scroll</span>
           <motion.div animate={{ y:[0,7,0] }} transition={{ repeat:Infinity, duration:1.7 }}><ChevronDown size={13} /></motion.div>
         </motion.div>
@@ -377,7 +383,7 @@ export default function Home() {
           .home-gallery-grid > div:last-child { grid-column: 1 / -1; max-width: 50%; margin: 0 auto; width: 100%; }
         }
         @media (max-width: 640px) {
-          .hero-section { align-items: flex-start !important; padding-top: 145px !important; padding-bottom: 160px !important; }
+          .hero-section { padding-top: 110px !important; }
           .hero-cta-btns { margin-top: -40px; }
         }
       `}</style>

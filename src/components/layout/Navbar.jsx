@@ -329,11 +329,11 @@ export default function Navbar() {
       {profileOpen && <div style={{ position: 'fixed', inset: 0, zIndex: 30 }} onClick={() => setProfile(false)} />}
 
       <style>{`
-        @media (min-width: 1024px) {
+        @media (min-width: 1200px) {
           .hidden-mobile { display: flex !important; }
           .show-mobile   { display: none  !important; }
         }
-        @media (max-width: 1023px) {
+        @media (max-width: 1199px) {
           .hidden-mobile { display: none  !important; }
           .show-mobile   { display: flex  !important; }
         }

@@ -2,7 +2,7 @@
 import { useLogAction } from '../../hooks/useLogAction'
 import { Check, UserCheck, Image, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { getOrFetch } from '../../lib/cache'
+import { getOrFetch, invalidate } from '../../lib/cache'
 import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
 
@@ -54,6 +54,8 @@ export default function StudioHomeDisplay() {
     if (error) toast.error('Failed to update')
     else {
       setStylists(prev => prev.map(x => x.id === s.id ? { ...x, featured: !x.featured } : x))
+      invalidate('studio_home_display')
+      invalidate('home_stylists')
       log('home_display.updated', { entityType: 'stylist', entityId: s.id, details: { message: `${s.featured ? 'removed' : 'featured'} stylist "${s.name}" on home page` } })
     }
     setUpdating(null)
@@ -67,6 +69,8 @@ export default function StudioHomeDisplay() {
     if (error) toast.error('Failed to update')
     else {
       setGallery(prev => prev.map(x => x.id === item.id ? { ...x, featured: !x.featured } : x))
+      invalidate('studio_home_display')
+      invalidate('home_gallery')
       log('home_display.updated', { entityType: 'gallery', entityId: item.id, details: { message: `${item.featured ? 'removed' : 'featured'} gallery photo "${item.title || 'untitled'}" on home page` } })
     }
     setUpdating(null)
@@ -81,6 +85,8 @@ export default function StudioHomeDisplay() {
     if (error) toast.error('Failed to update')
     else {
       setServices(prev => prev.map(x => x.id === svc.id ? { ...x, featured: !x.featured } : x))
+      invalidate('studio_home_display')
+      invalidate('home_services')
       log('home_display.updated', { entityType: 'service', entityId: svc.id, details: { message: `${svc.featured ? 'removed' : 'featured'} service "${svc.name}" on home page` } })
     }
     setUpdating(null)
@@ -198,10 +204,10 @@ export default function StudioHomeDisplay() {
                           </div>
                       }
                       {svc.featured && <CheckBadge />}
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.4rem 0.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}>
-                        <p style={{ color: 'var(--col-text)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
-                        {svc.price && <p style={{ color: C.goldDim, fontSize: 9, fontFamily: 'DM Sans,sans-serif' }}>${svc.price}</p>}
-                      </div>
+                    </div>
+                    <div style={{ padding: '0.5rem 0.6rem', textAlign: 'center' }}>
+                      <p style={{ color: svc.featured ? C.gold : C.white, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
+                      {svc.price && <p style={{ color: C.goldDim, fontSize: 9, letterSpacing: '0.1em', fontFamily: 'DM Sans,sans-serif' }}>€{svc.price}</p>}
                     </div>
                   </button>
                 )
@@ -242,11 +248,11 @@ export default function StudioHomeDisplay() {
                   <div style={{ aspectRatio: '4/3', overflow: 'hidden', position: 'relative', background: C.subtle }}>
                     <img src={item.image_url} alt={item.title || ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     {item.featured && <CheckBadge />}
-                    {item.title && (
-                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0.4rem 0.5rem', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
-                        <p style={{ color: 'var(--col-text)', fontSize: 9, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</p>
-                      </div>
-                    )}
+                  </div>
+                  <div style={{ padding: '0.5rem 0.6rem', textAlign: 'center' }}>
+                    <p style={{ color: item.featured ? C.gold : C.white, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.title || item.category || '—'}
+                    </p>
                   </div>
                 </button>
               )

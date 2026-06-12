@@ -335,7 +335,7 @@ export default function Gallery() {
               }}
             >
               {/* Image side */}
-              <div style={{ position:'relative', overflow:'hidden', minHeight:400 }}>
+              <div style={{ position:'relative', overflow:'hidden', minHeight:'clamp(240px, 45vh, 400px)' }}>
                 <img src={lightbox.image_url} alt={lightbox.title || ''}
                   style={{ width:'100%', height:'100%', objectFit:'cover' }} />
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, transparent 70%, rgba(10,10,10,0.6))' }} />
@@ -437,12 +437,14 @@ export default function Gallery() {
         }
         @media (max-width: 640px) {
           .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 0.625rem; }
+        }
+        @media (max-width: 720px) {
           .gallery-lightbox-modal {
             grid-template-columns: 1fr;
             max-height: 92vh;
             overflow-y: auto;
           }
-          .gallery-lightbox-modal > div:first-child { min-height: 260px !important; }
+          .gallery-lightbox-modal > div:first-child { min-height: clamp(200px, 35vh, 260px) !important; }
         }
       `}</style>
     </div>
