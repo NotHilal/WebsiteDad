@@ -25,7 +25,7 @@ export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer style={{ position: 'relative', background: '#060608', overflow: 'hidden' }}>
+    <footer style={{ position: 'relative', background: '#0d1e2f', overflow: 'hidden' }}>
 
       {/* ── Ambient glow ──────────────────────────────── */}
       <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 900, height: 400, background: 'radial-gradient(ellipse at top, rgba(184,212,232,0.07) 0%, transparent 65%)', pointerEvents: 'none' }} />
