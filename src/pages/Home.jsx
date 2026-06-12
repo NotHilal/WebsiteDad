@@ -1,7 +1,7 @@
 ﻿import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { ArrowRight, Star, ChevronDown, MapPin } from 'lucide-react'
+import { ArrowRight, Star, ChevronDown, MapPin, Scissors } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { getOrFetch } from '../lib/cache'
 
@@ -322,7 +322,7 @@ export default function Home() {
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem',
             }}>
               <div style={{ position:'absolute', top:-40, left:'50%', transform:'translateX(-50%)', width:280, height:140, background:'radial-gradient(ellipse, rgba(var(--rgb-acc),0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.2)' }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.28)' }}>
                 <Star size={11} color="var(--col-acc)" />
                 <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Loyalty Program</span>
               </div>
@@ -343,7 +343,10 @@ export default function Home() {
               display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem',
             }}>
               <div style={{ position:'absolute', bottom:-40, right:-40, width:240, height:240, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
-              <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>Ready?</span>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.28)' }}>
+                <Scissors size={11} color="var(--col-acc)" style={{ transform:'rotate(45deg)' }} />
+                <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Book Now</span>
+              </div>
               <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
                 Ready for your<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>transformation?</span>
               </h2>

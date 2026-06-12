@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useLogAction } from '../../hooks/useLogAction'
 import { Check, UserCheck, Image, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -24,9 +24,9 @@ export default function StudioHomeDisplay() {
   const [services,  setServices]  = useState([])
   const [loading,   setLoading]   = useState(true)
   const [updating,  setUpdating]  = useState(null)
-  const [pgTeam,    setPgTeam]    = useState(0)
-  const [pgSvc,     setPgSvc]     = useState(0)
-  const [pgGal,     setPgGal]     = useState(0)
+  const [pgTeam,  setPgTeam]  = useState(0)
+  const [pgSvc,   setPgSvc]   = useState(0)
+  const [pgGal,   setPgGal]   = useState(0)
   const PER = 6
 
   useEffect(() => { load() }, [])
@@ -34,7 +34,7 @@ export default function StudioHomeDisplay() {
   async function load() {
     const [s, g, svc] = await getOrFetch('studio_home_display', async () => {
       const [{ data: s }, { data: g }, { data: svc }] = await Promise.all([
-        supabase.from('stylists').select('id, name, title, photo_url, featured').order('display_order'),
+        supabase.from('stylists').select('id, name, title, photo_url, featured, profile_id').order('display_order'),
         supabase.from('gallery').select('id, image_url, title, category, featured').order('display_order'),
         supabase.from('services').select('id, name, category, price, image_url, featured').order('name'),
       ])
@@ -92,9 +92,9 @@ export default function StudioHomeDisplay() {
     setUpdating(null)
   }
 
-  const teamCount     = stylists.filter(s => s.featured).length
-  const galleryCount  = gallery.filter(g => g.featured).length
-  const serviceCount  = services.filter(s => s.featured).length
+  const teamCount    = stylists.filter(s => s.featured).length
+  const galleryCount = gallery.filter(g => g.featured).length
+  const serviceCount = services.filter(s => s.featured).length
 
   const sortedStylists = [...stylists].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
   const sortedGallery  = [...gallery].sort((a, b)   => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
@@ -115,7 +115,7 @@ export default function StudioHomeDisplay() {
         </p>
       </div>
 
-      {/* ── Team Section ─────────────────────────────────────── */}
+      {/* ── Team on Home ─────────────────────────────────────── */}
       <Section
         icon={<UserCheck size={14} color={C.gold} strokeWidth={1.5} />}
         title="Team on Home"
@@ -130,16 +130,18 @@ export default function StudioHomeDisplay() {
           <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.75rem' }}>
             {sortedStylists.slice(pgTeam * PER, (pgTeam + 1) * PER).map(s => {
-              const locked = !s.featured && teamCount >= MAX_TEAM
+              const unlinked = !s.profile_id
+              const locked   = unlinked || (!s.featured && teamCount >= MAX_TEAM)
               return (
                 <button key={s.id} onClick={() => toggleStylist(s)}
                   disabled={updating === s.id || locked}
+                  title={unlinked ? 'Link this stylist to a user account first' : undefined}
                   style={{
                     padding: 0, border: 'none', borderRadius: 12, overflow: 'hidden',
                     outline: s.featured ? `2px solid ${C.gold}` : `1px solid ${C.border}`,
                     background: s.featured ? C.goldBg : 'transparent',
                     cursor: locked ? 'not-allowed' : 'pointer',
-                    opacity: updating === s.id ? 0.5 : locked ? 0.4 : 1,
+                    opacity: updating === s.id ? 0.5 : unlinked ? 0.5 : locked ? 0.4 : 1,
                     transition: 'all 0.2s', position: 'relative',
                   }}>
                   <div style={{ height: 120, overflow: 'hidden', position: 'relative', background: C.subtle }}>
@@ -148,6 +150,11 @@ export default function StudioHomeDisplay() {
                       : <Initials name={s.name} />
                     }
                     {s.featured && <CheckBadge />}
+                    {unlinked && (
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '4px 6px', background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(248,113,113,0.9)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Not linked</span>
+                      </div>
+                    )}
                   </div>
                   <div style={{ padding: '0.5rem 0.6rem', textAlign: 'center' }}>
                     <p style={{ color: s.featured ? C.gold : C.white, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</p>
@@ -162,7 +169,7 @@ export default function StudioHomeDisplay() {
         )}
       </Section>
 
-      {/* ── Services Section ─────────────────────────────────── */}
+      {/* ── Services on Home ─────────────────────────────────── */}
       <Section
         icon={<Scissors size={14} color={C.gold} strokeWidth={1.5} />}
         title="Services on Home"
@@ -218,7 +225,7 @@ export default function StudioHomeDisplay() {
         )}
       </Section>
 
-      {/* ── Gallery Section ───────────────────────────────────── */}
+      {/* ── Gallery on Home ──────────────────────────────────── */}
       <Section
         icon={<Image size={14} color={C.gold} strokeWidth={1.5} />}
         title="Gallery on Home"
@@ -268,19 +275,14 @@ export default function StudioHomeDisplay() {
 }
 
 function Section({ icon, title, badge, badgeActive, children }) {
-  const C = {
-    card: 'var(--col-modal)', gold: 'var(--col-acc)',
-    white: 'var(--col-text)', muted: 'var(--col-text)',
-    border: 'rgba(var(--rgb-hi),0.07)',
-  }
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
-      <div style={{ padding: '0.875rem 1.25rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ background: 'var(--col-modal)', border: '1px solid rgba(var(--rgb-hi),0.07)', borderRadius: 14, overflow: 'hidden', flexShrink: 0 }}>
+      <div style={{ padding: '0.875rem 1.25rem', borderBottom: '1px solid rgba(var(--rgb-hi),0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {icon}
-          <h2 className="font-display" style={{ fontSize: '1.05rem', color: C.white }}>{title}</h2>
+          <h2 className="font-display" style={{ fontSize: '1.05rem', color: 'var(--col-text)' }}>{title}</h2>
         </div>
-        <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: badgeActive ? C.gold : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
+        <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: badgeActive ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
           {badge}
         </span>
       </div>
