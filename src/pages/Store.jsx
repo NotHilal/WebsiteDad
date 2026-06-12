@@ -46,7 +46,8 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
       >
         {p.image_url
           ? <img src={p.image_url} alt={p.name} loading="lazy" decoding="async"
-              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.55s ease', display: 'block' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.55s ease, opacity 0.4s ease', display: 'block', opacity: 0 }}
+              onLoad={e => { e.currentTarget.style.opacity = '1' }}
               onMouseEnter={e => { if (!outOfStock) e.currentTarget.style.transform = 'scale(1.05)' }}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
           : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

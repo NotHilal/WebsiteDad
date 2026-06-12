@@ -30,7 +30,8 @@ export default function Stylists() {
 
         .team-card { cursor: default; }
         .team-photo-wrap { position: relative; overflow: hidden; border-radius: 4px; }
-        .team-photo { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.7s cubic-bezier(0.22,1,0.36,1); display: block; }
+        .team-photo { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.7s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease; display: block; opacity: 0; }
+        .team-photo.loaded { opacity: 1; }
         .team-card:hover .team-photo { transform: scale(1.05); }
 
         .team-overlay {
@@ -123,7 +124,8 @@ export default function Stylists() {
                 {/* Photo */}
                 <div className="team-photo-wrap" style={{ aspectRatio: '4/5', marginBottom: '1.25rem' }}>
                   {s.photo_url
-                    ? <img src={s.photo_url} alt={s.name} className="team-photo" loading="lazy" decoding="async" />
+                    ? <img src={s.photo_url} alt={s.name} className="team-photo" loading="lazy" decoding="async"
+                        onLoad={e => e.currentTarget.classList.add('loaded')} />
                     : <div className="team-placeholder" style={{ aspectRatio: '4/5' }}>
                         <User size={48} color="rgba(var(--rgb-hi),0.06)" strokeWidth={1} />
                       </div>

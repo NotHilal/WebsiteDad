@@ -188,7 +188,8 @@ export default function Home() {
                 whileHover={{ y:-6, boxShadow:'0 20px 60px rgba(var(--rgb-acc),0.1)', borderColor:'var(--col-acc)' }}>
                 <div style={{ aspectRatio:'4/5', overflow:'hidden', position:'relative' }}>
                   <img src={svc.image_url} alt={svc.name} className="service-img" loading="lazy" decoding="async"
-                    style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }} />
+                    style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease, opacity 0.4s ease', opacity:0 }}
+                    onLoad={e => { e.currentTarget.style.opacity = '1' }} />
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.75))' }} />
                 </div>
                 <div style={{ padding:'1.5rem 2rem 2.5rem 2rem' }}>
@@ -224,7 +225,8 @@ export default function Home() {
                 style={{ aspectRatio:'4/5', borderRadius:4, overflow:'hidden', position:'relative', cursor:'pointer' }}
                 whileHover={{ scale:1.02 }}>
                 <img src={item.image_url} alt={`Gallery ${i + 1}`} className="gallery-img" loading="lazy" decoding="async"
-                  style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.65s ease' }} />
+                  style={{ width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.65s ease, opacity 0.4s ease', opacity:0 }}
+                  onLoad={e => { e.currentTarget.style.opacity = '1' }} />
                 <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 55%, rgba(10,10,10,0.5))', transition:'opacity 0.4s' }} />
               </motion.div>
             ))}
@@ -262,7 +264,8 @@ export default function Home() {
                       <div style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', border:'1px solid rgba(var(--rgb-acc),0.18)', boxShadow:'0 16px 48px rgba(0,0,0,0.5)', marginBottom:'0.4rem' }}>
                         {m.photo_url
                           ? <img src={m.photo_url} alt={m.name} loading="lazy" decoding="async"
-                              style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
+                              style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease, opacity 0.4s ease', opacity:0 }}
+                              onLoad={e => { e.currentTarget.style.opacity = '1' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
                           : <div style={{ width:'100%', height:'100%', background:'var(--col-acc)', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -283,7 +286,8 @@ export default function Home() {
                       <div style={{ aspectRatio:'1/1', borderRadius:20, overflow:'hidden', border:'1px solid rgba(var(--rgb-acc),0.18)', boxShadow:'0 16px 48px rgba(0,0,0,0.5)', marginBottom:'0.4rem' }}>
                         {m.photo_url
                           ? <img src={m.photo_url} alt={m.name} loading="lazy" decoding="async"
-                              style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease' }}
+                              style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'top center', transition:'transform 0.65s ease, opacity 0.4s ease', opacity:0 }}
+                              onLoad={e => { e.currentTarget.style.opacity = '1' }}
                               onMouseEnter={e => e.currentTarget.style.transform='scale(1.06)'}
                               onMouseLeave={e => e.currentTarget.style.transform='scale(1)'} />
                           : <div style={{ width:'100%', height:'100%', background:'var(--col-acc)', display:'flex', alignItems:'center', justifyContent:'center' }}>
