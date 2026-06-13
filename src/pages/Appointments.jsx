@@ -322,7 +322,7 @@ export default function Appointments() {
         </p>
         <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8, marginBottom:'2.5rem' }}>
           {[sel.service?.name, `$${sel.service?.price}`, sel.service?.duration ? fmtDur(sel.service.duration) : null].filter(Boolean).map((l,i)=>(
-            <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.18)', fontSize:11, color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{l}</span>
+            <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.12)', border:'1px solid rgba(var(--rgb-acc),0.3)', fontSize:11, color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{l}</span>
           ))}
         </div>
         <button className="btn-gold" onClick={() => { setDone(false); setStep(0); setSel({ service:null, stylist:null, date:null, time:null, notes:'' }); setPayStep(null); setClientSecret(null); setPayInStore(false); setGuestInfo({ name:'', phone:'', email:'' }); setShowPromo(true) }}>

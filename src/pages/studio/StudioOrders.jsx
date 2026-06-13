@@ -16,7 +16,7 @@ const C = {
 }
 
 const STATUS_STYLE = {
-  active:    { color: 'var(--col-acc)', bg: 'var(--col-acc)',  border: 'var(--col-acc)',  label: 'Awaiting Pickup' },
+  active:    { color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.1)', border: 'rgba(var(--rgb-acc),0.28)', label: 'Awaiting Pickup' },
   retrieved: { color: '#34d399', bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.22)',  label: 'Retrieved'       },
   expired:   { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.06)', border: 'rgba(var(--rgb-hi),0.1)', label: 'Expired' },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)', label: 'Cancelled'      },

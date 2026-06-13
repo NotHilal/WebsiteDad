@@ -285,7 +285,7 @@ export default function Store() {
                 <button key={cat} onClick={() => setActivecat(cat)} style={{
                   padding: '7px 16px', borderRadius: 8, fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
                   fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, cursor: 'pointer',
-                  background: isActive ? 'var(--col-acc)' : 'transparent',
+                  background: isActive ? 'rgba(var(--rgb-acc),0.12)' : 'transparent',
                   color: isActive ? 'var(--col-acc)' : 'var(--col-text)',
                   border: isActive ? '1px solid rgba(var(--rgb-acc),0.3)' : '1px solid transparent',
                   transition: 'all 0.18s',

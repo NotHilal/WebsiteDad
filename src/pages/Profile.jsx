@@ -174,299 +174,336 @@ export default function Profile() {
   }
 
   function downloadReceipt(order) {
-    const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' })
-    const W    = doc.internal.pageSize.getWidth()
-    const H    = doc.internal.pageSize.getHeight()
-    const m    = 16   // margin
-    const gold = [201, 168, 76]
-    const dark = [20, 20, 20]
-    const mid  = [100, 100, 100]
-    const lite = [170, 170, 170]
-    const bg   = [248, 248, 248]
-    const paid = order.payment_status === 'paid'
-    const inStore = order.payment_status === 'pay_in_store'
-    const total = ((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' })
+    const W   = doc.internal.pageSize.getWidth()   // 148
+    const H   = doc.internal.pageSize.getHeight()  // 210
+    const ml  = 14
+    const mr  = 14
+
+    // Brand palette
+    const steel  = [184, 212, 232]
+    const steel2 = [88, 148, 186]
+    const gold   = [201, 168, 76]
+    const ink    = [14, 18, 32]
+    const gray   = [100, 106, 122]
+    const lite   = [162, 167, 182]
+    const rule   = [220, 226, 238]
+
+    const paid      = order.payment_status === 'paid'
+    const inStore   = order.payment_status === 'pay_in_store'
+    const total     = ((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)
+    const unitPrice = parseFloat(order.products?.price || 0).toFixed(2)
     const orderDate = format(new Date(order.created_at), 'MMMM d, yyyy')
     const orderId   = order.id.slice(0, 8).toUpperCase()
+    const customer  = profile?.full_name || user?.email || 'Customer'
 
-    let y = 0
+    // ── Full white page ──
+    doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F')
 
-    // Gold top bar
-    doc.setFillColor(...gold)
-    doc.rect(0, 0, W, 4, 'F')
+    // Top steel bar
+    doc.setFillColor(...steel); doc.rect(0, 0, W, 3, 'F')
+    // Bottom steel bar
+    doc.setFillColor(...steel); doc.rect(0, H - 3, W, 3, 'F')
 
-    // White background
-    doc.setFillColor(255, 255, 255)
-    doc.rect(0, 4, W, H - 4, 'F')
+    // ── HEADER ──
+    let y = 18
 
-    y = 18
+    // Wordmark left
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(...ink)
+    doc.text('Hair', ml, y)
+    doc.setTextColor(...steel2)
+    doc.text('Go', ml + doc.getTextWidth('Hair'), y)
+    // Underline wordmark
+    const wmarkW = doc.getTextWidth('Hair') + doc.getTextWidth('Go')
+    doc.setDrawColor(...steel); doc.setLineWidth(0.7); doc.line(ml, y + 2, ml + wmarkW, y + 2)
 
-    // Brand — left
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(20)
-    doc.setTextColor(...dark)
-    doc.text('HairGo', m, y)
+    // Tagline
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...lite)
+    doc.text('PREMIUM HAIR STUDIO  ·  AUCKLAND, NEW ZEALAND', ml, y + 8)
 
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(7.5)
-    doc.setTextColor(...lite)
-    doc.text('PREMIUM HAIR STUDIO · AUCKLAND, NEW ZEALAND', m, y + 5.5)
+    // RECEIPT label right
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(...ink)
+    doc.text('RECEIPT', W - mr, y, { align: 'right' })
 
-    // RECEIPT label — right
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(10)
-    doc.setTextColor(...gold)
-    doc.text('RECEIPT', W - m, y, { align: 'right' })
+    // Ref # + date right
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
+    doc.text(`# ${orderId}`, W - mr, y + 7, { align: 'right' })
+    doc.setFontSize(7.5); doc.setTextColor(...lite)
+    doc.text(orderDate, W - mr, y + 12.5, { align: 'right' })
 
-    y += 14
+    y += 22
 
-    // Thin gold rule
-    doc.setDrawColor(...gold)
-    doc.setLineWidth(0.4)
-    doc.line(m, y, W - m, y)
+    // Full steel rule
+    doc.setDrawColor(...steel); doc.setLineWidth(0.6); doc.line(ml, y, W - mr, y)
+
     y += 10
 
-    // Order # / Date row
-    doc.setFontSize(7)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(...lite)
-    doc.text('ORDER NUMBER', m, y)
-    doc.text('DATE', W - m, y, { align: 'right' })
+    // ── BILLED TO ──
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
+    doc.text('BILLED TO', ml, y)
     y += 5
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...dark)
-    doc.text(`#${orderId}`, m, y)
-    doc.text(orderDate, W - m, y, { align: 'right' })
-
-    y += 11
-
-    // Customer row
-    doc.setFontSize(7)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(...lite)
-    doc.text('CUSTOMER', m, y)
-    y += 5
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...dark)
-    doc.text(profile?.full_name || user?.email || 'Customer', m, y)
-
-    y += 14
-
-    // Items table header
-    doc.setFillColor(...bg)
-    doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 11, 2, 2, 'F')
-    doc.setFontSize(7.5)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...mid)
-    doc.text('ITEM', m, y + 1)
-    doc.text('AMOUNT', W - m, y + 1, { align: 'right' })
-
-    y += 13
-
-    // Product line
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...dark)
-    const productName = order.products?.name || 'Product'
-    // Truncate long names
-    const maxW = W - m * 2 - 30
-    let displayName = productName
-    while (doc.getTextWidth(displayName) > maxW && displayName.length > 4) {
-      displayName = displayName.slice(0, -1)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
+    doc.text(customer, ml, y)
+    if (user?.email && profile?.full_name) {
+      y += 5
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
+      doc.text(user.email, ml, y)
     }
-    if (displayName !== productName) displayName += '...'
-    doc.text(displayName, m, y)
-    doc.text(`$${total}`, W - m, y, { align: 'right' })
 
-    y += 5.5
-    doc.setFontSize(9)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(...lite)
-    doc.text(`${order.quantity} x $${parseFloat(order.products?.price || 0).toFixed(2)}`, m, y)
+    y += 12
 
-    y += 10
+    // ── ITEMS TABLE ──
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
+    y += 6
 
-    // Dividers before total
-    doc.setDrawColor(220, 220, 220)
-    doc.setLineWidth(0.25)
-    doc.line(m, y, W - m, y)
-    y += 2
-    doc.setDrawColor(...dark)
-    doc.setLineWidth(0.6)
-    doc.line(m, y, W - m, y)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
+    doc.text('DESCRIPTION', ml, y)
+    doc.text('AMOUNT', W - mr, y, { align: 'right' })
+
+    y += 4
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
     y += 8
 
-    // Total row
-    doc.setFontSize(9)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...mid)
-    doc.text('TOTAL', m, y)
+    // Product
+    const productName = order.products?.name || 'Product'
+    const maxNW = W - ml - mr - 30
+    let dispName = productName
+    while (doc.getTextWidth(dispName) > maxNW && dispName.length > 4) dispName = dispName.slice(0, -1)
+    if (dispName !== productName) dispName += '...'
 
-    doc.setFontSize(18)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...gold)
-    doc.text(`$${total}`, W - m, y, { align: 'right' })
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...ink)
+    doc.text(dispName, ml, y)
+    doc.text(`$${total}`, W - mr, y, { align: 'right' })
+
+    y += 6
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
+    doc.text(`${order.quantity} unit${order.quantity > 1 ? 's' : ''}  ×  $${unitPrice} each`, ml, y)
+
+    y += 12
+
+    // ── TOTALS ──
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
+    y += 8
+
+    const colL = W / 2 + 8
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
+    doc.text('Subtotal', colL, y)
+    doc.text(`$${total}`, W - mr, y, { align: 'right' })
+
+    y += 8
+    doc.setDrawColor(...steel); doc.setLineWidth(0.5); doc.line(colL, y, W - mr, y)
+    y += 7
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
+    doc.text('TOTAL', colL, y)
+    doc.setFontSize(18); doc.setTextColor(...gold)
+    doc.text(`$${total}`, W - mr, y, { align: 'right' })
 
     y += 16
 
-    // Payment status box
-    const statusBg = paid ? [240, 253, 244] : [255, 251, 235]
-    const statusTx = paid ? [21, 128, 61]   : [120, 80, 0]
-    doc.setFillColor(...statusBg)
-    doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 12, 3, 3, 'F')
-    doc.setDrawColor(paid ? 187 : 253, paid ? 247 : 230, paid ? 208 : 138)
-    doc.setLineWidth(0.3)
-    doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 12, 3, 3, 'S')
-    doc.setFontSize(9)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...statusTx)
-    doc.text(paid ? 'Paid via Stripe' : inStore ? 'Pay in store' : 'Payment pending', W / 2, y + 1.5, { align: 'center' })
+    // ── PAYMENT STATUS ──
+    if (paid) {
+      doc.setFillColor(232, 252, 240); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
+      doc.setDrawColor(120, 205, 155); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
+      doc.setFillColor(34, 197, 94); doc.ellipse(W / 2 - 18, y + 1, 1.6, 1.6, 'F')
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(20, 115, 58)
+      doc.text('Paid via Stripe', W / 2 - 13, y + 1.4)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 180, 130)
+      doc.text('·  Payment complete', W / 2 + 16, y + 1.4)
+    } else {
+      doc.setFillColor(255, 249, 232); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
+      doc.setDrawColor(234, 172, 62); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
+      doc.setFillColor(245, 158, 11); doc.ellipse(W / 2 - 16, y + 1, 1.6, 1.6, 'F')
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(133, 85, 0)
+      doc.text(inStore ? 'Pay in Store' : 'Payment Pending', W / 2 - 11, y + 1.4)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(200, 145, 40)
+      doc.text(inStore ? '·  Due at salon' : '·  Awaiting payment', W / 2 + 18, y + 1.4)
+    }
 
     y += 20
 
-    // Footer rule
-    doc.setDrawColor(230, 230, 230)
-    doc.setLineWidth(0.25)
-    doc.line(m, y, W - m, y)
-    y += 7
-
-    doc.setFontSize(7.5)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(...lite)
+    // ── FOOTER ──
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
+    y += 8
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...lite)
     doc.text('Thank you for shopping with HairGo.', W / 2, y, { align: 'center' })
-    y += 4.5
+    y += 5
+    doc.setFontSize(7); doc.setTextColor(...steel2)
     doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, y, { align: 'center' })
-
-    // Gold bottom bar
-    doc.setFillColor(...gold)
-    doc.rect(0, H - 4, W, 4, 'F')
 
     doc.save(`HairGo-Receipt-${orderId}.pdf`)
   }
 
   function downloadApptReceipt(appt) {
-    const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' })
-    const W    = doc.internal.pageSize.getWidth()
-    const H    = doc.internal.pageSize.getHeight()
-    const m    = 16
-    const gold = [201, 168, 76]
-    const dark = [20, 20, 20]
-    const mid  = [100, 100, 100]
-    const lite = [170, 170, 170]
-    const bg   = [248, 248, 248]
-    const paid = appt.payment_status === 'paid'
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' })
+    const W   = doc.internal.pageSize.getWidth()
+    const H   = doc.internal.pageSize.getHeight()
+    const ml  = 14
+    const mr  = 14
+
+    const steel  = [184, 212, 232]
+    const steel2 = [88, 148, 186]
+    const gold   = [201, 168, 76]
+    const ink    = [14, 18, 32]
+    const gray   = [100, 106, 122]
+    const lite   = [162, 167, 182]
+    const rule   = [220, 226, 238]
+
+    const paid        = appt.payment_status === 'paid'
     const inStoreAppt = appt.payment_status === 'pay_in_store'
-    const apptId   = appt.id.slice(0, 8).toUpperCase()
-    const apptDate = format(new Date(appt.date), 'MMMM d, yyyy')
-    const bookedOn = appt.created_at ? format(new Date(appt.created_at), 'MMMM d, yyyy') : apptDate
+    const apptId      = appt.id.slice(0, 8).toUpperCase()
+    const apptDate    = format(new Date(appt.date), 'MMMM d, yyyy')
+    const bookedOn    = appt.created_at ? format(new Date(appt.created_at), 'MMMM d, yyyy') : apptDate
+    const price       = parseFloat(appt.services?.price || 0).toFixed(2)
+    const timeStr     = appt.time ? appt.time.slice(0, 5) : ''
+    const customer    = profile?.full_name || user?.email || 'Customer'
 
-    let y = 0
+    // ── Full white page ──
+    doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F')
+    doc.setFillColor(...steel); doc.rect(0, 0, W, 3, 'F')
+    doc.setFillColor(...steel); doc.rect(0, H - 3, W, 3, 'F')
 
-    doc.setFillColor(...gold); doc.rect(0, 0, W, 4, 'F')
-    doc.setFillColor(255, 255, 255); doc.rect(0, 4, W, H - 4, 'F')
+    // ── HEADER ──
+    let y = 18
 
-    y = 18
+    // Wordmark
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(...ink)
+    doc.text('Hair', ml, y)
+    doc.setTextColor(...steel2)
+    doc.text('Go', ml + doc.getTextWidth('Hair'), y)
+    const wmarkW = doc.getTextWidth('Hair') + doc.getTextWidth('Go')
+    doc.setDrawColor(...steel); doc.setLineWidth(0.7); doc.line(ml, y + 2, ml + wmarkW, y + 2)
 
-    // Brand
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(...dark)
-    doc.text('HairGo', m, y)
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...lite)
-    doc.text('PREMIUM HAIR STUDIO · AUCKLAND, NEW ZEALAND', m, y + 5.5)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...gold)
-    doc.text('APPOINTMENT', W - m, y, { align: 'right' })
+    // Tagline
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...lite)
+    doc.text('PREMIUM HAIR STUDIO  ·  AUCKLAND, NEW ZEALAND', ml, y + 8)
 
-    y += 14
-    doc.setDrawColor(...gold); doc.setLineWidth(0.4); doc.line(m, y, W - m, y)
-    y += 10
+    // RECEIPT label right
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(...ink)
+    doc.text('RECEIPT', W - mr, y, { align: 'right' })
 
-    // Ref + booked date
-    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...lite)
-    doc.text('REFERENCE', m, y); doc.text('BOOKED ON', W - m, y, { align: 'right' })
-    y += 5
-    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark)
-    doc.text(`#${apptId}`, m, y)
-    doc.text(bookedOn, W - m, y, { align: 'right' })
-
-    y += 11
-
-    // Customer
-    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(...lite)
-    doc.text('CUSTOMER', m, y)
-    y += 5
-    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark)
-    doc.text(profile?.full_name || user?.email || 'Customer', m, y)
-
-    y += 14
-
-    // Details table header
-    doc.setFillColor(...bg); doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 11, 2, 2, 'F')
-    doc.setFontSize(7.5); doc.setFont('helvetica', 'bold'); doc.setTextColor(...mid)
-    doc.text('APPOINTMENT DETAILS', m, y + 1)
-
-    y += 13
-
-    // Service name
-    doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark)
-    doc.text(appt.services?.name || 'Service', m, y)
-    if (appt.services?.price) {
-      doc.setFontSize(12); doc.setTextColor(...gold)
-      doc.text(`$${appt.services.price}`, W - m, y, { align: 'right' })
-    }
-
-    y += 6
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(...lite)
-    if (appt.stylists?.name) doc.text(`with ${appt.stylists.name}`, m, y)
-    if (appt.services?.duration) doc.text(`${appt.services.duration} min`, W - m, y, { align: 'right' })
-
-    y += 10
-
-    // Appointment date/time box
-    doc.setFillColor(248, 246, 240)
-    doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 16, 3, 3, 'F')
-    doc.setDrawColor(201, 168, 76); doc.setLineWidth(0.3)
-    doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 16, 3, 3, 'S')
-    doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...gold)
-    doc.text('APPOINTMENT DATE & TIME', W / 2, y - 0.5, { align: 'center' })
-    doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(...dark)
-    const timeStr = appt.time ? appt.time.slice(0, 5) : ''
-    doc.text(`${apptDate}${timeStr ? '  at  ' + timeStr : ''}`, W / 2, y + 6, { align: 'center' })
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
+    doc.text(`# ${apptId}`, W - mr, y + 7, { align: 'right' })
+    doc.setFontSize(7.5); doc.setTextColor(...lite)
+    doc.text(bookedOn, W - mr, y + 12.5, { align: 'right' })
 
     y += 22
 
-    // Dividers + total
-    doc.setDrawColor(220, 220, 220); doc.setLineWidth(0.25); doc.line(m, y, W - m, y)
-    y += 2
-    doc.setDrawColor(...dark); doc.setLineWidth(0.6); doc.line(m, y, W - m, y)
+    // Full steel rule
+    doc.setDrawColor(...steel); doc.setLineWidth(0.6); doc.line(ml, y, W - mr, y)
+
+    y += 10
+
+    // ── BILLED TO ──
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
+    doc.text('BILLED TO', ml, y)
+    y += 5
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
+    doc.text(customer, ml, y)
+    if (user?.email && profile?.full_name) {
+      y += 5
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
+      doc.text(user.email, ml, y)
+    }
+
+    y += 12
+
+    // ── SERVICE TABLE ──
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
+    y += 6
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
+    doc.text('DESCRIPTION', ml, y); doc.text('AMOUNT', W - mr, y, { align: 'right' })
+
+    y += 4
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
     y += 8
-    doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...mid)
-    doc.text('TOTAL', m, y)
+
+    // Service name
+    const svcName = appt.services?.name || 'Service'
+    const maxSvcW = W - ml - mr - 30
+    let svcDisp = svcName
+    while (doc.getTextWidth(svcDisp) > maxSvcW && svcDisp.length > 4) svcDisp = svcDisp.slice(0, -1)
+    if (svcDisp !== svcName) svcDisp += '...'
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...ink)
+    doc.text(svcDisp, ml, y)
+    doc.text(`$${price}`, W - mr, y, { align: 'right' })
+
+    y += 6
+    const subtitle = [
+      appt.stylists?.name ? `with ${appt.stylists.name}` : null,
+      appt.services?.duration ? `${appt.services.duration} min` : null,
+    ].filter(Boolean).join('  ·  ')
+    if (subtitle) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
+      doc.text(subtitle, ml, y)
+      y += 5
+    }
+
+    y += 8
+
+    // ── APPOINTMENT DATE/TIME ──
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
+    y += 8
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
+    doc.text('APPOINTMENT', ml, y)
+    y += 5
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...ink)
+    doc.text(`${apptDate}${timeStr ? '   ·   ' + timeStr : ''}`, ml, y)
+
+    y += 12
+
+    // ── TOTALS ──
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
+    y += 8
+
+    const colL = W / 2 + 8
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
+    doc.text('Subtotal', colL, y); doc.text(`$${price}`, W - mr, y, { align: 'right' })
+
+    y += 8
+    doc.setDrawColor(...steel); doc.setLineWidth(0.5); doc.line(colL, y, W - mr, y)
+    y += 7
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
+    doc.text('TOTAL', colL, y)
     doc.setFontSize(18); doc.setTextColor(...gold)
-    doc.text(`$${parseFloat(appt.services?.price || 0).toFixed(2)}`, W - m, y, { align: 'right' })
+    doc.text(`$${price}`, W - mr, y, { align: 'right' })
 
     y += 16
 
-    // Payment badge
-    const statusBg = paid ? [240, 253, 244] : [255, 251, 235]
-    const statusTx = paid ? [21, 128, 61]   : [120, 80, 0]
-    doc.setFillColor(...statusBg)
-    doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 12, 3, 3, 'F')
-    doc.setDrawColor(paid ? 187 : 253, paid ? 247 : 230, paid ? 208 : 138)
-    doc.setLineWidth(0.3); doc.roundedRect(m - 3, y - 5, W - m * 2 + 6, 12, 3, 3, 'S')
-    doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...statusTx)
-    doc.text(paid ? 'Paid via Stripe' : inStoreAppt ? 'Pay in store' : 'Payment pending', W / 2, y + 1.5, { align: 'center' })
+    // ── PAYMENT STATUS ──
+    if (paid) {
+      doc.setFillColor(232, 252, 240); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
+      doc.setDrawColor(120, 205, 155); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
+      doc.setFillColor(34, 197, 94); doc.ellipse(W / 2 - 18, y + 1, 1.6, 1.6, 'F')
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(20, 115, 58)
+      doc.text('Paid via Stripe', W / 2 - 13, y + 1.4)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 180, 130)
+      doc.text('·  Payment complete', W / 2 + 16, y + 1.4)
+    } else {
+      doc.setFillColor(255, 249, 232); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
+      doc.setDrawColor(234, 172, 62); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
+      doc.setFillColor(245, 158, 11); doc.ellipse(W / 2 - 16, y + 1, 1.6, 1.6, 'F')
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(133, 85, 0)
+      doc.text(inStoreAppt ? 'Pay in Store' : 'Payment Pending', W / 2 - 11, y + 1.4)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(200, 145, 40)
+      doc.text(inStoreAppt ? '·  Due at salon' : '·  Awaiting payment', W / 2 + 18, y + 1.4)
+    }
 
-    y += 18
+    y += 20
 
-    doc.setDrawColor(230, 230, 230); doc.setLineWidth(0.25); doc.line(m, y, W - m, y)
-    y += 7
-    doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...lite)
-    doc.text('Thank you for choosing HairGo.', W / 2, y, { align: 'center' })
-    y += 4.5
+    // ── FOOTER ──
+    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
+    y += 8
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...lite)
+    doc.text('Thank you for choosing HairGo. We look forward to seeing you again.', W / 2, y, { align: 'center' })
+    y += 5
+    doc.setFontSize(7); doc.setTextColor(...steel2)
     doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, y, { align: 'center' })
 
-    doc.setFillColor(...gold); doc.rect(0, H - 4, W, 4, 'F')
     doc.save(`HairGo-Appointment-${apptId}.pdf`)
   }
 
@@ -584,7 +621,7 @@ export default function Profile() {
               <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} className="profile-tab-btn" style={{ flex: 1, padding: '13px 4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', transition: 'color 0.2s', fontWeight: tab === t ? 500 : 400, color: tab === t ? 'var(--col-acc)' : 'var(--col-text)', borderBottom: `2px solid ${tab === t ? 'var(--col-acc)' : 'transparent'}`, marginBottom: -1 }}>
                 {t}
                 {t === 'Cart' && cartItems.length > 0 && (
-                  <span style={{ marginLeft: 4, fontSize: 9, background: 'var(--col-acc)', color: 'var(--col-acc)', padding: '1px 5px', borderRadius: 9999 }}>
+                  <span style={{ marginLeft: 4, fontSize: 9, background: 'var(--col-acc)', color: 'var(--col-bg)', padding: '1px 5px', borderRadius: 9999 }}>
                     {cartItems.length}
                   </span>
                 )}
@@ -661,82 +698,69 @@ export default function Profile() {
                         const apptDate = format(new Date(appt.date), 'MMM d, yyyy')
                         const isUpcoming = appt.status === 'confirmed' || appt.status === 'pending'
                         return (
-                          <div key={appt.id} style={{ borderRadius: 14, border: `1px solid ${isUpcoming ? 'var(--col-acc)' : BD}`, overflow: 'hidden', background: isUpcoming ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.02)' }}>
+                          <div key={appt.id} style={{ borderRadius: 16, border: `1px solid ${isUpcoming ? 'rgba(var(--rgb-acc),0.28)' : BD}`, overflow: 'hidden', background: 'var(--col-bg)', boxShadow: isUpcoming ? '0 4px 24px rgba(var(--rgb-acc),0.08)' : 'none', display: 'flex', transition: 'box-shadow 0.2s' }}>
 
-                            {/* Header */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.02)' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Scissors size={10} color="var(--col-text)" />
-                                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--col-text)', letterSpacing: '0.08em' }}>
+                            {/* Left accent bar */}
+                            <div style={{ width: 3, flexShrink: 0, background: isUpcoming ? 'linear-gradient(to bottom, var(--col-acc), var(--col-acc2))' : 'transparent' }} />
+
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              {/* Header */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 0' }}>
+                                <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                                   #{appt.id.slice(0, 8).toUpperCase()}
                                 </span>
-                                <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>·</span>
-                                <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
-                                  {appt.created_at ? format(new Date(appt.created_at), 'MMM d, yyyy') : apptDate}
+                                <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                  {s.label}
                                 </span>
                               </div>
-                              <span style={{ fontSize: 10, padding: '3px 9px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                                {s.label}
-                              </span>
-                            </div>
 
-                            {/* Main content */}
-                            <div style={{ padding: '12px 14px' }}>
-                              {/* Service + price */}
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                                <div>
-                                  <p style={{ color: 'var(--col-text)', fontSize: 14, fontWeight: 500, marginBottom: 3 }}>{appt.services?.name || '—'}</p>
-                                  {appt.stylists?.name && (
-                                    <p style={{ color: 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif' }}>
-                                      with {appt.stylists.name}
-                                      {appt.services?.duration && <span style={{ color: 'var(--col-text)' }}> · {appt.services.duration} min</span>}
-                                    </p>
+                              {/* Main content */}
+                              <div style={{ padding: '10px 14px 12px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                                  <div style={{ minWidth: 0 }}>
+                                    <p className="font-display" style={{ color: 'var(--col-text)', fontSize: '1.15rem', fontWeight: 400, lineHeight: 1.1, marginBottom: 4 }}>{appt.services?.name || '—'}</p>
+                                    {appt.stylists?.name && (
+                                      <p style={{ color: 'var(--col-text)', opacity: 0.5, fontSize: 11, fontFamily: 'DM Sans,sans-serif' }}>
+                                        with {appt.stylists.name}{appt.services?.duration ? ` · ${appt.services.duration} min` : ''}
+                                      </p>
+                                    )}
+                                  </div>
+                                  {appt.services?.price && (
+                                    <span className="font-display" style={{ color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontSize: '1.25rem', flexShrink: 0, marginLeft: 10 }}>
+                                      ${appt.services.price}
+                                    </span>
                                   )}
                                 </div>
-                                {appt.services?.price && (
-                                  <span className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem', flexShrink: 0 }}>
-                                    ${appt.services.price}
-                                  </span>
-                                )}
+
+                                {/* Date/time pill */}
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 8, background: isUpcoming ? 'rgba(var(--rgb-acc),0.07)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${isUpcoming ? 'rgba(var(--rgb-acc),0.2)' : BD}` }}>
+                                  <Calendar size={10} color={isUpcoming ? 'var(--col-acc)' : 'var(--col-text)'} />
+                                  <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>{apptDate}</span>
+                                  {appt.time && (
+                                    <>
+                                      <div style={{ width: 1, height: 10, background: 'rgba(var(--rgb-hi),0.15)' }} />
+                                      <Clock size={10} color={isUpcoming ? 'var(--col-acc)' : 'var(--col-text)'} />
+                                      <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>{appt.time.slice(0, 5)}</span>
+                                    </>
+                                  )}
+                                </div>
                               </div>
 
-                              {/* Date/time pill */}
-                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '7px 12px', borderRadius: 8, background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${isUpcoming ? 'var(--col-acc)' : BD}` }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                  <Calendar size={10} color={isUpcoming ? 'var(--col-acc)' : 'var(--col-text)'} />
-                                  <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>
-                                    {apptDate}
+                              {/* Footer */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}` }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: appt.payment_status === 'paid' ? '#34d399' : appt.payment_status === 'pay_in_store' ? '#f59e0b' : 'rgba(var(--rgb-hi),0.3)' }} />
+                                  <span style={{ fontSize: 10, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.06em' }}>
+                                    {appt.payment_status === 'paid' ? 'Paid online' : appt.payment_status === 'pay_in_store' ? 'Pay in store' : 'No payment on file'}
                                   </span>
                                 </div>
-                                {appt.time && (
-                                  <>
-                                    <div style={{ width: 1, height: 10, background: 'rgba(var(--rgb-hi),0.1)' }} />
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                      <Clock size={10} color={isUpcoming ? 'var(--col-acc)' : 'var(--col-text)'} />
-                                      <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>
-                                        {appt.time.slice(0, 5)}
-                                      </span>
-                                    </div>
-                                  </>
+                                {appt.payment_status === 'paid' && (
+                                  <button onClick={() => downloadApptReceipt(appt)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                    <Download size={9} /> Receipt
+                                  </button>
                                 )}
                               </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: appt.payment_status === 'paid' ? '#34d399' : appt.payment_status === 'pay_in_store' ? '#f59e0b' : 'var(--col-text)', flexShrink: 0 }} />
-                                <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>
-                                  {appt.payment_status === 'paid' ? 'Paid via Stripe' : appt.payment_status === 'pay_in_store' ? 'Pay in store' : 'No payment on file'}
-                                </span>
-                              </div>
-                              {appt.payment_status === 'paid' && (
-                                <button
-                                  onClick={() => downloadApptReceipt(appt)}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
-                                  <Download size={10} /> Receipt
-                                </button>
-                              )}
                             </div>
                           </div>
                         )

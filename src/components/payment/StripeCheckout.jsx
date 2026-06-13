@@ -1,36 +1,36 @@
-﻿import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { ShieldCheck, ArrowLeft, Lock } from 'lucide-react'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
-const cardStyle = {
-  style: {
-    base: {
-      color: 'var(--col-text)',
-      fontFamily: 'DM Sans, sans-serif',
-      fontSize: '14px',
-      fontWeight: '300',
-      letterSpacing: '0.04em',
-      '::placeholder': { color: 'rgba(255,255,255,0.2)' },
-    },
-    invalid: { color: '#f87171' },
-  },
+function useIsDark() {
+  const [isDark, setIsDark] = useState(
+    () => (localStorage.getItem('hg-theme') ?? 'dark') !== 'light'
+  )
+  useEffect(() => {
+    setIsDark(document.documentElement.dataset.theme !== 'light')
+    const obs = new MutationObserver(() =>
+      setIsDark(document.documentElement.dataset.theme !== 'light')
+    )
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
+  return isDark
 }
 
-const inputWrap = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 12,
-  padding: '13px 14px',
-  transition: 'border-color 0.2s',
-}
-
-function Field({ label, children }) {
+function Field({ label, children, isDark }) {
+  const inputWrap = {
+    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)',
+    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.18)'}`,
+    borderRadius: 12,
+    padding: '13px 14px',
+    transition: 'border-color 0.2s',
+  }
   return (
     <div>
-      <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 8 }}>
+      <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.4)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 8 }}>
         {label}
       </p>
       <div style={inputWrap} className="card-field">
@@ -45,6 +45,27 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
   const elements = useElements()
   const [paying, setPaying] = useState(false)
   const [error,  setError]  = useState(null)
+  const isDark = useIsDark()
+
+  const cardStyle = {
+    style: {
+      base: {
+        color: isDark ? '#e8e8f0' : '#1a1a2e',
+        backgroundColor: 'transparent',
+        fontFamily: 'DM Sans, sans-serif',
+        fontSize: '14px',
+        fontWeight: '300',
+        letterSpacing: '0.04em',
+        '::placeholder': { color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.45)' },
+      },
+      invalid: { color: '#f87171' },
+    },
+  }
+
+  const muted  = isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.6)'
+  const subtle = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.5)'
+  const back   = isDark ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.55)'
+  const backHover = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.85)'
 
   async function handlePay(e) {
     e.preventDefault()
@@ -86,16 +107,16 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
           </p>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: label ? 10 : 0 }}>
             <span style={{ fontSize: '0.95rem', color: 'rgba(184,212,232,0.7)', fontFamily: 'DM Sans, sans-serif', fontWeight: 300, lineHeight: 1, paddingBottom: 6 }}>$</span>
-            <span className="font-display" style={{ fontSize: '3.2rem', color: '#fff', lineHeight: 1, fontWeight: 300 }}>{amount}</span>
+            <span className="font-display" style={{ fontSize: '3.2rem', color: 'var(--col-text)', lineHeight: 1, fontWeight: 300 }}>{amount}</span>
           </div>
           {label && (
-            <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.32)', fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>{label}</p>
+            <p style={{ fontSize: '0.78rem', color: 'var(--col-text)', opacity: isDark ? 0.4 : 0.65, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>{label}</p>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.75rem 1.75rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.75rem 1.75rem', borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}` }}>
           {['VISA', 'MC', 'AMEX'].map((brand) => (
-            <div key={brand} style={{ padding: '3px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em', fontWeight: 600 }}>{brand}</span>
+            <div key={brand} style={{ padding: '3px 8px', borderRadius: 5, background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)', border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)'}` }}>
+              <span style={{ fontSize: 8, color: muted, fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.08em', fontWeight: 600 }}>{brand}</span>
             </div>
           ))}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -106,20 +127,20 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
       </div>
 
       {/* ── Card fields ─────────────────────────── */}
-      <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 14 }}>
+      <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: muted, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 14 }}>
         Card details
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-        <Field label="Card number">
+        <Field label="Card number" isDark={isDark}>
           <CardNumberElement options={cardStyle} />
         </Field>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <Field label="Expiry">
+          <Field label="Expiry" isDark={isDark}>
             <CardExpiryElement options={cardStyle} />
           </Field>
-          <Field label="CVC">
+          <Field label="CVC" isDark={isDark}>
             <CardCvcElement options={cardStyle} />
           </Field>
         </div>
@@ -137,7 +158,7 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
         style={{ width: '100%', justifyContent: 'center', padding: '1rem', fontSize: 12, letterSpacing: '0.2em', marginBottom: 12 }}>
         {paying ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,0.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             <span>Processing…</span>
           </div>
         ) : (
@@ -150,17 +171,17 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
 
       {/* ── Trust line ─────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 16 }}>
-        <ShieldCheck size={10} color="rgba(255,255,255,0.15)" />
-        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)', letterSpacing: '0.12em', fontFamily: 'DM Sans, sans-serif' }}>
+        <ShieldCheck size={10} color={subtle} />
+        <span style={{ fontSize: 9, color: subtle, letterSpacing: '0.12em', fontFamily: 'DM Sans, sans-serif' }}>
           256-bit encryption · Powered by Stripe · We never store your card
         </span>
       </div>
 
       {/* ── Back ───────────────────────────────── */}
       <button type="button" onClick={onCancel} disabled={paying}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '0.6rem', background: 'none', border: 'none', color: 'rgba(255,255,255,0.22)', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', cursor: 'pointer', transition: 'color 0.2s' }}
-        onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.22)'}>
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '0.6rem', background: 'none', border: 'none', color: back, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', cursor: 'pointer', transition: 'color 0.2s' }}
+        onMouseEnter={e => e.currentTarget.style.color = backHover}
+        onMouseLeave={e => e.currentTarget.style.color = back}>
         <ArrowLeft size={11} /> Back
       </button>
 
@@ -182,15 +203,15 @@ export default function StripeCheckout({ clientSecret, amount, label, onSuccess,
   return (
     <div onClick={onCancel} style={{
       position: 'fixed', inset: 0, zIndex: 999,
-      background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+      background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
     }}>
       <div onClick={e => e.stopPropagation()} style={{
         width: '100%', maxWidth: 460,
-        background: '#0e0e14',
+        background: 'var(--col-bg)',
         border: '1px solid rgba(184,212,232,0.15)',
         borderRadius: 24,
-        boxShadow: '0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04)',
+        boxShadow: '0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(var(--rgb-hi),0.04)',
         overflow: 'hidden', maxHeight: '92vh', overflowY: 'auto',
       }}>
         <div style={{ height: 3, background: 'linear-gradient(90deg, #B8D4E8, #E8D5A3, #7AAFC9)' }} />
