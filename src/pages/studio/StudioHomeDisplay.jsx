@@ -214,7 +214,7 @@ export default function StudioHomeDisplay() {
                     </div>
                     <div style={{ padding: '0.5rem 0.6rem', textAlign: 'center' }}>
                       <p style={{ color: svc.featured ? C.gold : C.white, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{svc.name}</p>
-                      {svc.price && <p style={{ color: C.goldDim, fontSize: 9, letterSpacing: '0.1em', fontFamily: 'DM Sans,sans-serif' }}>€{svc.price}</p>}
+                      {svc.price && <p style={{ color: C.goldDim, fontSize: 9, letterSpacing: '0.1em', fontFamily: 'DM Sans,sans-serif' }}>${svc.price}</p>}
                     </div>
                   </button>
                 )

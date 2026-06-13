@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { amount, label, currency = 'eur' } = await req.json()
+    const { amount, label, currency = 'nzd' } = await req.json()
 
     if (!amount || Number(amount) <= 0) {
       return new Response(JSON.stringify({ error: 'Invalid amount' }), {

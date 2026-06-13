@@ -307,7 +307,7 @@ export default function Appointments() {
         {payInStore && (
           <div style={{ padding:'12px 18px', borderRadius:12, background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.15)', margin:'1.25rem auto 0', maxWidth:380 }}>
             <p style={{ color:'rgba(245,158,11,0.85)', fontSize:'0.84rem', fontFamily:'DM Sans,sans-serif', lineHeight:1.7, margin:0 }}>
-              Your slot is reserved — please bring <strong style={{ color:'#f59e0b' }}>€{sel.service?.price}</strong> to pay at the salon.
+              Your slot is reserved — please bring <strong style={{ color:'#f59e0b' }}>${sel.service?.price}</strong> to pay at the salon.
             </p>
           </div>
         )}
@@ -321,7 +321,7 @@ export default function Appointments() {
           <strong style={{ color:'var(--col-text)' }}>{format(sel.date,'MMMM d, yyyy')}</strong> at <strong style={{ color:'var(--col-text)' }}>{sel.time}</strong> · <strong style={{ color:'var(--col-text)' }}>{sel.stylist?.name}</strong>
         </p>
         <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:8, marginBottom:'2.5rem' }}>
-          {[sel.service?.name, `€${sel.service?.price}`, sel.service?.duration ? fmtDur(sel.service.duration) : null].filter(Boolean).map((l,i)=>(
+          {[sel.service?.name, `$${sel.service?.price}`, sel.service?.duration ? fmtDur(sel.service.duration) : null].filter(Boolean).map((l,i)=>(
             <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.18)', fontSize:11, color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{l}</span>
           ))}
         </div>
@@ -434,7 +434,7 @@ export default function Appointments() {
           <p style={{ fontSize:8, letterSpacing:'0.22em', textTransform:'uppercase', color: 'var(--col-text)', fontFamily:'DM Sans,sans-serif', marginBottom:'1.25rem' }}>Your selection</p>
           <div style={{ display:'flex', flexDirection:'column', gap:'1.1rem' }}>
             {[
-              { label:'Service', value:sel.service?.name, sub:sel.service?.price?`€${sel.service.price}`:null },
+              { label:'Service', value:sel.service?.name, sub:sel.service?.price?`$${sel.service.price}`:null },
               { label:'Stylist', value:sel.stylist?.name },
               { label:'Date',    value:sel.date?format(sel.date,'MMM d, yyyy'):null },
               { label:'Time',    value:sel.time },
@@ -551,7 +551,7 @@ export default function Appointments() {
                           <div style={{ height:1, background:`linear-gradient(90deg,rgba(var(--rgb-acc),${isActive?'0.5':'0.22'}),transparent)`, marginBottom:'0.7rem' }} />
                           <h3 className="font-display" style={{ fontSize:'1.5rem', color:'#fff', lineHeight:1.1, marginBottom:'0.6rem', fontWeight:400 }}>{svc.name}</h3>
                           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                            {svc.price && <span className="font-display" style={{ fontSize:'1.8rem', color:'#B8D4E8', lineHeight:1, textShadow:isActive?'0 0 28px rgba(184,212,232,0.5)':'none' }}>€{svc.price}</span>}
+                            {svc.price && <span className="font-display" style={{ fontSize:'1.8rem', color:'#B8D4E8', lineHeight:1, textShadow:isActive?'0 0 28px rgba(184,212,232,0.5)':'none' }}>${svc.price}</span>}
                             {svc.duration>0 && (
                               <div style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 10px', borderRadius:20, background:'rgba(0,0,0,0.5)', backdropFilter:'blur(8px)', border:'1px solid rgba(255,255,255,0.1)' }}>
                                 <Clock size={9} color="rgba(255,255,255,0.7)" strokeWidth={1.5}/>
@@ -630,7 +630,7 @@ export default function Appointments() {
                           {preview.price && (
                             <div style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:'var(--col-acc)', border:'1px solid rgba(var(--rgb-acc),0.2)' }}>
                               <span style={{ fontSize:10, letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--col-bg)', fontFamily:'DM Sans,sans-serif' }}>Price</span>
-                              <span className="font-display" style={{ fontSize:'1.1rem', color:'var(--col-bg)' }}>€{preview.price}</span>
+                              <span className="font-display" style={{ fontSize:'1.1rem', color:'var(--col-bg)' }}>${preview.price}</span>
                             </div>
                           )}
                           {preview.duration>0 && (
@@ -671,7 +671,7 @@ export default function Appointments() {
                     Who should take<br/><span className="gold-gradient" style={{ fontStyle:'italic' }}>care of you?</span>
                   </h1>
                   <p style={{ color: 'var(--col-text)', fontSize:'0.85rem', fontFamily:'DM Sans,sans-serif' }}>
-                    {sel.service?.name}{sel.service?.price && ` · €${sel.service.price}`}
+                    {sel.service?.name}{sel.service?.price && ` · $${sel.service.price}`}
                   </p>
                 </div>
 
@@ -854,7 +854,7 @@ export default function Appointments() {
                       <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(14,14,20,0.93) 100%)' }}/>
                       <div style={{ position:'absolute', bottom:14, left:20, right:20, display:'flex', alignItems:'flex-end', justifyContent:'space-between' }}>
                         <h3 className="font-display" style={{ color:'var(--col-text)', fontSize:'1.6rem', lineHeight:1 }}>{sel.service.name}</h3>
-                        <span className="font-display" style={{ color:'var(--col-acc)', fontSize:'1.8rem', lineHeight:1 }}>€{sel.service.price}</span>
+                        <span className="font-display" style={{ color:'var(--col-acc)', fontSize:'1.8rem', lineHeight:1 }}>${sel.service.price}</span>
                       </div>
                     </div>
                   ) : (
@@ -864,7 +864,7 @@ export default function Appointments() {
                   <div style={{ background:'rgba(var(--rgb-hi),0.02)', position:'relative' }}>
                     <div style={{ position:'absolute', top:0, right:0, width:160, height:160, background:'radial-gradient(circle,rgba(var(--rgb-acc),0.05) 0%,transparent 70%)', pointerEvents:'none' }}/>
                     {[
-                      ...(!sel.service?.image_url ? [{ label:'Service', value:sel.service?.name, extra:`€${sel.service?.price}` }] : []),
+                      ...(!sel.service?.image_url ? [{ label:'Service', value:sel.service?.name, extra:`$${sel.service?.price}` }] : []),
                       { label:'Stylist',  value:sel.stylist?.name },
                       { label:'Date',     value:sel.date?format(sel.date,'EEEE, MMMM d, yyyy'):'' },
                       { label:'Time',     value:sel.time },
@@ -898,7 +898,7 @@ export default function Appointments() {
                       {availableCoupons.map(uc => {
                         const c = uc.coupons
                         const isApplied = appliedCoupon?.id === uc.id
-                        const discLabel = c.discount_type === 'percentage' ? `${c.discount_value}% off` : `€${c.discount_value} off`
+                        const discLabel = c.discount_type === 'percentage' ? `${c.discount_value}% off` : `$${c.discount_value} off`
                         return (
                           <button key={uc.id} onClick={() => setAppliedCoupon(isApplied ? null : uc)}
                             style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.7rem 1rem', borderRadius:12, cursor:'pointer', transition:'all 0.2s',
@@ -920,8 +920,8 @@ export default function Appointments() {
                       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.5rem 0.75rem', marginTop:6, borderRadius:9, background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.14)' }}>
                         <span style={{ fontSize:'0.78rem', fontFamily:'DM Sans,sans-serif', color:'rgba(52,211,153,0.8)' }}>Coupon applied</span>
                         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                          <span style={{ fontSize:'0.78rem', fontFamily:'DM Sans,sans-serif', color: 'var(--col-text)', textDecoration:'line-through' }}>€{basePrice.toFixed(2)}</span>
-                          <span style={{ fontSize:'0.9rem', fontFamily:'DM Sans,sans-serif', color:'#34d399', fontWeight:700 }}>€{finalPrice.toFixed(2)}</span>
+                          <span style={{ fontSize:'0.78rem', fontFamily:'DM Sans,sans-serif', color: 'var(--col-text)', textDecoration:'line-through' }}>${basePrice.toFixed(2)}</span>
+                          <span style={{ fontSize:'0.9rem', fontFamily:'DM Sans,sans-serif', color:'#34d399', fontWeight:700 }}>${finalPrice.toFixed(2)}</span>
                         </div>
                       </div>
                     )}
@@ -954,7 +954,7 @@ export default function Appointments() {
                   <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||saving||!guestInfoValid} style={{ flex:1, justifyContent:'center', borderRadius:10 }}>
                     {payStep==='loading'
                       ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopcolor: 'var(--col-bg)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
-                      : <>Pay Online &nbsp;€{finalPrice.toFixed(2)} <ArrowRight size={15}/></>
+                      : <>Pay Online &nbsp;${finalPrice.toFixed(2)} <ArrowRight size={15}/></>
                     }
                   </button>
                   <button onClick={bookInStore} disabled={saving||payStep==='loading'||!guestInfoValid}

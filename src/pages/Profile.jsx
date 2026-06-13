@@ -5,7 +5,7 @@ import jsPDF from 'jspdf'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import StripeCheckout from '../components/payment/StripeCheckout'
@@ -58,9 +58,13 @@ const BD = 'rgba(var(--rgb-hi),0.07)'
 export default function Profile() {
   const { user, profile, fetchProfile } = useAuth()
   const { cartItems, cartTotal, removeFromCart, commitQtyUpdate, expireItem, clearCart } = useCart()
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const location  = useLocation()
 
-  const [tab, setTab]             = useState('Appointments')
+  const [tab, setTab]             = useState(() => {
+    const t = location.state?.tab
+    return TABS.includes(t) ? t : 'Appointments'
+  })
   const [appointments, setAppts]  = useState([])
   const [orders, setOrders]       = useState([])
   const [coupons, setCoupons]     = useState([])
@@ -204,7 +208,7 @@ export default function Profile() {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(7.5)
     doc.setTextColor(...lite)
-    doc.text('PREMIUM HAIR STUDIO · DOHA, QATAR', m, y + 5.5)
+    doc.text('PREMIUM HAIR STUDIO · AUCKLAND, NEW ZEALAND', m, y + 5.5)
 
     // RECEIPT label — right
     doc.setFont('helvetica', 'bold')
@@ -272,13 +276,13 @@ export default function Profile() {
     }
     if (displayName !== productName) displayName += '...'
     doc.text(displayName, m, y)
-    doc.text(`€${total}`, W - m, y, { align: 'right' })
+    doc.text(`$${total}`, W - m, y, { align: 'right' })
 
     y += 5.5
     doc.setFontSize(9)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...lite)
-    doc.text(`${order.quantity} x €${parseFloat(order.products?.price || 0).toFixed(2)}`, m, y)
+    doc.text(`${order.quantity} x $${parseFloat(order.products?.price || 0).toFixed(2)}`, m, y)
 
     y += 10
 
@@ -301,7 +305,7 @@ export default function Profile() {
     doc.setFontSize(18)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...gold)
-    doc.text(`€${total}`, W - m, y, { align: 'right' })
+    doc.text(`$${total}`, W - m, y, { align: 'right' })
 
     y += 16
 
@@ -367,7 +371,7 @@ export default function Profile() {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(...dark)
     doc.text('HairGo', m, y)
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...lite)
-    doc.text('PREMIUM HAIR STUDIO · DOHA, QATAR', m, y + 5.5)
+    doc.text('PREMIUM HAIR STUDIO · AUCKLAND, NEW ZEALAND', m, y + 5.5)
     doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...gold)
     doc.text('APPOINTMENT', W - m, y, { align: 'right' })
 
@@ -406,7 +410,7 @@ export default function Profile() {
     doc.text(appt.services?.name || 'Service', m, y)
     if (appt.services?.price) {
       doc.setFontSize(12); doc.setTextColor(...gold)
-      doc.text(`€${appt.services.price}`, W - m, y, { align: 'right' })
+      doc.text(`$${appt.services.price}`, W - m, y, { align: 'right' })
     }
 
     y += 6
@@ -437,7 +441,7 @@ export default function Profile() {
     doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(...mid)
     doc.text('TOTAL', m, y)
     doc.setFontSize(18); doc.setTextColor(...gold)
-    doc.text(`€${parseFloat(appt.services?.price || 0).toFixed(2)}`, W - m, y, { align: 'right' })
+    doc.text(`$${parseFloat(appt.services?.price || 0).toFixed(2)}`, W - m, y, { align: 'right' })
 
     y += 16
 
@@ -613,7 +617,7 @@ export default function Profile() {
                         <div style={{ padding: '14px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                           <div>
                             <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif', marginBottom: 3 }}>Total</p>
-                            <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>€{cartTotal.toFixed(2)}</p>
+                            <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>${cartTotal.toFixed(2)}</p>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 11, justifyContent: 'center' }}>
@@ -689,7 +693,7 @@ export default function Profile() {
                                 </div>
                                 {appt.services?.price && (
                                   <span className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem', flexShrink: 0 }}>
-                                    €{appt.services.price}
+                                    ${appt.services.price}
                                   </span>
                                 )}
                               </div>
@@ -792,11 +796,11 @@ export default function Profile() {
                                 </p>
                                 <p style={{ color: 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif' }}>
                                   Qty {order.quantity}
-                                  {order.products?.price && ` · €${parseFloat(order.products.price).toFixed(2)} each`}
+                                  {order.products?.price && ` · $${parseFloat(order.products.price).toFixed(2)} each`}
                                 </p>
                               </div>
                               <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem', lineHeight: 1 }}>€{total}</p>
+                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem', lineHeight: 1 }}>${total}</p>
                               </div>
                             </div>
 
@@ -920,11 +924,11 @@ export default function Profile() {
                   <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
                     <p style={{ fontSize: 13, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 3 }}>{receipt.products?.name}</p>
                     <p style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
-                      {receipt.quantity} × €{parseFloat(receipt.products?.price || 0).toFixed(2)}
+                      {receipt.quantity} × ${parseFloat(receipt.products?.price || 0).toFixed(2)}
                     </p>
                   </div>
                   <span style={{ fontSize: 14, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>
-                    €{((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
+                    ${((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
                   </span>
                 </div>
 
@@ -932,7 +936,7 @@ export default function Profile() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
                   <span style={{ fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', fontWeight: 600 }}>Total</span>
                   <span className="font-display gold-gradient" style={{ fontSize: '1.6rem', lineHeight: 1 }}>
-                    €{((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
+                    ${((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
                   </span>
                 </div>
 
@@ -1011,7 +1015,7 @@ function CouponCard({ coupon: c, used }) {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-  const discountLabel = c?.discount_type === 'percentage' ? `${c.discount_value}%` : `€${c?.discount_value}`
+  const discountLabel = c?.discount_type === 'percentage' ? `${c.discount_value}%` : `$${c?.discount_value}`
   return (
     <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', opacity: used ? 0.55 : 1 }}>
       <div style={{ border: `1px solid ${used ? 'rgba(255,255,255,0.06)' : 'rgba(184,212,232,0.3)'}`, borderRadius: 16, display: 'flex', overflow: 'hidden', background: '#111116' }}>
@@ -1121,7 +1125,7 @@ function CartItemRow({ item, isLast, onRemove, onCommit, onExpired, BD }) {
             </button>
           </div>
           <span style={{ color: 'var(--col-acc)', fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
-            €{(price * qty).toFixed(2)}
+            ${(price * qty).toFixed(2)}
           </span>
         </div>
       </div>

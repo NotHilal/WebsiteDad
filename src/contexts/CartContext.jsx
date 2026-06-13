@@ -37,7 +37,7 @@ export function CartProvider({ children }) {
     if (!user) { toast.error('Sign in to add to cart'); return }
 
     const existing  = cartItems.find(i => i.product_id === product.id)
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
 
     // Check stock limit (read-only — we don't modify stock)
     const { data: fresh } = await supabase.from('products').select('stock').eq('id', product.id).single()

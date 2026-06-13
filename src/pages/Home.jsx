@@ -29,10 +29,10 @@ const FALLBACK_TEAM = [
 ]
 
 const FALLBACK_SERVICES = [
-  { id: 'fsvc1', name: 'Precision Cut',      description: "Sculpted to your bone structure and lifestyle — a silhouette that's perfectly yours.", price_display: 'from €45', image_url: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&h=1000&q=90' },
-  { id: 'fsvc2', name: 'Color & Highlights', description: 'Balayage, ombré, vivid transformations. Color that moves the way you do.',            price_display: 'from €80', image_url: 'https://images.unsplash.com/photo-1614020863825-28a0bb7e3c3c?auto=format&fit=crop&w=800&h=1000&q=90' },
-  { id: 'fsvc3', name: 'Blow-Out & Style',   description: 'A flawless finish for every occasion, from everyday elegance to special events.',       price_display: 'from €35', image_url: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&h=1000&q=90' },
-  { id: 'fsvc4', name: 'Hair Treatments',    description: "Keratin, deep hydration, and repair therapies to restore your hair's vitality.",         price_display: 'from €55', image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&h=1000&q=90' },
+  { id: 'fsvc1', name: 'Precision Cut',      description: "Sculpted to your bone structure and lifestyle — a silhouette that's perfectly yours.", price_display: 'from $45', image_url: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&h=1000&q=90' },
+  { id: 'fsvc2', name: 'Color & Highlights', description: 'Balayage, ombré, vivid transformations. Color that moves the way you do.',            price_display: 'from $80', image_url: 'https://images.unsplash.com/photo-1614020863825-28a0bb7e3c3c?auto=format&fit=crop&w=800&h=1000&q=90' },
+  { id: 'fsvc3', name: 'Blow-Out & Style',   description: 'A flawless finish for every occasion, from everyday elegance to special events.',       price_display: 'from $35', image_url: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&h=1000&q=90' },
+  { id: 'fsvc4', name: 'Hair Treatments',    description: "Keratin, deep hydration, and repair therapies to restore your hair's vitality.",         price_display: 'from $55', image_url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&h=1000&q=90' },
 ]
 
 const stats = [
@@ -77,9 +77,9 @@ export default function Home() {
 
     getOrFetch('home_services', async () => {
       const { data } = await supabase.from('services').select('id, name, description, price, image_url').eq('featured', true).order('name')
-      if (data?.length) return data.map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' }))
+      if (data?.length) return data.map(s => ({ ...s, price_display: s.price ? `from $${s.price}` : '' }))
       const { data: fb } = await supabase.from('services').select('id, name, description, price, image_url').order('name').limit(4)
-      return (fb || []).map(s => ({ ...s, price_display: s.price ? `from €${s.price}` : '' }))
+      return (fb || []).map(s => ({ ...s, price_display: s.price ? `from $${s.price}` : '' }))
     }, TTL).then(setHomeServices)
   }, [])
 

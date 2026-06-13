@@ -103,9 +103,9 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
 
         {/* Price */}
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 14 }}>
-          <span className="font-display" style={{ fontSize: '1.45rem', color: 'var(--col-acc)', lineHeight: 1 }}>€{parseFloat(p.price).toFixed(2)}</span>
+          <span className="font-display" style={{ fontSize: '1.45rem', color: 'var(--col-acc)', lineHeight: 1 }}>${parseFloat(p.price).toFixed(2)}</span>
           {qty > 1 && (
-            <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>×{qty} = €{(p.price * qty).toFixed(2)}</span>
+            <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>×{qty} = ${(p.price * qty).toFixed(2)}</span>
           )}
         </div>
 
@@ -197,7 +197,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
 /* ─── Main component ──────────────────────────────────── */
 export default function Store() {
   const { user }                 = useAuth()
-  const { cartItems, addToCart } = useCart()
+  const { cartItems, cartTotal, addToCart } = useCart()
   const navigate                 = useNavigate()
   const [products,  setProducts]  = useState([])
   const [loading,   setLoading]   = useState(true)
@@ -260,16 +260,16 @@ export default function Store() {
 
           {/* Cart summary */}
           {user && (
-            <button onClick={() => navigate('/profile')}
+            <button onClick={() => navigate('/profile', { state: { tab: 'Cart' } })}
               style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', borderRadius: 12, background: cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.08)'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
               <div style={{ position: 'relative' }}>
-                <ShoppingCart size={16} color={cartQty > 0 ? 'var(--col-acc)' : 'var(--col-text)'} />
+                <ShoppingCart size={16} color={cartQty > 0 ? 'var(--col-bg)' : 'var(--col-text)'} />
                 {cartQty > 0 && (
-                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>{cartQty}</span>
+                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: 'rgba(0,0,0,0.25)', color: '#fff', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>{cartQty}</span>
                 )}
               </div>
-              <span style={{ fontSize: 12, color: cartQty > 0 ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
-                {cartQty > 0 ? `Cart (${cartQty})` : 'Cart'}
+              <span style={{ fontSize: 12, color: cartQty > 0 ? 'var(--col-bg)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
+                {cartQty > 0 ? `Checkout · $${cartTotal.toFixed(2)}` : 'Cart'}
               </span>
             </button>
           )}
@@ -385,7 +385,7 @@ export default function Store() {
                 <h2 className="font-display font-light" style={{ color: 'var(--col-text)', fontSize: '2rem', lineHeight: 1.1, marginBottom: '0.5rem' }}>{detail.name}</h2>
 
                 <p className="font-display gold-gradient" style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '1.25rem' }}>
-                  €{(parseFloat(detail.price) * dQty).toFixed(2)}
+                  ${(parseFloat(detail.price) * dQty).toFixed(2)}
                   {dQty > 1 && <span style={{ fontSize: '0.9rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', backgroundImage: 'none', WebkitTextFillColor: 'var(--col-text)', marginLeft: 8 }}>×{dQty}</span>}
                 </p>
 
@@ -427,7 +427,7 @@ export default function Store() {
                   <button onClick={handleAddFromDetail} disabled={dAdding || detail.stock === 0} className="btn-gold" style={{ width: '100%', justifyContent: 'center' }}>
                     {dAdding
                       ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-                      : <><ShoppingCart size={14} /> {inCart(detail.id) ? 'Add More' : 'Add to Cart'} · €{(parseFloat(detail.price) * dQty).toFixed(2)}</>
+                      : <><ShoppingCart size={14} /> {inCart(detail.id) ? 'Add More' : 'Add to Cart'} · ${(parseFloat(detail.price) * dQty).toFixed(2)}</>
                     }
                   </button>
                 ) : (
@@ -507,6 +507,32 @@ export default function Store() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Sticky checkout bar ── */}
+      {user && cartQty > 0 && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+          style={{
+            position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 50, display: 'flex', alignItems: 'center', gap: 16,
+            padding: '12px 12px 12px 20px', borderRadius: 16, whiteSpace: 'nowrap',
+            background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-acc),0.28)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.65), 0 0 0 1px rgba(var(--rgb-acc),0.06)',
+          }}>
+          <ShoppingCart size={15} color="var(--col-acc)" />
+          <span style={{ fontSize: 13, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>
+            {cartQty} item{cartQty !== 1 ? 's' : ''}
+          </span>
+          <span style={{ fontSize: 14, color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
+            ${cartTotal.toFixed(2)}
+          </span>
+          <button onClick={() => navigate('/profile', { state: { tab: 'Cart' } })} className="btn-gold" style={{ padding: '9px 22px', fontSize: 11, gap: 7 }}>
+            Checkout <ChevronRight size={13} />
+          </button>
+        </motion.div>
+      )}
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
