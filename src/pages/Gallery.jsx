@@ -319,7 +319,7 @@ export default function Gallery() {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.28 }}
             onClick={() => setLightbox(null)}
-            style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.96)', backdropFilter: 'blur(28px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
 
             {/* Prev arrow */}
             {lbPrev && (
@@ -365,7 +365,7 @@ export default function Gallery() {
                 </div>
 
                 {/* Detail panel */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#07070d', overflowY: 'auto', position: 'relative' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--col-bg)', overflowY: 'auto', position: 'relative' }}>
                   {/* Accent bar */}
                   <div style={{ height: 2, flexShrink: 0, background: 'linear-gradient(90deg, var(--col-acc), var(--col-acc2), rgba(var(--rgb-acc),0.15))' }} />
 
@@ -374,7 +374,7 @@ export default function Gallery() {
                     {/* Close */}
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.25rem' }}>
                       <button onClick={() => setLightbox(null)} className="gal-lb-close"
-                        style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }}>
+                        style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.12)', color: 'var(--col-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0, opacity: 0.5 }}>
                         <X size={13} />
                       </button>
                     </div>
@@ -387,7 +387,7 @@ export default function Gallery() {
                     )}
 
                     {/* Title */}
-                    <h2 className="font-display" style={{ color: '#fff', fontSize: 'clamp(1.7rem,2.8vw,2.4rem)', lineHeight: 1.05, fontWeight: 300, margin: '0 0 1rem' }}>
+                    <h2 className="font-display" style={{ color: 'var(--col-text)', fontSize: 'clamp(1.7rem,2.8vw,2.4rem)', lineHeight: 1.05, fontWeight: 300, margin: '0 0 1rem' }}>
                       {lightbox.title}
                     </h2>
 
@@ -396,7 +396,7 @@ export default function Gallery() {
 
                     {/* Description */}
                     {lightbox.description && (
-                      <p style={{ color: 'rgba(255,255,255,0.48)', fontSize: '0.845rem', lineHeight: 1.9, margin: 0, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>
+                      <p style={{ color: 'var(--col-text)', opacity: 0.55, fontSize: '0.845rem', lineHeight: 1.9, margin: 0, fontFamily: 'DM Sans, sans-serif', fontWeight: 300 }}>
                         {lightbox.description}
                       </p>
                     )}
@@ -411,8 +411,8 @@ export default function Gallery() {
                             <User size={12} color="var(--col-acc)" />
                           </div>
                           <div>
-                            <p style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Stylist</p>
-                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.75)', fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{lightbox.stylist || lightbox.stylists?.name}</p>
+                            <p style={{ fontSize: 7.5, color: 'var(--col-text)', opacity: 0.35, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Stylist</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--col-text)', opacity: 0.8, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{lightbox.stylist || lightbox.stylists?.name}</p>
                           </div>
                         </div>
                       )}
@@ -422,14 +422,14 @@ export default function Gallery() {
                             <Clock size={12} color="var(--col-acc)" />
                           </div>
                           <div>
-                            <p style={{ fontSize: 7.5, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Duration</p>
-                            <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.75)', fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{lightbox.duration}</p>
+                            <p style={{ fontSize: 7.5, color: 'var(--col-text)', opacity: 0.35, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Duration</p>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--col-text)', opacity: 0.8, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{lightbox.duration}</p>
                           </div>
                         </div>
                       )}
                       {lightbox.price && (
                         <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(var(--rgb-acc),0.05)', border: '1px solid rgba(var(--rgb-acc),0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: 8.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', fontFamily: 'DM Sans, sans-serif' }}>Starting from</span>
+                          <span style={{ fontSize: 8.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', opacity: 0.35, fontFamily: 'DM Sans, sans-serif' }}>Starting from</span>
                           <span className="font-display" style={{ fontSize: '1.4rem', color: 'var(--col-acc)', lineHeight: 1 }}>{lightbox.price}</span>
                         </div>
                       )}
@@ -468,7 +468,7 @@ export default function Gallery() {
         .gal-card:hover .gal-hover-info { opacity: 1 !important; transform: translateY(0) !important; }
         .gal-card:hover .gal-hover-btn { opacity: 1 !important; transform: scale(1) !important; }
         .gal-lb-arrow:hover { background: rgba(255,255,255,0.12) !important; border-color: rgba(255,255,255,0.22) !important; color: #fff !important; }
-        .gal-lb-close:hover { background: rgba(255,255,255,0.1) !important; color: #fff !important; border-color: rgba(255,255,255,0.2) !important; }
+        .gal-lb-close:hover { background: rgba(var(--rgb-hi),0.1) !important; opacity: 1 !important; border-color: rgba(var(--rgb-hi),0.25) !important; }
         .gal-lb-modal { flex-direction: row; }
         @media (max-width: 800px) {
           .gal-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }

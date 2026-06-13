@@ -221,7 +221,9 @@ export default function Appointments() {
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
         body: {
-          amount: finalPrice.toFixed(2),
+          type: 'appointment',
+          serviceId: sel.service.id,
+          couponId: appliedCoupon?.id ?? null,
           label: `${sel.service.name} with ${sel.stylist.name} — ${format(sel.date, 'MMM d')} at ${sel.time}`,
         },
       })
@@ -246,9 +248,7 @@ export default function Appointments() {
       else { row.guest_name = guestInfo.name; row.guest_phone = guestInfo.phone; row.guest_email = guestInfo.email }
       const { error } = await supabase.from('appointments').insert(row)
       if (error) throw error
-      if (appliedCoupon) {
-        await supabase.from('user_coupons').update({ used: true }).eq('id', appliedCoupon.id)
-      }
+      // Coupon already marked used server-side by create-payment-intent
       await Promise.all([
         sendConfirmationEmail('paid', paymentIntentId),
         logBooking('paid'),

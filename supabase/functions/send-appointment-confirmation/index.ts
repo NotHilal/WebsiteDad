@@ -1,11 +1,20 @@
 // @ts-nocheck
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') ?? '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+
+  // Require an Authorization header (user JWT for logged-in users, anon key for guests).
+  // This blocks calls from outside the Supabase client entirely.
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      headers: { ...CORS, 'Content-Type': 'application/json' }, status: 401,
+    })
+  }
 
   const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
   if (!RESEND_API_KEY) {
@@ -67,7 +76,7 @@ Deno.serve(async (req) => {
               </tr>`).join('')}
               <tr>
                 <td style="padding:11px 0;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3);">Price</td>
-                <td style="padding:11px 0;font-family:Arial,sans-serif;font-size:18px;color:#C9A84C;text-align:right;font-weight:700;">€${price}</td>
+                <td style="padding:11px 0;font-family:Arial,sans-serif;font-size:18px;color:#C9A84C;text-align:right;font-weight:700;">$${price}</td>
               </tr>
             </table>
 
@@ -77,8 +86,8 @@ Deno.serve(async (req) => {
                 <td style="padding:14px 18px;border-radius:10px;${isInStore ? 'background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);' : 'background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);'}">
                   <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;${isInStore ? 'color:rgba(245,158,11,0.9);' : 'color:rgba(52,211,153,0.9);'}">
                     ${isInStore
-                      ? `<strong>Pay in store</strong> — please bring <strong>€${price}</strong> to the salon at the time of your appointment.`
-                      : `<strong>Payment confirmed</strong> — your payment of <strong>€${price}</strong> has been processed.`
+                      ? `<strong>Pay in store</strong> — please bring <strong>$${price}</strong> to the salon at the time of your appointment.`
+                      : `<strong>Payment confirmed</strong> — your payment of <strong>$${price}</strong> has been processed.`
                     }
                   </p>
                 </td>
@@ -90,7 +99,7 @@ Deno.serve(async (req) => {
         <!-- Footer -->
         <tr>
           <td style="padding:20px 36px;border-top:1px solid rgba(255,255,255,0.05);text-align:center;font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.2);">
-            HairGo &nbsp;·&nbsp; Doha, Qatar
+            HairGo &nbsp;·&nbsp; Auckland, New Zealand
           </td>
         </tr>
 

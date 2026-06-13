@@ -114,7 +114,7 @@ export default function Profile() {
     setPayStep('loading')
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-        body: { amount: cartTotal.toFixed(2), label: `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} from HairGo Store` },
+        body: { type: 'cart', label: `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} from HairGo Store` },
       })
       if (error) throw error
       setClientSecret(data.client_secret)
@@ -135,9 +135,10 @@ export default function Profile() {
           user_id: user.id, product_id: item.product_id, quantity: item.quantity,
           status: 'active', payment_status: 'pay_in_store', expires_at: expiresAt,
         })
-        await supabase.from('products')
-          .update({ stock: Math.max(0, (item.products?.stock ?? 0) - item.quantity) })
-          .eq('id', item.product_id)
+        await supabase.rpc('decrement_product_stock', {
+          p_product_id: item.product_id,
+          p_quantity: item.quantity,
+        })
       }
       await clearCart()
       toast.success('Items reserved! Come pay in store within 7 days.')
@@ -157,9 +158,10 @@ export default function Profile() {
           user_id: user.id, product_id: item.product_id, quantity: item.quantity,
           status: 'active', payment_intent_id: paymentIntentId, payment_status: 'paid',
         })
-        await supabase.from('products')
-          .update({ stock: Math.max(0, (item.products?.stock ?? 0) - item.quantity) })
-          .eq('id', item.product_id)
+        await supabase.rpc('decrement_product_stock', {
+          p_product_id: item.product_id,
+          p_quantity: item.quantity,
+        })
       }
       await clearCart()
       setPayStep(null); setClientSecret(null)

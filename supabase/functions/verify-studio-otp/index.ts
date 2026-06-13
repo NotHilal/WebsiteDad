@@ -1,7 +1,8 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const cors = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') ?? '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -43,20 +44,48 @@ async function validateTOTP(secret: string, token: string): Promise<boolean> {
   return false
 }
 
+function deny(msg = 'Unauthorized', status = 401) {
+  return new Response(JSON.stringify({ valid: false, error: msg }), {
+    status, headers: { ...cors, 'Content-Type': 'application/json' },
+  })
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   try {
+    // Require a valid staff JWT — the frontend already gates this behind login,
+    // but we verify server-side so the endpoint can't be hit directly by non-staff.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) return deny()
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return deny()
+
+    const { data: profile } = await supabase
+      .from('profiles').select('role').eq('id', user.id).single()
+
+    if (profile?.role !== 'admin' && profile?.role !== 'artist') {
+      return deny('Forbidden — studio access requires admin or artist role', 403)
+    }
+
+    // Auth confirmed — now check the TOTP token
     const { token } = await req.json()
     const secret = Deno.env.get('STUDIO_TOTP_SECRET')
     if (!secret) throw new Error('TOTP secret not configured')
+
     const valid = await validateTOTP(secret, String(token).replace(/\s/g, ''))
     return new Response(JSON.stringify({ valid }), {
       headers: { ...cors, 'Content-Type': 'application/json' },
     })
   } catch (err) {
     return new Response(JSON.stringify({ valid: false }), {
-      status: 400,
-      headers: { ...cors, 'Content-Type': 'application/json' },
+      status: 400, headers: { ...cors, 'Content-Type': 'application/json' },
     })
   }
 })
