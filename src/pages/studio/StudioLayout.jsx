@@ -132,7 +132,7 @@ export default function StudioLayout() {
             <span className="font-display s-brand-name" style={{ fontSize: '1.15rem', color: C.white, lineHeight: 1 }}>
               Hair<span style={{ color: C.gold }}>Go</span>
             </span>
-            <span style={{ display: 'block', fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
+            <span style={{ display: 'block', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
               Studio
             </span>
           </div>
@@ -146,7 +146,7 @@ export default function StudioLayout() {
             style={({ isActive }) => ({
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '0.55rem 0.875rem', borderRadius: 10,
-              fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 500 : 400,
+              fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 500 : 400,
               color: isActive ? C.gold : C.dim,
               background: isActive ? C.goldBg : 'transparent',
               border: isActive ? `1px solid ${C.goldBorder}` : '1px solid transparent',
@@ -158,12 +158,12 @@ export default function StudioLayout() {
                 <Icon size={14} strokeWidth={isActive ? 2 : 1.5} style={{ flexShrink: 0 }} />
                 {label}
                 {label === 'Messages' && unread > 0 && (
-                  <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
+                  <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
                     {unread > 9 ? '9+' : unread}
                   </span>
                 )}
                 {label === 'Blocked Dates' && isAdmin && pendingDayoffs > 0 && (
-                  <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
+                  <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
                     {pendingDayoffs > 9 ? '9+' : pendingDayoffs}
                   </span>
                 )}
@@ -176,15 +176,15 @@ export default function StudioLayout() {
       {/* Footer */}
       <div className="s-footer-wrap" style={{ padding: '0.75rem 0.625rem', borderTop: `1px solid ${C.border}`, flexShrink: 0 }}>
         <div style={{ padding: '0.5rem 0.875rem', marginBottom: 6 }}>
-          <p style={{ fontSize: '0.78rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <p style={{ fontSize: '0.86rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {profile?.full_name || 'Admin'}
           </p>
-          <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
+          <p style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
             {isAdmin ? 'Studio Admin' : 'Artist'}
           </p>
         </div>
         <button onClick={handleSignOut} className="s-signout"
-          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.5rem 0.875rem', borderRadius: 10, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(248,113,113,0.5)', background: 'none', border: `1px solid rgba(248,113,113,0.12)`, cursor: 'pointer', transition: 'all .18s ease', textAlign: 'left' }}>
+          style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.5rem 0.875rem', borderRadius: 10, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', color: 'rgba(248,113,113,0.5)', background: 'none', border: `1px solid rgba(248,113,113,0.12)`, cursor: 'pointer', transition: 'all .18s ease', textAlign: 'left' }}>
           <LogOut size={13} strokeWidth={1.5} />
           Sign Out
         </button>
@@ -193,7 +193,7 @@ export default function StudioLayout() {
   )
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', background: C.bg, overflow: 'hidden' }}>
+    <div className="studio-root" style={{ display: 'flex', height: '100vh', width: '100vw', background: C.bg, overflow: 'hidden' }}>
 
       <aside style={{ width: 210, flexShrink: 0, background: C.sidebar, borderRight: `1px solid ${C.border}` }} className="s-sidebar">
         <Sidebar />
@@ -214,14 +214,14 @@ export default function StudioLayout() {
         )}
       </AnimatePresence>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+      <div className="studio-right" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
         {/* Topbar */}
-        <header style={{ height: 50, flexShrink: 0, borderBottom: `1px solid ${C.border}`, background: C.topbar, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.75rem' }}>
+        <header className="studio-topbar" style={{ height: 50, flexShrink: 0, borderBottom: `1px solid ${C.border}`, background: C.topbar, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button onClick={() => setOpen(true)} style={{ display: 'none', padding: 4, color: C.dim, background: 'none', border: 'none', cursor: 'pointer' }} className="s-menu-btn">
               <Menu size={17} />
             </button>
-            <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
+            <span style={{ fontSize: '0.9rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.04em' }}>{currentPage}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={toggleTheme} style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: C.dim, cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }}>
@@ -232,13 +232,13 @@ export default function StudioLayout() {
             <AppointmentAlert />
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.14)' }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#34d399' }} className="animate-pulse" />
-              <span style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#34d399', fontFamily: 'DM Sans,sans-serif' }}>Live</span>
+              <span style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#34d399', fontFamily: 'DM Sans,sans-serif' }}>Live</span>
             </div>
           </div>
         </header>
 
         <main className="studio-main" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '1.75rem 2rem' }}>
-          <div className="studio-outlet" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
+          <div className="studio-outlet" style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
             <Outlet />
           </div>
         </main>
@@ -246,22 +246,30 @@ export default function StudioLayout() {
 
       <style>{`
         .s-brand:hover { opacity: 0.75 !important; }
-        .s-nav:hover { color: ${C.white} !important; background: rgba(var(--rgb-hi),0.04) !important; border-color: rgba(var(--rgb-hi),0.06) !important; }
+        .s-nav:hover { color: var(--col-acc) !important; background: rgba(var(--rgb-acc),0.08) !important; border-color: rgba(var(--rgb-acc),0.14) !important; }
         .s-signout:hover { color: ${C.danger} !important; border-color: rgba(248,113,113,0.28) !important; background: rgba(248,113,113,0.06) !important; }
         .s-sidebar  { display: none; }
         .s-menu-btn { display: flex !important; }
         @media (min-width: 1200px) {
-          .s-sidebar  { display: block !important; }
+          .s-sidebar  { display: block !important; position: sticky !important; top: 0 !important; height: 100vh !important; align-self: flex-start !important; }
           .s-menu-btn { display: none  !important; }
+          /* Switch to native document scroll on desktop */
+          .studio-root   { height: auto !important; min-height: 100vh !important; overflow: visible !important; }
+          .studio-right  { overflow: visible !important; }
+          .studio-main   { overflow: visible !important; }
+          .studio-outlet { overflow: visible !important; overflow-y: visible !important; flex: none !important; }
         }
         @media (max-width: 1199px) {
-          .studio-main { padding: 0.875rem !important; }
-          .studio-outlet { overflow-y: auto !important; }
-          .s-brand-wrap { padding: 0.75rem 1rem !important; }
+          /* Single scroll container model: outlet scrolls, document is locked.
+             Uses 100dvh (dynamic viewport height) to avoid iOS browser-chrome clipping. */
+          .studio-root   { height: 100dvh !important; }
+          .studio-main   { padding: 0.875rem !important; }
+          .studio-outlet { overscroll-behavior-y: contain; }
+          .s-brand-wrap  { padding: 0.75rem 1rem !important; }
           .s-logo-circle { width: 26px !important; height: 26px !important; }
-          .s-brand-name { font-size: 1rem !important; }
-          .s-nav-list { padding: 0.4rem 0.5rem !important; gap: 1px !important; }
-          .s-nav { padding: 0.38rem 0.75rem !important; font-size: 0.78rem !important; }
+          .s-brand-name  { font-size: 1rem !important; }
+          .s-nav-list    { padding: 0.4rem 0.5rem !important; gap: 1px !important; }
+          .s-nav         { padding: 0.38rem 0.75rem !important; font-size: 0.88rem !important; }
           .s-footer-wrap { padding: 0.5rem 0.5rem !important; }
         }
       `}</style>

@@ -124,11 +124,11 @@ export default function StudioOrders() {
     return c
   }, [orders])
 
-  const PER_PAGE = window.innerWidth < 768 ? 6 : 10
+  const PER_PAGE = window.innerWidth < 768 ? 5 : 10
   const paged = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
+    <div className="orders-outer" style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '1rem' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .o-search:focus { border-color: ${C.goldBorder} !important; }
@@ -138,6 +138,10 @@ export default function StudioOrders() {
         .o-cancel:hover:not(:disabled) { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .o-delete:hover { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; }
         .o-revert:hover:not(:disabled) { background: rgba(var(--rgb-acc),0.18) !important; border-color: rgba(var(--rgb-acc),0.45) !important; }
+        @media (max-width: 1199px) {
+          .orders-outer { height: auto !important; overflow: visible !important; padding-bottom: 2rem !important; }
+          .orders-list  { flex: none !important; overflow: visible !important; min-height: 0 !important; }
+        }
       `}</style>
 
       {/* ── Header ── */}
@@ -165,7 +169,7 @@ export default function StudioOrders() {
       </div>
 
       {/* ── List ── */}
-      <div style={{ flex: 1, overflowY: 'auto', background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, minHeight: 0 }}>
+      <div className="orders-list" style={{ flex: 1, overflowY: 'auto', background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, minHeight: 0 }}>
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '0.75rem' }}>
             {Array.from({ length: 6 }).map((_, i) => (

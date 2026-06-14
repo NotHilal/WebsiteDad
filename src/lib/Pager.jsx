@@ -1,17 +1,12 @@
-﻿const P = {
-  gold: '#B8D4E8', goldBg: 'rgba(184,212,232,0.08)', goldBorder: 'rgba(184,212,232,0.18)',
-  muted: 'rgba(255,255,255,0.22)', border: 'rgba(255,255,255,0.07)',
-}
-
 function btn(active, disabled) {
   return {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     minWidth: 30, height: 30, borderRadius: 8, padding: '0 6px',
     fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400,
     cursor: disabled ? 'default' : 'pointer',
-    border: `1px solid ${active ? P.goldBorder : P.border}`,
-    background: active ? P.goldBg : 'transparent',
-    color: active ? P.gold : disabled ? 'rgba(255,255,255,0.12)' : P.muted,
+    border: `1px solid ${active ? 'rgba(var(--rgb-acc),0.28)' : 'rgba(var(--rgb-hi),0.12)'}`,
+    background: active ? 'rgba(var(--rgb-acc),0.10)' : 'transparent',
+    color: active ? 'var(--col-acc)' : disabled ? 'rgba(var(--rgb-hi),0.2)' : 'rgba(var(--rgb-hi),0.5)',
     transition: 'all .15s',
   }
 }
@@ -35,15 +30,15 @@ export default function Pager({ page, total, perPage = 6, onChange }) {
   const from = page * perPage + 1
   const to   = Math.min((page + 1) * perPage, total)
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: '1.25rem', flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '0.75rem 1.25rem', flexWrap: 'wrap' }}>
       <button onClick={() => onChange(page - 1)} disabled={page === 0} style={btn(false, page === 0)}>‹</button>
       {pages(page, totalPages).map((p, i) =>
         p === '…'
-          ? <span key={`e${i}`} style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12, fontFamily: 'DM Sans,sans-serif', padding: '0 2px' }}>…</span>
+          ? <span key={`e${i}`} style={{ color: 'rgba(var(--rgb-hi),0.25)', fontSize: 12, fontFamily: 'DM Sans,sans-serif', padding: '0 2px' }}>…</span>
           : <button key={p} onClick={() => onChange(p)} style={btn(p === page, false)}>{p + 1}</button>
       )}
       <button onClick={() => onChange(page + 1)} disabled={page === totalPages - 1} style={btn(false, page === totalPages - 1)}>›</button>
-      <span style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.2)', fontFamily: 'DM Sans,sans-serif', marginLeft: 6 }}>
+      <span style={{ fontSize: '0.68rem', color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', marginLeft: 6 }}>
         {from}–{to} / {total}
       </span>
     </div>

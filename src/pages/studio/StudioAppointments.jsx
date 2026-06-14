@@ -149,7 +149,7 @@ export default function StudioAppointments() {
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: periodFilter ? 'auto' : 'hidden' }}>
+    <div className="appts-outer" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: periodFilter ? 'auto' : 'hidden' }}>
       <style>{`
         @keyframes dot-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .dot-pulse { animation: dot-pulse 1.6s ease-in-out infinite; }
@@ -166,6 +166,9 @@ export default function StudioAppointments() {
         .modal-x:hover { background: rgba(var(--rgb-hi),0.08) !important; color: ${C.white} !important; }
         .pg-btn:not(:disabled):hover { background: ${C.goldBg} !important; }
         .period-tab:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
+        @media (max-width: 1199px) {
+          .appts-outer { height: auto !important; overflow: visible !important; padding-bottom: 2rem !important; }
+        }
         @media (max-width: 640px) {
           .cal-day-appt { min-height: 54px !important; padding: 5px 4px 4px !important; border-radius: 7px !important; }
           .cal-appt-preview { display: none !important; }
