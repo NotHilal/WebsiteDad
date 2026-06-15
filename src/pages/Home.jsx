@@ -115,7 +115,7 @@ export default function Home() {
             }}
           >
             <MapPin size={11} strokeWidth={2.2} style={{ color:'var(--col-bg)', flexShrink:0 }} />
-            <span style={{ fontSize:10, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-bg)', fontFamily:'DM Sans,sans-serif', fontWeight:600 }}>
+            <span style={{ fontSize:13, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-bg)', fontFamily:'DM Sans,sans-serif', fontWeight:600 }}>
               Auckland, New Zealand
             </span>
           </motion.div>
@@ -134,7 +134,7 @@ export default function Home() {
 
           <motion.p initial={{ opacity:0, y:12, filter:'blur(5px)' }} animate={{ opacity:1, y:0, filter:'blur(0px)' }}
             transition={{ duration:0.85, delay:0.56, ease:[0.25,0.46,0.45,0.94] }}
-            style={{ color:'var(--col-text)', fontSize:'1.05rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
+            style={{ color:'var(--col-text)', fontSize:'1.37rem', lineHeight:1.85, maxWidth:520, margin:'0 auto 3.5rem auto', fontWeight:300 }}>
             Expert stylists crafting looks that reflect who you truly are. Book your transformation today.
           </motion.p>
 
@@ -156,8 +156,8 @@ export default function Home() {
           style={{ display:'flex', justifyContent:'center', flexWrap:'wrap', gap:'clamp(1.25rem,5vw,6rem)', padding:'0 1.5rem 7rem' }}>
           {stats.map(({ value, label }) => (
             <div key={label} style={{ textAlign:'center' }}>
-              <div className="font-display gold-gradient" style={{ fontSize:'clamp(1.4rem,2.5vw,2rem)', lineHeight:1, marginBottom:'0.35rem' }}>{value}</div>
-              <div style={{ fontSize:9, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{label}</div>
+              <div className="font-display gold-gradient" style={{ fontSize:'clamp(1.82rem,3.25vw,2.6rem)', lineHeight:1, marginBottom:'0.35rem' }}>{value}</div>
+              <div style={{ fontSize:12, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{label}</div>
             </div>
           ))}
         </motion.div>
@@ -165,7 +165,7 @@ export default function Home() {
         {/* Scroll indicator */}
         <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:1.5 }}
           style={{ position:'absolute', bottom:'clamp(20px, 4vh, 40px)', left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:'var(--col-text)' }}>
-          <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase' }}>Scroll</span>
+          <span style={{ fontSize:12, letterSpacing:'0.22em', textTransform:'uppercase' }}>Scroll</span>
           <motion.div animate={{ y:[0,7,0] }} transition={{ repeat:Infinity, duration:1.7 }}><ChevronDown size={13} /></motion.div>
         </motion.div>
       </section>
@@ -175,7 +175,7 @@ export default function Home() {
         <div className="wrap">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView}
             style={{ textAlign:'center', marginBottom:24 }}>
-            <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.8rem,5vw,4.5rem)', textAlign:'center', marginBottom:'0.5rem' }}>Our Services</h2>
+            <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(3.64rem,6.5vw,5.85rem)', textAlign:'center', marginBottom:'0.5rem' }}>Our Services</h2>
             <span className="sec-label">What We Offer</span>
             <div className="gold-bar" style={{ marginTop:'1rem' }} />
           </motion.div>
@@ -193,9 +193,9 @@ export default function Home() {
                   <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(10,10,10,0.75))' }} />
                 </div>
                 <div style={{ padding:'1.5rem 2rem 2.5rem 2rem' }}>
-                  <h3 className="font-display" style={{ fontSize:'1.4rem', color:'var(--col-text)', marginBottom:'0.85rem', textAlign:'center' }}>{svc.name}</h3>
-                  <p style={{ color: 'var(--col-text)', fontSize:'0.85rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{svc.description}</p>
-                  <span style={{ fontSize:10, color:'var(--col-acc)', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', textAlign:'center' }}>{svc.price_display}</span>
+                  <h3 className="font-display" style={{ fontSize:'1.82rem', color:'var(--col-text)', marginBottom:'0.85rem', textAlign:'center' }}>{svc.name}</h3>
+                  <p style={{ color: 'var(--col-text)', fontSize:'1.1rem', lineHeight:1.85, marginBottom:'1.5rem', textAlign:'center' }}>{svc.description}</p>
+                  <span style={{ fontSize:13, color:'var(--col-acc)', letterSpacing:'0.18em', textTransform:'uppercase', display:'block', textAlign:'center' }}>{svc.price_display}</span>
                 </div>
                 <div style={{ position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)', width:0, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', transition:'width 0.5s ease' }} className="card-accent" />
               </motion.div>
@@ -213,7 +213,7 @@ export default function Home() {
         <div className="wrap">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView}
             style={{ textAlign:'center', marginBottom:18 }}>
-            <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.8rem,5vw,4.5rem)', textAlign:'center', marginBottom:'0.5rem' }}>Gallery</h2>
+            <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(3.64rem,6.5vw,5.85rem)', textAlign:'center', marginBottom:'0.5rem' }}>Gallery</h2>
             <span className="sec-label">Our Work</span>
             <div className="gold-bar" style={{ marginTop:'1rem', marginBottom:0 }} />
           </motion.div>
@@ -233,7 +233,7 @@ export default function Home() {
           </div>
 
           <div style={{ textAlign:'center' }}>
-            <Link to="/gallery" className="btn-outline" style={{ padding:'12px 28px', fontSize:11 }}>
+            <Link to="/gallery" className="btn-outline" style={{ padding:'12px 28px', fontSize:14 }}>
               View All <ArrowRight size={13} />
             </Link>
           </div>
@@ -245,12 +245,12 @@ export default function Home() {
         <div className="wrap">
           <div className="home-about-grid">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once:true }} variants={inView} style={{ textAlign:'center' }}>
-              <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.8rem,5vw,4.5rem)', lineHeight:1.08, marginBottom:'0.5rem', textAlign:'center' }}>
+              <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(3.64rem,6.5vw,5.85rem)', lineHeight:1.08, marginBottom:'0.5rem', textAlign:'center' }}>
                 Art meets<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>precision.</span>
               </h2>
               <span className="sec-label">Our Story</span>
               <div className="gold-bar" style={{ margin:'0 auto 1.25rem auto' }} />
-              <p style={{ color: 'var(--col-text)', fontSize:'0.9rem', lineHeight:1.95, marginBottom:0, textAlign:'center' }}>
+              <p style={{ color: 'var(--col-text)', fontSize:'1.17rem', lineHeight:1.95, marginBottom:0, textAlign:'center' }}>
                 Born in the heart of Auckland, HairGo brings together a team of internationally trained stylists united by one purpose: to deliver excellence. From precision cuts to transformative colour, every service is crafted with the care and expertise you deserve.
               </p>
             </motion.div>
@@ -273,9 +273,9 @@ export default function Home() {
                             </div>
                         }
                       </div>
-                      <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
+                      <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1.3rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
                       <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', margin:'0 auto 5px auto' }} />
-                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'DM Sans,sans-serif' }}>{m.title}</p>
+                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:12, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'DM Sans,sans-serif' }}>{m.title}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -295,9 +295,9 @@ export default function Home() {
                             </div>
                         }
                       </div>
-                      <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
+                      <p className="font-display" style={{ color:'var(--col-text)', fontSize:'1.3rem', textAlign:'center', marginBottom:3 }}>{m.name}</p>
                       <div style={{ width:24, height:1, background:'linear-gradient(90deg,transparent,var(--col-acc),transparent)', margin:'0 auto 5px auto' }} />
-                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'DM Sans,sans-serif' }}>{m.title}</p>
+                      <p style={{ color:'rgba(var(--rgb-acc),0.7)', fontSize:12, letterSpacing:'0.22em', textTransform:'uppercase', textAlign:'center', fontFamily:'DM Sans,sans-serif' }}>{m.title}</p>
                     </motion.div>
                   ))}
                 </div>
@@ -328,13 +328,13 @@ export default function Home() {
               <div style={{ position:'absolute', top:-40, left:'50%', transform:'translateX(-50%)', width:280, height:140, background:'radial-gradient(ellipse, rgba(var(--rgb-acc),0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
               <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.28)' }}>
                 <Star size={11} color="var(--col-acc)" />
-                <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Loyalty Program</span>
+                <span style={{ fontSize:12, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Loyalty Program</span>
               </div>
-              <h3 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
+              <h3 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.34rem,3.9vw,3.64rem)', lineHeight:1.1, margin:0 }}>
                 Earn. Redeem.<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>Shine.</span>
               </h3>
               <div className="gold-bar" />
-              <p style={{ color: 'var(--col-text)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:340, margin:0 }}>
+              <p style={{ color: 'var(--col-text)', fontSize:'1.1rem', lineHeight:1.85, maxWidth:340, margin:0 }}>
                 Come 5 times and unlock an exclusive 30% discount on your next appointment. Simple, rewarding, and made for our regulars.
               </p>
               <Link to="/register" className="btn-gold" style={{ marginTop:'0.5rem' }}>Join for Free <ArrowRight size={14} /></Link>
@@ -349,13 +349,13 @@ export default function Home() {
               <div style={{ position:'absolute', bottom:-40, right:-40, width:240, height:240, background:'radial-gradient(circle, rgba(var(--rgb-acc),0.1) 0%, transparent 70%)', pointerEvents:'none' }} />
               <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 18px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.1)', border:'1px solid rgba(var(--rgb-acc),0.28)' }}>
                 <Scissors size={11} color="var(--col-acc)" style={{ transform:'rotate(45deg)' }} />
-                <span style={{ fontSize:9, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Book Now</span>
+                <span style={{ fontSize:12, letterSpacing:'0.22em', textTransform:'uppercase', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>Book Now</span>
               </div>
-              <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(1.8rem,3vw,2.8rem)', lineHeight:1.1, margin:0 }}>
+              <h2 className="font-display font-light" style={{ color:'var(--col-text)', fontSize:'clamp(2.34rem,3.9vw,3.64rem)', lineHeight:1.1, margin:0 }}>
                 Ready for your<br /><span className="gold-gradient" style={{ fontStyle:'italic' }}>transformation?</span>
               </h2>
               <div className="gold-bar" />
-              <p style={{ color: 'var(--col-text)', fontSize:'0.85rem', lineHeight:1.85, maxWidth:320, margin:0 }}>
+              <p style={{ color: 'var(--col-text)', fontSize:'1.1rem', lineHeight:1.85, maxWidth:320, margin:0 }}>
                 Book your appointment in minutes and let our experts take care of the rest.
               </p>
               <Link to="/appointments" className="btn-gold" style={{ marginTop:'0.5rem' }}>Book Now <ArrowRight size={14} /></Link>

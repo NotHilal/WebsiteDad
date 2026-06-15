@@ -14,14 +14,14 @@ const C = {
   border: 'rgba(var(--rgb-hi),0.07)', modal: 'var(--col-modal)',
 }
 
-const inp = { width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
-const lbl = { display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
+const inp = { width: '100%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, padding: '0.55rem 0.8rem', fontSize: '1.02rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', fontWeight: 300, transition: 'border-color .2s', boxSizing: 'border-box' }
+const lbl = { display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }
 const EMPTY = { code: '', discount_type: 'percentage', discount_value: '', expiry_date: '' }
 
 function ModalWrap({ children, onClose, maxWidth = 440 }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }} onMouseDown={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{ width: '100%', maxWidth, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 18, padding: '1.75rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
+      <div style={{ width: '100%', maxWidth, background: C.modal, border: `1px solid ${C.goldBorder}`, borderRadius: 18, padding: '2.1rem', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }} onClick={e => e.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -33,7 +33,7 @@ function TypeToggle({ value, onChange }) {
     <div style={{ display: 'flex', border: '1px solid rgba(var(--rgb-hi),0.1)', borderRadius: 9, overflow: 'hidden' }}>
       {[['percentage', '% Percentage'], ['fixed', '$ Fixed']].map(([val, label]) => (
         <button key={val} type="button" onClick={() => onChange(val)}
-          style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)', color: value === val ? 'var(--col-bg)' : 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(var(--rgb-hi),0.1)' : 'none' }}>
+          style={{ flex: 1, padding: '0.55rem 0.5rem', border: 'none', cursor: 'pointer', transition: 'all .15s', background: value === val ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)', color: value === val ? 'var(--col-bg)' : 'var(--col-text)', fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif', fontWeight: value === val ? 600 : 400, borderRight: val === 'percentage' ? '1px solid rgba(var(--rgb-hi),0.1)' : 'none' }}>
           {label}
         </button>
       ))}
@@ -50,33 +50,33 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
       {/* ── Desktop ── */}
       <div className="uc-desktop-card" style={{ display: 'flex', borderRadius: 14, overflow: 'hidden', border: sharedBorder, opacity: used ? 0.5 : 1, filter: used ? 'grayscale(0.35)' : 'none', transition: 'all .2s' }}>
         <div style={{ flexShrink: 0, width: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(var(--rgb-hi),0.02)' : C.goldBg, borderRight: `1px dashed ${used ? C.border : C.goldBorder}`, padding: '14px 6px', position: 'relative' }}>
-          <span className="font-display gold-gradient" style={{ fontSize: '1.75rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
-          <span style={{ fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>OFF</span>
+          <span className="font-display gold-gradient" style={{ fontSize: '2.1rem', lineHeight: 1, fontWeight: 400, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
+          <span style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>OFF</span>
           <div style={{ position: 'absolute', top: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-modal)' }} />
           <div style={{ position: 'absolute', bottom: -8, right: -8, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-modal)' }} />
         </div>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: used ? 'rgba(var(--rgb-hi),0.01)' : C.card, minWidth: 0 }}>
           <div style={{ flex: '0 0 150px', padding: '6px 12px', borderRadius: 8, background: used ? 'rgba(var(--rgb-hi),0.03)' : 'var(--col-acc)', border: `1px solid ${used ? C.border : 'var(--col-acc)'}` }}>
-            <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: used ? C.muted : 'var(--col-bg)', letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
+            <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.98rem', color: used ? C.muted : 'var(--col-bg)', letterSpacing: '0.12em', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{coupon.code}</span>
           </div>
-          <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>
+          <span style={{ fontSize: '0.84rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>
             {coupon.expiry_date ? `Exp. ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
           </span>
           {assignment ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
               <div style={{ width: 20, height: 20, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <span style={{ fontSize: 8, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{assignment.name?.[0]?.toUpperCase() || '?'}</span>
+                <span style={{ fontSize: 10, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{assignment.name?.[0]?.toUpperCase() || '?'}</span>
               </div>
-              <p style={{ fontSize: '0.72rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{assignment.name}</p>
+              <p style={{ fontSize: '0.86rem', color: C.dim, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{assignment.name}</p>
             </div>
           ) : (
-            <span style={{ flex: 1, fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>
+            <span style={{ flex: 1, fontSize: '0.84rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>
           )}
-          <span style={{ fontSize: 9, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
-          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
+          <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
           {assignment
-            ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>Unassign</button>
-            : <button onClick={() => onAssign(coupon)} className="btn-assign-uc" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>Assign</button>
+            ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>Unassign</button>
+            : <button onClick={() => onAssign(coupon)} className="btn-assign-uc" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>Assign</button>
           }
           <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}><Edit2 size={12} /></button>
           <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
@@ -90,45 +90,45 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
           <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: used ? 'rgba(var(--rgb-hi),0.03)' : C.goldBg, border: `1px dashed ${used ? C.border : C.goldBorder}`, borderRadius: 10, padding: '8px 12px', position: 'relative' }}>
             <div style={{ position: 'absolute', top: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: 'var(--col-modal)' }} />
             <div style={{ position: 'absolute', bottom: -6, right: -6, width: 12, height: 12, borderRadius: '50%', background: 'var(--col-modal)' }} />
-            <span className="font-display gold-gradient" style={{ fontSize: '1.35rem', lineHeight: 1, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
-            <span style={{ fontSize: 7, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
+            <span className="font-display gold-gradient" style={{ fontSize: '1.62rem', lineHeight: 1, filter: used ? 'grayscale(1)' : 'none' }}>{disc}</span>
+            <span style={{ fontSize: 8, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
               <div style={{ padding: '4px 10px', borderRadius: 7, background: used ? 'rgba(var(--rgb-hi),0.03)' : 'var(--col-acc)', border: `1px solid ${used ? C.border : 'var(--col-acc)'}`, overflow: 'hidden' }}>
-                <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.88rem', color: used ? C.muted : 'var(--col-bg)', letterSpacing: '0.12em' }}>{coupon.code}</span>
+                <span style={{ fontFamily: '"Courier New",monospace', fontSize: '1.06rem', color: used ? C.muted : 'var(--col-bg)', letterSpacing: '0.12em' }}>{coupon.code}</span>
               </div>
-              <span style={{ fontSize: 9, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+              <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
+              <span style={{ fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
                 {coupon.expiry_date ? `Exp. ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
               </span>
               {assignment && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <div style={{ width: 14, height: 14, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontSize: 7, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{assignment.name?.[0]?.toUpperCase() || '?'}</span>
+                    <span style={{ fontSize: 8, color: C.gold, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{assignment.name?.[0]?.toUpperCase() || '?'}</span>
                   </div>
-                  <span style={{ fontSize: '0.68rem', color: C.dim, fontFamily: 'DM Sans,sans-serif' }}>{assignment.name}</span>
+                  <span style={{ fontSize: '0.82rem', color: C.dim, fontFamily: 'DM Sans,sans-serif' }}>{assignment.name}</span>
                 </div>
               )}
-              {!assignment && <span style={{ fontSize: '0.68rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>}
+              {!assignment && <span style={{ fontSize: '0.82rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>}
             </div>
           </div>
         </div>
         {/* Action row */}
         <div style={{ display: 'flex', gap: 6, padding: '10px 14px', flexWrap: 'wrap', borderTop: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
           <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'}
-            style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
+            style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
             {used ? 'Mark active' : 'Mark used'}
           </button>
           {assignment
             ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign"
-                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>
+                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>
                 Unassign
               </button>
             : <button onClick={() => onAssign(coupon)} className="btn-assign-uc"
-                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>
+                style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>
                 Assign
               </button>
           }
@@ -152,12 +152,12 @@ function SelectableCouponCard({ coupon, selected, onSelect }) {
       style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderRadius: 12, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(var(--rgb-hi),0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}
       className="sel-card">
       <div style={{ width: 60, height: 52, borderRadius: 10, background: selected ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: '4px 6px' }}>
-        <span className="font-display gold-gradient" style={{ fontSize: '1.1rem', lineHeight: 1, filter: selected ? 'none' : 'grayscale(1)' }}>{disc}</span>
-        <span style={{ fontSize: 7, letterSpacing: '0.18em', color: selected ? C.goldDim : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
+        <span className="font-display gold-gradient" style={{ fontSize: '1.32rem', lineHeight: 1, filter: selected ? 'none' : 'grayscale(1)' }}>{disc}</span>
+        <span style={{ fontSize: 8, letterSpacing: '0.18em', color: selected ? C.goldDim : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>OFF</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontFamily: '"Courier New",monospace', fontSize: '0.82rem', color: selected ? C.gold : C.white, letterSpacing: '0.1em', marginBottom: 3 }}>{coupon.code}</p>
-        <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
+        <p style={{ fontFamily: '"Courier New",monospace', fontSize: '0.98rem', color: selected ? C.gold : C.white, letterSpacing: '0.1em', marginBottom: 3 }}>{coupon.code}</p>
+        <p style={{ fontSize: '0.84rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
           {coupon.expiry_date ? `Expires ${format(new Date(coupon.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
         </p>
       </div>
@@ -334,16 +334,16 @@ export default function StudioCoupons() {
       {/* ── Header ── */}
       <div className="uc-hdr" style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
         <div>
-          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Coupons</h1>
+          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.92rem,3vw,2.64rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.2rem' }}>Coupons</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{coupons.length} total</span>
-            {activeCount > 0 && <span style={{ fontSize: '0.7rem', color: '#34d399', fontFamily: 'DM Sans,sans-serif', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)', padding: '2px 8px', borderRadius: 20 }}>{activeCount} active</span>}
-            {usedCount > 0 && <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, padding: '2px 8px', borderRadius: 20 }}>{usedCount} used</span>}
+            <span style={{ fontSize: '0.9rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{coupons.length} total</span>
+            {activeCount > 0 && <span style={{ fontSize: '0.84rem', color: '#34d399', fontFamily: 'DM Sans,sans-serif', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)', padding: '2px 8px', borderRadius: 20 }}>{activeCount} active</span>}
+            {usedCount > 0 && <span style={{ fontSize: '0.84rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, padding: '2px 8px', borderRadius: 20 }}>{usedCount} used</span>}
           </div>
         </div>
         <div className="uc-hdr-btns" style={{ display: 'flex', gap: 7 }}>
           <button onClick={() => { setForm(EMPTY); setModal('add') }} className="btn-gold-sm"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1rem', borderRadius: 9, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.94rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s' }}>
             <Plus size={13} /> New Coupon
           </button>
         </div>
@@ -354,12 +354,12 @@ export default function StudioCoupons() {
         <div style={{ position: 'relative', flex: 1, minWidth: 180 }}>
           <Search size={12} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by coupon code…" autoComplete="off" className="uc-search"
-            style={{ width: '100%', boxSizing: 'border-box', background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.52rem 0.75rem 0.52rem 2.2rem', fontSize: '0.8rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'all .2s' }} />
+            style={{ width: '100%', boxSizing: 'border-box', background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.52rem 0.75rem 0.52rem 2.2rem', fontSize: '0.96rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'all .2s' }} />
           {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex' }}><X size={12} /></button>}
         </div>
         {[['all','All',coupons.length],['active','Active',activeCount],['used','Used',usedCount]].map(([val,label,count]) => (
           <button key={val} onClick={() => setStatusFilter(val)} className="btn-pill"
-            style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', border: `1px solid ${statusFilter === val ? C.goldBorder : C.border}`, background: statusFilter === val ? C.goldBg : 'transparent', color: statusFilter === val ? C.gold : C.muted }}>
+            style={{ padding: '5px 14px', borderRadius: 20, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', border: `1px solid ${statusFilter === val ? C.goldBorder : C.border}`, background: statusFilter === val ? C.goldBg : 'transparent', color: statusFilter === val ? C.gold : C.muted }}>
             {label} · {count}
           </button>
         ))}
@@ -374,9 +374,9 @@ export default function StudioCoupons() {
             <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Scissors size={22} style={{ color: C.faint }} />
             </div>
-            <p style={{ color: C.dim, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif' }}>{coupons.length === 0 ? 'No coupons yet' : 'No results match your search'}</p>
+            <p style={{ color: C.dim, fontSize: '1.06rem', fontFamily: 'DM Sans,sans-serif' }}>{coupons.length === 0 ? 'No coupons yet' : 'No results match your search'}</p>
             {(search || statusFilter !== 'all') && (
-              <button onClick={() => { setSearch(''); setStatusFilter('all') }} style={{ padding: '5px 16px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Clear filters</button>
+              <button onClick={() => { setSearch(''); setStatusFilter('all') }} style={{ padding: '5px 16px', borderRadius: 20, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Clear filters</button>
             )}
           </div>
         ) : (
@@ -396,16 +396,16 @@ export default function StudioCoupons() {
       </div>
 
       {!loading && filtered.length > 0 && (
-        <p style={{ flexShrink: 0, textAlign: 'right', fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', opacity: 0.5 }}>{filtered.length} of {coupons.length}</p>
+        <p style={{ flexShrink: 0, textAlign: 'right', fontSize: '0.84rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', opacity: 0.5 }}>{filtered.length} of {coupons.length}</p>
       )}
 
       {/* ── Create / Edit modal ── */}
       {(modal === 'add' || modal === 'edit') && (
         <ModalWrap onClose={() => { setModal(null); setForm(EMPTY) }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.8rem' }}>
             <div>
-              <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'New Coupon' : 'Edit Coupon'}</h2>
-              <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Fill in the discount details</p>
+              <h2 className="font-display" style={{ fontSize: '1.8rem', color: C.white, marginBottom: 3 }}>{modal === 'add' ? 'New Coupon' : 'Edit Coupon'}</h2>
+              <p style={{ fontSize: '0.9rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Fill in the discount details</p>
             </div>
             <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
           </div>
@@ -430,9 +430,9 @@ export default function StudioCoupons() {
               <input type="date" value={form.expiry_date} onChange={e => setForm(p => ({ ...p, expiry_date: e.target.value }))} className="m-inp" style={inp} />
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.5rem' }}>
-            <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
+          <div style={{ display: 'flex', gap: '0.625rem', marginTop: '1.8rem' }}>
+            <button onClick={() => { setModal(null); setForm(EMPTY) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.96rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={save} disabled={saving} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', color: 'var(--col-bg)', fontSize: '0.96rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: saving ? 0.6 : 1 }}>
               {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><Save size={13} /> {modal === 'add' ? 'Create' : 'Save'}</>}
             </button>
           </div>
@@ -448,29 +448,29 @@ export default function StudioCoupons() {
               <AlertTriangle size={18} color="#f87171" />
             </div>
             <div>
-              <h3 className="font-display" style={{ color: C.white, fontSize: '1.35rem', fontWeight: 500, marginBottom: 4 }}>Delete coupon?</h3>
-              <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
+              <h3 className="font-display" style={{ color: C.white, fontSize: '1.62rem', fontWeight: 500, marginBottom: 4 }}>Delete coupon?</h3>
+              <p style={{ color: C.muted, fontSize: '0.94rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5 }}>This action is permanent and cannot be undone.</p>
             </div>
           </div>
 
           {/* Coupon preview */}
-          <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ background: 'rgba(248,113,113,0.05)', border: '1px solid rgba(248,113,113,0.12)', borderRadius: 10, padding: '0.875rem 1rem', marginBottom: '1.8rem', display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 44, height: 44, borderRadius: 9, background: 'var(--col-acc)', border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span className="font-display gold-gradient" style={{ fontSize: '1rem', lineHeight: 1 }}>
+              <span className="font-display gold-gradient" style={{ fontSize: '1.2rem', lineHeight: 1 }}>
                 {deleteTarget.discount_type === 'percentage' ? `${deleteTarget.discount_value}%` : `$${deleteTarget.discount_value}`}
               </span>
             </div>
             <div>
-              <p style={{ fontFamily: '"Courier New",monospace', color: C.gold, fontSize: '0.85rem', letterSpacing: '0.1em', marginBottom: 3 }}>{deleteTarget.code}</p>
-              <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif' }}>
+              <p style={{ fontFamily: '"Courier New",monospace', color: C.gold, fontSize: '1.02rem', letterSpacing: '0.1em', marginBottom: 3 }}>{deleteTarget.code}</p>
+              <p style={{ color: C.muted, fontSize: '0.86rem', fontFamily: 'DM Sans,sans-serif' }}>
                 {deleteTarget.expiry_date ? `Expires ${format(new Date(deleteTarget.expiry_date), 'MMM d, yyyy')}` : 'No expiry'}
               </p>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
-            <button onClick={confirmDelete} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <button onClick={() => setDeleteTarget(null)} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={confirmDelete} style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg,#f87171,#ef4444)', color: 'var(--col-text)', fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
               <Trash2 size={13} /> Delete
             </button>
           </div>
@@ -489,7 +489,7 @@ export default function StudioCoupons() {
                     <ChevronLeft size={16} />
                   </button>
                 )}
-                <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, fontWeight: 500 }}>
+                <h2 className="font-display" style={{ fontSize: '1.8rem', color: C.white, fontWeight: 500 }}>
                   {assignStep === 1 ? 'Choose a Coupon' : 'Choose a Client'}
                 </h2>
               </div>
@@ -497,7 +497,7 @@ export default function StudioCoupons() {
                 {[1, 2].map(s => (
                   <div key={s} style={{ height: 3, width: s === assignStep ? 24 : 8, borderRadius: 2, background: s <= assignStep ? C.gold : C.border, transition: 'all .2s' }} />
                 ))}
-                <span style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginLeft: 4 }}>Step {assignStep} of 2</span>
+                <span style={{ fontSize: '0.84rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginLeft: 4 }}>Step {assignStep} of 2</span>
               </div>
             </div>
             <button onClick={() => setModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={14} /></button>
@@ -510,7 +510,7 @@ export default function StudioCoupons() {
                 {(() => {
                   const available = coupons.filter(c => c.active && !assignedIds.has(c.id))
                   if (available.length === 0) return (
-                    <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '2rem 0' }}>
+                    <p style={{ color: C.muted, fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '2rem 0' }}>
                       All active coupons are already assigned
                     </p>
                   )
@@ -520,7 +520,7 @@ export default function StudioCoupons() {
                 })()}
               </div>
               <button onClick={() => assignCoupon && setAssignStep(2)} disabled={!assignCoupon}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignCoupon ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.05)', color: assignCoupon ? 'var(--col-bg)' : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignCoupon ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s' }}>
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignCoupon ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.05)', color: assignCoupon ? 'var(--col-bg)' : C.muted, fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignCoupon ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s' }}>
                 Next <ChevronRight size={14} />
               </button>
             </>
@@ -532,15 +532,15 @@ export default function StudioCoupons() {
               {/* Chosen coupon reminder */}
               {assignCoupon && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 9, background: C.goldBg, border: `1px solid ${C.goldBorder}`, marginBottom: '1rem' }}>
-                  <span className="font-display gold-gradient" style={{ fontSize: '1rem' }}>
+                  <span className="font-display gold-gradient" style={{ fontSize: '1.2rem' }}>
                     {assignCoupon.discount_type === 'percentage' ? `${assignCoupon.discount_value}%` : `$${assignCoupon.discount_value}`} OFF
                   </span>
-                  <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.78rem', color: C.gold, letterSpacing: '0.1em' }}>{assignCoupon.code}</span>
+                  <span style={{ fontFamily: '"Courier New",monospace', fontSize: '0.94rem', color: C.gold, letterSpacing: '0.1em' }}>{assignCoupon.code}</span>
                 </div>
               )}
 
               {/* Search */}
-              <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+              <div style={{ position: 'relative', marginBottom: '0.9rem' }}>
                 <Search size={12} style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: C.muted, pointerEvents: 'none' }} />
                 <input value={userSearch} onChange={e => setUserSearch(e.target.value)}
                   placeholder="Search client by name…" autoComplete="off"
@@ -552,16 +552,16 @@ export default function StudioCoupons() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 240, overflowY: 'auto', marginBottom: '1.25rem' }}>
                 {filteredUsers.length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-                    <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>
+                    <p style={{ color: C.muted, fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>
                       {users.length === 0 ? 'No users registered yet' : 'No users match your search'}
                     </p>
                     {userSearch && (
-                      <button onClick={() => setUserSearch('')} style={{ fontSize: 10, color: C.goldDim, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '3px 12px', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>
+                      <button onClick={() => setUserSearch('')} style={{ fontSize: 12, color: C.goldDim, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 20, padding: '3px 12px', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>
                         Clear search
                       </button>
                     )}
                     {users.length === 0 && (
-                      <p style={{ color: 'var(--col-text)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>
+                      <p style={{ color: 'var(--col-text)', fontSize: '0.86rem', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>
                         Users need to register on the website first
                       </p>
                     )}
@@ -573,14 +573,14 @@ export default function StudioCoupons() {
                     <button key={u.id} type="button" onClick={() => setAssignUser(u)} className="user-row"
                       style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: `1.5px solid ${selected ? C.goldBorder : C.border}`, background: selected ? C.goldBg : 'rgba(var(--rgb-hi),0.02)', cursor: 'pointer', transition: 'all .15s', textAlign: 'left' }}>
                       <div style={{ width: 32, height: 32, borderRadius: '50%', background: selected ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1.5px solid ${selected ? C.goldBorder : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: 11, color: selected ? C.gold : C.muted, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
+                        <span style={{ fontSize: 13, color: selected ? C.gold : C.muted, fontFamily: '"Cormorant Garamond",serif', fontWeight: 600 }}>{initials}</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <p style={{ fontSize: '0.82rem', color: selected ? C.white : C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: selected ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.full_name || 'No name'}</p>
-                          {u.role && <span style={{ fontSize: 8, padding: '1px 6px', borderRadius: 9, background: u.role === 'admin' ? C.goldBg : 'rgba(var(--rgb-hi),0.05)', color: u.role === 'admin' ? C.goldDim : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>{u.role}</span>}
+                          <p style={{ fontSize: '0.98rem', color: selected ? C.white : C.dim, fontFamily: 'DM Sans,sans-serif', fontWeight: selected ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.full_name || 'No name'}</p>
+                          {u.role && <span style={{ fontSize: 10, padding: '1px 6px', borderRadius: 9, background: u.role === 'admin' ? C.goldBg : 'rgba(var(--rgb-hi),0.05)', color: u.role === 'admin' ? C.goldDim : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', flexShrink: 0 }}>{u.role}</span>}
                         </div>
-                        <p style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{u.points || 0} visits</p>
+                        <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{u.points || 0} visits</p>
                       </div>
                       <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${selected ? C.gold : C.border}`, background: selected ? C.gold : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {selected && <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--col-modal)' }} />}
@@ -591,7 +591,7 @@ export default function StudioCoupons() {
               </div>
 
               <button onClick={confirmAssign} disabled={!assignUser || saving}
-                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignUser ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.05)', color: assignUser ? 'var(--col-bg)' : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignUser && !saving ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: saving ? 0.6 : 1 }}>
+                style={{ width: '100%', padding: '0.65rem', borderRadius: 9, background: assignUser ? 'linear-gradient(135deg,var(--col-acc),var(--col-acc2))' : 'rgba(var(--rgb-hi),0.05)', color: assignUser ? 'var(--col-bg)' : C.muted, fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: assignUser && !saving ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .2s', opacity: saving ? 0.6 : 1 }}>
                 {saving ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .8s linear infinite' }} /> : <><UserPlus size={14} /> Assign Coupon</>}
               </button>
             </>

@@ -20,7 +20,7 @@ const C = {
   red: '#f87171', redBg: 'rgba(248,113,113,0.1)', redBorder: 'rgba(248,113,113,0.22)',
 }
 
-const TABLE_PER_PAGE = 15
+const TABLE_PER_PAGE = 6
 const TABLE_COLS = '1fr 58px 70px 66px 28px'
 
 function fmtMins(mins) {
@@ -129,23 +129,23 @@ function PayRow({ t, rate, onInfo, last }) {
   const net  = sheetMins(t)
   const earn = (net / 60) * rate
   return (
-    <div className="pr-row" style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.65rem 1rem', borderBottom: last ? 'none' : `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
-      <div style={{ color: C.white, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+    <div className="pr-row" style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.85rem 1rem', borderBottom: last ? 'none' : `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
+      <div style={{ color: C.white, fontSize: '0.95rem', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {format(new Date(t.clock_in), 'EEE, MMM d')}
       </div>
-      <div style={{ color: C.gold, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{fmtMins(net)}</div>
-      <div style={{ color: rate > 0 ? C.white : C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>
+      <div style={{ color: C.gold, fontSize: '0.92rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{fmtMins(net)}</div>
+      <div style={{ color: rate > 0 ? C.white : C.muted, fontSize: '0.92rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>
         {rate > 0 ? fmt(earn) : '—'}
       </div>
       <div>
         {t.paid_at
-          ? <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Paid</span>
-          : <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 99, background: C.redBg,   border: `1px solid ${C.redBorder}`,   color: C.red,   fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Unpaid</span>
+          ? <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Paid</span>
+          : <span style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, background: C.redBg,   border: `1px solid ${C.redBorder}`,   color: C.red,   fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>Unpaid</span>
         }
       </div>
       <button onClick={() => onInfo(t)} className="pr-info-btn"
-        style={{ width: 28, height: 28, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0, transition: 'all .15s' }}>
-        <Info size={12} />
+        style={{ width: 30, height: 30, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, padding: 0, transition: 'all .15s' }}>
+        <Info size={14} />
       </button>
     </div>
   )
@@ -164,7 +164,7 @@ function Pagination({ page, total, onChange }) {
     pages.push(total - 1)
   }
   const nav = d => ({ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, color: d ? 'var(--col-text)' : 'var(--col-text)', cursor: d ? 'not-allowed' : 'pointer', fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', transition: 'all .15s' })
-  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${a ? 'var(--col-acc)' : C.border}`, color: a ? 'var(--col-acc)' : 'var(--col-text)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
+  const num = a => ({ minWidth: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', background: a ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${a ? 'var(--col-acc)' : C.border}`, color: a ? 'var(--col-bg)' : 'var(--col-text)', cursor: 'pointer', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: a ? 600 : 400, transition: 'all .15s' })
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, padding: '0.25rem 0' }}>
       <button onClick={() => onChange(Math.max(0, page - 1))} disabled={page === 0} style={nav(page === 0)}>‹</button>
@@ -589,7 +589,7 @@ export default function StudioPayRuns() {
           )}
           <button onClick={() => editing ? setEditing(false) : openEdit(stylist)} className="pr-edit"
             style={{ padding: '0.65rem 1.25rem', borderRadius: 10, background: editing ? C.goldBg : C.subtle, border: `1px solid ${editing ? C.goldBorder : C.border}`, color: editing ? C.gold : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s' }}>
-            {editing ? <X size={13} /> : <Edit2 size={13} />}{editing ? 'Close' : '+ Extras (tips, commissions)'}
+            {editing ? <X size={13} /> : <Edit2 size={13} />}{editing ? 'Close' : '+ Extras'}
           </button>
           {sheets.length > 0 && (
             <button onClick={exportToExcel}
@@ -657,9 +657,9 @@ export default function StudioPayRuns() {
               </div>
             ) : (
               <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.55rem 1rem', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: TABLE_COLS, padding: '0.6rem 1rem', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem' }}>
                   {['Date', 'Hours', 'Earned', 'Status', ''].map(h => (
-                    <div key={h} style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>{h}</div>
+                    <div key={h} style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>{h}</div>
                   ))}
                 </div>
                 {visible.map((t, i) => (
