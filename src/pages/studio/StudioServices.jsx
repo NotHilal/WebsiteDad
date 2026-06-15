@@ -287,13 +287,13 @@ export default function StudioServices() {
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '1.25rem 1.4rem 1.35rem', zIndex: 2 }}>
 
                     {/* Service name */}
-                    <h3 className="font-display" style={{ fontSize: '1.65rem', color: 'var(--col-text)', lineHeight: 1.1, marginBottom: s.description ? '0.35rem' : '0.85rem', fontWeight: 400 }}>
+                    <h3 className="font-display" style={{ fontSize: '1.65rem', color: '#ffffff', lineHeight: 1.1, marginBottom: s.description ? '0.35rem' : '0.85rem', fontWeight: 400 }}>
                       {s.name}
                     </h3>
 
                     {/* Description */}
                     {s.description && (
-                      <p style={{ color: 'var(--col-text)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6, marginBottom: '0.85rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6, marginBottom: '0.85rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {s.description}
                       </p>
                     )}
@@ -307,9 +307,9 @@ export default function StudioServices() {
                         ${s.price}
                       </span>
                       {s.duration > 0 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(var(--rgb-hi),0.1)' }}>
-                          <Clock size={10} color="var(--col-text)" strokeWidth={1.5} />
-                          <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                          <Clock size={10} color="rgba(255,255,255,0.6)" strokeWidth={1.5} />
+                          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.85)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
                             {Math.floor(s.duration / 60) > 0 ? `${Math.floor(s.duration / 60)}h ` : ''}{s.duration % 60 > 0 ? `${s.duration % 60}m` : ''}
                           </span>
                         </div>

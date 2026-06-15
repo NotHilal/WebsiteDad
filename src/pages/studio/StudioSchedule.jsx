@@ -134,9 +134,24 @@ export default function StudioSchedule() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
       {/* Header */}
-      <div style={{ flexShrink: 0, marginBottom: '0.6rem', paddingBottom: '0.6rem', borderBottom: `1px solid ${C.border}` }}>
-        <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.1rem' }}>Schedule</h1>
-        <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{appointments.length} total appointments</p>
+      <div style={{ flexShrink: 0, marginBottom: '0.6rem', paddingBottom: '0.6rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.1rem' }}>Schedule</h1>
+          <p style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{appointments.length} total appointments</p>
+        </div>
+        <div style={{ display: 'flex', background: C.subtle, borderRadius: 10, padding: 3, gap: 2, flexShrink: 0 }}>
+          {['daily', 'weekly', 'monthly'].map(v => (
+            <button key={v} onClick={() => setView(v)}
+              style={{ padding: '5px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.05em', transition: 'all .18s',
+                background: view === v ? C.goldBg : 'transparent',
+                color: view === v ? C.gold : C.muted,
+                outline: view === v ? `1px solid ${C.goldBorder}` : 'none',
+              }}>
+              <span className="sched-view-label-full">{v.charAt(0).toUpperCase() + v.slice(1)}</span>
+              <span className="sched-view-label-short">{{ daily: 'Day', weekly: 'Wk', monthly: 'Mo' }[v]}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Calendar card */}
@@ -157,19 +172,6 @@ export default function StudioSchedule() {
             style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: C.muted, transition: 'all .18s' }}>
             <ChevronRight size={13} />
           </button>
-          <div style={{ display: 'flex', background: C.subtle, borderRadius: 10, padding: 3, gap: 2, marginLeft: 6 }}>
-            {['daily', 'weekly', 'monthly'].map(v => (
-              <button key={v} onClick={() => setView(v)}
-                style={{ padding: '5px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.05em', transition: 'all .18s',
-                  background: view === v ? C.goldBg : 'transparent',
-                  color: view === v ? C.gold : C.muted,
-                  outline: view === v ? `1px solid ${C.goldBorder}` : 'none',
-                }}>
-                <span className="sched-view-label-full">{v.charAt(0).toUpperCase() + v.slice(1)}</span>
-                <span className="sched-view-label-short">{{ daily: 'Day', weekly: 'Wk', monthly: 'Mo' }[v]}</span>
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Stylist filter */}

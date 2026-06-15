@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react'
-import { Check, Edit2, X, ArrowLeft, Clock, ChevronRight, ChevronLeft, Info, AlertCircle } from 'lucide-react'
+import { Check, Edit2, X, ArrowLeft, Clock, ChevronRight, ChevronLeft, Info, AlertCircle, Download } from 'lucide-react'
+import * as XLSX from 'xlsx'
 import { supabase } from '../../lib/supabase'
 import { useLogAction } from '../../hooks/useLogAction'
 import {
@@ -443,9 +444,84 @@ export default function StudioPayRuns() {
   // ── EMPLOYEE DETAIL ──────────────────────────────────────────────
   if (selected) {
     const stylist        = stylists.find(s => s.id === selected.id) || selected
-    const totals         = totalsMap.get(stylist.id) ?? { allMins: 0, paidMins: 0, unpaidMins: 0, allEarnings: 0, paidEarnings: 0, unpaidEarnings: 0, extras: 0, rate: 0 }
+    const totals         = totalsMap.get(stylist.id) ?? { allMins: 0, paidMins: 0, unpaidMins: 0, allEarnings: 0, paidEarnings: 0, unpaidEarnings: 0, extras: 0, tips: 0, commissions: 0, other: 0, rate: 0 }
     const rate           = parseFloat(stylist.hourly_rate) || 0
     const sheets         = timesheets.filter(t => t.stylist_id === stylist.id)
+
+    function exportToExcel() {
+      const sorted = [...sheets].sort((a, b) => new Date(a.clock_in) - new Date(b.clock_in))
+      const rows = []
+
+      rows.push(['Hair Go — Payroll Timesheet'])
+      rows.push(['Employee:', stylist.name])
+      rows.push(['Hourly Rate:', rate > 0 ? `$${rate.toFixed(2)}/h` : 'Not set'])
+      rows.push(['Generated:', format(new Date(), 'dd MMM yyyy')])
+      rows.push([])
+      rows.push(['Date', 'Day', 'Clock In', 'Clock Out', 'Break Deducted', 'Net Hours', 'Rate ($/h)', 'Earned ($)', 'Status'])
+
+      let curWeekKey = null, curWeekLabel = '', weekMins = 0, weekEarned = 0
+
+      for (const t of sorted) {
+        const wStart = startOfWeek(new Date(t.clock_in), { weekStartsOn: 1 })
+        const wKey   = format(wStart, 'yyyy-MM-dd')
+        const wLabel = format(wStart, 'dd/MM/yyyy')
+
+        if (curWeekKey !== null && wKey !== curWeekKey) {
+          rows.push([`  Week total (w/c ${curWeekLabel})`, '', '', '', '', +(weekMins/60).toFixed(2), '', rate > 0 ? +weekEarned.toFixed(2) : '', ''])
+          rows.push([])
+          weekMins = 0; weekEarned = 0
+        }
+        curWeekKey = wKey; curWeekLabel = wLabel
+
+        const raw  = Math.max(0, differenceInMinutes(new Date(t.clock_out), new Date(t.clock_in)))
+        const net  = raw >= 360 ? raw - 45 : raw
+        const brk  = raw >= 360 ? '45 min' : 'None'
+        const earn = (net / 60) * rate
+        weekMins  += net; weekEarned += earn
+
+        rows.push([
+          format(new Date(t.clock_in), 'dd/MM/yyyy'),
+          format(new Date(t.clock_in), 'EEEE'),
+          format(new Date(t.clock_in),  'HH:mm'),
+          format(new Date(t.clock_out), 'HH:mm'),
+          brk,
+          +(net / 60).toFixed(2),
+          rate > 0 ? rate : 'N/A',
+          rate > 0 ? +earn.toFixed(2) : 'N/A',
+          t.paid_at ? `Paid (${format(new Date(t.paid_at), 'dd/MM/yyyy')})` : 'Unpaid',
+        ])
+      }
+
+      if (curWeekKey !== null) {
+        rows.push([`  Week total (w/c ${curWeekLabel})`, '', '', '', '', +(weekMins/60).toFixed(2), '', rate > 0 ? +weekEarned.toFixed(2) : '', ''])
+      }
+
+      rows.push([])
+      rows.push([])
+      rows.push(['SUMMARY'])
+      rows.push(['Total Hours Worked',          '', '', '', '', '', '', +(totals.allMins / 60).toFixed(2)])
+      rows.push(['Total Earned (hours × rate)', '', '', '', '', '', '', rate > 0 ? +totals.allEarnings.toFixed(2)    : 'N/A'])
+      rows.push(['Already Paid',               '', '', '', '', '', '', rate > 0 ? +totals.paidEarnings.toFixed(2)   : 'N/A'])
+      rows.push(['Outstanding Balance',         '', '', '', '', '', '', rate > 0 ? +totals.unpaidEarnings.toFixed(2) : 'N/A'])
+      rows.push([])
+      rows.push(['ADDITIONAL EARNINGS'])
+      rows.push(['Tips',        '', '', '', '', '', '', +((totals.tips || 0).toFixed(2))])
+      rows.push(['Commissions', '', '', '', '', '', '', +((totals.commissions || 0).toFixed(2))])
+      rows.push(['Other',       '', '', '', '', '', '', +((totals.other || 0).toFixed(2))])
+      rows.push([])
+      const grandTotal = (rate > 0 ? totals.unpaidEarnings : 0) + (totals.extras || 0)
+      rows.push(['GRAND TOTAL PAYABLE (excl. PAYE & KiwiSaver)', '', '', '', '', '', '', +grandTotal.toFixed(2)])
+      rows.push([])
+      rows.push(['NOTE: PAYE income tax and KiwiSaver contributions are not included above.'])
+      rows.push(['Please calculate these separately before processing payment.'])
+
+      const ws = XLSX.utils.aoa_to_sheet(rows)
+      ws['!cols'] = [{ wch: 44 }, { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 16 }, { wch: 12 }, { wch: 11 }, { wch: 13 }, { wch: 26 }]
+
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Timesheet')
+      XLSX.writeFile(wb, `${stylist.name.replace(/\s+/g, '_')}_Timesheet_${format(new Date(), 'yyyy-MM-dd')}.xlsx`)
+    }
     const filteredSheets = unpaidOnly ? sheets.filter(t => !t.paid_at) : sheets
     const totalPages     = Math.max(1, Math.ceil(filteredSheets.length / TABLE_PER_PAGE))
     const visible        = filteredSheets.slice(page * TABLE_PER_PAGE, (page + 1) * TABLE_PER_PAGE)
@@ -515,6 +591,14 @@ export default function StudioPayRuns() {
             style={{ padding: '0.65rem 1.25rem', borderRadius: 10, background: editing ? C.goldBg : C.subtle, border: `1px solid ${editing ? C.goldBorder : C.border}`, color: editing ? C.gold : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s' }}>
             {editing ? <X size={13} /> : <Edit2 size={13} />}{editing ? 'Close' : '+ Extras (tips, commissions)'}
           </button>
+          {sheets.length > 0 && (
+            <button onClick={exportToExcel}
+              style={{ padding: '0.65rem 1.25rem', borderRadius: 10, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = C.goldBg; e.currentTarget.style.borderColor = C.goldBorder; e.currentTarget.style.color = C.gold }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.subtle; e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.muted }}>
+              <Download size={13} /> Export Excel
+            </button>
+          )}
         </div>
 
         {/* Extras panel */}

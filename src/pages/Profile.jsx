@@ -130,10 +130,12 @@ export default function Profile() {
     setReserving(true)
     try {
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      const orderGroupId = crypto.randomUUID()
       for (const item of cartItems) {
         await supabase.from('preorders').insert({
           user_id: user.id, product_id: item.product_id, quantity: item.quantity,
           status: 'active', payment_status: 'pay_in_store', expires_at: expiresAt,
+          order_group_id: orderGroupId,
         })
         await supabase.rpc('decrement_product_stock', {
           p_product_id: item.product_id,
@@ -153,10 +155,12 @@ export default function Profile() {
 
   async function completeCartPayment(paymentIntentId) {
     try {
+      const orderGroupId = crypto.randomUUID()
       for (const item of cartItems) {
         await supabase.from('preorders').insert({
           user_id: user.id, product_id: item.product_id, quantity: item.quantity,
           status: 'active', payment_intent_id: paymentIntentId, payment_status: 'paid',
+          order_group_id: orderGroupId,
         })
         await supabase.rpc('decrement_product_stock', {
           p_product_id: item.product_id,

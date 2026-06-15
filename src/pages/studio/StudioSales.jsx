@@ -361,10 +361,7 @@ export default function StudioSales() {
                 {Array.from({ length: MOBILE_PER_PAGE }).map((_, i) => {
                   const appt = mobileAppts[i]
                   if (!appt) return (
-                    <div key={`empty-${i}`} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: '3px solid transparent', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ height: 14, width: '45%', borderRadius: 4, background: 'rgba(var(--rgb-hi),0.03)' }} />
-                      <div style={{ height: 10, width: '65%', borderRadius: 4, background: 'rgba(var(--rgb-hi),0.02)' }} />
-                    </div>
+                    <div key={`empty-${i}`} style={{ minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', background: 'var(--col-modal)' }} />
                   )
                   const s = STATUS_APPT[appt.status] || STATUS_APPT.pending
                   const paid = appt.payment_status === 'paid'
@@ -468,13 +465,7 @@ export default function StudioSales() {
                 {Array.from({ length: MOBILE_PER_PAGE }).map((_, i) => {
                   const order = mobileOrders[i]
                   if (!order) return (
-                    <div key={`empty-${i}`} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: '3px solid transparent', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 26, height: 26, borderRadius: 5, background: 'rgba(var(--rgb-hi),0.03)', flexShrink: 0 }} />
-                        <div style={{ height: 14, flex: 1, borderRadius: 4, background: 'rgba(var(--rgb-hi),0.03)' }} />
-                      </div>
-                      <div style={{ height: 10, width: '55%', borderRadius: 4, background: 'rgba(var(--rgb-hi),0.02)', marginLeft: 34 }} />
-                    </div>
+                    <div key={`empty-${i}`} style={{ minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', background: 'var(--col-modal)' }} />
                   )
                   const s = STATUS_ORDER[order.status] || STATUS_ORDER.active
                   const paid = order.payment_status === 'paid'
@@ -650,35 +641,33 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
           {[25, 50, 75].map(pct => (
             <div key={pct} style={{ position: 'absolute', bottom: `${pct}%`, left: 0, right: 0, height: 1, background: 'rgba(var(--rgb-hi),0.04)', pointerEvents: 'none', zIndex: 0 }} />
           ))}
-          <div className="chart-bars" style={{ display: 'flex', alignItems: 'flex-end', gap: mode === 'month' ? 2 : 5, position: 'relative', zIndex: 1 }}>
+          <div className="chart-bars" style={{ height: 120, display: 'flex', alignItems: 'flex-end', gap: mode === 'month' ? 2 : 5, position: 'relative', zIndex: 1 }}>
             {data.map(({ day, total, apptRev, ordRev }, i) => {
-              const heightPct = total === 0 ? 0 : Math.max(5, (total / maxVal) * 100)
+              const heightPx = total === 0 ? 0 : Math.max(6, (total / maxVal) * 120)
               const today = isToday(day)
               const isSel = selected?.i === i
               return (
                 <div key={i} className="bar-col"
                   onClick={() => setSelected(isSel ? null : { i, day, total, apptRev, ordRev })}
-                  style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end', cursor: 'pointer' }}>
-                  <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
-                    {total === 0
-                      ? <div style={{ width: '100%', height: 2, background: today ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', borderRadius: 2 }} />
-                      : (
+                  style={{ flex: 1, position: 'relative', height: '100%', cursor: 'pointer' }}>
+                  {total === 0
+                    ? <div style={{ position: 'absolute', bottom: 0, width: '100%', height: 2, background: today ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', borderRadius: 2 }} />
+                    : <>
+                        {mode !== 'month' && (
+                          <span style={{ position: 'absolute', bottom: heightPx + 4, left: '50%', transform: 'translateX(-50%)', fontSize: 13, color: today ? C.gold : '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 2 }}>
+                            ${total.toFixed(0)}
+                          </span>
+                        )}
                         <motion.div className="bar-fill"
                           initial={{ height: 0 }}
-                          animate={{ height: `${heightPct}%` }}
+                          animate={{ height: heightPx }}
                           transition={{ duration: 0.55, delay: i * 0.02, ease: [0.22, 1, 0.36, 1] }}
-                          style={{ width: '100%', borderRadius: '4px 4px 0 0', position: 'relative', transition: 'filter .2s', overflow: 'hidden', display: 'flex', flexDirection: 'column', outline: isSel ? '2px solid var(--col-acc)' : 'none', outlineOffset: 1 }}>
-                          {ordRev > 0 && <div style={{ flex: ordRev, background: today ? 'linear-gradient(to top, #c4b5fd, #a78bfa66)' : 'linear-gradient(to top, #a78bfa, #a78bfa44)' }} />}
-                          {apptRev > 0 && <div style={{ flex: apptRev, background: today ? `linear-gradient(to top, ${C.gold}, ${C.gold}66)` : 'linear-gradient(to top, #34d399, #34d39944)' }} />}
-                          {total > 0 && mode !== 'month' && (
-                            <span style={{ position: 'absolute', top: -15, left: '50%', transform: 'translateX(-50%)', fontSize: 13, color: today ? C.gold : '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                              ${total.toFixed(0)}
-                            </span>
-                          )}
+                          style={{ position: 'absolute', bottom: 0, width: '100%', borderRadius: '4px 4px 0 0', overflow: 'hidden', display: 'flex', flexDirection: 'column', outline: isSel ? '2px solid var(--col-acc)' : 'none', outlineOffset: 1 }}>
+                          {ordRev > 0 && <div style={{ flex: ordRev, background: today ? 'linear-gradient(to top, #c4b5fd, rgba(167,139,250,0.4))' : 'linear-gradient(to top, #a78bfa, rgba(167,139,250,0.27))' }} />}
+                          {apptRev > 0 && <div style={{ flex: apptRev, background: today ? 'linear-gradient(to top, var(--col-acc), rgba(var(--rgb-acc),0.4))' : 'linear-gradient(to top, #34d399, rgba(52,211,153,0.27))' }} />}
                         </motion.div>
-                      )
-                    }
-                  </div>
+                      </>
+                  }
                 </div>
               )
             })}
@@ -854,7 +843,7 @@ function HourlyChart({ appointments, hours }) {
   const [selected, setSelected] = useState(null)
   const counts = hours.map(h => {
     const hStr = String(h).padStart(2, '0')
-    const slot  = appointments.filter(a => a.time?.startsWith(hStr))
+    const slot  = appointments.filter(a => a.time?.startsWith(hStr) && a.status !== 'cancelled')
     return { h, total: slot.length, completed: slot.filter(a => a.status === 'completed').length, confirmed: slot.filter(a => a.status === 'confirmed').length, pending: slot.filter(a => a.status === 'pending').length }
   })
   const maxCount = Math.max(1, ...counts.map(c => c.total))
@@ -897,29 +886,28 @@ function HourlyChart({ appointments, hours }) {
           {[25, 50, 75].map(pct => (
             <div key={pct} style={{ position: 'absolute', bottom: `${pct}%`, left: 0, right: 0, height: 1, background: 'rgba(var(--rgb-hi),0.04)', pointerEvents: 'none', zIndex: 0 }} />
           ))}
-          <div className="chart-bars" style={{ display: 'flex', alignItems: 'flex-end', gap: 5, position: 'relative', zIndex: 1 }}>
+          <div className="chart-bars" style={{ height: 120, display: 'flex', alignItems: 'flex-end', gap: 5, position: 'relative', zIndex: 1 }}>
             {counts.map(({ h, total, completed, confirmed, pending }, i) => {
-              const heightPct = total === 0 ? 0 : Math.max(6, (total / maxCount) * 100)
-              const color = completed > 0 ? C.gold : confirmed > 0 ? '#34d399' : pending > 0 ? '#f59e0b' : null
+              const heightPx = total === 0 ? 0 : Math.max(6, (total / maxCount) * 120)
+              const color = completed > 0 ? 'var(--col-acc)' : confirmed > 0 ? '#34d399' : pending > 0 ? '#f59e0b' : null
+              const colorAlpha = completed > 0 ? 'rgba(var(--rgb-acc),0.4)' : confirmed > 0 ? 'rgba(52,211,153,0.4)' : pending > 0 ? 'rgba(245,158,11,0.4)' : null
               const isSel = selected?.h === h
               return (
                 <div key={h} className="bar-col"
                   onClick={() => setSelected(isSel ? null : { h, total, completed, confirmed, pending })}
-                  style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, cursor: 'pointer', height: '100%', justifyContent: 'flex-end' }}>
-                  <div style={{ width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%', position: 'relative' }}>
-                    {total === 0
-                      ? <div style={{ width: '100%', height: 2, background: 'rgba(var(--rgb-hi),0.04)', borderRadius: 2 }} />
-                      : (
+                  style={{ flex: 1, position: 'relative', height: '100%', cursor: 'pointer' }}>
+                  {total === 0
+                    ? <div style={{ position: 'absolute', bottom: 0, width: '100%', height: 2, background: 'rgba(var(--rgb-hi),0.04)', borderRadius: 2 }} />
+                    : <>
+                        <span style={{ position: 'absolute', bottom: heightPx + 4, left: '50%', transform: 'translateX(-50%)', fontSize: 12, color: color || C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 2 }}>{total}</span>
                         <motion.div className="bar-fill"
                           initial={{ height: 0 }}
-                          animate={{ height: `${heightPct}%` }}
+                          animate={{ height: heightPx }}
                           transition={{ duration: 0.55, delay: i * 0.04, ease: [0.22, 1, 0.36, 1] }}
-                          style={{ width: '100%', background: color ? `linear-gradient(to top, ${color}, ${color}66)` : 'rgba(var(--rgb-hi),0.12)', borderRadius: '4px 4px 0 0', position: 'relative', transition: 'filter .2s', outline: isSel ? '2px solid var(--col-acc)' : 'none', outlineOffset: 1 }}>
-                          {total > 0 && <span style={{ position: 'absolute', top: -16, left: '50%', transform: 'translateX(-50%)', fontSize: 12, color: color || C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, whiteSpace: 'nowrap' }}>{total}</span>}
+                          style={{ position: 'absolute', bottom: 0, width: '100%', background: color ? `linear-gradient(to top, ${color}, ${colorAlpha})` : 'rgba(var(--rgb-hi),0.12)', borderRadius: '4px 4px 0 0', outline: isSel ? '2px solid var(--col-acc)' : 'none', outlineOffset: 1 }}>
                         </motion.div>
-                      )
-                    }
-                  </div>
+                      </>
+                  }
                 </div>
               )
             })}

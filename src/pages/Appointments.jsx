@@ -356,7 +356,7 @@ export default function Appointments() {
                 <div onClick={() => isDone && setStep(i)}
                   style={{ display:'flex', alignItems:'center', gap:6, cursor:isDone?'pointer':'default' }}>
                   <div style={{ width:24, height:24, borderRadius:'50%', flexShrink:0, background:isActive?'linear-gradient(135deg,var(--col-acc),var(--col-acc2))':isDone?'var(--col-acc)':'rgba(var(--rgb-hi),0.05)', border:isActive?'none':isDone?'1px solid rgba(var(--rgb-acc),0.35)':'1px solid rgba(var(--rgb-hi),0.08)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all .3s', boxShadow:isActive?'0 4px 14px rgba(var(--rgb-acc),0.45)':'none' }}>
-                    {isDone ? <Check size={10} color="var(--col-acc)"/> : <span style={{ fontSize:10, fontWeight:600, color:isActive?'var(--col-bg)':'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{i+1}</span>}
+                    {isDone ? <Check size={10} color="var(--col-bg)"/> : <span style={{ fontSize:10, fontWeight:600, color:isActive?'var(--col-bg)':'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{i+1}</span>}
                   </div>
                   <span style={{ fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', color:isActive?'var(--col-text)':isDone?'var(--col-acc)':'var(--col-text)', fontWeight:isActive?600:300 }}>{s}</span>
                 </div>
@@ -409,7 +409,7 @@ export default function Appointments() {
                   boxShadow: isActive ? '0 6px 24px rgba(var(--rgb-acc),0.5)' : 'none',
                   transition:'all 0.4s ease',
                 }}>
-                  {isDone ? <Check size={13} color="var(--col-acc)"/> : <span style={{ fontSize:12, fontWeight:600, color:isActive?'var(--col-bg)':'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{i+1}</span>}
+                  {isDone ? <Check size={13} color="var(--col-bg)"/> : <span style={{ fontSize:12, fontWeight:600, color:isActive?'var(--col-bg)':'var(--col-text)', fontFamily:'DM Sans,sans-serif' }}>{i+1}</span>}
                 </div>
                 <div style={{ paddingTop:3 }}>
                   <span style={{ fontSize:11, letterSpacing:'0.16em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', color:isActive?'var(--col-text)':isDone?'var(--col-acc)':'var(--col-text)', fontWeight:isActive?600:300, transition:'color 0.3s', display:'block' }}>{s}</span>
@@ -694,7 +694,7 @@ export default function Appointments() {
                               </div>
                           }
                           {isActive && (
-                            <div style={{ position:'absolute', inset:0, background:'var(--col-acc)' }}>
+                            <div style={{ position:'absolute', inset:0, background:'rgba(var(--rgb-acc),0.22)' }}>
                               <div style={{ position:'absolute', top:10, right:10, width:26, height:26, borderRadius:'50%', background:'linear-gradient(135deg,var(--col-acc),var(--col-acc2))', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 12px rgba(var(--rgb-acc),0.4)' }}>
                                 <Check size={12} color="var(--col-bg)" strokeWidth={2.5}/>
                               </div>

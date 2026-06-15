@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Clock, Play, StopCircle, ChevronLeft, ChevronRight, CalendarDays, AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Pager from '../../lib/Pager'
@@ -48,7 +48,6 @@ export default function StudioTimesheets() {
   useEffect(() => { load() }, [week, user])
 
   useEffect(() => {
-    if (!isAdmin) return
     loadLiveClockIns()
     const sub = supabase.channel('ts-live-clockins')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'timesheets' }, () => {
@@ -159,14 +158,15 @@ export default function StudioTimesheets() {
   }, 0)
 
   const filtered = filterStylist ? entries.filter(e => e.stylist_id === filterStylist.id) : entries
-  const PER_PAGE = window.innerWidth < 768 ? 4 : 10
-  const paged    = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+  const PER_PAGE = 3
+  const paged          = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+  const isCurrentWeek  = isSameWeek(week, new Date(), { weekStartsOn: 1 })
 
   if (error) return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
-      <AlertCircle size={28} color={C.red} />
-      <p style={{ color: C.muted, fontFamily: 'DM Sans,sans-serif', fontSize: '0.85rem', margin: 0, textAlign: 'center' }}>{error}</p>
-      <button onClick={load} style={{ padding: '0.4rem 1.25rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
+      <AlertCircle size={32} color={C.red} />
+      <p style={{ color: C.muted, fontFamily: 'DM Sans,sans-serif', fontSize: '1rem', margin: 0, textAlign: 'center' }}>{error}</p>
+      <button onClick={load} style={{ padding: '0.5rem 1.5rem', borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.white, fontSize: '0.94rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>Try again</button>
     </div>
   )
 
@@ -182,19 +182,21 @@ export default function StudioTimesheets() {
         .ts-picker-week:hover   { background: rgba(var(--rgb-acc),0.1) !important; border-color: rgba(var(--rgb-acc),0.15) !important; }
         .ts-filter-btn:hover    { background: rgba(var(--rgb-hi),0.05) !important; }
         .ts-stylist-row:hover   { background: rgba(var(--rgb-hi),0.04) !important; }
+        .ts-today-desktop { display: none !important; }
+        .ts-today-mobile  { display: flex; align-items: center; justify-content: center; width: 100%; }
       `}</style>
 
       {/* ── Header ──────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, paddingBottom: '1rem', borderBottom: `1px solid ${C.border}` }}>
-        <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
-        <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.7rem,3vw,2.4rem)', color: C.white, lineHeight: 1.1 }}>Timesheets</h1>
-        <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>Track worked hours and breaks in real time</p>
+        <p style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.3rem' }}>Team</p>
+        <h1 className="font-display font-light" style={{ fontSize: 'clamp(2rem,3.6vw,2.9rem)', color: C.white, lineHeight: 1.1 }}>Timesheets</h1>
+        <p style={{ color: C.muted, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', marginTop: 3 }}>Track worked hours and breaks in real time</p>
       </div>
 
       {/* Not linked warning for employees */}
       {!isAdmin && !loading && !linkedStylist && (
         <div style={{ flexShrink: 0, padding: '1rem 1.25rem', borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
-          <p style={{ color: '#f59e0b', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
+          <p style={{ color: '#f59e0b', fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif' }}>
             Your account hasn't been linked to a team member yet. Ask an admin to link your account in the <strong>Stylists</strong> page.
           </p>
         </div>
@@ -203,12 +205,12 @@ export default function StudioTimesheets() {
       {/* ── Stats row ────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, display: 'flex', gap: '0.6rem' }}>
         {[
-          { label: 'Clocked in now', value: clockedInNow.length,    color: C.green },
+          { label: 'Clocked in now', value: liveClockIns.length,    color: C.green },
           { label: 'Week total',     value: fmtMins(totalWeekMins), color: C.gold  },
         ].map(s => (
           <div key={s.label} style={{ flex: 1, background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '1rem 0.75rem', textAlign: 'center' }}>
-            <div className="font-display" style={{ fontSize: '1.5rem', color: s.color, lineHeight: 1 }}>{s.value}</div>
-            <div style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 5 }}>{s.label}</div>
+            <div className="font-display" style={{ fontSize: '1.8rem', color: s.color, lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontSize: 10, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 5 }}>{s.label}</div>
           </div>
         ))}
 
@@ -219,17 +221,17 @@ export default function StudioTimesheets() {
             {filterStylist ? (
               <>
                 {filterStylist.photo_url
-                  ? <img src={filterStylist.photo_url} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `2px solid ${C.gold}` }} />
-                  : <div style={{ width: 26, height: 26, borderRadius: '50%', background: C.goldBg, border: `2px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: 10, color: C.gold, fontWeight: 700 }}>{filterStylist.name[0]}</span>
+                  ? <img src={filterStylist.photo_url} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `2px solid ${C.gold}` }} />
+                  : <div style={{ width: 30, height: 30, borderRadius: '50%', background: C.goldBg, border: `2px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 12, color: C.gold, fontWeight: 700 }}>{filterStylist.name[0]}</span>
                     </div>
                 }
-                <span style={{ fontSize: 9, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{filterStylist.name.split(' ')[0]}</span>
+                <span style={{ fontSize: 11, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{filterStylist.name.split(' ')[0]}</span>
               </>
             ) : (
               <>
-                <div style={{ fontSize: '1.2rem', color: C.muted, lineHeight: 1 }}>⊞</div>
-                <div style={{ fontSize: 8, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 1 }}>Filter</div>
+                <div style={{ fontSize: '1.44rem', color: C.muted, lineHeight: 1 }}>⊞</div>
+                <div style={{ fontSize: 10, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 1 }}>Filter</div>
               </>
             )}
           </button>
@@ -244,11 +246,11 @@ export default function StudioTimesheets() {
             {/* Modal header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <div>
-                <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Team</p>
-                <h3 className="font-display font-light" style={{ fontSize: '1.3rem', color: C.white, lineHeight: 1.1 }}>Filter by member</h3>
+                <p style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Team</p>
+                <h3 className="font-display font-light" style={{ fontSize: '1.56rem', color: C.white, lineHeight: 1.1 }}>Filter by member</h3>
               </div>
               <button onClick={() => setShowFilter(false)}
-                style={{ width: 30, height: 30, borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}
+                style={{ width: 34, height: 34, borderRadius: 8, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 19, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .15s' }}
                 className="week-nav">
                 ×
               </button>
@@ -262,12 +264,12 @@ export default function StudioTimesheets() {
                   <button key={s.id} onClick={() => { setFilterStylist(s); setPage(0); setShowFilter(false) }} className="ts-stylist-row"
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '0.875rem 0.5rem', borderRadius: 12, background: isActive ? C.goldBg : C.subtle, border: `1px solid ${isActive ? C.goldBorder : C.border}`, cursor: 'pointer', transition: 'all .15s' }}>
                     {s.photo_url
-                      ? <img src={s.photo_url} alt="" style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `2px solid ${isActive ? C.gold : C.border}`, transition: 'border-color .15s' }} />
-                      : <div style={{ width: 44, height: 44, borderRadius: '50%', background: isActive ? C.goldBg : 'rgba(var(--rgb-hi),0.06)', border: `2px solid ${isActive ? C.gold : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 16, color: isActive ? C.gold : C.muted, fontWeight: 700 }}>{s.name[0]}</span>
+                      ? <img src={s.photo_url} alt="" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `2px solid ${isActive ? C.gold : C.border}`, transition: 'border-color .15s' }} />
+                      : <div style={{ width: 48, height: 48, borderRadius: '50%', background: isActive ? C.goldBg : 'rgba(var(--rgb-hi),0.06)', border: `2px solid ${isActive ? C.gold : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: 19, color: isActive ? C.gold : C.muted, fontWeight: 700 }}>{s.name[0]}</span>
                         </div>
                     }
-                    <span style={{ color: isActive ? C.gold : C.white, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</span>
+                    <span style={{ color: isActive ? C.gold : C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</span>
                   </button>
                 )
               })}
@@ -278,36 +280,50 @@ export default function StudioTimesheets() {
 
       {/* ── Week nav + calendar picker ───────────────────────── */}
       <div style={{ flexShrink: 0, position: 'relative' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '0.5rem 0.625rem' }}>
-          {isAdmin && filterStylist && (
-            <button onClick={() => { setFilterStylist(null); setPage(0) }} className="week-nav"
-              style={{ height: 32, padding: '0 10px', borderRadius: 9, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              Clear
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '0.5rem 0.625rem' }}>
+          {/* Main row: clear + arrows + date */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {isAdmin && filterStylist && (
+              <button onClick={() => { setFilterStylist(null); setPage(0) }} className="week-nav"
+                style={{ height: 36, padding: '0 12px', borderRadius: 9, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: '0.86rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                Clear
+              </button>
+            )}
+
+            <button onClick={() => { setWeek(subWeeks(week, 1)); setPage(0) }} className="week-nav"
+              style={{ width: 36, height: 36, borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
+              <ChevronLeft size={17} />
+            </button>
+
+            <button onClick={() => { setShowPicker(p => !p); setPickerMonth(startOfMonth(week)) }} className="ts-date-btn"
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '0.35rem 0.5rem', borderRadius: 10, transition: 'background .15s' }}>
+              <CalendarDays size={16} style={{ color: C.goldDim, flexShrink: 0 }} />
+              <span style={{ fontSize: '1.06rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
+              </span>
+            </button>
+
+            <button onClick={() => { setWeek(addWeeks(week, 1)); setPage(0) }} className="week-nav"
+              style={{ width: 36, height: 36, borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
+              <ChevronRight size={17} />
+            </button>
+
+            {/* Today — desktop only, hidden on mobile via CSS */}
+            {!isCurrentWeek && (
+              <button onClick={() => { setWeek(new Date()); setPage(0) }} className="week-nav ts-today-desktop"
+                style={{ height: 36, padding: '0 12px', borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.86rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                Today
+              </button>
+            )}
+          </div>
+
+          {/* Today — below the date row on both mobile and desktop */}
+          {!isCurrentWeek && (
+            <button onClick={() => { setWeek(new Date()); setPage(0) }} className="week-nav ts-today-mobile"
+              style={{ height: 28, padding: '0 14px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.06em', cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap' }}>
+              Back to today
             </button>
           )}
-
-          <button onClick={() => { setWeek(subWeeks(week, 1)); setPage(0) }} className="week-nav"
-            style={{ width: 32, height: 32, borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
-            <ChevronLeft size={15} />
-          </button>
-
-          <button onClick={() => { setShowPicker(p => !p); setPickerMonth(startOfMonth(week)) }} className="ts-date-btn"
-            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '0.35rem 0.5rem', borderRadius: 10, transition: 'background .15s' }}>
-            <CalendarDays size={14} style={{ color: C.goldDim, flexShrink: 0 }} />
-            <span style={{ fontSize: '0.88rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, whiteSpace: 'nowrap' }}>
-              {format(weekStart, 'MMM d')} – {format(weekEnd, 'MMM d, yyyy')}
-            </span>
-          </button>
-
-          <button onClick={() => { setWeek(addWeeks(week, 1)); setPage(0) }} className="week-nav"
-            style={{ width: 32, height: 32, borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0 }}>
-            <ChevronRight size={15} />
-          </button>
-
-          <button onClick={() => { setWeek(new Date()); setPage(0) }} className="week-nav"
-            style={{ height: 32, padding: '0 10px', borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
-            Today
-          </button>
         </div>
 
         {/* Backdrop to close picker */}
@@ -323,22 +339,22 @@ export default function StudioTimesheets() {
               {/* Month nav */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <button onClick={() => setPickerMonth(subMonths(pickerMonth, 1))} className="week-nav"
-                  style={{ width: 28, height: 28, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
-                  <ChevronLeft size={13} />
+                  style={{ width: 32, height: 32, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                  <ChevronLeft size={15} />
                 </button>
-                <span style={{ color: C.white, fontFamily: 'DM Sans,sans-serif', fontSize: '0.85rem', fontWeight: 600 }}>
+                <span style={{ color: C.white, fontFamily: 'DM Sans,sans-serif', fontSize: '1.02rem', fontWeight: 600 }}>
                   {format(pickerMonth, 'MMMM yyyy')}
                 </span>
                 <button onClick={() => setPickerMonth(addMonths(pickerMonth, 1))} className="week-nav"
-                  style={{ width: 28, height: 28, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
-                  <ChevronRight size={13} />
+                  style={{ width: 32, height: 32, borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .15s' }}>
+                  <ChevronRight size={15} />
                 </button>
               </div>
 
               {/* Day headers */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: '0.25rem' }}>
                 {['Mo','Tu','We','Th','Fr','Sa','Su'].map(d => (
-                  <div key={d} style={{ textAlign: 'center', fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em', padding: '3px 0', textTransform: 'uppercase' }}>{d}</div>
+                  <div key={d} style={{ textAlign: 'center', fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em', padding: '3px 0', textTransform: 'uppercase' }}>{d}</div>
                 ))}
               </div>
 
@@ -350,8 +366,8 @@ export default function StudioTimesheets() {
                     onClick={() => { setWeek(wk[0]); setPage(0); setShowPicker(false) }}
                     style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderRadius: 9, cursor: 'pointer', marginBottom: 2, transition: 'all .15s', background: selected ? 'var(--col-acc)' : 'transparent', border: selected ? `1px solid rgba(var(--rgb-acc),0.25)` : '1px solid transparent' }}>
                     {wk.map((day, di) => (
-                      <div key={di} style={{ textAlign: 'center', padding: '7px 0', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif',
-                        color: !isSameMonth(day, pickerMonth) ? 'var(--col-text)' : isToday(day) ? C.gold : selected ? 'rgba(var(--rgb-acc),0.9)' : C.white,
+                      <div key={di} style={{ textAlign: 'center', padding: '7px 0', fontSize: '0.96rem', fontFamily: 'DM Sans,sans-serif',
+                        color: selected ? (isToday(day) ? '#fff' : !isSameMonth(day, pickerMonth) ? 'rgba(255,255,255,0.45)' : '#fff') : (!isSameMonth(day, pickerMonth) ? 'var(--col-text)' : isToday(day) ? C.gold : C.white),
                         fontWeight: isToday(day) ? 700 : 400 }}>
                         {format(day, 'd')}
                       </div>
@@ -369,13 +385,13 @@ export default function StudioTimesheets() {
         <div style={{ flexShrink: 0, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.875rem', borderBottom: liveClockIns.length > 0 ? `1px solid ${C.border}` : 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.muted }}>Who's In</span>
-              <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: C.muted }}>·</span>
-              <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: C.muted }}>Live</span>
+              <span style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.muted }}>Who's In</span>
+              <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', color: C.muted }}>·</span>
+              <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', color: C.muted }}>Live</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 20, background: liveClockIns.length > 0 ? C.greenBg : C.subtle, border: `1px solid ${liveClockIns.length > 0 ? C.greenBorder : C.border}` }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: liveClockIns.length > 0 ? C.green : 'var(--col-text)', flexShrink: 0, animation: liveClockIns.length > 0 ? 'blink 2s infinite' : 'none' }} />
-              <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: liveClockIns.length > 0 ? C.green : C.muted, letterSpacing: '0.08em' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: liveClockIns.length > 0 ? C.greenBg : C.subtle, border: `1px solid ${liveClockIns.length > 0 ? C.greenBorder : C.border}` }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: liveClockIns.length > 0 ? C.green : 'var(--col-text)', flexShrink: 0, animation: liveClockIns.length > 0 ? 'blink 2s infinite' : 'none' }} />
+              <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: liveClockIns.length > 0 ? C.green : C.muted, letterSpacing: '0.08em' }}>
                 {liveClockIns.length} clocked in
               </span>
             </div>
@@ -387,16 +403,16 @@ export default function StudioTimesheets() {
                 const elapsed = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`
                 const s       = entry.stylists
                 return (
-                  <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.4rem 0.75rem 0.4rem 0.4rem', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
+                  <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.4rem 0.875rem 0.4rem 0.4rem', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
                     {s?.photo_url
-                      ? <img src={s.photo_url} alt={s.name} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1.5px solid ${C.greenBorder}` }} />
-                      : <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(52,211,153,0.1)', border: `1.5px solid ${C.greenBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, color: C.green, fontWeight: 700 }}>
+                      ? <img src={s.photo_url} alt={s.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1.5px solid ${C.greenBorder}` }} />
+                      : <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(52,211,153,0.1)', border: `1.5px solid ${C.greenBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 12, color: C.green, fontWeight: 700 }}>
                           {s?.name?.charAt(0) || '?'}
                         </div>
                     }
                     <div>
-                      <p style={{ fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: C.white, lineHeight: 1.2 }}>{s?.name?.split(' ')[0] || 'Stylist'}</p>
-                      <p style={{ fontSize: '0.65rem', fontFamily: 'DM Sans,sans-serif', color: C.green }}>{format(new Date(entry.clock_in), 'HH:mm')} · {elapsed}</p>
+                      <p style={{ fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: C.white, lineHeight: 1.2 }}>{s?.name?.split(' ')[0] || 'Stylist'}</p>
+                      <p style={{ fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', color: C.green }}>{format(new Date(entry.clock_in), 'HH:mm')} · {elapsed}</p>
                     </div>
                   </div>
                 )
@@ -422,38 +438,38 @@ export default function StudioTimesheets() {
               <div key={s.id} style={{ background: C.card, border: `1px solid ${active ? C.greenBorder : C.border}`, borderRadius: 14, padding: '1rem 0.875rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flex: '1 1 110px', minWidth: 110, transition: 'border-color .2s' }}>
                 <div style={{ position: 'relative' }}>
                   {s.photo_url
-                    ? <img src={s.photo_url} alt={s.name} style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `2px solid ${active ? C.green : C.border}`, transition: 'border-color .2s' }} />
-                    : <div style={{ width: 52, height: 52, borderRadius: '50%', background: C.subtle, border: `2px solid ${active ? C.green : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color .2s' }}>
-                        <span style={{ color: C.muted, fontSize: 18, fontWeight: 700 }}>{s.name[0]}</span>
+                    ? <img src={s.photo_url} alt={s.name} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', border: `2px solid ${active ? C.green : C.border}`, transition: 'border-color .2s' }} />
+                    : <div style={{ width: 56, height: 56, borderRadius: '50%', background: C.subtle, border: `2px solid ${active ? C.green : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-color .2s' }}>
+                        <span style={{ color: C.muted, fontSize: 20, fontWeight: 700 }}>{s.name[0]}</span>
                       </div>
                   }
-                  {active && <div style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: C.green, border: `2px solid ${C.card}`, animation: 'blink 2s infinite' }} />}
+                  {active && <div style={{ position: 'absolute', bottom: 1, right: 1, width: 13, height: 13, borderRadius: '50%', background: C.green, border: `2px solid ${C.card}`, animation: 'blink 2s infinite' }} />}
                 </div>
 
-                <p style={{ color: C.white, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</p>
+                <p style={{ color: C.white, fontSize: '0.96rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{s.name.split(' ')[0]}</p>
 
                 {active
-                  ? <p style={{ fontSize: 10, color: C.green, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(sinceMin)}</p>
+                  ? <p style={{ fontSize: 12, color: C.green, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(sinceMin)}</p>
                   : todayMins > 0
-                    ? <p style={{ fontSize: 10, color: C.goldDim, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(todayMins)}</p>
-                    : <p style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>Not in</p>
+                    ? <p style={{ fontSize: 12, color: C.goldDim, fontFamily: 'DM Sans,sans-serif' }}>{fmtMins(todayMins)}</p>
+                    : <p style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>Not in</p>
                 }
 
                 {isAdmin ? (
                   active
-                    ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 9, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '3px 9px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
-                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> Active
+                    ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '4px 10px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> Active
                       </span>
-                    : <span style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', padding: '3px 9px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
+                    : <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', padding: '4px 10px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
                 ) : (
                   active
                     ? <button onClick={() => clockOut(s.id)} className="clk-out"
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
-                        <StopCircle size={9} /> Out
+                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
+                        <StopCircle size={11} /> Out
                       </button>
                     : <button onClick={() => clockIn(s.id)} className="clk-in"
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
-                        <Play size={9} /> In
+                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 6, background: C.greenBg, border: `1px solid ${C.greenBorder}`, color: C.green, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
+                        <Play size={11} /> In
                       </button>
                 )}
               </div>
@@ -462,84 +478,76 @@ export default function StudioTimesheets() {
         </div>
       )}
 
-      {/* ── Log table ────────────────────────────────────────── */}
-      <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
-
-          {/* Column headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.5rem 0.875rem', background: 'rgba(var(--rgb-hi),0.025)', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
-            {['Member', 'In', 'Out', 'Net'].map((h, i) => (
-              <div key={i} style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, textAlign: i > 0 ? 'center' : 'left' }}>{h}</div>
-            ))}
-          </div>
-
-          {loading ? (
-            Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.75rem 0.875rem', borderBottom: `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.subtle, flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ height: 10, borderRadius: 4, width: 90, background: C.subtle, marginBottom: 5 }} />
-                    <div style={{ height: 8, borderRadius: 4, width: 60, background: C.subtle }} />
-                  </div>
-                </div>
-                {[1,1,1].map((_, j) => <div key={j} style={{ height: 10, borderRadius: 4, background: C.subtle, margin: '0 auto', width: 36 }} />)}
+      {/* ── Log entries ──────────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+        {loading ? (
+          Array.from({ length: PER_PAGE }).map((_, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', background: C.card, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.border}`, borderRadius: 12 }}>
+              <div style={{ width: 38, height: 38, borderRadius: '50%', background: C.subtle, flexShrink: 0 }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ height: 12, borderRadius: 4, width: 110, background: C.subtle, marginBottom: 7 }} />
+                <div style={{ height: 10, borderRadius: 4, width: 80, background: C.subtle }} />
               </div>
-            ))
-          ) : filtered.length === 0 ? (
-            <div style={{ padding: '3rem', textAlign: 'center' }}>
-              <Clock size={28} style={{ margin: '0 auto 0.6rem', color: C.border, display: 'block' }} />
-              <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif' }}>No entries this week</p>
+              <div style={{ height: 12, borderRadius: 4, width: 38, background: C.subtle }} />
+              <div style={{ height: 12, borderRadius: 4, width: 38, background: C.subtle }} />
+              <div style={{ height: 12, borderRadius: 4, width: 52, background: C.subtle }} />
             </div>
-          ) : paged.map((e, idx) => {
-            const raw    = e.clock_out ? Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in))) : null
-            const net    = raw !== null ? (raw >= 360 ? raw - 30 : raw) : null
-            const isLast = idx === paged.length - 1
-            return (
-              <div key={e.id} className="ts-row"
-                style={{ display: 'grid', gridTemplateColumns: '1fr 52px 52px 64px', padding: '0.6rem 0.875rem', borderBottom: isLast ? 'none' : `1px solid ${C.border}`, gap: '0.5rem', alignItems: 'center', transition: 'background .12s' }}>
+          ))
+        ) : filtered.length === 0 ? (
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '3rem', textAlign: 'center' }}>
+            <Clock size={32} style={{ margin: '0 auto 0.6rem', color: C.border, display: 'block' }} />
+            <p style={{ color: C.muted, fontSize: '0.96rem', fontFamily: 'DM Sans,sans-serif' }}>No entries this week</p>
+          </div>
+        ) : paged.map(e => {
+          const raw      = e.clock_out ? Math.max(0, differenceInMinutes(new Date(e.clock_out), new Date(e.clock_in))) : null
+          const net      = raw !== null ? (raw >= 360 ? raw - 30 : raw) : null
+          const isActive = !e.clock_out
+          return (
+            <div key={e.id} className="ts-row"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.8rem 1rem', background: C.card, border: `1px solid ${isActive ? C.greenBorder : C.border}`, borderLeft: `3px solid ${isActive ? C.green : 'rgba(var(--rgb-acc),0.35)'}`, borderRadius: 12, transition: 'all .12s' }}>
 
-                {/* Member + date */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  {e.stylists?.photo_url
-                    ? <img src={e.stylists.photo_url} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1px solid ${C.border}` }} />
-                    : <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.subtle, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>{e.stylists?.name?.[0]}</span>
-                      </div>
-                  }
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ color: C.white, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.stylists?.name}</p>
-                    <p style={{ color: C.muted, fontSize: '0.67rem', fontFamily: 'DM Sans,sans-serif', marginTop: 1 }}>{format(new Date(e.clock_in), 'EEE d MMM')}</p>
+              {/* Avatar */}
+              {e.stylists?.photo_url
+                ? <img src={e.stylists.photo_url} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `2px solid ${isActive ? C.greenBorder : C.border}` }} />
+                : <div style={{ width: 38, height: 38, borderRadius: '50%', background: C.subtle, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `2px solid ${C.border}` }}>
+                    <span style={{ fontSize: 13, color: C.muted, fontWeight: 700 }}>{e.stylists?.name?.[0]}</span>
                   </div>
-                </div>
+              }
 
-                {/* Clock in */}
-                <div style={{ textAlign: 'center' }}>
-                  <span style={{ color: C.green, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_in), 'HH:mm')}</span>
-                </div>
+              {/* Name + date */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ color: C.white, fontSize: '1.14rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{e.stylists?.name}</p>
+                <p style={{ color: C.muted, fontSize: '0.94rem', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(e.clock_in), 'EEE, MMM d')}</p>
+              </div>
 
-                {/* Clock out */}
+              {/* In · Out */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>In</div>
+                  <span style={{ color: C.green, fontSize: '1.05rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_in), 'HH:mm')}</span>
+                </div>
+                <span style={{ color: C.border, fontSize: '0.9rem', marginTop: 10 }}>·</span>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Out</div>
                   {e.clock_out
-                    ? <span style={{ color: C.red, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_out), 'HH:mm')}</span>
-                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 8, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '2px 5px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, whiteSpace: 'nowrap' }}>
-                        <span style={{ width: 4, height: 4, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> On
+                    ? <span style={{ color: C.red, fontSize: '1.05rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{format(new Date(e.clock_out), 'HH:mm')}</span>
+                    : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, color: C.green, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, padding: '2px 7px', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}`, whiteSpace: 'nowrap' }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: C.green, animation: 'blink 2s infinite', display: 'inline-block' }} /> Live
                       </span>
                   }
                 </div>
+              </div>
 
-                {/* Net hours */}
-                <div style={{ textAlign: 'center' }}>
-                  <span style={{ color: net !== null ? C.gold : C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: net !== null ? 600 : 400 }}>
-                    {net !== null ? fmtMins(net) : '—'}
-                  </span>
-                </div>
-
-
-</div>
-            )
-          })}
-        </div>
+              {/* Net hours */}
+              <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 54 }}>
+                <div style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>Net</div>
+                <span style={{ color: net !== null ? C.gold : C.muted, fontSize: '1.1rem', fontFamily: 'DM Sans,sans-serif', fontWeight: net !== null ? 700 : 400 }}>
+                  {net !== null ? fmtMins(net) : '—'}
+                </span>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {!loading && <Pager page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} />}
