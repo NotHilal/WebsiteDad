@@ -58,17 +58,17 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
         {/* Badges */}
         <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: 5 }}>
           {inCart && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: 'rgba(52,211,153,0.9)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6, background: 'rgba(52,211,153,0.9)', fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               <CheckCircle size={9} /> In Cart
             </span>
           )}
           {!inCart && p.stock > 0 && p.stock < 5 && (
-            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(245,158,11,0.85)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(245,158,11,0.85)', fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               Only {p.stock} left
             </span>
           )}
           {outOfStock && (
-            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            <span style={{ padding: '3px 9px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
               Out of stock
             </span>
           )}
@@ -76,7 +76,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
 
         {/* Quick-view hint */}
         <div style={{ position: 'absolute', bottom: 10, right: 10, opacity: 0, transition: 'opacity 0.25s' }} className="qv-btn">
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Details <ChevronRight size={9} />
           </span>
         </div>
@@ -87,7 +87,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
 
         {/* Category */}
         {p.category && (
-          <span style={{ fontSize: 9, color: 'var(--col-acc)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>
+          <span style={{ fontSize: 11, color: 'var(--col-acc)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 5 }}>
             {p.category}
           </span>
         )}
@@ -117,7 +117,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
         {inCart && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
             <CheckCircle size={11} color="#34d399" />
-            <span style={{ fontSize: 10, color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
+            <span style={{ fontSize: 12, color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
               {cartItems.find(i => i.product_id === p.id)?.quantity ?? 0} in cart
             </span>
           </div>
@@ -265,7 +265,7 @@ export default function Store() {
               <div style={{ position: 'relative' }}>
                 <ShoppingCart size={16} color={cartQty > 0 ? 'var(--col-bg)' : 'var(--col-text)'} />
                 {cartQty > 0 && (
-                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: 'rgba(0,0,0,0.25)', color: '#fff', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>{cartQty}</span>
+                  <span style={{ position: 'absolute', top: -7, right: -7, width: 15, height: 15, borderRadius: '50%', background: 'rgba(0,0,0,0.25)', color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans,sans-serif' }}>{cartQty}</span>
                 )}
               </div>
               <span style={{ fontSize: 12, color: cartQty > 0 ? 'var(--col-bg)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
@@ -291,7 +291,7 @@ export default function Store() {
                   transition: 'all 0.18s',
                 }}>
                   {cat}
-                  <span style={{ marginLeft: 5, fontSize: 9, opacity: 0.6 }}>({count})</span>
+                  <span style={{ marginLeft: 5, fontSize: 11, opacity: 0.6 }}>({count})</span>
                 </button>
               )
             })}
@@ -357,7 +357,15 @@ export default function Store() {
               transition={{ type: 'spring', damping: 28, stiffness: 320 }}
               onClick={e => e.stopPropagation()}
               className="store-detail-modal"
-              style={{ width: '100%', maxWidth: 780, background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-hi),0.09)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.8)', display: 'grid', gridTemplateColumns: '1fr 1fr', maxHeight: '92vh' }}>
+              style={{ width: '100%', maxWidth: 780, background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-hi),0.09)', borderRadius: 24, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.8)', display: 'grid', gridTemplateColumns: '1fr 1fr', maxHeight: '92vh', position: 'relative' }}>
+
+              {/* Close button — top-right of modal */}
+              <button onClick={closeDetail}
+                style={{ position: 'absolute', top: 14, right: 14, zIndex: 10, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(10px)', transition: 'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; e.currentTarget.style.color = '#fff' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.45)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)' }}>
+                <X size={14} />
+              </button>
 
               {/* Image */}
               <div style={{ position: 'relative', background: 'var(--col-modal)', minHeight: 'clamp(240px, 50vh, 380px)' }}>
@@ -369,19 +377,13 @@ export default function Store() {
                 }
                 {detail.category && (
                   <div style={{ position: 'absolute', top: 16, left: 16, padding: '4px 12px', borderRadius: 6, background: 'var(--col-acc)' }}>
-                    <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: 'var(--col-bg)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>{detail.category}</span>
+                    <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: 'var(--col-bg)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>{detail.category}</span>
                   </div>
                 )}
               </div>
 
               {/* Details */}
               <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: 0, overflowY: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.25rem' }}>
-                  <button onClick={closeDetail} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <X size={14} />
-                  </button>
-                </div>
-
                 <h2 className="font-display font-light" style={{ color: 'var(--col-text)', fontSize: '2rem', lineHeight: 1.1, marginBottom: '0.5rem' }}>{detail.name}</h2>
 
                 <p className="font-display gold-gradient" style={{ fontSize: '2rem', lineHeight: 1, marginBottom: '1.25rem' }}>

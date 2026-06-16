@@ -54,6 +54,22 @@ export default function StudioAppointments() {
 
   async function updateStatus(id, newStatus) {
     const appt = appointments.find(a => a.id === id)
+
+    if (newStatus === 'cancelled') {
+      const { data, error } = await supabase.functions.invoke('process-refund', {
+        body: { type: 'appointment', id },
+      })
+      if (error) { toast.error('Failed to cancel: ' + (error.message || 'unknown error')); return }
+      const wasRefunded = data?.refunded
+      setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'cancelled', payment_status: wasRefunded ? 'refunded' : a.payment_status } : a))
+      log('appointment.status_changed', {
+        entityType: 'appointment', entityId: id,
+        details: { message: `cancelled ${appt?.profiles?.full_name || 'client'}'s "${appt?.services?.name || 'appointment'}"${wasRefunded ? ' — Stripe refund issued' : ''}` },
+      })
+      toast.success(wasRefunded ? 'Appointment cancelled & refund issued' : 'Appointment cancelled')
+      return
+    }
+
     const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id)
     if (error) { toast.error(error.message); return }
 

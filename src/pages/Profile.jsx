@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ShoppingCart, Trash2, Download, Receipt, Scissors, ChevronRight, Minus, Plus } from 'lucide-react'
+import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ShoppingCart, Trash2, Download, Receipt, Scissors, ChevronRight, Minus, Plus, AlertTriangle, RotateCcw } from 'lucide-react'
 import jsPDF from 'jspdf'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
@@ -82,11 +82,16 @@ export default function Profile() {
   const [clientSecret, setClientSecret] = useState(null)
   const [reserving,    setReserving]    = useState(false)
 
+  // Appointment manage modal state
+  const [manageAppt,  setManageAppt]  = useState(null)
+  const [cancelling,  setCancelling]  = useState(false)
+
+
   useEffect(() => { if (user) loadAll() }, [user])
 
   async function loadAll() {
     const [{ data: a }, { data: o }, { data: c }] = await Promise.all([
-      supabase.from('appointments').select('*, stylists(name), services(name,price,duration)').eq('user_id', user.id).order('date', { ascending: false }),
+      supabase.from('appointments').select('*, stylists(id, name, photo_url), services(id, name, price, duration)').eq('user_id', user.id).order('date', { ascending: false }),
       supabase.from('preorders').select('*, products(name,image_url,price)').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('user_coupons').select('*, coupons(*)').eq('user_id', user.id).order('created_at', { ascending: false }),
     ])
@@ -175,6 +180,65 @@ export default function Profile() {
     } catch {
       toast.error('Payment succeeded but order failed — contact us')
     }
+  }
+
+  function canManage(appt) {
+    if (!['confirmed', 'pending'].includes(appt.status)) return false
+    if (appt.payment_status !== 'paid') return false
+    const apptTime = new Date(`${appt.date}T${appt.time || '00:00'}`)
+    return apptTime - Date.now() > 24 * 60 * 60 * 1000
+  }
+
+  function withinWindow(appt) {
+    if (!['confirmed', 'pending'].includes(appt.status)) return false
+    if (appt.payment_status !== 'paid') return false
+    const apptTime = new Date(`${appt.date}T${appt.time || '00:00'}`)
+    const diff = apptTime - Date.now()
+    return diff > 0 && diff <= 24 * 60 * 60 * 1000
+  }
+
+  async function handleCancelAppt() {
+    if (!manageAppt || cancelling) return
+    setCancelling(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('process-refund', {
+        body: { type: 'appointment', id: manageAppt.id, refundPct: 80 },
+      })
+      if (error) throw error
+      setAppts(prev => prev.map(a => a.id === manageAppt.id
+        ? { ...a, status: 'cancelled', payment_status: data?.refunded ? 'refunded' : a.payment_status }
+        : a))
+      ;(async () => { try { await supabase.from('activity_logs').insert({
+        actor_id:   user.id,
+        actor_name: profile?.full_name || user.email,
+        actor_role: profile?.role || 'user',
+        action:     'appointment.cancelled_by_client',
+        details: {
+          message:        `${profile?.full_name || user.email} cancelled their ${manageAppt.services?.name || 'appointment'} on ${manageAppt.date}${manageAppt.time ? ` at ${manageAppt.time.slice(0, 5)}` : ''} — 80% refund issued`,
+          appointment_id: manageAppt.id,
+          service:        manageAppt.services?.name,
+          stylist:        manageAppt.stylists?.name,
+          date:           manageAppt.date,
+          time:           manageAppt.time,
+          refund_pct:     80,
+        },
+      }) } catch {} })()
+      setManageAppt(null)
+      toast.success('Appointment cancelled — 80% refund is on its way.')
+    } catch (err) {
+      toast.error(err.message || 'Could not cancel appointment')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  function handleReschedule() {
+    if (!manageAppt) return
+    const apptId = manageAppt.id
+    setManageAppt(null)
+    navigate('/appointments', {
+      state: { reschedule: { service: manageAppt.services, stylist: manageAppt.stylists, stylist_id: manageAppt.stylist_id, appointmentId: apptId } },
+    })
   }
 
   function downloadReceipt(order) {
@@ -531,7 +595,7 @@ export default function Profile() {
 
           {/* Loyalty stamps */}
           <div className="profile-loyalty" style={{ flex: '0 0 52%', padding: '22px 24px' }}>
-            <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--col-text)', marginBottom: 14 }}>Loyalty Visits</p>
+            <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--col-text)', marginBottom: 14 }}>Loyalty Visits</p>
             {totalVisits > 0 && stampsThisCycle === 0 ? (
               <>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
@@ -595,7 +659,7 @@ export default function Profile() {
                 <p style={{ fontSize: 11, color: 'var(--col-text)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
               </div>
             </div>
-            <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500, color: 'var(--col-bg)', background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.25)', padding: '4px 12px', borderRadius: 6, alignSelf: 'flex-start' }}>
+            <span style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500, color: 'var(--col-bg)', background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.25)', padding: '4px 12px', borderRadius: 6, alignSelf: 'flex-start' }}>
               {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''} total`}
             </span>
           </div>
@@ -611,7 +675,7 @@ export default function Profile() {
           ].map(({ label, value }, i) => (
             <div key={label} style={{ flex: 1, padding: '16px 0', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
               <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 32, color: 'var(--col-text)', lineHeight: 1, marginBottom: 4 }}>{value}</div>
-              <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--col-text)' }}>{label}</div>
+              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--col-text)' }}>{label}</div>
             </div>
           ))}
         </motion.div>
@@ -625,7 +689,7 @@ export default function Profile() {
               <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} className="profile-tab-btn" style={{ flex: 1, padding: '13px 4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', transition: 'color 0.2s', fontWeight: tab === t ? 500 : 400, color: tab === t ? 'var(--col-acc)' : 'var(--col-text)', borderBottom: `2px solid ${tab === t ? 'var(--col-acc)' : 'transparent'}`, marginBottom: -1 }}>
                 {t}
                 {t === 'Cart' && cartItems.length > 0 && (
-                  <span style={{ marginLeft: 4, fontSize: 9, background: 'var(--col-acc)', color: 'var(--col-bg)', padding: '1px 5px', borderRadius: 9999 }}>
+                  <span style={{ marginLeft: 4, fontSize: 11, background: 'var(--col-acc)', color: 'var(--col-bg)', padding: '1px 5px', borderRadius: 9999 }}>
                     {cartItems.length}
                   </span>
                 )}
@@ -659,7 +723,7 @@ export default function Profile() {
                         {/* Cart footer */}
                         <div style={{ padding: '14px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                           <div>
-                            <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif', marginBottom: 3 }}>Total</p>
+                            <p style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif', marginBottom: 3 }}>Total</p>
                             <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>${cartTotal.toFixed(2)}</p>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -710,10 +774,10 @@ export default function Profile() {
                             <div style={{ flex: 1, minWidth: 0 }}>
                               {/* Header */}
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 0' }}>
-                                <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                                <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                                   #{appt.id.slice(0, 8).toUpperCase()}
                                 </span>
-                                <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
                                   {s.label}
                                 </span>
                               </div>
@@ -748,19 +812,32 @@ export default function Profile() {
                                     </>
                                   )}
                                 </div>
+
+                                {canManage(appt) && (
+                                  <button onClick={() => setManageAppt(appt)}
+                                    style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)', color: '#f87171', fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
+                                    <X size={10} /> Cancel
+                                  </button>
+                                )}
+                                {withinWindow(appt) && (
+                                  <button onClick={() => navigate('/chat')}
+                                    style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, cursor: 'pointer', opacity: 0.55 }}>
+                                    Contact us
+                                  </button>
+                                )}
                               </div>
 
                               {/* Footer */}
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}` }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                   <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: appt.payment_status === 'paid' ? '#34d399' : appt.payment_status === 'pay_in_store' ? '#f59e0b' : 'rgba(var(--rgb-hi),0.3)' }} />
-                                  <span style={{ fontSize: 10, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.06em' }}>
+                                  <span style={{ fontSize: 12, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.06em' }}>
                                     {appt.payment_status === 'paid' ? 'Paid online' : appt.payment_status === 'pay_in_store' ? 'Pay in store' : 'No payment on file'}
                                   </span>
                                 </div>
                                 {appt.payment_status === 'paid' && (
                                   <button onClick={() => downloadApptReceipt(appt)}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                                     <Download size={9} /> Receipt
                                   </button>
                                 )}
@@ -778,8 +855,17 @@ export default function Profile() {
 
                 {/* ── Orders ── */}
                 {tab === 'Orders' && (() => {
-                  const totalOrdPages = Math.ceil(orders.length / PER_PAGE)
-                  const pageOrders = orders.slice(ordPage * PER_PAGE, (ordPage + 1) * PER_PAGE)
+                  const groups = Object.values(
+                    orders.reduce((acc, o) => {
+                      const key = o.order_group_id || o.id
+                      if (!acc[key]) acc[key] = []
+                      acc[key].push(o)
+                      return acc
+                    }, {})
+                  ).sort((a, b) => new Date(b[0].created_at) - new Date(a[0].created_at))
+
+                  const totalOrdPages = Math.ceil(groups.length / PER_PAGE)
+                  const pageGroups = groups.slice(ordPage * PER_PAGE, (ordPage + 1) * PER_PAGE)
                   return (
                   <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 300 }}>
@@ -787,73 +873,78 @@ export default function Profile() {
                       Array.from({ length: 2 }).map((_, i) => (
                         <div key={i} style={{ height: 140, borderRadius: 12, background: S1 }} className="shimmer" />
                       ))
-                    ) : orders.length === 0 ? (
+                    ) : groups.length === 0 ? (
                       <EmptyState icon={Package} text="No orders yet." action="Browse the store" link="/store" />
                     ) : (
-                      pageOrders.map(order => {
-                        const total = ((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)
-                        const s = STATUS_MAP[order.status] ?? STATUS_MAP.active
+                      pageGroups.map(group => {
+                        const first = group[0]
+                        const s = STATUS_MAP[first.status] ?? STATUS_MAP.active
+                        const groupTotal = group.reduce((sum, o) => sum + (parseFloat(o.products?.price) || 0) * o.quantity, 0)
+                        const groupId = (first.order_group_id || first.id).slice(0, 8).toUpperCase()
                         return (
-                          <div key={order.id} style={{ borderRadius: 14, border: `1px solid ${BD}`, overflow: 'hidden', background: 'rgba(var(--rgb-hi),0.02)' }}>
+                          <div key={groupId} style={{ borderRadius: 14, border: `1px solid ${BD}`, overflow: 'hidden', background: 'rgba(var(--rgb-hi),0.02)' }}>
 
                             {/* Order header */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.02)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Package size={11} color="var(--col-text)" />
-                                <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--col-text)', letterSpacing: '0.08em' }}>
-                                  #{order.id.slice(0, 8).toUpperCase()}
-                                </span>
-                                <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>·</span>
-                                <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
-                                  {format(new Date(order.created_at), 'MMM d, yyyy')}
-                                </span>
+                                <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--col-text)', letterSpacing: '0.08em' }}>#{groupId}</span>
+                                <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>·</span>
+                                <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(first.created_at), 'MMM d, yyyy')}</span>
                               </div>
-                              <span style={{ fontSize: 10, padding: '3px 9px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                              <span style={{ fontSize: 12, padding: '3px 9px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
                                 {s.label}
                               </span>
                             </div>
 
-                            {/* Product row */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px' }}>
-                              <div style={{ width: 52, height: 52, borderRadius: 8, background: 'var(--col-card)', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {order.products?.image_url
-                                  ? <img src={order.products.image_url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s ease' }} onLoad={e => { e.currentTarget.style.opacity = '1' }} />
-                                  : <Package size={18} color="rgba(var(--rgb-hi),0.12)" />}
-                              </div>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ color: 'var(--col-text)', fontSize: 13, fontWeight: 500, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {order.products?.name}
+                            {/* Items */}
+                            {group.map((order, i) => (
+                              <div key={order.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderBottom: i < group.length - 1 ? `1px solid ${BD}` : 'none' }}>
+                                <div style={{ width: 44, height: 44, borderRadius: 8, background: 'var(--col-card)', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  {order.products?.image_url
+                                    ? <img src={order.products.image_url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0, transition: 'opacity 0.3s ease' }} onLoad={e => { e.currentTarget.style.opacity = '1' }} />
+                                    : <Package size={16} color="rgba(var(--rgb-hi),0.12)" />}
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ color: 'var(--col-text)', fontSize: 13, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {order.products?.name}
+                                  </p>
+                                  <p style={{ color: 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', opacity: 0.5 }}>
+                                    Qty {order.quantity}{order.products?.price ? ` · $${parseFloat(order.products.price).toFixed(2)} each` : ''}
+                                  </p>
+                                </div>
+                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.05rem', lineHeight: 1, flexShrink: 0 }}>
+                                  ${((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)}
                                 </p>
-                                <p style={{ color: 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif' }}>
-                                  Qty {order.quantity}
-                                  {order.products?.price && ` · $${parseFloat(order.products.price).toFixed(2)} each`}
-                                </p>
                               </div>
-                              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem', lineHeight: 1 }}>${total}</p>
-                              </div>
-                            </div>
+                            ))}
 
                             {/* Footer */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: order.payment_status === 'paid' ? '#34d399' : '#f59e0b', flexShrink: 0 }} />
-                                  <span style={{ fontSize: 10, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>
-                                    {order.payment_status === 'paid' ? 'Paid via Stripe' : order.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
+                                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: first.payment_status === 'paid' ? '#34d399' : '#f59e0b', flexShrink: 0 }} />
+                                  <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>
+                                    {first.payment_status === 'paid' ? 'Paid via Stripe' : first.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
                                   </span>
                                 </div>
-                                {order.payment_status === 'pay_in_store' && order.expires_at && order.status === 'active' && (
-                                  <span style={{ fontSize: 9, color: 'rgba(245,158,11,0.55)', fontFamily: 'DM Sans,sans-serif', paddingLeft: 11 }}>
-                                    Hold expires {format(new Date(order.expires_at), 'MMM d')}
+                                {first.payment_status === 'pay_in_store' && first.expires_at && first.status === 'active' && (
+                                  <span style={{ fontSize: 11, color: 'rgba(245,158,11,0.55)', fontFamily: 'DM Sans,sans-serif', paddingLeft: 11 }}>
+                                    Hold expires {format(new Date(first.expires_at), 'MMM d')}
                                   </span>
                                 )}
                               </div>
-                              <button
-                                onClick={() => setReceipt(order)}
-                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
-                                <Receipt size={10} /> Receipt
-                              </button>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {group.length > 1 && (
+                                  <span className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem' }}>
+                                    ${groupTotal.toFixed(2)}
+                                  </span>
+                                )}
+<button onClick={() => setReceipt(first)}
+                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                  <Receipt size={10} /> Receipt
+                                </button>
+                              </div>
                             </div>
                           </div>
                         )
@@ -920,7 +1011,7 @@ export default function Profile() {
                       Hair<span style={{ color: 'var(--col-acc)' }}>Go</span>
                     </span>
                   </div>
-                  <p style={{ fontSize: 9, color: 'var(--col-text)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>
+                  <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>
                     Premium Hair Studio · Auckland, NZ
                   </p>
                 </div>
@@ -928,25 +1019,25 @@ export default function Profile() {
                 {/* Order # + Date */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
-                    <p style={{ fontSize: 9, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Order</p>
+                    <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Order</p>
                     <p style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--col-text)', letterSpacing: '0.1em' }}>#{receipt.id.slice(0, 8).toUpperCase()}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 9, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Date</p>
+                    <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Date</p>
                     <p style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(receipt.created_at), 'MMM d, yyyy')}</p>
                   </div>
                 </div>
 
                 {/* Customer */}
                 <div style={{ marginBottom: 18, padding: '10px 12px', background: 'rgba(var(--rgb-hi),0.03)', border: '1px solid rgba(var(--rgb-hi),0.06)', borderRadius: 10 }}>
-                  <p style={{ fontSize: 9, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Customer</p>
+                  <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Customer</p>
                   <p style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{profile?.full_name || user?.email}</p>
                 </div>
 
                 {/* Items header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 9, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Item</span>
-                  <span style={{ fontSize: 9, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Amount</span>
+                  <span style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Item</span>
+                  <span style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Amount</span>
                 </div>
 
                 {/* Item row */}
@@ -964,7 +1055,7 @@ export default function Profile() {
 
                 {/* Total */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                  <span style={{ fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', fontWeight: 600 }}>Total</span>
+                  <span style={{ fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', fontWeight: 600 }}>Total</span>
                   <span className="font-display gold-gradient" style={{ fontSize: '1.6rem', lineHeight: 1 }}>
                     ${((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
                   </span>
@@ -978,7 +1069,7 @@ export default function Profile() {
                   </span>
                 </div>
 
-                <p style={{ textAlign: 'center', fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', marginBottom: 20 }}>
+                <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', marginBottom: 20 }}>
                   Thank you for shopping with HairGo.
                 </p>
 
@@ -1010,6 +1101,67 @@ export default function Profile() {
         />
       )}
 
+      {/* ── Manage appointment modal ── */}
+      <AnimatePresence>
+        {manageAppt && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+            onClick={() => !cancelling && setManageAppt(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.96 }}
+              style={{ background: 'var(--col-modal)', borderRadius: 20, padding: 24, maxWidth: 380, width: '100%', position: 'relative' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button onClick={() => !cancelling && setManageAppt(null)}
+                style={{ position: 'absolute', top: 14, right: 14, width: 30, height: 30, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={14} />
+              </button>
+
+              <p style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Manage Appointment</p>
+              <p className="font-display" style={{ fontSize: '1.3rem', color: 'var(--col-text)', marginBottom: 16 }}>{manageAppt.services?.name || '—'}</p>
+
+              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.07)', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {manageAppt.stylists?.name && (
+                  <span style={{ fontSize: 12, color: 'var(--col-text)', opacity: 0.6, fontFamily: 'DM Sans,sans-serif' }}>with {manageAppt.stylists.name}</span>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Calendar size={11} color="var(--col-acc)" />
+                  <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
+                    {format(new Date(manageAppt.date), 'MMM d, yyyy')}{manageAppt.time ? ` at ${manageAppt.time.slice(0, 5)}` : ''}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                <button onClick={handleReschedule} disabled={cancelling}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 12, background: 'rgba(var(--rgb-acc),0.07)', border: '1px solid rgba(var(--rgb-acc),0.2)', cursor: cancelling ? 'not-allowed' : 'pointer', opacity: cancelling ? 0.7 : 1, transition: 'all 0.2s', width: '100%', textAlign: 'left' }}>
+                  <RotateCcw size={16} color="var(--col-acc)" style={{ flexShrink: 0 }} />
+                  <div>
+                    <p style={{ fontSize: 13, color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>Reschedule</p>
+                    <p style={{ fontSize: 11, color: 'var(--col-text)', opacity: 0.5, fontFamily: 'DM Sans,sans-serif', margin: '2px 0 0' }}>Pick a new date & time</p>
+                  </div>
+                </button>
+
+                <button onClick={handleCancelAppt} disabled={cancelling}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.18)', cursor: cancelling ? 'not-allowed' : 'pointer', opacity: cancelling ? 0.7 : 1, transition: 'all 0.2s', width: '100%', textAlign: 'left' }}>
+                  <AlertTriangle size={16} color="#f87171" style={{ flexShrink: 0 }} />
+                  <div>
+                    <p style={{ fontSize: 13, color: '#f87171', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>Cancel</p>
+                    <p style={{ fontSize: 11, color: 'var(--col-text)', opacity: 0.5, fontFamily: 'DM Sans,sans-serif', margin: '2px 0 0' }}>80% refund · Cannot be undone</p>
+                  </div>
+                </button>
+              </div>
+
+              <p style={{ fontSize: 11, color: 'var(--col-text)', opacity: 0.35, fontFamily: 'DM Sans,sans-serif', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
+                Appointments within 24 hours cannot be managed online. Contact us directly.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -1028,7 +1180,7 @@ export default function Profile() {
           .profile-tab-panel { min-height: 320px; }
           .profile-tab-btn {
             padding: 11px 2px !important;
-            font-size: 9px !important;
+            font-size: 11px !important;
             letter-spacing: 0.08em !important;
           }
         }
@@ -1053,7 +1205,7 @@ function CouponCard({ coupon: c, used }) {
         {/* Left: discount badge */}
         <div style={{ flexShrink: 0, width: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: used ? 'rgba(255,255,255,0.02)' : 'linear-gradient(160deg, #3D5A73 0%, #B8D4E8 100%)', position: 'relative' }}>
           <span className="font-display" style={{ fontSize: '2.2rem', lineHeight: 1, fontWeight: 400, color: '#fff' }}>{discountLabel}</span>
-          <span style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
+          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
           <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
           <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
         </div>
@@ -1066,7 +1218,7 @@ function CouponCard({ coupon: c, used }) {
 
         {/* Right: code + info */}
         <div style={{ flex: 1, padding: '16px 16px 16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, minWidth: 0 }}>
-          <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.25)' : '#B8D4E8', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Used reward' : 'Loyalty Reward'}</p>
+          <p style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.25)' : '#B8D4E8', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Used reward' : 'Loyalty Reward'}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
               <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: '#f0f0f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
@@ -1077,12 +1229,12 @@ function CouponCard({ coupon: c, used }) {
               </button>
             )}
           </div>
-          {c?.expiry_date && <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}</p>}
+          {c?.expiry_date && <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}</p>}
         </div>
       </div>
       {used && (
         <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '3px 10px' }}>
-          <span style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Used</span>
+          <span style={{ fontSize: 12, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Used</span>
         </div>
       )}
     </div>

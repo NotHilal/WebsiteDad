@@ -38,7 +38,7 @@ export default function Login() {
     transition: 'border-color 0.3s, background 0.3s',
   }
   const lbl = {
-    display: 'block', fontSize: 10, letterSpacing: '0.22em',
+    display: 'block', fontSize: 12, letterSpacing: '0.22em',
     textTransform: 'uppercase', color: 'var(--col-text)',
     marginBottom: 8, fontFamily: 'DM Sans,sans-serif',
   }

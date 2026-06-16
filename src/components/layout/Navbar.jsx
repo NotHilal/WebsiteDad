@@ -153,9 +153,9 @@ export default function Navbar() {
               <Link to="/profile"
                 style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
                 onClick={() => {}}>
-                <ShoppingCart size={13} color={cartCount > 0 ? 'var(--col-acc)' : 'var(--col-text)'} />
+                <ShoppingCart size={13} color={cartCount > 0 ? 'var(--col-bg)' : 'var(--col-text)'} />
                 {cartCount > 0 && (
-                  <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, sans-serif' }}>
+                  <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, sans-serif' }}>
                     {cartCount > 9 ? '9+' : cartCount}
                   </span>
                 )}
@@ -193,7 +193,7 @@ export default function Navbar() {
                       style={{ position: 'absolute', right: 0, top: 'calc(100% + 10px)', width: 220, background: 'var(--col-drop)', backdropFilter: 'blur(24px)', border: '1px solid rgba(var(--rgb-acc),0.12)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}
                     >
                       <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(var(--rgb-hi),0.05)' }}>
-                        <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--col-text)', marginBottom: 4, fontFamily: 'DM Sans,sans-serif' }}>Signed in as</p>
+                        <p style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--col-text)', marginBottom: 4, fontFamily: 'DM Sans,sans-serif' }}>Signed in as</p>
                         <p style={{ fontSize: '0.82rem', color: 'var(--col-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</p>
                         {(profile?.points || 0) > 0 && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6 }}>

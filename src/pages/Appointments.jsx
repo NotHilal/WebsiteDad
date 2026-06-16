@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info, Mail, UserPlus } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useLocation } from 'react-router-dom'
 import { getOrFetch } from '../lib/cache'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
@@ -42,7 +43,13 @@ const slide = {
 
 export default function Appointments() {
   const { user, profile } = useAuth()
-  const [step,     setStep]     = useState(0)
+  const location = useLocation()
+  const reschedule = location.state?.reschedule
+  const [step,     setStep]     = useState(() => {
+    if (reschedule?.service && reschedule?.stylist) return 2
+    if (reschedule?.service) return 1
+    return 0
+  })
   const [services, setServices] = useState([])
   const [stylists, setStylists] = useState([])
   const [blocked,  setBlocked]  = useState([])
@@ -54,7 +61,13 @@ export default function Appointments() {
   const [payInStore,   setPayInStore]   = useState(false)
   const [guestInfo,    setGuestInfo]    = useState({ name:'', phone:'', email:'' })
   const [showPromo,    setShowPromo]    = useState(true)
-  const [sel,          setSel]          = useState({ service:null, stylist:null, date:null, time:null, notes:'' })
+  const [sel,          setSel]          = useState(() => ({
+    service: reschedule?.service ?? null,
+    stylist: reschedule?.stylist ?? null,
+    date: null,
+    time: null,
+    notes: '',
+  }))
   const [genderFilter, setGenderFilter] = useState('all')
   const [preview,      setPreview]      = useState(null)
   const [payStep,      setPayStep]      = useState(null)
@@ -100,8 +113,10 @@ export default function Appointments() {
     if (!sel.date || !sel.stylist) return
     const dateStr = format(sel.date, 'yyyy-MM-dd')
     if (stylistDayOffs.includes(dateStr)) { setTaken([...SLOTS]); setBlockedSlots([]); return }
+    let apptQuery = supabase.from('appointments').select('time, services(duration)').eq('stylist_id', sel.stylist.id).eq('date', dateStr).neq('status', 'cancelled')
+    if (reschedule?.appointmentId) apptQuery = apptQuery.neq('id', reschedule.appointmentId)
     Promise.all([
-      supabase.from('appointments').select('time, services(duration)').eq('stylist_id', sel.stylist.id).eq('date', dateStr).neq('status', 'cancelled'),
+      apptQuery,
       supabase.from('blocked_hours').select('hour').eq('date', dateStr).or(`stylist_id.eq.${sel.stylist.id},stylist_id.is.null`),
     ]).then(([{ data: appts }, { data: hours }]) => {
       const selectedDur = sel.service?.duration || 60
@@ -285,6 +300,47 @@ export default function Appointments() {
       setDone(true)
     } catch (err) {
       toast.error(err.message || 'Could not book appointment')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function confirmReschedule() {
+    if (!reschedule?.appointmentId) return
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .update({
+          date: format(sel.date, 'yyyy-MM-dd'),
+          time: sel.time,
+          notes: sel.notes,
+          stylist_id: sel.stylist.id,
+          service_id: sel.service.id,
+          status: 'confirmed',
+        })
+        .eq('id', reschedule.appointmentId)
+      if (error) throw error
+      await Promise.all([
+        sendConfirmationEmail('paid', null),
+        (async () => { try { await supabase.from('activity_logs').insert({
+          actor_id:   user?.id || null,
+          actor_name: profile?.full_name || user?.email || 'Client',
+          actor_role: profile?.role || 'user',
+          action:     'appointment.rescheduled',
+          details: {
+            message:        `${profile?.full_name || user?.email} rescheduled their ${sel.service?.name} with ${sel.stylist?.name} to ${format(sel.date, 'MMM d, yyyy')} at ${sel.time}`,
+            appointment_id: reschedule.appointmentId,
+            service:        sel.service?.name,
+            stylist:        sel.stylist?.name,
+            new_date:       format(sel.date, 'yyyy-MM-dd'),
+            new_time:       sel.time,
+          },
+        }) } catch {} })(),
+      ])
+      setDone(true)
+    } catch (err) {
+      toast.error(err.message || 'Could not reschedule appointment')
     } finally {
       setSaving(false)
     }
@@ -805,7 +861,7 @@ export default function Appointments() {
                                   const isSel = sel.time===slot
                                   return (
                                     <button key={slot} disabled={tk} onClick={() => setSel(p=>({...p,time:slot}))} className="appt-slot-btn"
-                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'1.06rem', fontFamily:'DM Sans,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(var(--rgb-acc),0.1)', background:isSel?'linear-gradient(135deg,var(--col-acc),var(--col-acc2))':'var(--col-acc)', color:isSel?'var(--col-bg)':tk?'rgba(0,0,0,0.2)':'var(--col-bg)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(var(--rgb-acc),0.35)':'none' }}>
+                                      style={{ padding:'0.45rem 0', borderRadius:8, fontSize:'1.06rem', fontFamily:'DM Sans,sans-serif', cursor:tk?'not-allowed':'pointer', transition:'all 0.2s ease', border:isSel?'none':'1px solid rgba(var(--rgb-hi),0.07)', background:isSel?'linear-gradient(135deg,var(--col-acc),var(--col-acc2))':'rgba(var(--rgb-hi),0.02)', color:isSel?'var(--col-bg)':tk?'rgba(var(--rgb-hi),0.08)':'var(--col-text)', fontWeight:isSel?700:300, textDecoration:tk?'line-through':'none', boxShadow:isSel?'0 4px 14px rgba(var(--rgb-acc),0.35)':'none' }}>
                                       {slot}
                                     </button>
                                   )
@@ -891,7 +947,7 @@ export default function Appointments() {
                 </div>
 
                 {/* ── Coupons ── */}
-                {availableCoupons.length > 0 && (
+                {availableCoupons.length > 0 && !reschedule?.appointmentId && (
                   <div style={{ marginBottom:18 }}>
                     <p style={{ fontSize:13, letterSpacing:'0.18em', textTransform:'uppercase', color: 'var(--col-text)', marginBottom:8, fontFamily:'DM Sans,sans-serif' }}>Your coupons</p>
                     <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
@@ -950,28 +1006,36 @@ export default function Appointments() {
                   </div>
                 )}
 
-                <div style={{ display:'flex', gap:10 }}>
-                  <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||saving||!guestInfoValid} style={{ flex:1, justifyContent:'center', borderRadius:10 }}>
-                    {payStep==='loading'
-                      ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopcolor: 'var(--col-bg)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
-                      : <>Pay Online &nbsp;${finalPrice.toFixed(2)} <ArrowRight size={15}/></>
-                    }
-                  </button>
-                  <button onClick={bookInStore} disabled={saving||payStep==='loading'||!guestInfoValid}
-                    style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:10, border:'1px solid rgba(var(--rgb-acc),0.28)', background:'var(--col-acc)', color:'var(--col-bg)', cursor: (saving||payStep==='loading'||!guestInfoValid) ? 'not-allowed' : 'pointer', opacity:(saving||payStep==='loading'||!guestInfoValid)?0.5:1, fontSize:15, fontFamily:'DM Sans,sans-serif', fontWeight:500, letterSpacing:'0.04em', transition:'all 0.25s' }}
-                    onMouseEnter={e => { if (!saving && !payStep && guestInfoValid) { e.currentTarget.style.background='var(--col-acc)'; e.currentTarget.style.borderColor='var(--col-acc)' } }}
-                    onMouseLeave={e => { e.currentTarget.style.background='var(--col-acc)'; e.currentTarget.style.borderColor='var(--col-acc)' }}>
+                {reschedule?.appointmentId ? (
+                  <button className="btn-gold" onClick={confirmReschedule} disabled={saving} style={{ width:'100%', justifyContent:'center', borderRadius:10 }}>
                     {saving
-                      ? <div style={{ width:16,height:16,border:'2px solid rgba(var(--rgb-acc),0.25)',borderTopcolor:'var(--col-acc)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
-                      : 'Pay in Store'
+                      ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'var(--col-bg)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
+                      : <>Confirm Reschedule <ArrowRight size={15}/></>
                     }
                   </button>
-                </div>
-
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:12 }}>
-                  <Sparkles size={10} color="rgba(var(--rgb-acc),0.4)"/>
-                  <p style={{ fontSize:11, color: 'var(--col-text)', letterSpacing:'0.12em', fontFamily:'DM Sans,sans-serif' }}>Every completed visit counts toward your 30% reward</p>
-                </div>
+                ) : (
+                  <>
+                    <div style={{ display:'flex', gap:10 }}>
+                      <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||saving||!guestInfoValid} style={{ flex:1, justifyContent:'center', borderRadius:10 }}>
+                        {payStep==='loading'
+                          ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'var(--col-bg)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
+                          : <>Pay Online &nbsp;${finalPrice.toFixed(2)} <ArrowRight size={15}/></>
+                        }
+                      </button>
+                      <button onClick={bookInStore} disabled={saving||payStep==='loading'||!guestInfoValid}
+                        style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 16px', borderRadius:10, border:'1px solid rgba(var(--rgb-acc),0.28)', background:'var(--col-acc)', color:'var(--col-bg)', cursor: (saving||payStep==='loading'||!guestInfoValid) ? 'not-allowed' : 'pointer', opacity:(saving||payStep==='loading'||!guestInfoValid)?0.5:1, fontSize:15, fontFamily:'DM Sans,sans-serif', fontWeight:500, letterSpacing:'0.04em', transition:'all 0.25s' }}>
+                        {saving
+                          ? <div style={{ width:16,height:16,border:'2px solid rgba(var(--rgb-acc),0.25)',borderTopColor:'var(--col-acc)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
+                          : 'Pay in Store'
+                        }
+                      </button>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:12 }}>
+                      <Sparkles size={10} color="rgba(var(--rgb-acc),0.4)"/>
+                      <p style={{ fontSize:11, color: 'var(--col-text)', letterSpacing:'0.12em', fontFamily:'DM Sans,sans-serif' }}>Every completed visit counts toward your 30% reward</p>
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
 

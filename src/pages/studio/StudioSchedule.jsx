@@ -74,7 +74,17 @@ export default function StudioSchedule() {
   const [dayDate,       setDayDate]       = useState(new Date())
   const [selectedAppt,  setSelectedAppt]  = useState(null)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    let debounce = null
+    const sub = supabase.channel('schedule-appointments')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
+        clearTimeout(debounce)
+        debounce = setTimeout(load, 800)
+      })
+      .subscribe()
+    return () => { clearTimeout(debounce); supabase.removeChannel(sub) }
+  }, [])
 
   async function load() {
     const [{ data: allAppts }, { data: stylistList }] = await Promise.all([

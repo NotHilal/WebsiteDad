@@ -181,7 +181,7 @@ export default function Gallery() {
             <motion.p
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ delay: 0.55 }}
-              style={{ marginTop: 14, fontSize: 10, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans, sans-serif' }}>
+              style={{ marginTop: 14, fontSize: 12, letterSpacing: '0.26em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans, sans-serif' }}>
               {filtered.length} {filtered.length === 1 ? 'work' : 'works'}
             </motion.p>
           )}
@@ -197,7 +197,7 @@ export default function Gallery() {
           <div style={{ display: 'flex', borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)' }}>
             {GENDERS.map(g => (
               <button key={g} onClick={() => changeFilter(() => setGender(g))}
-                style={{ padding: '9px 28px', background: gender === g ? 'var(--col-acc)' : 'transparent', color: gender === g ? 'var(--col-bg)' : 'var(--col-text)', border: 'none', cursor: 'pointer', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', fontWeight: gender === g ? 600 : 400, transition: 'all 0.22s ease' }}>
+                style={{ padding: '9px 28px', background: gender === g ? 'var(--col-acc)' : 'transparent', color: gender === g ? 'var(--col-bg)' : 'var(--col-text)', border: 'none', cursor: 'pointer', fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', fontWeight: gender === g ? 600 : 400, transition: 'all 0.22s ease' }}>
                 {g}
               </button>
             ))}
@@ -207,7 +207,7 @@ export default function Gallery() {
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
             {CATS.map(c => (
               <button key={c} onClick={() => changeFilter(() => setCat(c))}
-                style={{ padding: '6px 18px', borderRadius: 9999, cursor: 'pointer', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, transition: 'all 0.22s ease', background: cat === c ? 'rgba(var(--rgb-acc),0.13)' : 'transparent', border: cat === c ? '1px solid rgba(var(--rgb-acc),0.38)' : '1px solid rgba(var(--rgb-hi),0.1)', color: cat === c ? 'var(--col-acc)' : 'var(--col-text)', boxShadow: cat === c ? '0 2px 12px rgba(var(--rgb-acc),0.14)' : 'none' }}>
+                style={{ padding: '6px 18px', borderRadius: 9999, cursor: 'pointer', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', fontWeight: 500, transition: 'all 0.22s ease', background: cat === c ? 'rgba(var(--rgb-acc),0.13)' : 'transparent', border: cat === c ? '1px solid rgba(var(--rgb-acc),0.38)' : '1px solid rgba(var(--rgb-hi),0.1)', color: cat === c ? 'var(--col-acc)' : 'var(--col-text)', boxShadow: cat === c ? '0 2px 12px rgba(var(--rgb-acc),0.14)' : 'none' }}>
                 {c}
               </button>
             ))}
@@ -256,7 +256,7 @@ export default function Gallery() {
                   {/* Category tag */}
                   {item.category && (
                     <div style={{ position: 'absolute', top: 14, left: 14, zIndex: 2 }}>
-                      <span style={{ fontSize: 7.5, padding: '3.5px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.62)', backdropFilter: 'blur(10px)', color: 'rgba(255,255,255,0.82)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <span style={{ fontSize: 10, padding: '3.5px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.62)', backdropFilter: 'blur(10px)', color: 'rgba(255,255,255,0.82)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,0.08)' }}>
                         {item.category}
                       </span>
                     </div>
@@ -275,7 +275,7 @@ export default function Gallery() {
                   <div className="gal-hover" style={{ position: 'absolute', inset: 0, zIndex: 3, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '1.1rem', background: 'transparent', transition: 'background 0.35s ease', pointerEvents: 'none' }}>
                     <div className="gal-hover-info" style={{ opacity: 0, transform: 'translateY(7px)', transition: 'all 0.35s ease' }}>
                       {(item.stylist || item.stylists?.name) && (
-                        <p style={{ fontSize: 9, color: 'var(--col-acc)', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: 0 }}>
+                        <p style={{ fontSize: 11, color: 'var(--col-acc)', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: 0 }}>
                           {item.stylist || item.stylists?.name}
                         </p>
                       )}
@@ -348,7 +348,13 @@ export default function Gallery() {
                 transition={{ type: 'spring', damping: 28, stiffness: 280 }}
                 onClick={e => e.stopPropagation()}
                 className="gal-lb-modal"
-                style={{ width: '100%', maxWidth: 940, maxHeight: '88vh', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 64px 160px rgba(0,0,0,0.9)', display: 'flex' }}>
+                style={{ width: '100%', maxWidth: 940, maxHeight: '88vh', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 64px 160px rgba(0,0,0,0.9)', display: 'flex', position: 'relative' }}>
+
+                {/* Close button — top-right of modal */}
+                <button onClick={() => setLightbox(null)} className="gal-lb-close"
+                  style={{ position: 'absolute', top: 14, right: 14, zIndex: 20, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all 0.2s' }}>
+                  <X size={14} />
+                </button>
 
                 {/* Image panel */}
                 <div style={{ flex: '0 0 57%', position: 'relative', overflow: 'hidden', minHeight: 320, background: 'rgba(255,255,255,0.04)' }}>
@@ -358,7 +364,7 @@ export default function Gallery() {
                     onLoad={e => { e.currentTarget.style.opacity = '1' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.06) 50%, rgba(0,0,0,0.5) 100%)' }} />
                   <div style={{ position: 'absolute', bottom: 18, left: 20 }}>
-                    <span style={{ fontSize: 9.5, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', fontFamily: 'DM Sans, sans-serif' }}>
+                    <span style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', fontFamily: 'DM Sans, sans-serif' }}>
                       {lbIdx + 1} of {filtered.length}
                     </span>
                   </div>
@@ -371,17 +377,9 @@ export default function Gallery() {
 
                   <div style={{ flex: 1, padding: '2rem 2rem 2.5rem', display: 'flex', flexDirection: 'column' }}>
 
-                    {/* Close */}
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.25rem' }}>
-                      <button onClick={() => setLightbox(null)} className="gal-lb-close"
-                        style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.12)', color: 'var(--col-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0, opacity: 0.5 }}>
-                        <X size={13} />
-                      </button>
-                    </div>
-
                     {/* Category pill */}
                     {lightbox.category && (
-                      <span style={{ fontSize: 8.5, padding: '4px 14px', borderRadius: 9999, background: 'rgba(var(--rgb-acc),0.1)', border: '1px solid rgba(var(--rgb-acc),0.25)', color: 'var(--col-acc)', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.22em', textTransform: 'uppercase', display: 'inline-block', width: 'fit-content', marginBottom: '1.25rem' }}>
+                      <span style={{ fontSize: 10, padding: '4px 14px', borderRadius: 9999, background: 'rgba(var(--rgb-acc),0.1)', border: '1px solid rgba(var(--rgb-acc),0.25)', color: 'var(--col-acc)', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.22em', textTransform: 'uppercase', display: 'inline-block', width: 'fit-content', marginBottom: '1.25rem' }}>
                         {lightbox.category}
                       </span>
                     )}
@@ -411,7 +409,7 @@ export default function Gallery() {
                             <User size={12} color="var(--col-acc)" />
                           </div>
                           <div>
-                            <p style={{ fontSize: 7.5, color: 'var(--col-text)', opacity: 0.35, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Stylist</p>
+                            <p style={{ fontSize: 10, color: 'var(--col-text)', opacity: 0.35, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Stylist</p>
                             <p style={{ fontSize: '0.8rem', color: 'var(--col-text)', opacity: 0.8, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{lightbox.stylist || lightbox.stylists?.name}</p>
                           </div>
                         </div>
@@ -422,14 +420,14 @@ export default function Gallery() {
                             <Clock size={12} color="var(--col-acc)" />
                           </div>
                           <div>
-                            <p style={{ fontSize: 7.5, color: 'var(--col-text)', opacity: 0.35, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Duration</p>
+                            <p style={{ fontSize: 10, color: 'var(--col-text)', opacity: 0.35, letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans, sans-serif', margin: '0 0 2px' }}>Duration</p>
                             <p style={{ fontSize: '0.8rem', color: 'var(--col-text)', opacity: 0.8, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{lightbox.duration}</p>
                           </div>
                         </div>
                       )}
                       {lightbox.price && (
                         <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(var(--rgb-acc),0.05)', border: '1px solid rgba(var(--rgb-acc),0.12)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: 8.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', opacity: 0.35, fontFamily: 'DM Sans, sans-serif' }}>Starting from</span>
+                          <span style={{ fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--col-text)', opacity: 0.35, fontFamily: 'DM Sans, sans-serif' }}>Starting from</span>
                           <span className="font-display" style={{ fontSize: '1.4rem', color: 'var(--col-acc)', lineHeight: 1 }}>{lightbox.price}</span>
                         </div>
                       )}
@@ -468,7 +466,7 @@ export default function Gallery() {
         .gal-card:hover .gal-hover-info { opacity: 1 !important; transform: translateY(0) !important; }
         .gal-card:hover .gal-hover-btn { opacity: 1 !important; transform: scale(1) !important; }
         .gal-lb-arrow:hover { background: rgba(255,255,255,0.12) !important; border-color: rgba(255,255,255,0.22) !important; color: #fff !important; }
-        .gal-lb-close:hover { background: rgba(var(--rgb-hi),0.1) !important; opacity: 1 !important; border-color: rgba(var(--rgb-hi),0.25) !important; }
+        .gal-lb-close:hover { background: rgba(255,255,255,0.18) !important; border-color: rgba(255,255,255,0.3) !important; color: #fff !important; }
         .gal-lb-modal { flex-direction: row; }
         @media (max-width: 800px) {
           .gal-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }

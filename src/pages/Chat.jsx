@@ -173,14 +173,14 @@ export default function Chat() {
           <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>My Tickets</p>
-              <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
+              <p style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
                 {tickets.length} {tickets.length === 1 ? 'conversation' : 'conversations'}
               </p>
             </div>
             <button onClick={() => setShowNew(true)} style={{
               display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8,
               background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)',
-              fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer',
+              fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer',
               letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'transform .2s',
             }}>
               <Plus size={11} /> New
@@ -198,7 +198,7 @@ export default function Chat() {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, padding: '1.5rem', textAlign: 'center' }}>
                 <MessageSquare size={24} color="rgba(var(--rgb-hi),0.08)" style={{ marginBottom: 10 }} />
                 <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 10 }}>No tickets yet</p>
-                <button onClick={() => setShowNew(true)} style={{ fontSize: 10, color: C.gold, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                <button onClick={() => setShowNew(true)} style={{ fontSize: 12, color: C.gold, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                   Open first ticket
                 </button>
               </div>
@@ -215,23 +215,23 @@ export default function Chat() {
                       <p style={{ fontSize: '0.8rem', color: isActive ? C.white : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, marginLeft: 6 }}>
                         {tk.unread > 0 && (
-                          <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: 'var(--col-text)', fontSize: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 3px' }}>
+                          <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: 'var(--col-text)', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 3px' }}>
                             {tk.unread}
                           </span>
                         )}
-                        {tk.lastTime && <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
+                        {tk.lastTime && <span style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
                       </div>
                     </div>
                     <p style={{ fontSize: '0.72rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
                       {tk.lastMsg || 'No messages yet'}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 5 }}>
-                      <span style={{ fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'var(--col-text)', fontWeight: 600 }}>
+                      <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'var(--col-text)', fontWeight: 600 }}>
                         {tk.status}
                       </span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 20, background: tk.recipient ? 'rgba(52,211,153,0.07)' : 'var(--col-acc)', border: `1px solid ${tk.recipient ? 'rgba(52,211,153,0.2)' : 'var(--col-acc)'}` }}>
                         <div style={{ width: 4, height: 4, borderRadius: '50%', background: tk.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
-                        <span style={{ fontSize: 8, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: tk.recipient ? 'rgba(52,211,153,0.8)' : C.goldDim, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: tk.recipient ? 'rgba(52,211,153,0.8)' : C.goldDim, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
                           {tk.recipient?.full_name || 'Store'}
                         </span>
                       </span>
@@ -245,11 +245,11 @@ export default function Chat() {
           {/* Profile footer */}
           <div style={{ padding: '0.75rem 1rem', borderTop: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: 10, color: 'var(--col-bg)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{displayName[0]?.toUpperCase()}</span>
+              <span style={{ fontSize: 12, color: 'var(--col-bg)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{displayName[0]?.toUpperCase()}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: '0.75rem', color: C.white, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{displayName}</p>
-              <p style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Client</p>
+              <p style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Client</p>
             </div>
           </div>
         </div>
@@ -283,15 +283,15 @@ export default function Chat() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: selected.recipient ? 'rgba(52,211,153,0.1)' : 'var(--col-acc)', border: `1px solid ${selected.recipient ? 'rgba(52,211,153,0.3)' : 'var(--col-acc)'}` }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
-                    <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: selected.recipient ? '#34d399' : C.gold, letterSpacing: '0.04em' }}>
+                    <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: selected.recipient ? '#34d399' : C.gold, letterSpacing: '0.04em' }}>
                       {selected.recipient?.full_name || 'HairGo Store'}
                     </span>
                   </span>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: selected.status === 'open' ? 'rgba(52,211,153,0.08)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${selected.status === 'open' ? 'rgba(52,211,153,0.2)' : 'rgba(var(--rgb-hi),0.07)'}` }}>
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'var(--col-text)', boxShadow: selected.status === 'open' ? '0 0 5px rgba(52,211,153,0.4)' : 'none', flexShrink: 0 }} />
-                    <span style={{ fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? 'rgba(52,211,153,0.8)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{selected.status}</span>
+                    <span style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? 'rgba(52,211,153,0.8)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{selected.status}</span>
                   </span>
-                  <span style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
+                  <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
                 </div>
               </div>
 
@@ -310,7 +310,7 @@ export default function Chat() {
                       {showDate && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.75rem 0' }}>
                           <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.05)' }} />
-                          <span style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.06)' }}>
+                          <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.06)' }}>
                             {isToday(new Date(msg.created_at)) ? 'Today' : isYesterday(new Date(msg.created_at)) ? 'Yesterday' : format(new Date(msg.created_at), 'MMMM d')}
                           </span>
                           <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.05)' }} />
@@ -320,17 +320,17 @@ export default function Chat() {
                         style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start', marginTop: prevSame ? 2 : 8 }}>
                         {!isMe && (
                           <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, rgba(var(--rgb-acc),0.22), rgba(var(--rgb-acc),0.12))', border: '1px solid rgba(var(--rgb-acc),0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ fontSize: 9, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '-0.01em' }}>HG</span>
+                            <span style={{ fontSize: 11, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '-0.01em' }}>HG</span>
                           </div>
                         )}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
                           {!isMe && !prevSame && (
-                            <span style={{ fontSize: 9, color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>{msg.sender?.full_name || 'HairGo Team'}</span>
+                            <span style={{ fontSize: 11, color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>{msg.sender?.full_name || 'HairGo Team'}</span>
                           )}
                           <div style={{ padding: '0.6rem 1rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'DM Sans,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontWeight: 500, boxShadow: '0 4px 16px rgba(var(--rgb-acc),0.22)' } : { background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.09)', color: 'var(--col-text)', backdropFilter: 'blur(6px)' }) }}>
                             {msg.content}
                           </div>
-                          <span style={{ fontSize: 9, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
+                          <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
                         </div>
                       </motion.div>
                     </div>
@@ -388,23 +388,23 @@ export default function Chat() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Send to</label>
+                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Send to</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {[{ id: null, full_name: 'Store' }, ...workers].map(w => (
                         <button key={w.id ?? 'store'} type="button" onClick={() => setRecipientId(w.id)}
-                          style={{ padding: '5px 14px', borderRadius: 20, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', border: `1px solid ${recipientId === w.id ? C.goldBorder : C.border}`, background: recipientId === w.id ? C.goldBg : 'transparent', color: recipientId === w.id ? C.gold : C.muted }}>
+                          style={{ padding: '5px 14px', borderRadius: 20, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', border: `1px solid ${recipientId === w.id ? C.goldBorder : C.border}`, background: recipientId === w.id ? C.goldBg : 'transparent', color: recipientId === w.id ? C.gold : C.muted }}>
                           {w.full_name}
                         </button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Subject *</label>
+                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Subject *</label>
                     <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. Question about my appointment…" className="new-inp"
                       style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s, box-shadow .2s' }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Message <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--col-text)' }}>(optional)</span></label>
+                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Message <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--col-text)' }}>(optional)</span></label>
                     <textarea value={newMsg} onChange={e => setNewMsg(e.target.value)} rows={3} placeholder="Describe your question or request…" className="new-inp"
                       style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', resize: 'none', transition: 'border-color .2s, box-shadow .2s' }} />
                   </div>

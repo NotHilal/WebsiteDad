@@ -95,20 +95,26 @@ export default function StudioOrders() {
   }
 
   async function cancelOrder(group) {
-    if (!confirm('Cancel this order? Refund the client manually via Stripe.')) return
+    if (!confirm('Cancel this order? A Stripe refund will be issued automatically if paid online.')) return
     setUpdating(group.groupId)
-    const ids = group.items.map(i => i.id)
-    const { error } = await supabase.from('preorders').update({ status: 'cancelled' }).in('id', ids)
-    if (error) { toast.error('Update failed'); setUpdating(null); return }
-    log('order.cancelled', { entityType: 'order', entityId: group.groupId, details: { message: `cancelled ${group.profiles?.full_name || 'client'}'s order` } })
+
+    const { data, error } = await supabase.functions.invoke('process-refund', {
+      body: { type: 'order', id: group.groupId },
+    })
+    if (error) { toast.error('Failed to cancel: ' + (error.message || 'unknown error')); setUpdating(null); return }
+
+    log('order.cancelled', { entityType: 'order', entityId: group.groupId, details: { message: `cancelled ${group.profiles?.full_name || 'client'}'s order${data?.refunded ? ' — Stripe refund issued' : ''}` } })
+
+    // Restock items
     for (const item of group.items) {
       if (item.product_id && item.quantity) {
         const { data: prod } = await supabase.from('products').select('stock').eq('id', item.product_id).single()
         if (prod) await supabase.from('products').update({ stock: (prod.stock || 0) + item.quantity }).eq('id', item.product_id)
       }
     }
-    toast.success('Order cancelled')
-    syncGroup(group.groupId, { status: 'cancelled' })
+
+    toast.success(data?.refunded ? 'Order cancelled & refund issued' : 'Order cancelled')
+    syncGroup(group.groupId, { status: 'cancelled', ...(data?.refunded ? { payment_status: 'refunded' } : {}) })
     setUpdating(null)
   }
 

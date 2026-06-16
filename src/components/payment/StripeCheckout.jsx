@@ -3,7 +3,12 @@ import { loadStripe } from '@stripe/stripe-js'
 import { Elements, CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { ShieldCheck, ArrowLeft, Lock } from 'lucide-react'
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+// Lazy — only initializes when checkout first opens, not on page load
+let _stripePromise = null
+function getStripe() {
+  if (!_stripePromise) _stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+  return _stripePromise
+}
 
 function useIsDark() {
   const [isDark, setIsDark] = useState(
@@ -22,15 +27,15 @@ function useIsDark() {
 
 function Field({ label, children, isDark }) {
   const inputWrap = {
-    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)',
-    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.18)'}`,
+    background: isDark ? 'rgba(255,255,255,0.05)' : '#ececf2',
+    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.22)'}`,
     borderRadius: 12,
     padding: '13px 14px',
     transition: 'border-color 0.2s',
   }
   return (
     <div>
-      <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.4)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 8 }}>
+      <p style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.5)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 8 }}>
         {label}
       </p>
       <div style={inputWrap} className="card-field">
@@ -43,9 +48,16 @@ function Field({ label, children, isDark }) {
 function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
   const stripe   = useStripe()
   const elements = useElements()
-  const [paying, setPaying] = useState(false)
-  const [error,  setError]  = useState(null)
+  const [paying,     setPaying]     = useState(false)
+  const [error,      setError]      = useState(null)
+  const [cardReady,  setCardReady]  = useState(false)
   const isDark = useIsDark()
+
+  // Fallback: if onReady never fires, unblock fields after 4 s
+  useEffect(() => {
+    const t = setTimeout(() => setCardReady(true), 4000)
+    return () => clearTimeout(t)
+  }, [])
 
   const cardStyle = {
     style: {
@@ -96,13 +108,15 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
       {/* ── Amount card ─────────────────────────── */}
       <div style={{
         position: 'relative', borderRadius: 20, overflow: 'hidden', marginBottom: 24,
-        background: 'linear-gradient(135deg, rgba(184,212,232,0.12) 0%, rgba(122,175,201,0.06) 100%)',
-        border: '1px solid rgba(184,212,232,0.2)',
+        background: isDark
+          ? 'linear-gradient(135deg, rgba(184,212,232,0.12) 0%, rgba(122,175,201,0.06) 100%)'
+          : 'linear-gradient(135deg, rgba(184,212,232,0.35) 0%, rgba(122,175,201,0.2) 100%)',
+        border: `1px solid ${isDark ? 'rgba(184,212,232,0.2)' : 'rgba(122,175,201,0.45)'}`,
       }}>
         <div style={{ height: 3, background: 'linear-gradient(90deg, #B8D4E8, #E8D5A3, #7AAFC9)' }} />
         <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, borderRadius: '50%', background: 'radial-gradient(circle, rgba(184,212,232,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ padding: '1.5rem 1.75rem 1.4rem' }}>
-          <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: 'rgba(184,212,232,0.6)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 10 }}>
+          <p style={{ fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: isDark ? 'rgba(184,212,232,0.6)' : 'rgba(0,0,0,0.7)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 10 }}>
             Amount due
           </p>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, marginBottom: label ? 10 : 0 }}>
@@ -131,9 +145,9 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
         Card details
       </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
         <Field label="Card number" isDark={isDark}>
-          <CardNumberElement options={cardStyle} />
+          <CardNumberElement options={cardStyle} onReady={() => setCardReady(true)} />
         </Field>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -144,6 +158,13 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
             <CardCvcElement options={cardStyle} />
           </Field>
         </div>
+
+        {!cardReady && (
+          <div style={{ position: 'absolute', inset: 0, borderRadius: 12, background: isDark ? 'rgba(14,14,20,0.6)' : 'rgba(240,241,247,0.7)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <div style={{ width: 14, height: 14, border: `2px solid ${isDark ? 'rgba(184,212,232,0.2)' : 'rgba(0,0,0,0.15)'}`, borderTopColor: isDark ? '#B8D4E8' : '#7AAFC9', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <span style={{ fontSize: 11, color: isDark ? 'rgba(184,212,232,0.6)' : 'rgba(0,0,0,0.45)', fontFamily: 'DM Sans, sans-serif', letterSpacing: '0.1em' }}>Loading secure fields…</span>
+          </div>
+        )}
       </div>
 
       {/* ── Error ───────────────────────────────── */}
@@ -188,9 +209,9 @@ function CheckoutForm({ clientSecret, amount, label, onSuccess, onCancel }) {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .card-field:focus-within {
-          border-color: rgba(184,212,232,0.55) !important;
-          box-shadow: 0 0 0 3px rgba(184,212,232,0.07);
-          background: rgba(184,212,232,0.03) !important;
+          border-color: rgba(122,175,201,0.75) !important;
+          box-shadow: 0 0 0 3px rgba(122,175,201,0.12);
+          background: rgba(184,212,232,0.06) !important;
         }
       `}</style>
     </form>
@@ -216,7 +237,7 @@ export default function StripeCheckout({ clientSecret, amount, label, onSuccess,
       }}>
         <div style={{ height: 3, background: 'linear-gradient(90deg, #B8D4E8, #E8D5A3, #7AAFC9)' }} />
         <div style={{ padding: '2rem' }}>
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <Elements stripe={getStripe()} options={{ clientSecret }}>
             <CheckoutForm clientSecret={clientSecret} amount={amount} label={label} onSuccess={onSuccess} onCancel={onCancel} />
           </Elements>
         </div>

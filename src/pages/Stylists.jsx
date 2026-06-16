@@ -55,14 +55,14 @@ export default function Stylists() {
           padding: 3px 10px; border-radius: 9999px;
           background: rgba(var(--rgb-acc),0.15);
           border: 1px solid rgba(var(--rgb-acc),0.25);
-          font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+          font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
           color: var(--col-acc); font-family: DM Sans,sans-serif;
           white-space: nowrap;
         }
 
         .ig-link {
           display: inline-flex; align-items: center; gap: 5px;
-          font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+          font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
           color: var(--col-text); text-decoration: none;
           font-family: DM Sans,sans-serif; transition: color 0.2s;
           margin-top: 0.75rem;
@@ -167,7 +167,7 @@ export default function Stylists() {
                     {s.name}
                   </h3>
                   {s.title && (
-                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 400 }}>
+                    <p style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 400 }}>
                       {s.title}
                     </p>
                   )}

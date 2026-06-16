@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
       amount: amountCents,
       currency,
       description,
-      automatic_payment_methods: { enabled: true },
+      payment_method_types: ['card'],
     })
 
     return json({ client_secret: paymentIntent.client_secret, payment_intent_id: paymentIntent.id })

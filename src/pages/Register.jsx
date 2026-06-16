@@ -39,7 +39,7 @@ export default function Register() {
     transition: 'border-color 0.3s, background 0.3s',
   }
   const lbl = {
-    display: 'block', fontSize: 10, letterSpacing: '0.22em',
+    display: 'block', fontSize: 12, letterSpacing: '0.22em',
     textTransform: 'uppercase', color: 'var(--col-text)',
     marginBottom: 7, fontFamily: 'DM Sans,sans-serif',
   }
@@ -83,7 +83,7 @@ export default function Register() {
               </div>
               <div>
                 <label style={lbl}>
-                  Phone <span style={{ color: 'var(--col-text)', fontSize: 9 }}>(opt.)</span>
+                  Phone <span style={{ color: 'var(--col-text)', fontSize: 11 }}>(opt.)</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Phone size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />

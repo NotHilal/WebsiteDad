@@ -141,8 +141,11 @@ export default function StudioDashboard() {
           return (
             <button key={c.label} onClick={() => navigate(c.link)} className="d-stat"
               style={{ ...card, padding: '1.1rem 1.25rem', textAlign: 'left', cursor: 'pointer', transition: 'all .2s ease', borderColor: isClockCard && clockedIn ? 'rgba(52,211,153,0.2)' : undefined }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: `${isClockCard && clockedIn ? '#34d399' : c.color}14`, border: `1px solid ${isClockCard && clockedIn ? '#34d399' : c.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.875rem' }}>
-                <c.icon size={15} color={isClockCard && clockedIn ? '#34d399' : c.color} strokeWidth={1.5} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.875rem' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 10, background: `${isClockCard && clockedIn ? '#34d399' : c.color}14`, border: `1px solid ${isClockCard && clockedIn ? '#34d399' : c.color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <c.icon size={15} color={isClockCard && clockedIn ? '#34d399' : c.color} strokeWidth={1.5} />
+                </div>
+                <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, lineHeight: 1.2 }}>{c.label}</p>
               </div>
               {isClockCard ? (
                 activeClockIn === undefined ? (
@@ -160,7 +163,6 @@ export default function StudioDashboard() {
                   {loading ? '—' : c.value}
                 </div>
               )}
-              <p style={{ fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.1rem' }}>{c.label}</p>
               <p style={{ fontSize: '0.83rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
                 {isClockCard ? (clockedIn ? `Since ${elapsedStr} ago` : 'Not clocked in') : c.sub}
               </p>
@@ -196,7 +198,7 @@ export default function StudioDashboard() {
                   {[nextAppt.services?.name, nextAppt.stylists?.name].filter(Boolean).join(' · ')}
                 </p>
               </div>
-              <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 5, background: 'rgba(var(--rgb-acc),0.15)', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>Next</span>
+              <span style={{ fontSize: 12, padding: '2px 7px', borderRadius: 5, background: 'rgba(var(--rgb-acc),0.15)', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', flexShrink: 0 }}>Next</span>
             </div>
           )}
         </div>

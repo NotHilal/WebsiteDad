@@ -124,7 +124,17 @@ export default function StudioAppointmentsList() {
   const [selectedDay, setSelectedDay] = useState(null)
   const [dayPage,     setDayPage]     = useState(0)
 
-  useEffect(() => { load() }, [user])
+  useEffect(() => {
+    load()
+    let debounce = null
+    const sub = supabase.channel('apptlist-appointments')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
+        clearTimeout(debounce)
+        debounce = setTimeout(load, 800)
+      })
+      .subscribe()
+    return () => { clearTimeout(debounce); supabase.removeChannel(sub) }
+  }, [user])
 
   async function load() {
     if (!user) return
