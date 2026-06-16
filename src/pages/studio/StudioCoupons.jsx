@@ -43,7 +43,8 @@ function TypeToggle({ value, onChange }) {
 
 function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign, onAssign }) {
   const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `$${coupon.discount_value}`
-  const used = !coupon.active
+  const usedByClient = assignment?.used === true
+  const used = !coupon.active || usedByClient
   const sharedBorder = `1px solid ${used ? C.border : C.goldBorder}`
   return (
     <div>
@@ -73,7 +74,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
             <span style={{ flex: 1, fontSize: '0.84rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>
           )}
           <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
-          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
+          <button onClick={() => onToggle(coupon.id, coupon.active, usedByClient)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
           {assignment
             ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>Unassign</button>
             : <button onClick={() => onAssign(coupon)} className="btn-assign-uc" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>Assign</button>
@@ -118,7 +119,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
         </div>
         {/* Action row */}
         <div style={{ display: 'flex', gap: 6, padding: '10px 14px', flexWrap: 'wrap', borderTop: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
-          <button onClick={() => onToggle(coupon.id, coupon.active)} className={used ? 'btn-mark-active' : 'btn-mark-used'}
+          <button onClick={() => onToggle(coupon.id, coupon.active, usedByClient)} className={used ? 'btn-mark-active' : 'btn-mark-used'}
             style={{ flex: 1, minWidth: 90, padding: '6px 10px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>
             {used ? 'Mark active' : 'Mark used'}
           </button>
@@ -259,17 +260,30 @@ export default function StudioCoupons() {
     toast.success('Coupon unassigned')
   }
 
-  async function toggleActive(id, currentActive) {
+  async function toggleActive(id, currentActive, assignmentUsed = false) {
+    if (currentActive && assignmentUsed) {
+      // Coupon is still globally active but was used by the assigned client.
+      // "Mark active" here means: let the client use it again — just reset user_coupons.used.
+      const { error } = await supabase.from('user_coupons').update({ used: false }).eq('coupon_id', id)
+      if (error) { toast.error(error.message); return }
+      setAssignments(prev => prev[id] ? { ...prev, [id]: { ...prev[id], used: false } } : prev)
+      invalidate('studio_coupons')
+      toast.success('Marked as active')
+      return
+    }
+
     const { error } = await supabase.from('coupons').update({ active: !currentActive }).eq('id', id)
     if (error) { toast.error(error.message); return }
     setCoupons(prev => prev.map(c => c.id === id ? { ...c, active: !currentActive } : c))
 
     // Sync user_coupons.used — active=true means used=false, active=false means used=true
     if (assignedIds.has(id)) {
-      await supabase.from('user_coupons').update({ used: currentActive }).eq('coupon_id', id)
-      setAssignments(prev => prev[id] ? { ...prev, [id]: { ...prev[id], used: currentActive } } : prev)
+      const { error: ucErr } = await supabase.from('user_coupons').update({ used: currentActive }).eq('coupon_id', id)
+      if (ucErr) toast.error('Coupon status updated but could not sync assignment: ' + ucErr.message)
+      else setAssignments(prev => prev[id] ? { ...prev, [id]: { ...prev[id], used: currentActive } } : prev)
     }
 
+    invalidate('studio_coupons')
     toast.success(!currentActive ? 'Marked as active' : 'Marked as used')
   }
 

@@ -199,6 +199,8 @@ CREATE POLICY "Admins manage coupons" ON coupons FOR ALL USING (
 
 -- User Coupons
 CREATE POLICY "Users read own coupons" ON user_coupons FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "Users mark own coupons used" ON user_coupons FOR UPDATE
+  USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 CREATE POLICY "Admins manage user coupons" ON user_coupons FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );

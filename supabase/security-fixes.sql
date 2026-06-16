@@ -66,3 +66,16 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION decrement_product_stock TO authenticated;
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 4. user_coupons: allow users to self-claim public promo codes
+--    Users can INSERT a row for themselves with used=false only.
+--    The edge function (service role) handles marking used=true.
+--    UPDATE policy was added separately ("Users mark own coupons used").
+-- ─────────────────────────────────────────────────────────────────────────────
+DROP POLICY IF EXISTS "Users can claim promo coupons" ON user_coupons;
+
+CREATE POLICY "Users can claim promo coupons"
+  ON user_coupons FOR INSERT
+  WITH CHECK (user_id = auth.uid() AND used = false);

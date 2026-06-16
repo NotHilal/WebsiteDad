@@ -75,12 +75,25 @@ export default function Profile() {
   const [receipt,   setReceipt]   = useState(null)
   const [apptPage,  setApptPage]  = useState(0)
   const [ordPage,   setOrdPage]   = useState(0)
-  const PER_PAGE = 2
+  const [apptFilter,   setApptFilter]   = useState('upcoming')
+  const [ordFilter,    setOrdFilter]    = useState('pickup')
+  const [rewardFilter, setRewardFilter] = useState('active')
+  const PER_PAGE = 3
 
   // Payment modal state
   const [payStep,      setPayStep]      = useState(null)
   const [clientSecret, setClientSecret] = useState(null)
   const [reserving,    setReserving]    = useState(false)
+
+  // Cart coupon state
+  const [cartCouponCode,      setCartCouponCode]      = useState('')
+  const [cartCoupon,          setCartCoupon]          = useState(null)
+  const [cartCouponError,     setCartCouponError]     = useState(null)
+  const [validatingCartCode,  setValidatingCartCode]  = useState(false)
+
+  const cartFinalTotal = cartCoupon
+    ? Math.max(0, cartTotal - parseFloat(cartCoupon.discount_value))
+    : cartTotal
 
   // Appointment manage modal state
   const [manageAppt,  setManageAppt]  = useState(null)
@@ -114,12 +127,39 @@ export default function Profile() {
     navigate('/')
   }
 
+  async function validateCartCoupon() {
+    const code = cartCouponCode.trim().toUpperCase()
+    if (!code) return
+    setValidatingCartCode(true)
+    setCartCouponError(null)
+    try {
+      const { data: coupon } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', code)
+        .eq('active', true)
+        .maybeSingle()
+      if (!coupon) { setCartCouponError('Invalid coupon code'); return }
+      if (coupon.discount_type === 'percentage') { setCartCouponError('Percentage coupons can only be applied to appointments'); return }
+      if (coupon.expiry_date && new Date(coupon.expiry_date) < new Date()) { setCartCouponError('This coupon has expired'); return }
+      if (coupon.max_uses != null && coupon.current_uses >= coupon.max_uses) { setCartCouponError('This coupon has been fully redeemed'); return }
+      setCartCoupon(coupon)
+      setCartCouponCode('')
+    } finally {
+      setValidatingCartCode(false)
+    }
+  }
+
   async function startCartPayment() {
     if (cartItems.length === 0) return
     setPayStep('loading')
     try {
       const { data, error } = await supabase.functions.invoke('create-payment-intent', {
-        body: { type: 'cart', label: `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} from HairGo Store` },
+        body: {
+          type: 'cart',
+          couponCode: cartCoupon?.code ?? null,
+          label: `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} from HairGo Store`,
+        },
       })
       if (error) throw error
       setClientSecret(data.client_secret)
@@ -148,6 +188,7 @@ export default function Profile() {
         })
       }
       await clearCart()
+      setCartCoupon(null); setCartCouponCode('')
       toast.success('Items reserved! Come pay in store within 7 days.')
       loadAll()
       setTab('Orders')
@@ -172,7 +213,18 @@ export default function Profile() {
           p_quantity: item.quantity,
         })
       }
+
+      // Mark coupon used only now — payment is confirmed
+      if (cartCoupon) {
+        try {
+          await supabase.functions.invoke('create-payment-intent', {
+            body: { type: 'confirm-coupon', paymentIntentId, couponCode: cartCoupon.code },
+          })
+        } catch {} // non-critical — order is already confirmed
+      }
+
       await clearCart()
+      setCartCoupon(null); setCartCouponCode('')
       setPayStep(null); setClientSecret(null)
       toast.success('Payment confirmed! Come pick up your order.')
       loadAll()
@@ -582,7 +634,10 @@ export default function Profile() {
   const name     = profile?.full_name || user?.email?.split('@')[0] || 'Guest'
   const isAdmin  = profile?.role === 'admin'
   const upcoming = appointments.filter(a => a.status === 'confirmed' || a.status === 'pending').length
-  const activeCoupons = coupons.filter(c => !c.used).length
+  const now = new Date()
+  const activeCoupons = coupons.filter(({ used, coupons: c }) =>
+    !used && !(c?.expiry_date && new Date(c.expiry_date) < now)
+  ).length
   const card = { background: S1, border: `1px solid ${BD}`, borderRadius: 16 }
 
   return (
@@ -720,11 +775,48 @@ export default function Profile() {
                           />
                         ))}
 
+                        {/* Coupon code input */}
+                        {cartCoupon ? (
+                          <div style={{ padding: '10px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(52,211,153,0.04)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <Check size={12} color="#34d399"/>
+                              <span style={{ fontSize: 13, fontFamily: '"Courier New", monospace', letterSpacing: '0.06em', color: '#34d399' }}>{cartCoupon.code}</span>
+                              <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', color: 'rgba(52,211,153,0.65)' }}>— ${parseFloat(cartCoupon.discount_value).toFixed(2)} off</span>
+                            </div>
+                            <button onClick={() => setCartCoupon(null)}
+                              style={{ background: 'none', border: 'none', color: 'rgba(248,113,113,0.55)', cursor: 'pointer', padding: '2px 4px', fontSize: 11, fontFamily: 'DM Sans,sans-serif', lineHeight: 1 }}>
+                              Remove
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ padding: '10px 20px', borderTop: `1px solid ${BD}` }}>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              <input
+                                value={cartCouponCode}
+                                onChange={e => { setCartCouponCode(e.target.value.toUpperCase()); setCartCouponError(null) }}
+                                onKeyDown={e => e.key === 'Enter' && validateCartCoupon()}
+                                placeholder="Coupon code"
+                                style={{ flex: 1, background: S1, border: `1px solid ${cartCouponError ? 'rgba(248,113,113,0.4)' : BD}`, borderRadius: 8, padding: '7px 12px', fontSize: 12, color: 'var(--col-text)', outline: 'none', fontFamily: '"Courier New", monospace', letterSpacing: '0.06em', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                              />
+                              <button onClick={validateCartCoupon} disabled={!cartCouponCode.trim() || validatingCartCode}
+                                style={{ padding: '7px 14px', borderRadius: 8, border: `1px solid rgba(var(--rgb-acc),0.25)`, background: 'rgba(var(--rgb-acc),0.07)', color: 'var(--col-acc)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.08em', cursor: (!cartCouponCode.trim() || validatingCartCode) ? 'not-allowed' : 'pointer', opacity: (!cartCouponCode.trim() || validatingCartCode) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                                <Tag size={10}/>{validatingCartCode ? '…' : 'Apply'}
+                              </button>
+                            </div>
+                            {cartCouponError && (
+                              <p style={{ fontSize: 11, color: '#f87171', fontFamily: 'DM Sans,sans-serif', marginTop: 5 }}>{cartCouponError}</p>
+                            )}
+                          </div>
+                        )}
+
                         {/* Cart footer */}
                         <div style={{ padding: '14px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                           <div>
                             <p style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif', marginBottom: 3 }}>Total</p>
-                            <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>${cartTotal.toFixed(2)}</p>
+                            {cartCoupon && (
+                              <p style={{ fontSize: '1.1rem', color: 'var(--col-text)', opacity: 0.4, textDecoration: 'line-through', lineHeight: 1, marginBottom: 2, fontFamily: 'DM Sans,sans-serif' }}>${cartTotal.toFixed(2)}</p>
+                            )}
+                            <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>${cartFinalTotal.toFixed(2)}</p>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 11, justifyContent: 'center' }}>
@@ -749,17 +841,37 @@ export default function Profile() {
 
                 {/* ── Appointments ── */}
                 {tab === 'Appointments' && (() => {
-                  const totalApptPages = Math.ceil(appointments.length / PER_PAGE)
-                  const pageAppts = appointments.slice(apptPage * PER_PAGE, (apptPage + 1) * PER_PAGE)
+                  const filtered = appointments.filter(a =>
+                    apptFilter === 'upcoming' ? (a.status === 'confirmed' || a.status === 'pending') :
+                    apptFilter === 'completed' ? a.status === 'completed' : a.status === 'cancelled'
+                  )
+                  const pageAppts = filtered.slice(apptPage * PER_PAGE, (apptPage + 1) * PER_PAGE)
+                  const apptCounts = {
+                    upcoming:  appointments.filter(a => a.status === 'confirmed' || a.status === 'pending').length,
+                    completed: appointments.filter(a => a.status === 'completed').length,
+                    cancelled: appointments.filter(a => a.status === 'cancelled').length,
+                  }
                   return (
-                  <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 320 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderBottom: `1px solid ${BD}`, flexWrap: 'wrap' }}>
+                      {[['upcoming','Upcoming'],['completed','Completed'],['cancelled','Cancelled']].map(([key, label]) => (
+                        <button key={key} onClick={() => { setApptFilter(key); setApptPage(0) }}
+                          style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: apptFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${apptFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: apptFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: apptFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
+                          {label}
+                          {apptCounts[key] > 0 && <span style={{ fontSize:10, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{apptCounts[key]}</span>}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10, minHeight: 220 }}>
                     {loading ? (
                       Array.from({ length: 2 }).map((_, i) => (
                         <div key={i} style={{ height: 150, borderRadius: 12, background: S1 }} className="shimmer" />
                       ))
-                    ) : appointments.length === 0 ? (
-                      <EmptyState icon={Calendar} text="No appointments yet." action="Book your first visit" link="/appointments" />
+                    ) : pageAppts.length === 0 ? (
+                      <EmptyState icon={Calendar}
+                        text={apptFilter === 'upcoming' ? 'No upcoming appointments.' : apptFilter === 'completed' ? 'No completed appointments yet.' : 'No cancelled appointments.'}
+                        action={apptFilter === 'upcoming' ? 'Book now' : undefined}
+                        link={apptFilter === 'upcoming' ? '/appointments' : undefined} />
                     ) : (
                       pageAppts.map(appt => {
                         const s = STATUS_MAP[appt.status] ?? STATUS_MAP.pending
@@ -813,6 +925,19 @@ export default function Profile() {
                                   )}
                                 </div>
 
+                                {(() => {
+                                  const m = appt.notes?.match(/\[Coupon: (\S+) — (.+?) · Final: \$([0-9.]+)\]/)
+                                  if (!m) return null
+                                  return (
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '5px 10px', borderRadius: 8, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)' }}>
+                                      <Tag size={10} color="#34d399" />
+                                      <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', color: '#34d399', letterSpacing: '0.06em' }}>
+                                        {m[1]} — {m[2]} · paid <strong>${m[3]}</strong>
+                                      </span>
+                                    </div>
+                                  )
+                                })()}
+
                                 {canManage(appt) && (
                                   <button onClick={() => setManageAppt(appt)}
                                     style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)', color: '#f87171', fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
@@ -848,14 +973,14 @@ export default function Profile() {
                       })
                     )}
                     </div>
-                    <Pager page={apptPage} total={totalApptPages} onChange={setApptPage} />
+                    <Pager page={apptPage} total={Math.ceil(filtered.length / PER_PAGE)} onChange={setApptPage} />
                   </div>
                   )
                 })()}
 
                 {/* ── Orders ── */}
                 {tab === 'Orders' && (() => {
-                  const groups = Object.values(
+                  const allGroups = Object.values(
                     orders.reduce((acc, o) => {
                       const key = o.order_group_id || o.id
                       if (!acc[key]) acc[key] = []
@@ -864,17 +989,35 @@ export default function Profile() {
                     }, {})
                   ).sort((a, b) => new Date(b[0].created_at) - new Date(a[0].created_at))
 
-                  const totalOrdPages = Math.ceil(groups.length / PER_PAGE)
-                  const pageGroups = groups.slice(ordPage * PER_PAGE, (ordPage + 1) * PER_PAGE)
+                  const filteredGroups = allGroups.filter(g =>
+                    ordFilter === 'pickup' ? g[0].status === 'active' : (g[0].status === 'retrieved' || g[0].status === 'expired')
+                  )
+                  const pageGroups = filteredGroups.slice(ordPage * PER_PAGE, (ordPage + 1) * PER_PAGE)
+                  const ordCounts = {
+                    pickup:    allGroups.filter(g => g[0].status === 'active').length,
+                    completed: allGroups.filter(g => g[0].status === 'retrieved' || g[0].status === 'expired').length,
+                  }
                   return (
-                  <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 300 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderBottom: `1px solid ${BD}`, flexWrap: 'wrap' }}>
+                      {[['pickup','Awaiting Pickup'],['completed','Completed']].map(([key, label]) => (
+                        <button key={key} onClick={() => { setOrdFilter(key); setOrdPage(0) }}
+                          style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: ordFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${ordFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: ordFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: ordFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
+                          {label}
+                          {ordCounts[key] > 0 && <span style={{ fontSize:10, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{ordCounts[key]}</span>}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10, minHeight: 220 }}>
                     {loading ? (
                       Array.from({ length: 2 }).map((_, i) => (
                         <div key={i} style={{ height: 140, borderRadius: 12, background: S1 }} className="shimmer" />
                       ))
-                    ) : groups.length === 0 ? (
-                      <EmptyState icon={Package} text="No orders yet." action="Browse the store" link="/store" />
+                    ) : pageGroups.length === 0 ? (
+                      <EmptyState icon={Package}
+                        text={ordFilter === 'pickup' ? 'No orders awaiting pickup.' : 'No completed orders yet.'}
+                        action={ordFilter === 'pickup' ? 'Browse the store' : undefined}
+                        link={ordFilter === 'pickup' ? '/store' : undefined} />
                     ) : (
                       pageGroups.map(group => {
                         const first = group[0]
@@ -951,23 +1094,48 @@ export default function Profile() {
                       })
                     )}
                     </div>
-                    <Pager page={ordPage} total={totalOrdPages} onChange={setOrdPage} />
+                    <Pager page={ordPage} total={Math.ceil(filteredGroups.length / PER_PAGE)} onChange={setOrdPage} />
                   </div>
                   )
                 })()}
 
                 {/* ── Rewards ── */}
-                {tab === 'Rewards' && (
-                  <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {loading ? (
-                      Array.from({ length: 2 }).map((_, i) => <div key={i} style={{ height: 90, borderRadius: 14, background: S1 }} className="shimmer" />)
-                    ) : coupons.length === 0 ? (
-                      <EmptyState icon={Star} text="No coupons yet. Complete 5 visits to unlock your 30% reward." />
-                    ) : (
-                      coupons.map(({ id, coupons: c, used }) => <CouponCard key={id} coupon={c} used={used} />)
-                    )}
+                {tab === 'Rewards' && (() => {
+                  const now = new Date()
+                  const activeCouponsList = coupons.filter(({ used, coupons: c }) => !used && !(c?.expiry_date && new Date(c.expiry_date) < now))
+                  const pastCouponsList   = coupons.filter(({ used, coupons: c }) => used || !!(c?.expiry_date && new Date(c.expiry_date) < now))
+                  const displayList = rewardFilter === 'active' ? activeCouponsList : pastCouponsList
+                  return (
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderBottom: `1px solid ${BD}`, flexWrap: 'wrap' }}>
+                      {[['active','Available'],['past','Used & Expired']].map(([key, label]) => {
+                        const count = key === 'active' ? activeCouponsList.length : pastCouponsList.length
+                        return (
+                          <button key={key} onClick={() => setRewardFilter(key)}
+                            style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: rewardFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${rewardFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: rewardFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: rewardFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
+                            {label}
+                            {count > 0 && <span style={{ fontSize:10, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{count}</span>}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {loading ? (
+                        Array.from({ length: 2 }).map((_, i) => <div key={i} style={{ height: 90, borderRadius: 14, background: S1 }} className="shimmer" />)
+                      ) : coupons.length === 0 ? (
+                        <EmptyState icon={Star} text="No coupons yet. Complete 5 visits to unlock your 30% reward." />
+                      ) : displayList.length === 0 ? (
+                        <EmptyState icon={Star} text={rewardFilter === 'active' ? 'No available coupons right now.' : 'No used or expired coupons.'} />
+                      ) : (
+                        displayList.map(({ id, coupons: c, used }) => {
+                          const expired = !used && !!(c?.expiry_date && new Date(c.expiry_date) < now)
+                          return <CouponCard key={id} coupon={c} used={used} expired={expired} />
+                        })
+                      )}
+                    </div>
                   </div>
-                )}
+                  )
+                })()}
 
               </motion.div>
             </AnimatePresence>
@@ -1094,7 +1262,7 @@ export default function Profile() {
       {payStep === 'form' && clientSecret && (
         <StripeCheckout
           clientSecret={clientSecret}
-          amount={cartTotal.toFixed(2)}
+          amount={cartFinalTotal.toFixed(2)}
           label={`${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} from HairGo Store`}
           onSuccess={completeCartPayment}
           onCancel={() => { setPayStep(null); setClientSecret(null) }}
@@ -1189,23 +1357,31 @@ export default function Profile() {
   )
 }
 
-function CouponCard({ coupon: c, used }) {
+function CouponCard({ coupon: c, used, expired }) {
   const [copied, setCopied] = useState(false)
+  const inactive = used || expired
   function copy() {
-    if (!c?.code || used) return
+    if (!c?.code || inactive) return
     navigator.clipboard.writeText(c.code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
   const discountLabel = c?.discount_type === 'percentage' ? `${c.discount_value}%` : `$${c?.discount_value}`
+  const leftBg = used
+    ? 'rgba(255,255,255,0.02)'
+    : expired
+      ? 'rgba(239,68,68,0.06)'
+      : 'linear-gradient(160deg, #3D5A73 0%, #B8D4E8 100%)'
+  const topLabel = used ? 'Used reward' : expired ? 'Expired reward' : 'Loyalty Reward'
+  const topLabelColor = used ? 'rgba(255,255,255,0.25)' : expired ? 'rgba(239,68,68,0.45)' : '#B8D4E8'
   return (
-    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', opacity: used ? 0.55 : 1 }}>
-      <div style={{ border: `1px solid ${used ? 'rgba(255,255,255,0.06)' : 'rgba(184,212,232,0.3)'}`, borderRadius: 16, display: 'flex', overflow: 'hidden', background: '#111116' }}>
+    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', opacity: inactive ? 0.6 : 1 }}>
+      <div style={{ border: `1px solid ${used ? 'rgba(255,255,255,0.06)' : expired ? 'rgba(239,68,68,0.15)' : 'rgba(184,212,232,0.3)'}`, borderRadius: 16, display: 'flex', overflow: 'hidden', background: '#111116' }}>
 
         {/* Left: discount badge */}
-        <div style={{ flexShrink: 0, width: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: used ? 'rgba(255,255,255,0.02)' : 'linear-gradient(160deg, #3D5A73 0%, #B8D4E8 100%)', position: 'relative' }}>
-          <span className="font-display" style={{ fontSize: '2.2rem', lineHeight: 1, fontWeight: 400, color: '#fff' }}>{discountLabel}</span>
-          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
+        <div style={{ flexShrink: 0, width: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: leftBg, position: 'relative' }}>
+          <span className="font-display" style={{ fontSize: '2.2rem', lineHeight: 1, fontWeight: 400, color: expired ? 'rgba(255,255,255,0.4)' : '#fff' }}>{discountLabel}</span>
+          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: expired ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
           <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
           <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
         </div>
@@ -1218,23 +1394,32 @@ function CouponCard({ coupon: c, used }) {
 
         {/* Right: code + info */}
         <div style={{ flex: 1, padding: '16px 16px 16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, minWidth: 0 }}>
-          <p style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: used ? 'rgba(255,255,255,0.25)' : '#B8D4E8', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Used reward' : 'Loyalty Reward'}</p>
+          <p style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: topLabelColor, fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{topLabel}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: '#f0f0f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
+              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: inactive ? 'rgba(240,240,240,0.4)' : '#f0f0f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
             </div>
-            {!used && (
+            {!inactive && (
               <button onClick={copy} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, cursor: 'pointer', background: copied ? 'rgba(52,211,153,0.12)' : '#B8D4E8', border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'rgba(184,212,232,0.4)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s' }}>
                 {copied ? <CheckCheck size={13} color="#34d399" /> : <Copy size={13} color="#0a0a0a" />}
               </button>
             )}
           </div>
-          {c?.expiry_date && <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{used ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}</p>}
+          {c?.expiry_date && (
+            <p style={{ fontSize: 12, color: expired ? 'rgba(239,68,68,0.55)' : 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>
+              {expired ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}
+            </p>
+          )}
         </div>
       </div>
       {used && (
         <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '3px 10px' }}>
           <span style={{ fontSize: 12, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Used</span>
+        </div>
+      )}
+      {expired && (
+        <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, padding: '3px 10px' }}>
+          <span style={{ fontSize: 12, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.5)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Expired</span>
         </div>
       )}
     </div>

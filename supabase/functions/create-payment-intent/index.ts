@@ -18,7 +18,6 @@ function json(data, status = 200) {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
 
-  // Require authentication — reject calls with no Authorization header
   const authHeader = req.headers.get('Authorization')
   if (!authHeader) return json({ error: 'Unauthorized' }, 401)
 
@@ -31,22 +30,63 @@ Deno.serve(async (req) => {
   const { data: { user } } = await userClient.auth.getUser()
   if (!user) return json({ error: 'Unauthorized' }, 401)
 
-  // Service-role client for privileged DB reads/writes (cart totals, coupon updates)
   const adminClient = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
   try {
-    const { type, serviceId, couponId, label, currency = 'nzd' } = await req.json()
+    const { type, serviceId, couponId, couponCode, paymentIntentId, label, currency = 'nzd' } = await req.json()
 
+    // ── Confirm coupon after successful payment ──────────────────────────────
+    // Called from the client after Stripe payment succeeds. Verifies the intent
+    // status with Stripe before touching the coupon so an abandoned checkout
+    // never consumes the discount.
+    if (type === 'confirm-coupon') {
+      if (!paymentIntentId) return json({ error: 'paymentIntentId required' }, 400)
+
+      const pi = await stripe.paymentIntents.retrieve(paymentIntentId)
+      if (pi.status !== 'succeeded') return json({ error: 'Payment not confirmed' }, 400)
+
+      if (couponId) {
+        const { data: uc } = await adminClient.from('user_coupons')
+          .select('coupon_id, used').eq('id', couponId).eq('user_id', user.id).single()
+        if (uc && !uc.used) {
+          await adminClient.from('user_coupons').update({ used: true }).eq('id', couponId)
+          await adminClient.from('coupons').update({ active: false }).eq('id', uc.coupon_id)
+        }
+      } else if (couponCode) {
+        // Guest appointment or cart — deactivate so no one else can claim it.
+        const { data: c } = await adminClient.from('coupons').select('id')
+          .eq('code', String(couponCode).toUpperCase()).single()
+        if (c) await adminClient.from('coupons').update({ active: false }).eq('id', c.id)
+      }
+
+      return json({ ok: true })
+    }
+
+    // ── Mark coupon used (pay-in-store) ─────────────────────────────────────
+    // No Stripe payment intent involved — staff collect payment physically.
+    // Still routed through the edge function so we can use the admin client
+    // to deactivate the coupon globally (user client has no UPDATE on coupons).
+    if (type === 'mark-coupon-used') {
+      if (!couponId) return json({ error: 'couponId required' }, 400)
+      const { data: uc } = await adminClient.from('user_coupons')
+        .select('coupon_id, used').eq('id', couponId).eq('user_id', user.id).single()
+      if (uc && !uc.used) {
+        await adminClient.from('user_coupons').update({ used: true }).eq('id', couponId)
+        await adminClient.from('coupons').update({ active: false }).eq('id', uc.coupon_id)
+      }
+      return json({ ok: true })
+    }
+
+    // ── Create payment intent ────────────────────────────────────────────────
     let amountCents: number
     let description: string
 
     if (type === 'appointment') {
       if (!serviceId) return json({ error: 'serviceId is required' }, 400)
 
-      // Look up canonical price from DB — never trust a client-supplied amount
       const { data: service, error: svcErr } = await userClient
         .from('services')
         .select('price, name')
@@ -58,7 +98,6 @@ Deno.serve(async (req) => {
 
       let price = parseFloat(service.price)
 
-      // Validate and apply coupon server-side if provided
       if (couponId) {
         const { data: uc } = await adminClient
           .from('user_coupons')
@@ -76,19 +115,26 @@ Deno.serve(async (req) => {
             const { data: prof } = await adminClient.from('profiles').select('points').eq('id', user.id).single()
             if ((prof?.points ?? 0) < c.min_points_required) canApply = false
           }
-
           if (canApply) {
             price = c.discount_type === 'percentage'
               ? Math.max(0, price * (1 - c.discount_value / 100))
               : Math.max(0, price - c.discount_value)
-
-            // Mark coupon used atomically at intent-creation time
-            await adminClient
-              .from('user_coupons')
-              .update({ used: true })
-              .eq('id', couponId)
-              .eq('used', false)
+            // Coupon is marked used only after payment succeeds (confirm-coupon action)
           }
+        }
+      }
+
+      if (couponCode && !couponId) {
+        // Guest-only path: logged-in users always have a couponId via user_coupons.
+        const { data: coupon } = await adminClient.from('coupons').select('*')
+          .eq('code', String(couponCode).toUpperCase()).eq('active', true).maybeSingle()
+        const c = coupon as any
+        const expired = c?.expiry_date && new Date(c.expiry_date) < new Date()
+        const exceeded = c?.max_uses != null && (c.current_uses ?? 0) >= c.max_uses
+        if (c && !expired && !exceeded) {
+          price = c.discount_type === 'percentage'
+            ? Math.max(0, price * (1 - c.discount_value / 100))
+            : Math.max(0, price - parseFloat(c.discount_value))
         }
       }
 
@@ -96,7 +142,6 @@ Deno.serve(async (req) => {
       description = label ?? `Appointment: ${service.name}`
 
     } else if (type === 'cart') {
-      // Compute total server-side from the user's cart — never trust client-supplied total
       const { data: items, error: cartErr } = await adminClient
         .from('cart_items')
         .select('quantity, products(id, name, price, stock, available)')
@@ -110,16 +155,32 @@ Deno.serve(async (req) => {
         if ((item.products?.stock ?? 0) < item.quantity) return json({ error: 'Insufficient stock for one or more items' }, 400)
       }
 
-      const total = items.reduce((s, i) => s + parseFloat(i.products.price) * i.quantity, 0)
+      let total = items.reduce((s, i) => s + parseFloat(i.products.price) * i.quantity, 0)
+
+      if (couponCode) {
+        const { data: coupon } = await adminClient
+          .from('coupons')
+          .select('*')
+          .eq('code', String(couponCode).toUpperCase())
+          .eq('active', true)
+          .maybeSingle()
+        const c = coupon as any
+        const expired = c?.expiry_date && new Date(c.expiry_date) < new Date()
+        const exceeded = c?.max_uses != null && (c.current_uses ?? 0) >= c.max_uses
+        if (c && !expired && !exceeded && c.discount_type === 'fixed') {
+          total = Math.max(0, total - parseFloat(c.discount_value))
+          // current_uses incremented only after payment succeeds (confirm-coupon action)
+        }
+      }
+
       amountCents = Math.round(total * 100)
       description = label ?? `HairGo Store — ${items.length} item${items.length !== 1 ? 's' : ''}`
 
     } else {
-      return json({ error: 'type must be "appointment" or "cart"' }, 400)
+      return json({ error: 'type must be "appointment", "cart", or "confirm-coupon"' }, 400)
     }
 
     if (amountCents <= 0) return json({ error: 'Amount must be positive' }, 400)
-
     if (!Deno.env.get('STRIPE_SECRET_KEY')) return json({ error: 'Stripe not configured' }, 500)
 
     const paymentIntent = await stripe.paymentIntents.create({

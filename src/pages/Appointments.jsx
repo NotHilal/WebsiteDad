@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info, Mail, UserPlus } from 'lucide-react'
+import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info, Mail, UserPlus, Tag } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useLocation } from 'react-router-dom'
@@ -74,6 +74,9 @@ export default function Appointments() {
   const [clientSecret, setClientSecret] = useState(null)
   const [availableCoupons, setAvailableCoupons] = useState([])
   const [appliedCoupon,    setAppliedCoupon]    = useState(null)
+  const [couponCode,       setCouponCode]       = useState('')
+  const [couponError,      setCouponError]      = useState(null)
+  const [validatingCode,   setValidatingCode]   = useState(false)
   const [stylistDayOffs,   setStylistDayOffs]   = useState([])
   const [servicesPage,     setServicesPage]     = useState(0)
 
@@ -154,6 +157,8 @@ export default function Appointments() {
   useEffect(() => {
     if (step !== 3 || !user) return
     setAppliedCoupon(null)
+    setCouponCode('')
+    setCouponError(null)
     supabase
       .from('user_coupons')
       .select('id, used, coupons(id, code, discount_type, discount_value, expiry_date, active)')
@@ -168,6 +173,19 @@ export default function Appointments() {
           return true
         })
         setAvailableCoupons(valid)
+
+        // Restore coupon selection that survived navigation or token refresh
+        const KEY = `hg_booking_coupon_${user.id}`
+        const saved = sessionStorage.getItem(KEY)
+        if (!saved) return
+        try {
+          const { isManual, id } = JSON.parse(saved)
+          if (!isManual && id) {
+            const match = valid.find(uc => uc.id === id)
+            if (match) setAppliedCoupon(match)
+            else sessionStorage.removeItem(KEY) // no longer in available list (e.g. already used)
+          }
+        } catch { sessionStorage.removeItem(KEY) }
       })
   }, [step, user])
 
@@ -230,6 +248,49 @@ export default function Appointments() {
     }
   }
 
+  async function validateCouponCode() {
+    const code = couponCode.trim().toUpperCase()
+    if (!code) return
+    setValidatingCode(true)
+    setCouponError(null)
+    try {
+      const { data: coupon } = await supabase.from('coupons').select('*').eq('code', code).eq('active', true).maybeSingle()
+      if (!coupon) { setCouponError('Invalid coupon code'); return }
+      if (coupon.expiry_date && new Date(coupon.expiry_date) < new Date()) { setCouponError('This coupon has expired'); return }
+      if (coupon.max_uses != null && coupon.current_uses >= coupon.max_uses) { setCouponError('This coupon has been fully redeemed'); return }
+
+      if (user) {
+        // For logged-in users: get or create a user_coupons row so the code is
+        // treated identically to an admin-assigned card from this point on.
+        let { data: uc } = await supabase.from('user_coupons')
+          .select('id, used, coupons(id, code, discount_type, discount_value, expiry_date, active)')
+          .eq('user_id', user.id).eq('coupon_id', coupon.id).maybeSingle()
+
+        if (!uc) {
+          const { data: inserted, error: insErr } = await supabase.from('user_coupons')
+            .insert({ user_id: user.id, coupon_id: coupon.id, used: false, granted_by: 'promo' })
+            .select('id, used, coupons(id, code, discount_type, discount_value, expiry_date, active)')
+            .single()
+          if (insErr) { setCouponError('Could not apply coupon — please try again'); return }
+          uc = inserted
+        }
+
+        if (uc.used) { setCouponError('You have already used this coupon'); return }
+
+        // Add to card list if not already present (shows the new card as selected)
+        setAvailableCoupons(prev => prev.find(c => c.id === uc.id) ? prev : [...prev, uc])
+        setAppliedCoupon(uc)
+        sessionStorage.setItem(`hg_booking_coupon_${user.id}`, JSON.stringify({ isManual: false, id: uc.id, code: coupon.code }))
+      } else {
+        // Guest — no user_coupons row possible, keep code reference directly
+        setAppliedCoupon({ id: null, isManual: true, coupons: coupon })
+      }
+      setCouponCode('')
+    } finally {
+      setValidatingCode(false)
+    }
+  }
+
   async function startPayment() {
     if (!guestInfoValid) return toast.error('Please fill in your contact information')
     setPayStep('loading')
@@ -238,7 +299,8 @@ export default function Appointments() {
         body: {
           type: 'appointment',
           serviceId: sel.service.id,
-          couponId: appliedCoupon?.id ?? null,
+          couponId: (!appliedCoupon?.isManual && appliedCoupon?.id) ? appliedCoupon.id : null,
+          couponCode: appliedCoupon?.isManual ? appliedCoupon.coupons.code : null,
           label: `${sel.service.name} with ${sel.stylist.name} — ${format(sel.date, 'MMM d')} at ${sel.time}`,
         },
       })
@@ -254,20 +316,39 @@ export default function Appointments() {
   async function completeBooking(paymentIntentId) {
     setSaving(true)
     try {
+      const couponNote = appliedCoupon
+        ? `[Coupon: ${appliedCoupon.coupons.code} — ${appliedCoupon.coupons.discount_type === 'percentage' ? `${appliedCoupon.coupons.discount_value}% off` : `$${appliedCoupon.coupons.discount_value} off`} · Final: $${finalPrice.toFixed(2)}]`
+        : ''
       const row = {
         stylist_id: sel.stylist.id, service_id: sel.service.id,
-        date: format(sel.date, 'yyyy-MM-dd'), time: sel.time, notes: sel.notes,
+        date: format(sel.date, 'yyyy-MM-dd'), time: sel.time,
+        notes: [sel.notes, couponNote].filter(Boolean).join('\n'),
         status: 'confirmed', payment_intent_id: paymentIntentId, payment_status: 'paid',
       }
       if (user) row.user_id = user.id
       else { row.guest_name = guestInfo.name; row.guest_phone = guestInfo.phone; row.guest_email = guestInfo.email }
       const { error } = await supabase.from('appointments').insert(row)
       if (error) throw error
-      // Coupon already marked used server-side by create-payment-intent
+
+      // Mark coupon used only now — payment is confirmed
+      if (appliedCoupon) {
+        try {
+          await supabase.functions.invoke('create-payment-intent', {
+            body: {
+              type: 'confirm-coupon',
+              paymentIntentId,
+              couponId: !appliedCoupon.isManual ? appliedCoupon.id : null,
+              couponCode: appliedCoupon.isManual ? appliedCoupon.coupons.code : null,
+            },
+          })
+        } catch {} // non-critical — booking is already confirmed
+      }
+
       await Promise.all([
         sendConfirmationEmail('paid', paymentIntentId),
         logBooking('paid'),
       ])
+      if (user) sessionStorage.removeItem(`hg_booking_coupon_${user.id}`)
       setDone(true)
     } catch (err) {
       toast.error('Payment succeeded but booking failed — please contact us')
@@ -280,22 +361,29 @@ export default function Appointments() {
     if (!guestInfoValid) return toast.error('Please fill in your contact information')
     setSaving(true)
     try {
+      const couponNote = appliedCoupon
+        ? `[Coupon: ${appliedCoupon.coupons.code} — ${appliedCoupon.coupons.discount_type === 'percentage' ? `${appliedCoupon.coupons.discount_value}% off` : `$${appliedCoupon.coupons.discount_value} off`} · Final: $${finalPrice.toFixed(2)}]`
+        : ''
       const row = {
         stylist_id: sel.stylist.id, service_id: sel.service.id,
-        date: format(sel.date, 'yyyy-MM-dd'), time: sel.time, notes: sel.notes,
+        date: format(sel.date, 'yyyy-MM-dd'), time: sel.time,
+        notes: [sel.notes, couponNote].filter(Boolean).join('\n'),
         status: 'confirmed', payment_status: 'pay_in_store',
       }
       if (user) row.user_id = user.id
       else { row.guest_name = guestInfo.name; row.guest_phone = guestInfo.phone; row.guest_email = guestInfo.email }
       const { error } = await supabase.from('appointments').insert(row)
       if (error) throw error
-      if (appliedCoupon) {
-        await supabase.from('user_coupons').update({ used: true }).eq('id', appliedCoupon.id)
+      if (appliedCoupon && !appliedCoupon.isManual) {
+        await supabase.functions.invoke('create-payment-intent', {
+          body: { type: 'mark-coupon-used', couponId: appliedCoupon.id },
+        })
       }
       await Promise.all([
         sendConfirmationEmail('pay_in_store'),
         logBooking('pay_in_store'),
       ])
+      if (user) sessionStorage.removeItem(`hg_booking_coupon_${user.id}`)
       setPayInStore(true)
       setDone(true)
     } catch (err) {
@@ -947,37 +1035,80 @@ export default function Appointments() {
                 </div>
 
                 {/* ── Coupons ── */}
-                {availableCoupons.length > 0 && !reschedule?.appointmentId && (
+                {!reschedule?.appointmentId && user && (
                   <div style={{ marginBottom:18 }}>
-                    <p style={{ fontSize:13, letterSpacing:'0.18em', textTransform:'uppercase', color: 'var(--col-text)', marginBottom:8, fontFamily:'DM Sans,sans-serif' }}>Your coupons</p>
-                    <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                      {availableCoupons.map(uc => {
-                        const c = uc.coupons
-                        const isApplied = appliedCoupon?.id === uc.id
-                        const discLabel = c.discount_type === 'percentage' ? `${c.discount_value}% off` : `$${c.discount_value} off`
-                        return (
-                          <button key={uc.id} onClick={() => setAppliedCoupon(isApplied ? null : uc)}
-                            style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.7rem 1rem', borderRadius:12, cursor:'pointer', transition:'all 0.2s',
-                              background: isApplied ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.02)',
-                              border: isApplied ? '1px solid rgba(var(--rgb-acc),0.4)' : '1px solid rgba(var(--rgb-hi),0.07)',
-                            }}>
-                            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                              <div style={{ width:28, height:28, borderRadius:8, background: isApplied ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: isApplied ? '1px solid rgba(var(--rgb-acc),0.3)' : '1px solid rgba(var(--rgb-hi),0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                                {isApplied ? <Check size={13} color="var(--col-acc)" strokeWidth={2.5}/> : <Star size={11} color="var(--col-text)" strokeWidth={1.5}/>}
-                              </div>
-                              <span style={{ fontSize:'1.17rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.08em', color: isApplied ? 'var(--col-acc)' : 'var(--col-text)', fontWeight: isApplied ? 700 : 400 }}>{c.code}</span>
-                            </div>
-                            <span style={{ fontSize:'1.12rem', fontFamily:'DM Sans,sans-serif', color: isApplied ? 'var(--col-acc)' : 'var(--col-text)', fontWeight: isApplied ? 600 : 400 }}>{discLabel}</span>
+                    {/* Pre-assigned user coupons */}
+                    {availableCoupons.length > 0 && (
+                      <>
+                        <p style={{ fontSize:13, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-text)', marginBottom:8, fontFamily:'DM Sans,sans-serif' }}>Your coupons</p>
+                        <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                          {availableCoupons.map(uc => {
+                            const c = uc.coupons
+                            const isApplied = appliedCoupon?.id === uc.id
+                            const discLabel = c.discount_type === 'percentage' ? `${c.discount_value}% off` : `$${c.discount_value} off`
+                            return (
+                              <button key={uc.id} onClick={() => {
+                                if (isApplied) { setAppliedCoupon(null); if (user) sessionStorage.removeItem(`hg_booking_coupon_${user.id}`) }
+                                else { setAppliedCoupon(uc); setCouponCode(''); setCouponError(null); if (user) sessionStorage.setItem(`hg_booking_coupon_${user.id}`, JSON.stringify({ isManual: false, id: uc.id, code: uc.coupons.code })) }
+                              }}
+                                style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.7rem 1rem', borderRadius:12, cursor:'pointer', transition:'all 0.2s',
+                                  background: isApplied ? 'rgba(52,211,153,0.06)' : 'rgba(var(--rgb-hi),0.02)',
+                                  border: isApplied ? '1px solid rgba(52,211,153,0.25)' : '1px solid rgba(var(--rgb-hi),0.07)',
+                                }}>
+                                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                                  <div style={{ width:28, height:28, borderRadius:8, background: isApplied ? 'rgba(52,211,153,0.1)' : 'rgba(var(--rgb-hi),0.04)', border: isApplied ? '1px solid rgba(52,211,153,0.3)' : '1px solid rgba(var(--rgb-hi),0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                                    {isApplied ? <Check size={13} color="#34d399" strokeWidth={2.5}/> : <Star size={11} color="var(--col-text)" strokeWidth={1.5}/>}
+                                  </div>
+                                  <span style={{ fontSize:'1.17rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.08em', color: isApplied ? '#34d399' : 'var(--col-text)', fontWeight: isApplied ? 700 : 400 }}>{c.code}</span>
+                                </div>
+                                <span style={{ fontSize:'1.12rem', fontFamily:'DM Sans,sans-serif', color: isApplied ? '#34d399' : 'var(--col-text)', fontWeight: isApplied ? 600 : 400 }}>{discLabel}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Coupon code input — hidden once any coupon is applied */}
+                    {!appliedCoupon && (
+                      <div style={{ marginTop: availableCoupons.length > 0 ? 12 : 0 }}>
+                        <p style={{ fontSize:13, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-text)', marginBottom:8, fontFamily:'DM Sans,sans-serif' }}>
+                          {availableCoupons.length > 0 ? 'Or enter a coupon code' : 'Have a coupon code?'}
+                        </p>
+                        <div style={{ display:'flex', gap:8 }}>
+                          <input
+                            value={couponCode}
+                            onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCouponError(null) }}
+                            onKeyDown={e => e.key === 'Enter' && validateCouponCode()}
+                            placeholder="ENTER CODE"
+                            style={{ flex:1, background:'rgba(var(--rgb-hi),0.02)', border:`1px solid ${couponError ? 'rgba(248,113,113,0.4)' : 'rgba(var(--rgb-hi),0.07)'}`, borderRadius:10, padding:'0.65rem 1rem', fontSize:'1.1rem', color:'var(--col-text)', outline:'none', fontFamily:'"Courier New", monospace', letterSpacing:'0.08em', transition:'border-color 0.2s', boxSizing:'border-box' }}
+                          />
+                          <button onClick={validateCouponCode} disabled={!couponCode.trim() || validatingCode}
+                            style={{ padding:'0.65rem 1.1rem', borderRadius:10, border:'1px solid rgba(var(--rgb-acc),0.3)', background:'rgba(var(--rgb-acc),0.08)', color:'var(--col-acc)', cursor: (!couponCode.trim() || validatingCode) ? 'not-allowed' : 'pointer', opacity: (!couponCode.trim() || validatingCode) ? 0.5 : 1, fontSize:13, fontFamily:'DM Sans,sans-serif', fontWeight:500, letterSpacing:'0.06em', whiteSpace:'nowrap', display:'flex', alignItems:'center', gap:6, transition:'all 0.2s' }}>
+                            <Tag size={12}/>{validatingCode ? 'Checking…' : 'Apply'}
                           </button>
-                        )
-                      })}
-                    </div>
+                        </div>
+                        {couponError && <p style={{ fontSize:12, color:'#f87171', fontFamily:'DM Sans,sans-serif', marginTop:5 }}>{couponError}</p>}
+                      </div>
+                    )}
+
+                    {/* Applied summary — shown for both user_coupons and manual codes */}
                     {appliedCoupon && (
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.5rem 0.75rem', marginTop:6, borderRadius:9, background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.14)' }}>
-                        <span style={{ fontSize:'1.12rem', fontFamily:'DM Sans,sans-serif', color:'rgba(52,211,153,0.8)' }}>Coupon applied</span>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.6rem 0.9rem', marginTop:10, borderRadius:10, background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.18)' }}>
                         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                          <span style={{ fontSize:'1.12rem', fontFamily:'DM Sans,sans-serif', color: 'var(--col-text)', textDecoration:'line-through' }}>${basePrice.toFixed(2)}</span>
-                          <span style={{ fontSize:'1.3rem', fontFamily:'DM Sans,sans-serif', color:'#34d399', fontWeight:700 }}>${finalPrice.toFixed(2)}</span>
+                          <Check size={13} color="#34d399"/>
+                          <span style={{ fontSize:'1.1rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.06em', color:'#34d399' }}>{appliedCoupon.coupons.code}</span>
+                          <span style={{ fontSize:'1.05rem', fontFamily:'DM Sans,sans-serif', color:'rgba(52,211,153,0.7)' }}>applied</span>
+                        </div>
+                        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                          <div style={{ textAlign:'right' }}>
+                            <span style={{ fontSize:'1.05rem', fontFamily:'DM Sans,sans-serif', color:'var(--col-text)', textDecoration:'line-through', opacity:0.5 }}>${basePrice.toFixed(2)}</span>
+                            <span style={{ fontSize:'1.25rem', fontFamily:'DM Sans,sans-serif', color:'#34d399', fontWeight:700, marginLeft:8 }}>${finalPrice.toFixed(2)}</span>
+                          </div>
+                          <button onClick={() => { setAppliedCoupon(null); setCouponCode(''); setCouponError(null); if (user) sessionStorage.removeItem(`hg_booking_coupon_${user.id}`) }}
+                            style={{ background:'none', border:'none', color:'rgba(248,113,113,0.55)', cursor:'pointer', padding:'2px 4px', fontSize:12, fontFamily:'DM Sans,sans-serif', lineHeight:1 }}>
+                            Remove
+                          </button>
                         </div>
                       </div>
                     )}

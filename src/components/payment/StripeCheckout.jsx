@@ -222,12 +222,12 @@ export default function StripeCheckout({ clientSecret, amount, label, onSuccess,
   if (!clientSecret) return null
 
   return (
-    <div onClick={onCancel} style={{
+    <div style={{
       position: 'fixed', inset: 0, zIndex: 999,
       background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
     }}>
-      <div onClick={e => e.stopPropagation()} style={{
+      <div style={{
         width: '100%', maxWidth: 460,
         background: 'var(--col-bg)',
         border: '1px solid rgba(184,212,232,0.15)',
