@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, X, Calendar, User } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, Calendar, User, Tag, AlertTriangle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useLogAction } from '../../hooks/useLogAction'
 import {
@@ -36,6 +36,8 @@ export default function StudioAppointments() {
   const [page,         setPage]         = useState(0)
   const [periodFilter, setPeriodFilter] = useState(null) // null | 'day' | 'week' | 'month' | 'all'
   const [listPage,     setListPage]     = useState(0)
+  const [cancelModal,  setCancelModal]  = useState(null) // appt | null
+  const [cancelling,   setCancelling]   = useState(false)
 
   const PAGE_SIZE      = 3
   const LIST_PAGE_SIZE = 5
@@ -52,21 +54,52 @@ export default function StudioAppointments() {
     setLoading(false)
   }
 
+  async function cancelWithCredit(appt) {
+    setCancelling(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('process-refund', {
+        body: { type: 'cancel-with-credit', id: appt.id },
+      })
+      if (error) throw error
+      setAppointments(prev => prev.map(a => a.id === appt.id ? { ...a, status: 'cancelled' } : a))
+      log('appointment.status_changed', {
+        entityType: 'appointment', entityId: appt.id,
+        details: { message: `cancelled ${appt.profiles?.full_name || 'client'}'s "${appt.services?.name || 'appointment'}" — store credit issued${data?.couponCode ? `: ${data.couponCode} ($${data?.creditAmount})` : ''}` },
+      })
+      toast.success(data?.couponCode
+        ? `Cancelled · Store credit ${data.couponCode} ($${data.creditAmount}) sent to client`
+        : 'Appointment cancelled (no payment on file — no credit issued)')
+      setCancelModal(null)
+    } catch (err) {
+      toast.error(err.message || 'Failed to cancel')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  async function cancelOnly(appt) {
+    setCancelling(true)
+    try {
+      await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', appt.id)
+      setAppointments(prev => prev.map(a => a.id === appt.id ? { ...a, status: 'cancelled' } : a))
+      log('appointment.status_changed', {
+        entityType: 'appointment', entityId: appt.id,
+        details: { message: `cancelled ${appt.profiles?.full_name || 'client'}'s "${appt.services?.name || 'appointment'}" (no credit)` },
+      })
+      toast.success('Appointment cancelled')
+      setCancelModal(null)
+    } catch (err) {
+      toast.error(err.message || 'Failed to cancel')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
   async function updateStatus(id, newStatus) {
     const appt = appointments.find(a => a.id === id)
 
     if (newStatus === 'cancelled') {
-      const { data, error } = await supabase.functions.invoke('process-refund', {
-        body: { type: 'appointment', id },
-      })
-      if (error) { toast.error('Failed to cancel: ' + (error.message || 'unknown error')); return }
-      const wasRefunded = data?.refunded
-      setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: 'cancelled', payment_status: wasRefunded ? 'refunded' : a.payment_status } : a))
-      log('appointment.status_changed', {
-        entityType: 'appointment', entityId: id,
-        details: { message: `cancelled ${appt?.profiles?.full_name || 'client'}'s "${appt?.services?.name || 'appointment'}"${wasRefunded ? ' — Stripe refund issued' : ''}` },
-      })
-      toast.success(wasRefunded ? 'Appointment cancelled & refund issued' : 'Appointment cancelled')
+      setCancelModal(appt)
       return
     }
 
@@ -418,6 +451,66 @@ export default function StudioAppointments() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Cancel confirmation modal ── */}
+      {cancelModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+          onClick={() => !cancelling && setCancelModal(null)}>
+          <div style={{ width: '100%', maxWidth: 400, background: 'var(--col-modal)', borderRadius: 20, overflow: 'hidden', border: `1px solid rgba(var(--rgb-acc),0.18)`, boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}
+            onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div style={{ padding: '1.5rem 1.5rem 1rem', borderBottom: `1px solid ${C.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#f87171', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, marginBottom: 6 }}>Cancel Appointment</p>
+                  <p className="font-display font-light" style={{ fontSize: '1.4rem', color: C.white, lineHeight: 1.15, marginBottom: 4 }}>{cancelModal.services?.name || '—'}</p>
+                  <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
+                    {cancelModal.profiles?.full_name || 'Client'}
+                    {cancelModal.date ? ` · ${cancelModal.date}` : ''}
+                    {cancelModal.time ? ` at ${cancelModal.time.slice(0, 5)}` : ''}
+                  </p>
+                </div>
+                <button onClick={() => !cancelling && setCancelModal(null)}
+                  style={{ width: 30, height: 30, borderRadius: '50%', background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                  <X size={13} />
+                </button>
+              </div>
+            </div>
+
+            {/* Options */}
+            <div style={{ padding: '1rem 1.5rem 1.5rem', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>
+                How would you like to handle this cancellation?
+              </p>
+
+              {/* Issue store credit */}
+              <button onClick={() => cancelWithCredit(cancelModal)} disabled={cancelling}
+                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 12, background: C.goldBg, border: `1px solid ${C.goldBorder}`, cursor: cancelling ? 'not-allowed' : 'pointer', opacity: cancelling ? 0.6 : 1, transition: 'all 0.18s', textAlign: 'left', width: '100%' }}>
+                <Tag size={16} color={C.gold} style={{ flexShrink: 0 }} />
+                <div>
+                  <p style={{ fontSize: '0.88rem', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, margin: 0 }}>Issue Store Credit</p>
+                  <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', margin: '3px 0 0' }}>
+                    Cancel &amp; generate a coupon for 100% of the amount paid — assigned to client's account
+                  </p>
+                </div>
+              </button>
+
+              {/* Cancel only */}
+              <button onClick={() => cancelOnly(cancelModal)} disabled={cancelling}
+                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 12, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)', cursor: cancelling ? 'not-allowed' : 'pointer', opacity: cancelling ? 0.6 : 1, transition: 'all 0.18s', textAlign: 'left', width: '100%' }}>
+                <AlertTriangle size={16} color="#f87171" style={{ flexShrink: 0 }} />
+                <div>
+                  <p style={{ fontSize: '0.88rem', color: '#f87171', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, margin: 0 }}>Cancel Only</p>
+                  <p style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', margin: '3px 0 0' }}>
+                    Mark as cancelled without issuing credit — use if client is rescheduling
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

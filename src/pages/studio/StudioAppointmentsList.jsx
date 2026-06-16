@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Search, X, ChevronDown, Trash2, AlertTriangle, ChevronRight, ChevronLeft,
-  Calendar, Clock, LayoutList
+  Calendar, Clock, LayoutList, RefreshCw, MessageSquare, Tag, Phone,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -10,7 +11,7 @@ import { useLogAction } from '../../hooks/useLogAction'
 import {
   format, isToday, isTomorrow, isPast, parseISO, isSameDay,
   startOfMonth, endOfMonth, eachDayOfInterval, getDay,
-  addMonths, subMonths
+  addMonths, subMonths, isSameMonth
 } from 'date-fns'
 import toast from 'react-hot-toast'
 import Pager from '../../lib/Pager'
@@ -105,6 +106,7 @@ function StatusDropdown({ appt, onUpdate }) {
 export default function StudioAppointmentsList() {
   const { user, isAdmin } = useAuth()
   const log = useLogAction()
+  const navigate = useNavigate()
 
   // List state
   const [appointments, setAppointments] = useState([])
@@ -118,11 +120,39 @@ export default function StudioAppointmentsList() {
   const [deleting,     setDeleting]     = useState(false)
   const [page,         setPage]         = useState(0)
 
-  // Tab + calendar state
+  // Main tab
+  const [mainTab,     setMainTab]     = useState('overview')   // 'overview' | 'requests'
+
+  // Overview sub-tab + calendar state
   const [tab,         setTab]         = useState('calendar')   // 'list' | 'calendar'
   const [calDate,     setCalDate]     = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(null)
   const [dayPage,     setDayPage]     = useState(0)
+
+  // Rescheduling tab state
+  const [reschedRequests, setReschedRequests] = useState([])
+  const [loadingResched,  setLoadingResched]  = useState(false)
+  const [stylists,        setStylists]        = useState([])
+  const [reschedModal,    setReschedModal]    = useState(null)
+  const [reschedDate,     setReschedDate]     = useState('')
+  const [reschedTime,     setReschedTime]     = useState('')
+  const [reschedStylist,  setReschedStylist]  = useState('')
+  const [reschedWorking,  setReschedWorking]  = useState(false)
+  const [creditWorking,   setCreditWorking]   = useState(null)
+  // Inline chat state
+  const [chatTicketId,  setChatTicketId]  = useState(null)
+  const [chatMessages,  setChatMessages]  = useState([])
+  const [chatInput,     setChatInput]     = useState('')
+  const [chatSending,   setChatSending]   = useState(false)
+  const [chatLoading,   setChatLoading]   = useState(false)
+  const chatBottomRef = useRef(null)
+
+  useEffect(() => {
+    if (mainTab === 'requests') {
+      loadReschedRequests()
+      if (stylists.length === 0) loadStylists()
+    }
+  }, [mainTab])
 
   useEffect(() => {
     load()
@@ -207,6 +237,112 @@ export default function StudioAppointmentsList() {
       }
     } else {
       toast.success(`Marked as ${STATUS_CFG[newStatus]?.label}`)
+    }
+  }
+
+  async function loadReschedRequests() {
+    setLoadingResched(true)
+    const { data, error } = await supabase
+      .from('tickets')
+      .select('*, appointments!appointment_id(id, date, time, status, payment_status, payment_intent_id, services(name, price), stylists(id, name)), profiles!user_id(full_name, email), ticket_messages(id, content, sender_id, is_from_admin, created_at)')
+      .not('appointment_id', 'is', null)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+    if (error) console.error('loadReschedRequests:', error)
+    setReschedRequests(data || [])
+    setLoadingResched(false)
+  }
+
+  async function loadStylists() {
+    const { data } = await supabase.from('stylists').select('id, name').order('name')
+    setStylists(data || [])
+  }
+
+  async function openInlineChat(ticketId) {
+    if (chatTicketId === ticketId) {
+      setChatTicketId(null)
+      setChatMessages([])
+      return
+    }
+    setChatTicketId(ticketId)
+    setChatLoading(true)
+    const { data } = await supabase
+      .from('ticket_messages')
+      .select('*, sender:profiles!sender_id(full_name)')
+      .eq('ticket_id', ticketId)
+      .order('created_at')
+    setChatMessages(data || [])
+    setChatLoading(false)
+    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
+  }
+
+  async function sendInlineChatMessage() {
+    if (!chatInput.trim() || !chatTicketId || chatSending) return
+    setChatSending(true)
+    const content = chatInput.trim()
+    setChatInput('')
+    await supabase.from('ticket_messages').insert({
+      ticket_id: chatTicketId, sender_id: user.id,
+      content, is_from_admin: true, read: false,
+    })
+    await supabase.from('tickets').update({ updated_at: new Date().toISOString() }).eq('id', chatTicketId)
+    const { data } = await supabase
+      .from('ticket_messages')
+      .select('*, sender:profiles!sender_id(full_name)')
+      .eq('ticket_id', chatTicketId)
+      .order('created_at')
+    setChatMessages(data || [])
+    setChatSending(false)
+    setTimeout(() => chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
+  }
+
+  async function handleIssueCredit(ticket) {
+    setCreditWorking(ticket.id)
+    try {
+      const { data, error } = await supabase.functions.invoke('process-refund', {
+        body: { type: 'cancel-with-credit', id: ticket.appointment_id },
+      })
+      if (error) throw error
+      const creditMsg = data?.couponCode
+        ? `Your appointment has been cancelled. A store credit of $${data.creditAmount} (code: ${data.couponCode}) has been added to your account — use it anytime on your next booking!`
+        : `Your appointment has been cancelled. No payment was on file so no credit was issued.`
+      await supabase.from('ticket_messages').insert({
+        ticket_id: ticket.id, sender_id: user.id,
+        content: creditMsg, is_from_admin: true, read: false,
+      })
+      await supabase.from('tickets').update({ status: 'resolved' }).eq('id', ticket.id)
+      setReschedRequests(prev => prev.filter(t => t.id !== ticket.id))
+      toast.success(data?.couponCode ? `Credit ${data.couponCode} ($${data.creditAmount}) issued` : 'Appointment cancelled')
+    } catch (err) {
+      toast.error(err.message || 'Failed to issue credit')
+    } finally {
+      setCreditWorking(null)
+    }
+  }
+
+  async function handleReschedule() {
+    if (!reschedModal || !reschedDate || !reschedTime) return
+    setReschedWorking(true)
+    try {
+      const { ticket } = reschedModal
+      const updates = { date: reschedDate, time: reschedTime }
+      if (reschedStylist) updates.stylist_id = reschedStylist
+      await supabase.from('appointments').update(updates).eq('id', ticket.appointment_id)
+      const stylist = stylists.find(s => s.id === reschedStylist)
+      const dateStr = new Date(reschedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      await supabase.from('ticket_messages').insert({
+        ticket_id: ticket.id, sender_id: user.id,
+        content: `Your appointment has been rescheduled to ${dateStr} at ${reschedTime}${stylist ? ` with ${stylist.name}` : ''}. See you then! ✨`,
+        is_from_admin: true, read: false,
+      })
+      await supabase.from('tickets').update({ status: 'resolved' }).eq('id', ticket.id)
+      setReschedRequests(prev => prev.filter(t => t.id !== ticket.id))
+      setReschedModal(null)
+      toast.success('Appointment rescheduled & client notified')
+    } catch (err) {
+      toast.error(err.message || 'Failed to reschedule')
+    } finally {
+      setReschedWorking(false)
     }
   }
 
@@ -388,40 +524,96 @@ export default function StudioAppointmentsList() {
         .cal-nav-btn:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; }
         .cal-day-btn:hover { background: rgba(var(--rgb-hi),0.05) !important; border-color: rgba(var(--rgb-hi),0.1) !important; }
         .cal-chip:hover { opacity: 0.8; transform: translateY(-1px); }
-        @media (max-width: 480px) {
-          .stat-card { padding: 0.45rem 0.55rem !important; }
-          .stat-card .stat-num { font-size: 1.05rem !important; }
-          .stat-card .stat-lbl { font-size: 8px !important; letter-spacing: 0.08em !important; }
-          .al-row { padding: 0.75rem 0.875rem !important; }
+        @media (max-width: 640px) {
+          /* Base bump: everything inherits larger text on mobile */
+          .al-root { font-size: 15px !important; }
+
+          /* Stat cards */
+          .stat-card { padding: 0.55rem 0.75rem !important; }
+          .stat-card .stat-num { font-size: 1.2rem !important; }
+          .stat-card .stat-lbl { font-size: 11px !important; letter-spacing: 0.06em !important; }
+
+          /* List rows */
+          .al-row { padding: 0.875rem 1rem !important; }
+          .al-row p, .al-row span { font-size: 14px !important; }
+          .al-row .al-info-btn { font-size: 12px !important; padding: 5px 11px !important; }
+
+          /* Main tabs */
+          .al-root .al-main-tab { font-size: 13px !important; padding: 0.7rem 0.875rem !important; }
+
+          /* View switcher buttons */
+          .al-root .al-view-btn { font-size: 13px !important; padding: 8px 18px !important; }
+
+          /* Period pills */
+          .al-pill { font-size: 13px !important; padding: 6px 16px !important; }
+
+          /* Search input */
+          .al-search { font-size: 14px !important; padding: 0.55rem 0.875rem 0.55rem 2.2rem !important; }
+
+          /* Calendar day numbers */
+          .al-root .cal-day-num { font-size: 14px !important; }
+          .al-root .cal-weekday  { font-size: 11px !important; }
+
+          /* Details panel */
+          .al-root .al-detail-label { font-size: 11px !important; }
+          .al-root .al-detail-value { font-size: 15px !important; }
+
+          /* Reschedule cards */
+          .al-root .al-resched-name  { font-size: 15px !important; }
+          .al-root .al-resched-meta  { font-size: 13px !important; }
+          .al-root .al-resched-msg   { font-size: 14px !important; }
+          .al-root .al-resched-btn   { font-size: 13px !important; padding: 10px 14px !important; }
         }
       `}</style>
 
       {/* ── Header ── */}
-      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', paddingBottom: '0.6rem', borderBottom: `1px solid ${C.border}` }}>
-        <div>
-          <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Appointments</h1>
-          <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{appointments.length} total</span>
-        </div>
-        {/* Tab switcher */}
-        <div style={{ display: 'flex', gap: 3, padding: 3, background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, borderRadius: 10 }}>
-          {[
-            { key: 'calendar', icon: Calendar,   label: 'Calendar' },
-            { key: 'list',     icon: LayoutList, label: 'List'     },
-          ].map(({ key, icon: Icon, label }) => {
-            const active = tab === key
-            return (
-              <button key={key} onClick={() => setTab(key)}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 7, cursor: 'pointer', transition: 'all .18s', border: 'none', background: active ? 'rgba(var(--rgb-acc),0.12)' : 'transparent', color: active ? C.gold : C.muted, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, letterSpacing: '0.04em' }}>
-                <Icon size={12} /> {label}
-              </button>
-            )
-          })}
-        </div>
+      {/* Page header */}
+      <div style={{ flexShrink: 0, paddingBottom: '0.75rem' }}>
+        <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.3rem,2vw,1.7rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>Appointments</h1>
+        <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{appointments.length} total</span>
       </div>
 
-      {/* ══ LIST TAB ══════════════════════════════════════════ */}
-      {tab === 'list' && (
+      {/* Main tab bar */}
+      <div style={{ flexShrink: 0, display: 'flex', borderBottom: `1px solid ${C.border}`, marginBottom: '0.75rem' }}>
+        {[
+          { key: 'overview',  label: 'Overview' },
+          { key: 'requests',  label: 'Reschedule Requests', badge: reschedRequests.length || null },
+        ].map(({ key, label, badge }) => {
+          const active = mainTab === key
+          return (
+            <button key={key} onClick={() => setMainTab(key)}
+              className="al-main-tab"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.6rem 1rem', background: 'none', border: 'none', borderBottom: `2px solid ${active ? C.gold : 'transparent'}`, marginBottom: -1, cursor: 'pointer', color: active ? C.gold : C.muted, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'color .18s', whiteSpace: 'nowrap' }}>
+              {label}
+              {badge ? <span style={{ minWidth: 17, height: 17, borderRadius: 9, background: '#f59e0b', color: '#000', fontSize: 9, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>{badge}</span> : null}
+            </button>
+          )
+        })}
+      </div>
+
+
+      {/* ══ OVERVIEW: LIST ════════════════════════════════════ */}
+      {mainTab === 'overview' && tab === 'list' && (
         <>
+          {/* View switcher */}
+          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'inline-flex', borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+              {[
+                { key: 'calendar', icon: Calendar,   label: 'Calendar' },
+                { key: 'list',     icon: LayoutList, label: 'List'     },
+              ].map(({ key, icon: Icon, label }, i) => {
+                const active = tab === key
+                return (
+                  <button key={key} onClick={() => setTab(key)}
+                    className="al-view-btn"
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', cursor: 'pointer', transition: 'all .18s', border: 'none', borderLeft: i > 0 ? `1px solid ${C.border}` : 'none', background: active ? 'rgba(var(--rgb-acc),0.1)' : 'rgba(var(--rgb-hi),0.03)', color: active ? C.gold : C.muted, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, letterSpacing: '0.09em', textTransform: 'uppercase' }}>
+                    <Icon size={12} /> {label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* Stat cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.5rem', flexShrink: 0 }}>
             {statCards.map(({ s, label, cfg }) => (
@@ -547,16 +739,35 @@ export default function StudioAppointmentsList() {
       )}
 
       {/* ══ CALENDAR TAB ══════════════════════════════════════ */}
-      {tab === 'calendar' && (
+      {/* ══ OVERVIEW: CALENDAR ════════════════════════════════ */}
+      {mainTab === 'overview' && tab === 'calendar' && (
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: '0.6rem', overflowY: 'auto' }}>
 
-          {/* Today button */}
-          <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={() => { setCalDate(new Date()); setSelectedDay(null) }}
-              style={{ padding: '4px 12px', borderRadius: 7, border: `1px solid ${C.border}`, background: 'transparent', color: C.muted, fontSize: 11, fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', transition: 'all .15s' }}
-              className="al-pill">
-              Today
-            </button>
+          {/* Toolbar: Calendar/List switcher + Today button */}
+          <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* View switcher */}
+            <div style={{ display: 'inline-flex', borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+              {[
+                { key: 'calendar', icon: Calendar,   label: 'Calendar' },
+                { key: 'list',     icon: LayoutList, label: 'List'     },
+              ].map(({ key, icon: Icon, label }, i) => {
+                const active = tab === key
+                return (
+                  <button key={key} onClick={() => setTab(key)}
+                    className="al-view-btn"
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', cursor: 'pointer', transition: 'all .18s', border: 'none', borderLeft: i > 0 ? `1px solid ${C.border}` : 'none', background: active ? 'rgba(var(--rgb-acc),0.1)' : 'rgba(var(--rgb-hi),0.03)', color: active ? C.gold : C.muted, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, letterSpacing: '0.09em', textTransform: 'uppercase' }}>
+                    <Icon size={12} /> {label}
+                  </button>
+                )
+              })}
+            </div>
+            {/* Today — only when not on current month */}
+            {!isSameMonth(calDate, new Date()) && (
+              <button onClick={() => { setCalDate(new Date()); setSelectedDay(null) }}
+                style={{ padding: '5px 14px', borderRadius: 8, border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.gold, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em' }}>
+                Today
+              </button>
+            )}
           </div>
 
           {/* Calendar grid */}
@@ -732,6 +943,240 @@ export default function StudioAppointmentsList() {
                   </>
                 )
               })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ══ RESCHEDULE REQUESTS TAB ═══════════════════════════ */}
+      {mainTab === 'requests' && (
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0' }}>
+          {loadingResched ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', gap: 10 }}>
+              <div style={{ width: 18, height: 18, border: `2px solid ${C.goldBorder}`, borderTopColor: C.gold, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+              <span style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Loading requests…</span>
+            </div>
+          ) : reschedRequests.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3.5rem 1.5rem', gap: 12, textAlign: 'center' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <RefreshCw size={20} color={C.gold} />
+              </div>
+              <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>No pending requests</p>
+              <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', opacity: 0.6 }}>Client reschedule & cancel requests will appear here.</p>
+              <button onClick={loadReschedRequests} style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em' }}>
+                <RefreshCw size={11} /> Refresh
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '0.25rem 0' }}>
+              {reschedRequests.map(ticket => {
+                const appt = ticket.appointments
+                const clientMsg = ticket.ticket_messages
+                  ?.filter(m => !m.is_from_admin)
+                  .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0]
+                const name = ticket.profiles?.full_name || ticket.profiles?.email || 'Client'
+                const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                const apptDate = appt?.date ? new Date(appt.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : '—'
+                const isCredit = creditWorking === ticket.id
+                return (
+                  <div key={ticket.id} style={{ margin: '0 0.125rem', borderRadius: 14, background: C.card, border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+                    {/* Accent top */}
+                    <div style={{ height: 2, background: 'linear-gradient(90deg, var(--col-acc3), var(--col-acc))' }} />
+                    <div style={{ padding: '1rem 1.25rem' }}>
+
+                      {/* Client row */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.75rem' }}>
+                        <div style={{ width: 34, height: 34, borderRadius: '50%', background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ fontSize: '0.7rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.gold }}>{initials}</span>
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p className="al-resched-name" style={{ fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: C.white, marginBottom: 2 }}>{name}</p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                            {appt?.services?.name && (
+                              <span style={{ fontSize: '0.72rem', color: C.gold, fontFamily: 'DM Sans,sans-serif' }}>{appt.services.name}</span>
+                            )}
+                            {appt?.date && (
+                              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{apptDate}{appt.time ? ` · ${appt.time.slice(0, 5)}` : ''}</span>
+                            )}
+                            {appt?.stylists?.name && (
+                              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>with {appt.stylists.name}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ padding: '3px 8px', borderRadius: 6, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', flexShrink: 0 }}>
+                          <span style={{ fontSize: '0.65rem', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Open</span>
+                        </div>
+                      </div>
+
+                      {/* Client message */}
+                      {clientMsg && (
+                        <div style={{ display: 'flex', gap: 8, marginBottom: '0.875rem', padding: '0.625rem 0.875rem', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}` }}>
+                          <MessageSquare size={12} color={C.muted} style={{ flexShrink: 0, marginTop: 2 }} />
+                          <p className="al-resched-msg" style={{ fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.55, opacity: 0.8 }}>{clientMsg.content}</p>
+                        </div>
+                      )}
+
+                      {/* Payment info */}
+                      {appt?.payment_status && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '0.875rem' }}>
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: appt.payment_status === 'paid' ? '#34d399' : 'rgba(var(--rgb-hi),0.3)' }} />
+                          <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
+                            {appt.payment_status === 'paid' ? `Paid online${appt.services?.price ? ` · $${appt.services.price}` : ''}` : 'Pay in store'}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => openInlineChat(ticket.id)}
+                          className="al-resched-btn"
+                          style={{ flex: 1, minWidth: 100, padding: '8px 12px', borderRadius: 9, background: chatTicketId === ticket.id ? 'rgba(96,165,250,0.15)' : 'rgba(96,165,250,0.08)', border: `1px solid ${chatTicketId === ticket.id ? 'rgba(96,165,250,0.4)' : 'rgba(96,165,250,0.22)'}`, color: '#60a5fa', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .15s', letterSpacing: '0.05em' }}>
+                          <MessageSquare size={12} /> {chatTicketId === ticket.id ? 'Close Chat' : 'Chat'}
+                        </button>
+                        <button
+                          onClick={() => handleIssueCredit(ticket)}
+                          disabled={!!isCredit}
+                          className="al-resched-btn"
+                          style={{ flex: 1, minWidth: 100, padding: '8px 12px', borderRadius: 9, background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)', color: '#34d399', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: isCredit ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: isCredit ? 0.6 : 1, transition: 'all .15s', letterSpacing: '0.05em' }}>
+                          {isCredit
+                            ? <><div style={{ width: 11, height: 11, border: '2px solid #34d399', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> Processing…</>
+                            : <><Tag size={12} /> Issue Credit & Cancel</>}
+                        </button>
+                        <button
+                          onClick={() => { setReschedModal({ ticket }); setReschedDate(appt?.date || ''); setReschedTime(appt?.time?.slice(0,5) || ''); setReschedStylist(appt?.stylists?.id || '') }}
+                          className="al-resched-btn"
+                          style={{ flex: 1, minWidth: 100, padding: '8px 12px', borderRadius: 9, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .15s', letterSpacing: '0.05em' }}>
+                          <RefreshCw size={11} /> Reschedule
+                        </button>
+                      </div>
+
+                      {/* Inline chat panel */}
+                      {chatTicketId === ticket.id && (
+                        <div style={{ marginTop: '0.875rem', borderTop: `1px solid ${C.border}`, paddingTop: '0.875rem' }}>
+                          {/* Message list */}
+                          <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8, paddingRight: 2 }}>
+                            {chatLoading ? (
+                              <div style={{ display: 'flex', justifyContent: 'center', padding: '1.5rem' }}>
+                                <div style={{ width: 16, height: 16, border: `2px solid ${C.border}`, borderTopColor: C.gold, borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                              </div>
+                            ) : chatMessages.length === 0 ? (
+                              <p style={{ textAlign: 'center', fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', padding: '1rem', opacity: 0.5 }}>No messages yet</p>
+                            ) : chatMessages.map(msg => (
+                              <div key={msg.id} style={{ display: 'flex', justifyContent: msg.is_from_admin ? 'flex-end' : 'flex-start' }}>
+                                <div style={{
+                                  maxWidth: '78%', padding: '6px 11px',
+                                  borderRadius: msg.is_from_admin ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
+                                  background: msg.is_from_admin ? 'rgba(var(--rgb-acc),0.12)' : 'rgba(var(--rgb-hi),0.05)',
+                                  border: msg.is_from_admin ? '1px solid rgba(var(--rgb-acc),0.22)' : `1px solid ${C.border}`,
+                                }}>
+                                  <p style={{ margin: 0, fontSize: '0.78rem', color: C.white, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5 }}>{msg.content}</p>
+                                  <p style={{ margin: '3px 0 0', fontSize: '0.6rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', opacity: 0.5, textAlign: msg.is_from_admin ? 'right' : 'left' }}>
+                                    {msg.sender?.full_name || (msg.is_from_admin ? 'Admin' : 'Client')} · {format(new Date(msg.created_at), 'HH:mm')}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                            <div ref={chatBottomRef} />
+                          </div>
+                          {/* Reply input */}
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <input
+                              value={chatInput}
+                              onChange={e => setChatInput(e.target.value)}
+                              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendInlineChatMessage() } }}
+                              placeholder="Reply to client…"
+                              style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.04)', color: C.white, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', outline: 'none' }}
+                            />
+                            <button
+                              onClick={sendInlineChatMessage}
+                              disabled={chatSending || !chatInput.trim()}
+                              style={{ padding: '8px 14px', borderRadius: 8, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: chatSending || !chatInput.trim() ? 'not-allowed' : 'pointer', opacity: chatSending || !chatInput.trim() ? 0.5 : 1, transition: 'opacity .15s' }}>
+                              Send
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Reschedule modal ── */}
+      <AnimatePresence>
+        {reschedModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 210, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+            onMouseDown={e => { if (e.target === e.currentTarget) setReschedModal(null) }}>
+            <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: 420, background: 'var(--col-modal)', border: `1px solid ${C.goldBorder}`, borderRadius: 20, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.6)' }}>
+              <div style={{ height: 3, background: 'linear-gradient(90deg, var(--col-acc3), var(--col-acc))' }} />
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                  <div>
+                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Appointments</p>
+                    <h3 style={{ color: C.white, fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500 }}>Reschedule</h3>
+                  </div>
+                  <button onClick={() => setReschedModal(null)} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                    <X size={13} />
+                  </button>
+                </div>
+
+                {/* Current appt summary */}
+                {reschedModal.ticket.appointments && (
+                  <div style={{ padding: '0.625rem 0.875rem', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, marginBottom: '1.25rem' }}>
+                    <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 2 }}>Currently booked</p>
+                    <p style={{ fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>
+                      {reschedModal.ticket.appointments.services?.name} · {reschedModal.ticket.appointments.date} · {reschedModal.ticket.appointments.time?.slice(0,5)}
+                    </p>
+                  </div>
+                )}
+
+                {/* New date */}
+                <label style={{ display: 'block', marginBottom: '0.875rem' }}>
+                  <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>New Date</p>
+                  <input type="date" value={reschedDate} onChange={e => setReschedDate(e.target.value)}
+                    style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: 9, background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', outline: 'none' }} />
+                </label>
+
+                {/* New time */}
+                <label style={{ display: 'block', marginBottom: '0.875rem' }}>
+                  <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>New Time</p>
+                  <input type="time" value={reschedTime} onChange={e => setReschedTime(e.target.value)}
+                    style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: 9, background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', outline: 'none' }} />
+                </label>
+
+                {/* Stylist */}
+                {stylists.length > 0 && (
+                  <label style={{ display: 'block', marginBottom: '1.25rem' }}>
+                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>Stylist</p>
+                    <select value={reschedStylist} onChange={e => setReschedStylist(e.target.value)}
+                      style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: 9, background: 'var(--col-modal)', border: `1px solid ${C.border}`, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', outline: 'none', cursor: 'pointer' }}>
+                      <option value="">Keep current stylist</option>
+                      {stylists.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  </label>
+                )}
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setReschedModal(null)}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button onClick={handleReschedule} disabled={!reschedDate || !reschedTime || reschedWorking}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', background: reschedDate && reschedTime ? 'linear-gradient(135deg, var(--col-acc3), var(--col-acc))' : 'rgba(var(--rgb-hi),0.06)', color: reschedDate && reschedTime ? 'var(--col-bg)' : C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: reschedDate && reschedTime && !reschedWorking ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: reschedWorking ? 0.6 : 1, transition: 'all .2s' }}>
+                    {reschedWorking
+                      ? <><div style={{ width: 13, height: 13, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> Saving…</>
+                      : <><RefreshCw size={13} /> Confirm Reschedule</>}
+                  </button>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

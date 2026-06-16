@@ -1,4 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Send, MessageSquare, CheckCircle, RotateCcw, Trash2, AlertTriangle, Store, Scissors } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -26,6 +27,7 @@ const FILTERS = ['All', 'Open', 'Closed']
 export default function StudioMessages() {
   const { user, profile, isAdmin } = useAuth()
   const log = useLogAction()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [tickets,    setTickets]   = useState([])
   const [selected,   setSelected]  = useState(null)
   const [messages,   setMessages]  = useState([])
@@ -109,8 +111,32 @@ export default function StudioMessages() {
       if (!meta[m.ticket_id]) meta[m.ticket_id] = { lastMsg: m.content, lastTime: m.created_at, unread: 0 }
       if (!m.read && !m.is_from_admin) meta[m.ticket_id].unread++
     }
-    setTickets(tkts.map(t => ({ ...t, ...(meta[t.id] || {}) })))
+    const enriched = tkts.map(t => ({ ...t, ...(meta[t.id] || {}) }))
+    setTickets(enriched)
     setLoading(false)
+
+    // Auto-select ticket if ?ticket=<id> is in the URL
+    const paramId = searchParams.get('ticket')
+    if (paramId && !selectedRef.current) {
+      const match = enriched.find(t => t.id === paramId)
+      if (match) {
+        setSelected(match)
+        setSearchParams({}, { replace: true })
+      } else {
+        // Ticket might be in the other tab — fetch it directly
+        const { data: direct } = await supabase
+          .from('tickets')
+          .select('*, user:profiles!user_id(full_name), recipient:profiles!recipient_id(full_name)')
+          .eq('id', paramId)
+          .single()
+        if (direct) {
+          const newTab = direct.recipient_id ? 'direct' : 'store'
+          setTab(newTab)
+          setSelected(direct)
+          setSearchParams({}, { replace: true })
+        }
+      }
+    }
   }
 
   async function loadMessages(ticketId) {

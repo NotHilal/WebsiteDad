@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ShoppingCart, Trash2, Download, Receipt, Scissors, ChevronRight, Minus, Plus, AlertTriangle, RotateCcw } from 'lucide-react'
+import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ShoppingCart, Trash2, Download, Receipt, Scissors, ChevronRight, Minus, Plus, Phone, MessageSquare } from 'lucide-react'
 import jsPDF from 'jspdf'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
@@ -25,7 +25,7 @@ const STATUS_MAP = {
 
 function StatusPill({ status }) {
   const s = STATUS_MAP[status] ?? STATUS_MAP.pending
-  return <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 500, color: s.color, background: s.bg, whiteSpace: 'nowrap' }}>{s.label}</span>
+  return <span style={{ padding: '4px 10px', borderRadius: 6, fontSize: 15, fontWeight: 500, color: s.color, background: s.bg, whiteSpace: 'nowrap' }}>{s.label}</span>
 }
 
 function Countdown({ expiresAt, onExpired }) {
@@ -45,7 +45,7 @@ function Countdown({ expiresAt, onExpired }) {
   const s = secs % 60
   const urgent = secs < 60
   return (
-    <span style={{ fontSize: 11, fontFamily: 'DM Sans, sans-serif', color: urgent ? '#f87171' : '#f59e0b', fontWeight: 600 }}>
+    <span style={{ fontSize: 15, fontFamily: 'DM Sans, sans-serif', color: urgent ? '#f87171' : '#f59e0b', fontWeight: 600 }}>
       {m}:{String(s).padStart(2, '0')}
     </span>
   )
@@ -91,13 +91,15 @@ export default function Profile() {
   const [cartCouponError,     setCartCouponError]     = useState(null)
   const [validatingCartCode,  setValidatingCartCode]  = useState(false)
 
+  // Contact Us popup state
+  const [contactAppt,    setContactAppt]    = useState(null)
+  const [contactMsg,     setContactMsg]     = useState('')
+  const [contactSending, setContactSending] = useState(false)
+
   const cartFinalTotal = cartCoupon
     ? Math.max(0, cartTotal - parseFloat(cartCoupon.discount_value))
     : cartTotal
 
-  // Appointment manage modal state
-  const [manageAppt,  setManageAppt]  = useState(null)
-  const [cancelling,  setCancelling]  = useState(false)
 
 
   useEffect(() => { if (user) loadAll() }, [user])
@@ -112,6 +114,48 @@ export default function Profile() {
     setOrders(o || [])
     setCoupons(c || [])
     setLoading(false)
+  }
+
+  async function handleContactSend() {
+    if (!contactAppt || !contactMsg.trim()) return
+    setContactSending(true)
+    try {
+      const appt = contactAppt
+      const stylistName = appt.stylists?.name || 'Any stylist'
+      const serviceName = appt.services?.name || 'Service'
+      const apptDate = new Date(appt.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+      const apptTime = appt.time?.slice(0, 5) || ''
+      const userName = profile?.full_name || user?.email || 'Client'
+
+      const prefilledTitle = `${userName} — ${serviceName} on ${apptDate} at ${apptTime}`
+      const fullContent = contactMsg.trim()
+
+      const { data: ticket, error: ticketErr } = await supabase.from('tickets').insert({
+        user_id: user.id,
+        title: prefilledTitle,
+        status: 'open',
+        recipient_id: null,
+        appointment_id: appt.id,
+      }).select('id').single()
+      if (ticketErr) console.error('ticket insert error:', ticketErr)
+
+      if (ticket) {
+        await supabase.from('ticket_messages').insert({
+          ticket_id: ticket.id,
+          sender_id: user.id,
+          content: fullContent,
+          is_from_admin: false,
+          read: false,
+        })
+      }
+      setContactAppt(null)
+      setContactMsg('')
+      navigate('/chat')
+    } catch (e) {
+      toast.error('Failed to send message')
+    } finally {
+      setContactSending(false)
+    }
   }
 
   async function saveName() {
@@ -232,65 +276,6 @@ export default function Profile() {
     } catch {
       toast.error('Payment succeeded but order failed — contact us')
     }
-  }
-
-  function canManage(appt) {
-    if (!['confirmed', 'pending'].includes(appt.status)) return false
-    if (appt.payment_status !== 'paid') return false
-    const apptTime = new Date(`${appt.date}T${appt.time || '00:00'}`)
-    return apptTime - Date.now() > 24 * 60 * 60 * 1000
-  }
-
-  function withinWindow(appt) {
-    if (!['confirmed', 'pending'].includes(appt.status)) return false
-    if (appt.payment_status !== 'paid') return false
-    const apptTime = new Date(`${appt.date}T${appt.time || '00:00'}`)
-    const diff = apptTime - Date.now()
-    return diff > 0 && diff <= 24 * 60 * 60 * 1000
-  }
-
-  async function handleCancelAppt() {
-    if (!manageAppt || cancelling) return
-    setCancelling(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('process-refund', {
-        body: { type: 'appointment', id: manageAppt.id, refundPct: 80 },
-      })
-      if (error) throw error
-      setAppts(prev => prev.map(a => a.id === manageAppt.id
-        ? { ...a, status: 'cancelled', payment_status: data?.refunded ? 'refunded' : a.payment_status }
-        : a))
-      ;(async () => { try { await supabase.from('activity_logs').insert({
-        actor_id:   user.id,
-        actor_name: profile?.full_name || user.email,
-        actor_role: profile?.role || 'user',
-        action:     'appointment.cancelled_by_client',
-        details: {
-          message:        `${profile?.full_name || user.email} cancelled their ${manageAppt.services?.name || 'appointment'} on ${manageAppt.date}${manageAppt.time ? ` at ${manageAppt.time.slice(0, 5)}` : ''} — 80% refund issued`,
-          appointment_id: manageAppt.id,
-          service:        manageAppt.services?.name,
-          stylist:        manageAppt.stylists?.name,
-          date:           manageAppt.date,
-          time:           manageAppt.time,
-          refund_pct:     80,
-        },
-      }) } catch {} })()
-      setManageAppt(null)
-      toast.success('Appointment cancelled — 80% refund is on its way.')
-    } catch (err) {
-      toast.error(err.message || 'Could not cancel appointment')
-    } finally {
-      setCancelling(false)
-    }
-  }
-
-  function handleReschedule() {
-    if (!manageAppt) return
-    const apptId = manageAppt.id
-    setManageAppt(null)
-    navigate('/appointments', {
-      state: { reschedule: { service: manageAppt.services, stylist: manageAppt.stylists, stylist_id: manageAppt.stylist_id, appointmentId: apptId } },
-    })
   }
 
   function downloadReceipt(order) {
@@ -641,110 +626,94 @@ export default function Profile() {
   const card = { background: S1, border: `1px solid ${BD}`, borderRadius: 16 }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '78px 20px 20px', boxSizing: 'border-box' }}>
-      <div style={{ width: '100%', maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 'clamp(70px, 10vw, 90px) clamp(12px, 4vw, 24px) 32px', boxSizing: 'border-box' }}>
+      <div style={{ width: '100%', maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        {/* ── Top card ── */}
+        {/* ── Hero ── */}
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }}
-          className="profile-top-card" style={{ ...card, display: 'flex', overflow: 'hidden' }}>
+          style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', border: `1px solid ${BD}`, background: S1 }}>
 
-          {/* Loyalty stamps */}
-          <div className="profile-loyalty" style={{ flex: '0 0 52%', padding: '22px 24px' }}>
-            <p style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--col-text)', marginBottom: 14 }}>Loyalty Visits</p>
-            {totalVisits > 0 && stampsThisCycle === 0 ? (
-              <>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <motion.div key={i} initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.35, delay: i * 0.06, ease }}
-                      style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px rgba(var(--rgb-acc),0.4)' }}>
-                      <Check size={14} color="var(--col-bg)" strokeWidth={2.5} />
-                    </motion.div>
-                  ))}
+          {/* Top accent line */}
+          <div style={{ height: 3, background: 'linear-gradient(90deg, transparent, var(--col-acc2) 25%, var(--col-acc) 50%, var(--col-acc2) 75%, transparent)' }} />
+
+          {/* Avatar + info */}
+          <div style={{ padding: '22px 22px 18px', display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{ width: 58, height: 58, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Cormorant Garamond", serif', fontSize: 28, color: 'var(--col-bg)', boxShadow: '0 0 28px rgba(var(--rgb-acc),0.3)' }}>
+              {initial || '?'}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {editName ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                  <input value={nameInput} onChange={e => setNameInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveName()}
+                    style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(var(--rgb-acc),0.45)', color: 'var(--col-text)', fontFamily: '"Cormorant Garamond", serif', fontSize: 22, outline: 'none', flex: 1, minWidth: 0 }} autoFocus />
+                  <button onClick={saveName} style={{ background: 'none', border: 'none', color: 'var(--col-acc)', cursor: 'pointer', padding: 2 }}><Check size={13}/></button>
+                  <button onClick={() => setEditName(false)} style={{ background: 'none', border: 'none', color: 'var(--col-text)', cursor: 'pointer', padding: 2 }}><X size={13}/></button>
                 </div>
-                <p style={{ fontSize: 11, color: 'var(--col-acc)', marginBottom: 3, fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>Reward unlocked!</p>
-                <p style={{ fontSize: 11, color: 'var(--col-text)' }}>Check Rewards · {totalVisits} visits total</p>
-              </>
-            ) : (
-              <>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-                  {Array.from({ length: 5 }).map((_, i) => {
-                    const filled = i < stampsThisCycle
-                    return (
-                      <motion.div key={i} initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.35, delay: i * 0.06, ease }}
-                        style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, background: filled ? 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))' : 'transparent', border: filled ? 'none' : '1.5px solid var(--col-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: filled ? '0 0 12px rgba(var(--rgb-acc),0.35)' : 'none' }}>
-                        {filled && <Check size={14} color="var(--col-bg)" strokeWidth={2.5} />}
-                      </motion.div>
-                    )
-                  })}
-                </div>
-                <p style={{ fontSize: 12, color: 'var(--col-text)', marginBottom: 4 }}>
-                  <span className="gold-gradient" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 22 }}>{stampsThisCycle}</span>
-                  <span style={{ color: 'var(--col-text)' }}> / 5 visits</span>
-                </p>
-                <p style={{ fontSize: 11, color: 'var(--col-text)' }}>
-                  {totalVisits === 0 ? 'Book 5 visits to unlock 30% off' : `${remaining} more to unlock 30% off`}
-                </p>
-              </>
-            )}
+              ) : (
+                <button onClick={() => { setEditName(true); setNameInput(profile?.full_name || '') }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, maxWidth: '100%' }}>
+                  <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 24, color: 'var(--col-text)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</span>
+                  <Edit2 size={11} style={{ color: 'var(--col-text)', opacity: 0.35, flexShrink: 0 }} />
+                </button>
+              )}
+              <p style={{ fontSize: 15, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', marginBottom: 9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
+              <span style={{ display: 'inline-block', fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.18em', fontWeight: 600, color: 'var(--col-bg)', background: 'var(--col-acc)', padding: '3px 10px', borderRadius: 5 }}>
+                {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''}`}
+              </span>
+            </div>
           </div>
 
-          <div className="profile-divider" style={{ width: 1, background: BD, flexShrink: 0, margin: '16px 0' }} />
-
-          {/* Profile */}
-          <div className="profile-info" style={{ flex: 1, padding: '22px 20px 22px 22px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-              <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"Cormorant Garamond", serif', fontSize: 19, color: 'var(--col-bg)', fontWeight: 500, boxShadow: '0 0 18px rgba(var(--rgb-acc),0.35)' }}>
-                {initial || '?'}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                {editName ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <input value={nameInput} onChange={e => setNameInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveName()}
-                      style={{ background: 'transparent', border: 'none', borderBottom: '1px solid rgba(var(--rgb-acc),0.45)', color: 'var(--col-text)', fontFamily: '"Cormorant Garamond", serif', fontSize: 19, outline: 'none', flex: 1, minWidth: 0 }} autoFocus />
-                    <button onClick={saveName} style={{ background: 'none', border: 'none', color: 'var(--col-acc)', cursor: 'pointer', padding: 2 }}><Check size={13}/></button>
-                    <button onClick={() => setEditName(false)} style={{ background: 'none', border: 'none', color: 'var(--col-text)', cursor: 'pointer', padding: 2 }}><X size={13}/></button>
-                  </div>
-                ) : (
-                  <button onClick={() => { setEditName(true); setNameInput(profile?.full_name || '') }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 21, color: 'var(--col-text)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>{name}</span>
-                    <Edit2 size={11} style={{ color: 'var(--col-text)', flexShrink: 0 }} />
-                  </button>
-                )}
-                <p style={{ fontSize: 11, color: 'var(--col-text)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
-              </div>
+          {/* Loyalty progress bar */}
+          <div style={{ padding: '0 22px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <span style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--col-text)', opacity: 0.38, fontFamily: 'DM Sans,sans-serif' }}>Loyalty</span>
+              <span style={{ fontSize: 15, fontFamily: 'DM Sans,sans-serif', color: totalVisits > 0 && stampsThisCycle === 0 ? 'var(--col-acc)' : 'var(--col-text)', opacity: totalVisits > 0 && stampsThisCycle === 0 ? 1 : 0.5 }}>
+                {totalVisits === 0
+                  ? '5 visits · unlock 30% off'
+                  : stampsThisCycle === 0
+                    ? 'Reward unlocked — check Rewards'
+                    : `${stampsThisCycle} / 5 · ${remaining} more for 30% off`}
+              </span>
             </div>
-            <span style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', fontWeight: 500, color: 'var(--col-bg)', background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.25)', padding: '4px 12px', borderRadius: 6, alignSelf: 'flex-start' }}>
-              {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''} total`}
-            </span>
+            <div style={{ display: 'flex', gap: 5 }}>
+              {Array.from({ length: 5 }).map((_, i) => {
+                const filled = totalVisits > 0 && stampsThisCycle === 0 ? true : i < stampsThisCycle
+                return (
+                  <motion.div key={i}
+                    initial={{ scaleX: 0, opacity: 0 }} animate={{ scaleX: 1, opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.1 + i * 0.07, ease }}
+                    style={{ flex: 1, height: 5, borderRadius: 3, background: filled ? 'linear-gradient(90deg, var(--col-acc2), var(--col-acc))' : BD, boxShadow: filled ? '0 0 8px rgba(var(--rgb-acc),0.4)' : 'none', transformOrigin: 'left' }} />
+                )
+              })}
+            </div>
           </div>
-        </motion.div>
 
-        {/* ── Stats bar ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.07, ease }}
-          style={{ ...card, display: 'flex' }}>
-          {[
-            { label: 'Upcoming',  value: upcoming },
-            { label: 'Cart',      value: cartItems.reduce((s, i) => s + i.quantity, 0) },
-            { label: 'Coupons',   value: activeCoupons },
-          ].map(({ label, value }, i) => (
-            <div key={label} style={{ flex: 1, padding: '16px 0', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
-              <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 32, color: 'var(--col-text)', lineHeight: 1, marginBottom: 4 }}>{value}</div>
-              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'var(--col-text)' }}>{label}</div>
-            </div>
-          ))}
+          {/* Stats strip */}
+          <div style={{ display: 'flex', borderTop: `1px solid ${BD}` }}>
+            {[
+              { label: 'Upcoming',  value: upcoming },
+              { label: 'Cart',      value: cartItems.reduce((s, i) => s + i.quantity, 0) },
+              { label: 'Coupons',   value: activeCoupons },
+            ].map(({ label, value }, i) => (
+              <div key={label} style={{ flex: 1, padding: '14px 8px', textAlign: 'center', borderRight: i < 2 ? `1px solid ${BD}` : 'none' }}>
+                <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 30, color: value > 0 ? 'var(--col-acc)' : 'var(--col-text)', lineHeight: 1, marginBottom: 3 }}>{value}</div>
+                <div style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--col-text)', opacity: 0.4, fontFamily: 'DM Sans,sans-serif' }}>{label}</div>
+              </div>
+            ))}
+          </div>
         </motion.div>
 
         {/* ── Tabs + content ── */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.13, ease }}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.1, ease }}
           className="profile-tab-panel" style={{ ...card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          <div style={{ display: 'flex', borderBottom: `1px solid ${BD}`, flexShrink: 0 }}>
+          <div className="profile-tab-bar">
             {TABS.map(t => (
-              <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} className="profile-tab-btn" style={{ flex: 1, padding: '13px 4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', transition: 'color 0.2s', fontWeight: tab === t ? 500 : 400, color: tab === t ? 'var(--col-acc)' : 'var(--col-text)', borderBottom: `2px solid ${tab === t ? 'var(--col-acc)' : 'transparent'}`, marginBottom: -1 }}>
+              <button key={t} onClick={() => { setTab(t); setApptPage(0); setOrdPage(0) }} className="profile-tab-btn"
+                style={{ fontWeight: tab === t ? 600 : 400, color: tab === t ? 'var(--col-acc)' : 'var(--col-text)', borderBottom: `2px solid ${tab === t ? 'var(--col-acc)' : 'transparent'}`, marginBottom: -1 }}>
                 {t}
                 {t === 'Cart' && cartItems.length > 0 && (
-                  <span style={{ marginLeft: 4, fontSize: 11, background: 'var(--col-acc)', color: 'var(--col-bg)', padding: '1px 5px', borderRadius: 9999 }}>
+                  <span style={{ marginLeft: 4, fontSize: 14, background: 'var(--col-acc)', color: 'var(--col-bg)', padding: '1px 5px', borderRadius: 9999 }}>
                     {cartItems.length}
                   </span>
                 )}
@@ -780,11 +749,11 @@ export default function Profile() {
                           <div style={{ padding: '10px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(52,211,153,0.04)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <Check size={12} color="#34d399"/>
-                              <span style={{ fontSize: 13, fontFamily: '"Courier New", monospace', letterSpacing: '0.06em', color: '#34d399' }}>{cartCoupon.code}</span>
-                              <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', color: 'rgba(52,211,153,0.65)' }}>— ${parseFloat(cartCoupon.discount_value).toFixed(2)} off</span>
+                              <span style={{ fontSize: 15, fontFamily: '"Courier New", monospace', letterSpacing: '0.06em', color: '#34d399' }}>{cartCoupon.code}</span>
+                              <span style={{ fontSize: 14, fontFamily: 'DM Sans,sans-serif', color: 'rgba(52,211,153,0.65)' }}>— ${parseFloat(cartCoupon.discount_value).toFixed(2)} off</span>
                             </div>
                             <button onClick={() => setCartCoupon(null)}
-                              style={{ background: 'none', border: 'none', color: 'rgba(248,113,113,0.55)', cursor: 'pointer', padding: '2px 4px', fontSize: 11, fontFamily: 'DM Sans,sans-serif', lineHeight: 1 }}>
+                              style={{ background: 'none', border: 'none', color: 'rgba(248,113,113,0.55)', cursor: 'pointer', padding: '2px 4px', fontSize: 15, fontFamily: 'DM Sans,sans-serif', lineHeight: 1 }}>
                               Remove
                             </button>
                           </div>
@@ -796,15 +765,15 @@ export default function Profile() {
                                 onChange={e => { setCartCouponCode(e.target.value.toUpperCase()); setCartCouponError(null) }}
                                 onKeyDown={e => e.key === 'Enter' && validateCartCoupon()}
                                 placeholder="Coupon code"
-                                style={{ flex: 1, background: S1, border: `1px solid ${cartCouponError ? 'rgba(248,113,113,0.4)' : BD}`, borderRadius: 8, padding: '7px 12px', fontSize: 12, color: 'var(--col-text)', outline: 'none', fontFamily: '"Courier New", monospace', letterSpacing: '0.06em', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                                style={{ flex: 1, background: S1, border: `1px solid ${cartCouponError ? 'rgba(248,113,113,0.4)' : BD}`, borderRadius: 8, padding: '7px 12px', fontSize: 14, color: 'var(--col-text)', outline: 'none', fontFamily: '"Courier New", monospace', letterSpacing: '0.06em', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
                               />
                               <button onClick={validateCartCoupon} disabled={!cartCouponCode.trim() || validatingCartCode}
-                                style={{ padding: '7px 14px', borderRadius: 8, border: `1px solid rgba(var(--rgb-acc),0.25)`, background: 'rgba(var(--rgb-acc),0.07)', color: 'var(--col-acc)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.08em', cursor: (!cartCouponCode.trim() || validatingCartCode) ? 'not-allowed' : 'pointer', opacity: (!cartCouponCode.trim() || validatingCartCode) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                                style={{ padding: '7px 14px', borderRadius: 8, border: `1px solid rgba(var(--rgb-acc),0.25)`, background: 'rgba(var(--rgb-acc),0.07)', color: 'var(--col-acc)', fontSize: 15, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.08em', cursor: (!cartCouponCode.trim() || validatingCartCode) ? 'not-allowed' : 'pointer', opacity: (!cartCouponCode.trim() || validatingCartCode) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
                                 <Tag size={10}/>{validatingCartCode ? '…' : 'Apply'}
                               </button>
                             </div>
                             {cartCouponError && (
-                              <p style={{ fontSize: 11, color: '#f87171', fontFamily: 'DM Sans,sans-serif', marginTop: 5 }}>{cartCouponError}</p>
+                              <p style={{ fontSize: 15, color: '#f87171', fontFamily: 'DM Sans,sans-serif', marginTop: 5 }}>{cartCouponError}</p>
                             )}
                           </div>
                         )}
@@ -812,21 +781,21 @@ export default function Profile() {
                         {/* Cart footer */}
                         <div style={{ padding: '14px 20px', borderTop: `1px solid ${BD}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
                           <div>
-                            <p style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif', marginBottom: 3 }}>Total</p>
+                            <p style={{ fontSize: 15, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', fontFamily: 'DM Sans, sans-serif', marginBottom: 3 }}>Total</p>
                             {cartCoupon && (
                               <p style={{ fontSize: '1.1rem', color: 'var(--col-text)', opacity: 0.4, textDecoration: 'line-through', lineHeight: 1, marginBottom: 2, fontFamily: 'DM Sans,sans-serif' }}>${cartTotal.toFixed(2)}</p>
                             )}
                             <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>${cartFinalTotal.toFixed(2)}</p>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 11, justifyContent: 'center' }}>
+                            <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 15, justifyContent: 'center' }}>
                               {payStep === 'loading'
                                 ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                 : 'Pay Online'
                               }
                             </button>
                             <button onClick={reserveInStore} disabled={payStep === 'loading' || reserving}
-                              style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: (payStep === 'loading' || reserving) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                              style={{ padding: '10px 22px', borderRadius: 10, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 15, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: (payStep === 'loading' || reserving) ? 'not-allowed' : 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                               {reserving
                                 ? <div style={{ width: 12, height: 12, border: '2px solid rgba(var(--rgb-acc),0.3)', borderTopColor: 'var(--col-acc)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                 : 'Pay In Store'
@@ -856,9 +825,9 @@ export default function Profile() {
                     <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderBottom: `1px solid ${BD}`, flexWrap: 'wrap' }}>
                       {[['upcoming','Upcoming'],['completed','Completed'],['cancelled','Cancelled']].map(([key, label]) => (
                         <button key={key} onClick={() => { setApptFilter(key); setApptPage(0) }}
-                          style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: apptFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${apptFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: apptFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: apptFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
+                          style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:15, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: apptFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${apptFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: apptFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: apptFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
                           {label}
-                          {apptCounts[key] > 0 && <span style={{ fontSize:10, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{apptCounts[key]}</span>}
+                          {apptCounts[key] > 0 && <span style={{ fontSize:14, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{apptCounts[key]}</span>}
                         </button>
                       ))}
                     </div>
@@ -886,10 +855,10 @@ export default function Profile() {
                             <div style={{ flex: 1, minWidth: 0 }}>
                               {/* Header */}
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px 0' }}>
-                                <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                                <span style={{ fontSize: 15, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.3, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                                   #{appt.id.slice(0, 8).toUpperCase()}
                                 </span>
-                                <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                                <span style={{ fontSize: 14, padding: '3px 10px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
                                   {s.label}
                                 </span>
                               </div>
@@ -898,9 +867,9 @@ export default function Profile() {
                               <div style={{ padding: '10px 14px 12px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                                   <div style={{ minWidth: 0 }}>
-                                    <p className="font-display" style={{ color: 'var(--col-text)', fontSize: '1.15rem', fontWeight: 400, lineHeight: 1.1, marginBottom: 4 }}>{appt.services?.name || '—'}</p>
+                                    <p className="font-display" style={{ color: 'var(--col-text)', fontSize: '1.25rem', fontWeight: 400, lineHeight: 1.1, marginBottom: 4 }}>{appt.services?.name || '—'}</p>
                                     {appt.stylists?.name && (
-                                      <p style={{ color: 'var(--col-text)', opacity: 0.5, fontSize: 11, fontFamily: 'DM Sans,sans-serif' }}>
+                                      <p style={{ color: 'var(--col-text)', opacity: 0.5, fontSize: 15, fontFamily: 'DM Sans,sans-serif' }}>
                                         with {appt.stylists.name}{appt.services?.duration ? ` · ${appt.services.duration} min` : ''}
                                       </p>
                                     )}
@@ -915,12 +884,12 @@ export default function Profile() {
                                 {/* Date/time pill */}
                                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 8, background: isUpcoming ? 'rgba(var(--rgb-acc),0.07)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${isUpcoming ? 'rgba(var(--rgb-acc),0.2)' : BD}` }}>
                                   <Calendar size={10} color={isUpcoming ? 'var(--col-acc)' : 'var(--col-text)'} />
-                                  <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>{apptDate}</span>
+                                  <span style={{ fontSize: 15, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>{apptDate}</span>
                                   {appt.time && (
                                     <>
                                       <div style={{ width: 1, height: 10, background: 'rgba(var(--rgb-hi),0.15)' }} />
                                       <Clock size={10} color={isUpcoming ? 'var(--col-acc)' : 'var(--col-text)'} />
-                                      <span style={{ fontSize: 11, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>{appt.time.slice(0, 5)}</span>
+                                      <span style={{ fontSize: 15, color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isUpcoming ? 600 : 400 }}>{appt.time.slice(0, 5)}</span>
                                     </>
                                   )}
                                 </div>
@@ -931,24 +900,20 @@ export default function Profile() {
                                   return (
                                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '5px 10px', borderRadius: 8, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)' }}>
                                       <Tag size={10} color="#34d399" />
-                                      <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', color: '#34d399', letterSpacing: '0.06em' }}>
+                                      <span style={{ fontSize: 15, fontFamily: 'DM Sans,sans-serif', color: '#34d399', letterSpacing: '0.06em' }}>
                                         {m[1]} — {m[2]} · paid <strong>${m[3]}</strong>
                                       </span>
                                     </div>
                                   )
                                 })()}
 
-                                {canManage(appt) && (
-                                  <button onClick={() => setManageAppt(appt)}
-                                    style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.18)', color: '#f87171', fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer' }}>
-                                    <X size={10} /> Cancel
-                                  </button>
-                                )}
-                                {withinWindow(appt) && (
-                                  <button onClick={() => navigate('/chat')}
-                                    style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, cursor: 'pointer', opacity: 0.55 }}>
-                                    Contact us
-                                  </button>
+                                {isUpcoming && (
+                                  <div style={{ marginTop: 10, display: 'flex', justifyContent: 'flex-start' }}>
+                                    <button onClick={() => { setContactAppt(appt); setContactMsg('') }}
+                                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 8, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.22)', color: 'var(--col-acc)', fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.05em', transition: 'all 0.2s' }}>
+                                      <MessageSquare size={12} /> Contact Us
+                                    </button>
+                                  </div>
                                 )}
                               </div>
 
@@ -956,13 +921,13 @@ export default function Profile() {
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}` }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                   <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: appt.payment_status === 'paid' ? '#34d399' : appt.payment_status === 'pay_in_store' ? '#f59e0b' : 'rgba(var(--rgb-hi),0.3)' }} />
-                                  <span style={{ fontSize: 12, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.06em' }}>
+                                  <span style={{ fontSize: 14, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.06em' }}>
                                     {appt.payment_status === 'paid' ? 'Paid online' : appt.payment_status === 'pay_in_store' ? 'Pay in store' : 'No payment on file'}
                                   </span>
                                 </div>
                                 {appt.payment_status === 'paid' && (
                                   <button onClick={() => downloadApptReceipt(appt)}
-                                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                                     <Download size={9} /> Receipt
                                   </button>
                                 )}
@@ -1002,9 +967,9 @@ export default function Profile() {
                     <div style={{ display: 'flex', gap: 6, padding: '10px 16px', borderBottom: `1px solid ${BD}`, flexWrap: 'wrap' }}>
                       {[['pickup','Awaiting Pickup'],['completed','Completed']].map(([key, label]) => (
                         <button key={key} onClick={() => { setOrdFilter(key); setOrdPage(0) }}
-                          style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: ordFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${ordFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: ordFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: ordFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
+                          style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:15, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: ordFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${ordFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: ordFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: ordFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
                           {label}
-                          {ordCounts[key] > 0 && <span style={{ fontSize:10, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{ordCounts[key]}</span>}
+                          {ordCounts[key] > 0 && <span style={{ fontSize:14, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{ordCounts[key]}</span>}
                         </button>
                       ))}
                     </div>
@@ -1031,11 +996,11 @@ export default function Profile() {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.02)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Package size={11} color="var(--col-text)" />
-                                <span style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--col-text)', letterSpacing: '0.08em' }}>#{groupId}</span>
-                                <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>·</span>
-                                <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(first.created_at), 'MMM d, yyyy')}</span>
+                                <span style={{ fontSize: 14, fontFamily: 'monospace', color: 'var(--col-text)', letterSpacing: '0.08em' }}>#{groupId}</span>
+                                <span style={{ fontSize: 14, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>·</span>
+                                <span style={{ fontSize: 14, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(first.created_at), 'MMM d, yyyy')}</span>
                               </div>
-                              <span style={{ fontSize: 12, padding: '3px 9px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                              <span style={{ fontSize: 14, padding: '3px 9px', borderRadius: 20, background: s.bg, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, whiteSpace: 'nowrap' }}>
                                 {s.label}
                               </span>
                             </div>
@@ -1049,14 +1014,14 @@ export default function Profile() {
                                     : <Package size={16} color="rgba(var(--rgb-hi),0.12)" />}
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ color: 'var(--col-text)', fontSize: 13, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <p style={{ color: 'var(--col-text)', fontSize: 15, fontWeight: 500, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {order.products?.name}
                                   </p>
-                                  <p style={{ color: 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', opacity: 0.5 }}>
+                                  <p style={{ color: 'var(--col-text)', fontSize: 15, fontFamily: 'DM Sans,sans-serif', opacity: 0.5 }}>
                                     Qty {order.quantity}{order.products?.price ? ` · $${parseFloat(order.products.price).toFixed(2)} each` : ''}
                                   </p>
                                 </div>
-                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.05rem', lineHeight: 1, flexShrink: 0 }}>
+                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.15rem', lineHeight: 1, flexShrink: 0 }}>
                                   ${((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)}
                                 </p>
                               </div>
@@ -1067,12 +1032,12 @@ export default function Profile() {
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: first.payment_status === 'paid' ? '#34d399' : '#f59e0b', flexShrink: 0 }} />
-                                  <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>
+                                  <span style={{ fontSize: 14, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.08em' }}>
                                     {first.payment_status === 'paid' ? 'Paid via Stripe' : first.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
                                   </span>
                                 </div>
                                 {first.payment_status === 'pay_in_store' && first.expires_at && first.status === 'active' && (
-                                  <span style={{ fontSize: 11, color: 'rgba(245,158,11,0.55)', fontFamily: 'DM Sans,sans-serif', paddingLeft: 11 }}>
+                                  <span style={{ fontSize: 15, color: 'rgba(245,158,11,0.55)', fontFamily: 'DM Sans,sans-serif', paddingLeft: 11 }}>
                                     Hold expires {format(new Date(first.expires_at), 'MMM d')}
                                   </span>
                                 )}
@@ -1084,7 +1049,7 @@ export default function Profile() {
                                   </span>
                                 )}
 <button onClick={() => setReceipt(first)}
-                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
+                                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 14, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                                   <Receipt size={10} /> Receipt
                                 </button>
                               </div>
@@ -1112,9 +1077,9 @@ export default function Profile() {
                         const count = key === 'active' ? activeCouponsList.length : pastCouponsList.length
                         return (
                           <button key={key} onClick={() => setRewardFilter(key)}
-                            style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: rewardFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${rewardFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: rewardFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: rewardFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
+                            style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:15, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: rewardFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${rewardFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: rewardFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: rewardFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
                             {label}
-                            {count > 0 && <span style={{ fontSize:10, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{count}</span>}
+                            {count > 0 && <span style={{ fontSize:14, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{count}</span>}
                           </button>
                         )
                       })}
@@ -1145,7 +1110,7 @@ export default function Profile() {
         {/* ── Sign out ── */}
         <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35, delay: 0.2, ease }}
           onClick={handleLogout} disabled={loggingOut}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 20px', borderRadius: 10, border: `1px solid ${BD}`, background: 'transparent', color: 'var(--col-text)', fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.16em', cursor: 'pointer', transition: 'color 0.2s, border-color 0.2s', flexShrink: 0 }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 20px', borderRadius: 10, border: `1px solid ${BD}`, background: 'transparent', color: 'var(--col-text)', fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.16em', cursor: 'pointer', transition: 'color 0.2s, border-color 0.2s', flexShrink: 0 }}
           onMouseEnter={e => { e.currentTarget.style.color = 'var(--col-text)'; e.currentTarget.style.borderColor = 'var(--col-text)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'var(--col-text)'; e.currentTarget.style.borderColor = BD }}>
           {loggingOut ? <svg className="animate-spin" style={{ width: 13, height: 13 }} fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> : <LogOut size={13} />}
@@ -1179,7 +1144,7 @@ export default function Profile() {
                       Hair<span style={{ color: 'var(--col-acc)' }}>Go</span>
                     </span>
                   </div>
-                  <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>
+                  <p style={{ fontSize: 15, color: 'var(--col-text)', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>
                     Premium Hair Studio · Auckland, NZ
                   </p>
                 </div>
@@ -1187,32 +1152,32 @@ export default function Profile() {
                 {/* Order # + Date */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div>
-                    <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Order</p>
-                    <p style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--col-text)', letterSpacing: '0.1em' }}>#{receipt.id.slice(0, 8).toUpperCase()}</p>
+                    <p style={{ fontSize: 15, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Order</p>
+                    <p style={{ fontFamily: 'monospace', fontSize: 14, color: 'var(--col-text)', letterSpacing: '0.1em' }}>#{receipt.id.slice(0, 8).toUpperCase()}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Date</p>
-                    <p style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(receipt.created_at), 'MMM d, yyyy')}</p>
+                    <p style={{ fontSize: 15, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Date</p>
+                    <p style={{ fontSize: 14, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(receipt.created_at), 'MMM d, yyyy')}</p>
                   </div>
                 </div>
 
                 {/* Customer */}
                 <div style={{ marginBottom: 18, padding: '10px 12px', background: 'rgba(var(--rgb-hi),0.03)', border: '1px solid rgba(var(--rgb-hi),0.06)', borderRadius: 10 }}>
-                  <p style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Customer</p>
-                  <p style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{profile?.full_name || user?.email}</p>
+                  <p style={{ fontSize: 15, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Customer</p>
+                  <p style={{ fontSize: 14, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{profile?.full_name || user?.email}</p>
                 </div>
 
                 {/* Items header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Item</span>
-                  <span style={{ fontSize: 11, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Amount</span>
+                  <span style={{ fontSize: 15, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Item</span>
+                  <span style={{ fontSize: 15, color: 'var(--col-text)', letterSpacing: '0.18em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif' }}>Amount</span>
                 </div>
 
                 {/* Item row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '12px 0', borderTop: '1px solid rgba(var(--rgb-hi),0.06)', borderBottom: '1px solid rgba(var(--rgb-hi),0.06)', marginBottom: 14 }}>
                   <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
-                    <p style={{ fontSize: 13, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 3 }}>{receipt.products?.name}</p>
-                    <p style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
+                    <p style={{ fontSize: 15, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 3 }}>{receipt.products?.name}</p>
+                    <p style={{ fontSize: 15, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
                       {receipt.quantity} × ${parseFloat(receipt.products?.price || 0).toFixed(2)}
                     </p>
                   </div>
@@ -1223,7 +1188,7 @@ export default function Profile() {
 
                 {/* Total */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-                  <span style={{ fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', fontWeight: 600 }}>Total</span>
+                  <span style={{ fontSize: 14, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', fontWeight: 600 }}>Total</span>
                   <span className="font-display gold-gradient" style={{ fontSize: '1.6rem', lineHeight: 1 }}>
                     ${((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
                   </span>
@@ -1232,23 +1197,23 @@ export default function Profile() {
                 {/* Payment badge */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px 14px', background: receipt.payment_status === 'paid' ? 'rgba(52,211,153,0.08)' : 'rgba(245,158,11,0.08)', borderRadius: 10, border: `1px solid ${receipt.payment_status === 'paid' ? 'rgba(52,211,153,0.2)' : 'rgba(245,158,11,0.2)'}`, marginBottom: 22 }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: receipt.payment_status === 'paid' ? '#34d399' : '#f59e0b', flexShrink: 0 }} />
-                  <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', color: receipt.payment_status === 'paid' ? '#34d399' : '#f59e0b', fontWeight: 600, letterSpacing: '0.1em' }}>
+                  <span style={{ fontSize: 15, fontFamily: 'DM Sans,sans-serif', color: receipt.payment_status === 'paid' ? '#34d399' : '#f59e0b', fontWeight: 600, letterSpacing: '0.1em' }}>
                     {receipt.payment_status === 'paid' ? 'Paid via Stripe' : receipt.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
                   </span>
                 </div>
 
-                <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', marginBottom: 20 }}>
+                <p style={{ textAlign: 'center', fontSize: 15, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', marginBottom: 20 }}>
                   Thank you for shopping with HairGo.
                 </p>
 
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={() => setReceipt(null)}
-                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.08)', color: 'var(--col-text)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.08)', color: 'var(--col-text)', fontSize: 15, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
                     Close
                   </button>
                   <button onClick={() => downloadReceipt(receipt)}
-                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', border: 'none', color: 'var(--col-bg)', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))', border: 'none', color: 'var(--col-bg)', fontSize: 15, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <Download size={12} /> Download PDF
                   </button>
                 </div>
@@ -1269,62 +1234,136 @@ export default function Profile() {
         />
       )}
 
-      {/* ── Manage appointment modal ── */}
+
+      {/* ── Contact Us popup ── */}
       <AnimatePresence>
-        {manageAppt && (
+        {contactAppt && (
           <motion.div
+            key="contact-overlay"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-            onClick={() => !cancelling && setManageAppt(null)}
+            onClick={() => setContactAppt(null)}
+            style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
           >
             <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.96 }}
-              style={{ background: 'var(--col-modal)', borderRadius: 20, padding: 24, maxWidth: 380, width: '100%', position: 'relative' }}
+              key="contact-card"
+              initial={{ opacity: 0, y: 30, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 28 }}
               onClick={e => e.stopPropagation()}
+              className="contact-card"
+              style={{ width: '100%', maxWidth: 660, borderRadius: 24, background: 'var(--col-modal)', border: `1px solid rgba(var(--rgb-acc),0.14)`, overflow: 'hidden', boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(var(--rgb-acc),0.06)', maxHeight: '90vh', overflowY: 'auto' }}
             >
-              <button onClick={() => !cancelling && setManageAppt(null)}
-                style={{ position: 'absolute', top: 14, right: 14, width: 30, height: 30, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <X size={14} />
-              </button>
+              {/* Accent bar */}
+              <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, var(--col-acc2) 20%, var(--col-acc) 50%, var(--col-acc2) 80%, transparent)', position: 'sticky', top: 0, zIndex: 2 }} />
 
-              <p style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Manage Appointment</p>
-              <p className="font-display" style={{ fontSize: '1.3rem', color: 'var(--col-text)', marginBottom: 16 }}>{manageAppt.services?.name || '—'}</p>
+              {/* Hero header */}
+              <div className="contact-header" style={{ padding: '24px 28px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div>
+                  <span style={{ display: 'block', fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--col-acc)', marginBottom: 5 }}>Hair Go</span>
+                  <span className="font-display contact-title" style={{ fontSize: '1.9rem', color: 'var(--col-text)', letterSpacing: '0.02em', lineHeight: 1.1 }}>Get in Touch</span>
+                  <p className="contact-subtitle" style={{ marginTop: 5, fontSize: 13, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', fontWeight: 300 }}>We'll get back to you as soon as possible.</p>
+                </div>
+                <button onClick={() => setContactAppt(null)}
+                  style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.06)', border: `1px solid ${BD}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--col-text)', opacity: 0.55, flexShrink: 0, transition: 'all 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.1)' }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '0.55'; e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.06)' }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
 
-              <div style={{ padding: '12px 14px', borderRadius: 12, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.07)', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {manageAppt.stylists?.name && (
-                  <span style={{ fontSize: 12, color: 'var(--col-text)', opacity: 0.6, fontFamily: 'DM Sans,sans-serif' }}>with {manageAppt.stylists.name}</span>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Calendar size={11} color="var(--col-acc)" />
-                  <span style={{ fontSize: 12, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>
-                    {format(new Date(manageAppt.date), 'MMM d, yyyy')}{manageAppt.time ? ` at ${manageAppt.time.slice(0, 5)}` : ''}
-                  </span>
+              {/* Two-panel body */}
+              <div className="contact-panels" style={{ display: 'grid', gridTemplateColumns: '1fr 1px 1fr', padding: '0 0 28px' }}>
+
+                {/* LEFT — call */}
+                <div className="contact-left" style={{ padding: '0 28px', display: 'flex', flexDirection: 'column', position: 'relative', textAlign: 'center' }}>
+                  {/* "Call Us" pinned top-left */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, alignSelf: 'flex-start', marginBottom: 0 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(var(--rgb-acc),0.1)', border: '1px solid rgba(var(--rgb-acc),0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Phone size={13} color="var(--col-acc)" />
+                    </div>
+                    <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--col-text)', fontWeight: 600, opacity: 0.7 }}>Call Us</span>
+                  </div>
+
+                  {/* Phone + hours centered in remaining space */}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, paddingTop: 8 }}>
+                    <a href="tel:0211555429"
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, textDecoration: 'none', padding: '12px 18px', borderRadius: 14, background: 'rgba(var(--rgb-acc),0.07)', border: '1px solid rgba(var(--rgb-acc),0.18)', transition: 'all 0.2s', width: '100%' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.13)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-acc),0.32)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.07)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-acc),0.18)' }}
+                    >
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, var(--col-acc3), var(--col-acc2))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(var(--rgb-acc),0.3)' }}>
+                        <Phone size={15} color="var(--col-bg)" />
+                      </div>
+                      <span style={{ fontSize: '1.2rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: 'var(--col-text)', letterSpacing: '0.06em' }}>021 155 5429</span>
+                    </a>
+
+                    <div style={{ width: '100%', borderRadius: 12, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${BD}`, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {[['Mon – Fri', '9:00 – 19:00'], ['Sat – Sun', '10:00 – 18:00']].map(([day, time]) => (
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.45 }}>{day}</span>
+                          <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-acc)', fontWeight: 500 }}>{time}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider with OR */}
+                <div className="contact-divider" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 0 }}>
+                  <div style={{ flex: 1, width: 1, background: `rgba(var(--rgb-hi),0.07)`, minHeight: 40 }} />
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--col-modal)', border: `1px solid rgba(var(--rgb-hi),0.09)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, zIndex: 1 }}>
+                    <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, letterSpacing: '0.08em', color: 'var(--col-text)', opacity: 0.35, textTransform: 'uppercase' }}>or</span>
+                  </div>
+                  <div style={{ flex: 1, width: 1, background: `rgba(var(--rgb-hi),0.07)`, minHeight: 40 }} />
+                </div>
+
+                {/* RIGHT — message */}
+                <div className="contact-right" style={{ padding: '0 28px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(var(--rgb-acc),0.1)', border: '1px solid rgba(var(--rgb-acc),0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <MessageSquare size={13} color="var(--col-acc)" />
+                    </div>
+                    <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--col-text)', fontWeight: 600, opacity: 0.7 }}>Message</span>
+                  </div>
+
+                  {/* Appointment pill */}
+                  <div style={{ marginBottom: 12, padding: '9px 14px', borderRadius: 10, background: 'rgba(var(--rgb-acc),0.06)', border: '1px solid rgba(var(--rgb-acc),0.14)', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Scissors size={11} color="var(--col-acc)" />
+                      <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.7 }}>{contactAppt.services?.name || '—'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Calendar size={11} color="var(--col-acc)" />
+                      <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.7 }}>
+                        {new Date(contactAppt.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        {contactAppt.time ? ` · ${contactAppt.time.slice(0, 5)}` : ''}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Star size={11} color="var(--col-acc)" />
+                      <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.7 }}>{contactAppt.stylists?.name || 'Any stylist'}</span>
+                    </div>
+                  </div>
+
+                  <textarea
+                    value={contactMsg}
+                    onChange={e => setContactMsg(e.target.value)}
+                    placeholder="Tell us what you need — cancel, reschedule, or any question…"
+                    rows={5}
+                    style={{ width: '100%', padding: '13px 14px', borderRadius: 12, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${BD}`, color: 'var(--col-text)', fontSize: 14, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, lineHeight: 1.6, resize: 'none', outline: 'none', transition: 'border-color 0.2s', marginBottom: 12 }}
+                    onFocus={e => e.target.style.borderColor = 'rgba(var(--rgb-acc),0.45)'}
+                    onBlur={e => e.target.style.borderColor = BD}
+                  />
+
+                  <button
+                    onClick={handleContactSend}
+                    disabled={contactSending || !contactMsg.trim()}
+                    style={{ width: '100%', padding: '13px', borderRadius: 12, background: contactMsg.trim() ? 'linear-gradient(135deg, var(--col-acc3) 0%, var(--col-acc2) 50%, var(--col-acc) 100%)' : 'rgba(var(--rgb-hi),0.05)', border: contactMsg.trim() ? 'none' : `1px solid ${BD}`, color: contactMsg.trim() ? 'var(--col-bg)' : 'var(--col-text)', fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', cursor: contactMsg.trim() && !contactSending ? 'pointer' : 'not-allowed', opacity: contactSending ? 0.6 : 1, transition: 'all 0.25s', boxShadow: contactMsg.trim() ? '0 8px 24px rgba(var(--rgb-acc),0.25)' : 'none' }}
+                  >
+                    {contactSending ? 'Sending…' : 'Send Message'}
+                  </button>
                 </div>
               </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-                <button onClick={handleReschedule} disabled={cancelling}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 12, background: 'rgba(var(--rgb-acc),0.07)', border: '1px solid rgba(var(--rgb-acc),0.2)', cursor: cancelling ? 'not-allowed' : 'pointer', opacity: cancelling ? 0.7 : 1, transition: 'all 0.2s', width: '100%', textAlign: 'left' }}>
-                  <RotateCcw size={16} color="var(--col-acc)" style={{ flexShrink: 0 }} />
-                  <div>
-                    <p style={{ fontSize: 13, color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>Reschedule</p>
-                    <p style={{ fontSize: 11, color: 'var(--col-text)', opacity: 0.5, fontFamily: 'DM Sans,sans-serif', margin: '2px 0 0' }}>Pick a new date & time</p>
-                  </div>
-                </button>
-
-                <button onClick={handleCancelAppt} disabled={cancelling}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.18)', cursor: cancelling ? 'not-allowed' : 'pointer', opacity: cancelling ? 0.7 : 1, transition: 'all 0.2s', width: '100%', textAlign: 'left' }}>
-                  <AlertTriangle size={16} color="#f87171" style={{ flexShrink: 0 }} />
-                  <div>
-                    <p style={{ fontSize: 13, color: '#f87171', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, margin: 0 }}>Cancel</p>
-                    <p style={{ fontSize: 11, color: 'var(--col-text)', opacity: 0.5, fontFamily: 'DM Sans,sans-serif', margin: '2px 0 0' }}>80% refund · Cannot be undone</p>
-                  </div>
-                </button>
-              </div>
-
-              <p style={{ fontSize: 11, color: 'var(--col-text)', opacity: 0.35, fontFamily: 'DM Sans,sans-serif', textAlign: 'center', lineHeight: 1.5, margin: 0 }}>
-                Appointments within 24 hours cannot be managed online. Contact us directly.
-              </p>
             </motion.div>
           </motion.div>
         )}
@@ -1334,22 +1373,54 @@ export default function Profile() {
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 600px) {
-          .profile-top-card { flex-direction: column !important; }
-          .profile-loyalty {
-            flex: unset !important;
-            padding: 18px 18px 16px !important;
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-          }
-          .profile-divider { display: none !important; }
-          .profile-info {
-            flex: unset !important;
-            padding: 16px 18px 18px !important;
-          }
           .profile-tab-panel { min-height: 320px; }
-          .profile-tab-btn {
-            padding: 11px 2px !important;
-            font-size: 11px !important;
-            letter-spacing: 0.08em !important;
+        }
+
+        /* ── Contact popup mobile ── */
+        @media (max-width: 540px) {
+          .contact-card {
+            border-radius: 20px !important;
+            margin: 0 !important;
+          }
+          .contact-header {
+            padding: 18px 18px 12px !important;
+          }
+          .contact-title {
+            font-size: 1.5rem !important;
+          }
+          .contact-subtitle {
+            font-size: 12px !important;
+          }
+          .contact-panels {
+            grid-template-columns: 1fr !important;
+            padding-bottom: 20px !important;
+          }
+          .contact-left {
+            padding: 0 18px !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+          }
+
+          /* horizontal OR divider */
+          .contact-divider {
+            flex-direction: row !important;
+            height: auto !important;
+            margin: 20px 18px !important;
+            align-items: center !important;
+          }
+          .contact-divider > div:first-child,
+          .contact-divider > div:last-child {
+            flex: 1 !important;
+            width: auto !important;
+            height: 1px !important;
+            min-height: unset !important;
+          }
+
+          /* message section stacked (now second on mobile) */
+          .contact-right {
+            padding: 16px 18px 0 !important;
+            border-top: 1px solid rgba(var(--rgb-hi), 0.07) !important;
+            align-items: flex-start !important;
           }
         }
       `}</style>
@@ -1381,7 +1452,7 @@ function CouponCard({ coupon: c, used, expired }) {
         {/* Left: discount badge */}
         <div style={{ flexShrink: 0, width: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px 8px', background: leftBg, position: 'relative' }}>
           <span className="font-display" style={{ fontSize: '2.2rem', lineHeight: 1, fontWeight: 400, color: expired ? 'rgba(255,255,255,0.4)' : '#fff' }}>{discountLabel}</span>
-          <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: expired ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
+          <span style={{ fontSize: 15, letterSpacing: '0.22em', textTransform: 'uppercase', color: expired ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.65)', fontFamily: 'DM Sans,sans-serif', marginTop: 4 }}>OFF</span>
           <div style={{ position: 'absolute', top: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
           <div style={{ position: 'absolute', bottom: -10, right: -10, width: 20, height: 20, borderRadius: '50%', background: '#111116', zIndex: 2 }} />
         </div>
@@ -1394,10 +1465,10 @@ function CouponCard({ coupon: c, used, expired }) {
 
         {/* Right: code + info */}
         <div style={{ flex: 1, padding: '16px 16px 16px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 8, minWidth: 0 }}>
-          <p style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: topLabelColor, fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{topLabel}</p>
+          <p style={{ fontSize: 15, letterSpacing: '0.22em', textTransform: 'uppercase', color: topLabelColor, fontFamily: 'DM Sans,sans-serif', margin: 0 }}>{topLabel}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ flex: 1, padding: '7px 12px', borderRadius: 8, minWidth: 0, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 13, letterSpacing: '0.14em', color: inactive ? 'rgba(240,240,240,0.4)' : '#f0f0f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
+              <span style={{ fontFamily: '"Courier New", monospace', fontSize: 15, letterSpacing: '0.14em', color: inactive ? 'rgba(240,240,240,0.4)' : '#f0f0f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{c?.code}</span>
             </div>
             {!inactive && (
               <button onClick={copy} style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0, cursor: 'pointer', background: copied ? 'rgba(52,211,153,0.12)' : '#B8D4E8', border: `1px solid ${copied ? 'rgba(52,211,153,0.3)' : 'rgba(184,212,232,0.4)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s' }}>
@@ -1406,7 +1477,7 @@ function CouponCard({ coupon: c, used, expired }) {
             )}
           </div>
           {c?.expiry_date && (
-            <p style={{ fontSize: 12, color: expired ? 'rgba(239,68,68,0.55)' : 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>
+            <p style={{ fontSize: 14, color: expired ? 'rgba(239,68,68,0.55)' : 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', margin: 0 }}>
               {expired ? 'Expired' : 'Expires'} {format(new Date(c.expiry_date), 'MMM d, yyyy')}
             </p>
           )}
@@ -1414,12 +1485,12 @@ function CouponCard({ coupon: c, used, expired }) {
       </div>
       {used && (
         <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '3px 10px' }}>
-          <span style={{ fontSize: 12, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Used</span>
+          <span style={{ fontSize: 14, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Used</span>
         </div>
       )}
       {expired && (
         <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%) rotate(-12deg)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, padding: '3px 10px' }}>
-          <span style={{ fontSize: 12, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.5)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Expired</span>
+          <span style={{ fontSize: 14, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.5)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Expired</span>
         </div>
       )}
     </div>
@@ -1465,7 +1536,7 @@ function CartItemRow({ item, isLast, onRemove, onCommit, onExpired, BD }) {
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ color: 'var(--col-text)', fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 8 }}>
+        <p style={{ color: 'var(--col-text)', fontSize: 15, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 8 }}>
           {item.products?.name}
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1479,7 +1550,7 @@ function CartItemRow({ item, isLast, onRemove, onCommit, onExpired, BD }) {
               onMouseLeave={e => e.currentTarget.style.color = qty <= 1 ? 'var(--col-text)' : 'var(--col-text)'}>
               <Minus size={10} />
             </button>
-            <span style={{ width: 26, textAlign: 'center', color: 'var(--col-text)', fontSize: 13, fontWeight: 700, fontFamily: 'DM Sans,sans-serif', userSelect: 'none' }}>
+            <span style={{ width: 26, textAlign: 'center', color: 'var(--col-text)', fontSize: 15, fontWeight: 700, fontFamily: 'DM Sans,sans-serif', userSelect: 'none' }}>
               {qty}
             </span>
             <button
@@ -1491,7 +1562,7 @@ function CartItemRow({ item, isLast, onRemove, onCommit, onExpired, BD }) {
               <Plus size={10} />
             </button>
           </div>
-          <span style={{ color: 'var(--col-acc)', fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
+          <span style={{ color: 'var(--col-acc)', fontSize: 15, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
             ${(price * qty).toFixed(2)}
           </span>
         </div>
@@ -1521,7 +1592,7 @@ function Pager({ page, total, onChange }) {
 
       {Array.from({ length: total }).map((_, i) => (
         <button key={i} onClick={() => onChange(i)}
-          style={{ width: 30, height: 30, borderRadius: 8, border: i === page ? '1px solid rgba(var(--rgb-acc),0.4)' : '1px solid rgba(var(--rgb-hi),0.08)', background: i === page ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', color: i === page ? 'var(--col-bg)' : 'var(--col-text)', cursor: 'pointer', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: i === page ? 700 : 400, transition: 'all 0.2s' }}>
+          style={{ width: 30, height: 30, borderRadius: 8, border: i === page ? '1px solid rgba(var(--rgb-acc),0.4)' : '1px solid rgba(var(--rgb-hi),0.08)', background: i === page ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', color: i === page ? 'var(--col-bg)' : 'var(--col-text)', cursor: 'pointer', fontSize: 15, fontFamily: 'DM Sans,sans-serif', fontWeight: i === page ? 700 : 400, transition: 'all 0.2s' }}>
           {i + 1}
         </button>
       ))}
@@ -1541,9 +1612,9 @@ function EmptyState({ icon: Icon, text, action, link }) {
   return (
     <div style={{ padding: '36px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       <Icon size={22} style={{ color: 'var(--col-text)' }} />
-      <p style={{ color: 'var(--col-text)', fontSize: 13, textAlign: 'center', maxWidth: 220, lineHeight: 1.6 }}>{text}</p>
+      <p style={{ color: 'var(--col-text)', fontSize: 15, textAlign: 'center', maxWidth: 220, lineHeight: 1.6 }}>{text}</p>
       {action && link && (
-        <button onClick={() => navigate(link)} style={{ marginTop: 4, padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.14em', cursor: 'pointer' }}>
+        <button onClick={() => navigate(link)} style={{ marginTop: 4, padding: '8px 18px', borderRadius: 8, border: '1px solid rgba(var(--rgb-acc),0.25)', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.14em', cursor: 'pointer' }}>
           {action}
         </button>
       )}

@@ -29,6 +29,56 @@ Deno.serve(async (req) => {
   try {
     const { type, id, refundPct = 100 } = await req.json()
 
+    if (type === 'cancel-with-credit') {
+      // Cancel appointment and issue a store-credit coupon for 100% of what was paid.
+      const { data: appt, error } = await adminClient
+        .from('appointments')
+        .select('id, payment_intent_id, payment_status, status, user_id, services(price)')
+        .eq('id', id)
+        .single()
+
+      if (error || !appt) return json({ error: 'Appointment not found' }, 404)
+      if (appt.status === 'cancelled') return json({ error: 'Already cancelled' }, 400)
+
+      // Determine credit amount: use Stripe actual charge if paid online, else service price
+      let creditAmount = 0
+      if (appt.payment_status === 'paid' && appt.payment_intent_id) {
+        const pi = await stripe.paymentIntents.retrieve(appt.payment_intent_id)
+        creditAmount = pi.amount / 100
+      } else if ((appt as any).services?.price) {
+        creditAmount = parseFloat((appt as any).services.price)
+      }
+
+      let couponCode: string | null = null
+      if (creditAmount > 0 && appt.user_id) {
+        const code = `CREDIT${Math.random().toString(36).slice(2, 7).toUpperCase()}`
+        const expiry = new Date()
+        expiry.setFullYear(expiry.getFullYear() + 1)
+        const { data: coupon } = await adminClient.from('coupons').insert({
+          code,
+          discount_type: 'fixed',
+          discount_value: creditAmount,
+          active: true,
+          max_uses: 1,
+          current_uses: 0,
+          expiry_date: expiry.toISOString().split('T')[0],
+        }).select('id').single()
+
+        if (coupon) {
+          await adminClient.from('user_coupons').insert({
+            user_id: appt.user_id,
+            coupon_id: (coupon as any).id,
+            used: false,
+            granted_by: 'admin',
+          })
+          couponCode = code
+        }
+      }
+
+      await adminClient.from('appointments').update({ status: 'cancelled' }).eq('id', id)
+      return json({ ok: true, couponCode, creditAmount })
+    }
+
     if (type === 'appointment') {
       const { data: appt, error } = await adminClient
         .from('appointments')
