@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Send, MessageSquare, X, CheckCircle, Scissors } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -150,17 +150,46 @@ export default function Chat() {
         @keyframes spin { to { transform: rotate(360deg); } }
         .tk-item:hover { background: rgba(var(--rgb-hi),0.025) !important; }
         .msg-inp:focus { outline: none; }
-        .msg-inp::placeholder { color: var(--col-text); }
+        .msg-inp::placeholder { color: rgba(var(--rgb-hi),0.3); }
         .send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(var(--rgb-acc),0.35); }
         .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-        .new-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.07); outline: none; }
-        .new-inp::placeholder { color: var(--col-text); }
+        .new-inp:focus { border-color: rgba(var(--rgb-acc),0.5) !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.07); outline: none; }
+        .new-inp::placeholder { color: rgba(var(--rgb-hi),0.3); }
         .chat-back { display: none; }
+        .chat-send-label { display: inline; }
+
         @media (max-width: 767px) {
           .chat-layout { grid-template-columns: 1fr !important; }
           .chat-has-thread .chat-list { display: none !important; }
           .chat-layout:not(.chat-has-thread) .chat-thread { display: none !important; }
           .chat-back { display: flex !important; }
+
+          /* Ticket list */
+          .chat-list-hdr { padding: 1rem 1.125rem !important; }
+          .chat-new-btn { padding: 9px 18px !important; font-size: 13px !important; border-radius: 12px !important; }
+          .tk-item { padding: 1rem 1.125rem !important; min-height: 76px; }
+          .tk-avatar { width: 44px !important; height: 44px !important; font-size: 16px !important; }
+
+          /* Thread header */
+          .thread-hdr { padding: 0.875rem 1rem !important; }
+          .thread-hdr-badge-row { gap: 5px !important; }
+          .thread-hdr-date { display: none !important; }
+
+          /* Messages */
+          .msg-bubble-wrap { max-width: 86% !important; }
+          .msg-content { font-size: 0.9rem !important; }
+
+          /* Input */
+          .chat-input-area { padding: 0.625rem 0.875rem !important; }
+          .chat-inp-form { padding: 0.5rem 0.5rem 0.5rem 1rem !important; border-radius: 16px !important; }
+          .msg-inp { font-size: 16px !important; padding: 0.4rem 0 !important; }
+          .chat-send-btn { width: 40px !important; height: 40px !important; padding: 0 !important; border-radius: 12px !important; justify-content: center; }
+          .chat-send-label { display: none !important; }
+
+          /* New ticket modal — bottom sheet */
+          .new-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+          .new-modal-panel { border-radius: 22px 22px 0 0 !important; max-width: 100% !important; }
+          .new-modal-inputs input, .new-modal-inputs textarea { font-size: 16px !important; }
         }
       `}</style>
 
@@ -170,20 +199,21 @@ export default function Chat() {
         {/* ── LEFT: ticket list ────────────────────────────── */}
         <div className="chat-list" style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          <div style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="chat-list-hdr" style={{ padding: '0.875rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <p style={{ fontSize: '0.82rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>My Tickets</p>
-              <p style={{ fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
+              <p style={{ fontSize: '0.88rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Messages</p>
+              <p style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
                 {tickets.length} {tickets.length === 1 ? 'conversation' : 'conversations'}
               </p>
             </div>
-            <button onClick={() => setShowNew(true)} style={{
-              display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 8,
+            <button className="chat-new-btn" onClick={() => setShowNew(true)} style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10,
               background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)',
               fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer',
-              letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'transform .2s',
+              letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'transform .2s, box-shadow .2s',
+              boxShadow: '0 4px 14px rgba(var(--rgb-acc),0.28)',
             }}>
-              <Plus size={11} /> New
+              <Plus size={12} /> New
             </button>
           </div>
 
@@ -191,57 +221,70 @@ export default function Chat() {
             {loading ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1, padding: '0.5rem' }}>
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} style={{ height: 72, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.03)' }} className="shimmer" />
+                  <div key={i} style={{ height: 76, borderRadius: 10, background: 'rgba(var(--rgb-hi),0.03)', margin: '0.25rem 0' }} className="shimmer" />
                 ))}
               </div>
             ) : tickets.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, padding: '1.5rem', textAlign: 'center' }}>
-                <MessageSquare size={24} color="rgba(var(--rgb-hi),0.08)" style={{ marginBottom: 10 }} />
-                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 10 }}>No tickets yet</p>
-                <button onClick={() => setShowNew(true)} style={{ fontSize: 12, color: C.gold, background: 'none', border: `1px solid ${C.goldBorder}`, borderRadius: 6, padding: '5px 14px', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                  Open first ticket
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '2rem 1.5rem', textAlign: 'center', gap: 12 }}>
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MessageSquare size={22} color="rgba(var(--rgb-hi),0.18)" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <p style={{ color: C.white, fontSize: '0.88rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 4 }}>No conversations yet</p>
+                  <p style={{ color: 'rgba(var(--rgb-hi),0.3)', fontSize: '0.76rem', fontFamily: 'DM Sans,sans-serif' }}>Start a new ticket to chat with the team</p>
+                </div>
+                <button onClick={() => setShowNew(true)} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 20px', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                  <Plus size={12} /> New Ticket
                 </button>
               </div>
             ) : tickets.map(tk => {
               const isActive = selected?.id === tk.id
               const isOpen = tk.status === 'open'
+              const avatarLabel = (tk.recipient?.full_name || 'H')[0].toUpperCase()
               return (
                 <button key={tk.id} className="tk-item" onClick={() => setSelected(tk)}
-                  style={{ width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10, background: isActive ? C.goldBg : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(var(--rgb-hi),0.04)', cursor: 'pointer', transition: 'background .15s' }}>
-                  {/* Status indicator */}
-                  <div style={{ marginTop: 5, width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: isOpen ? '#34d399' : 'var(--col-text)', boxShadow: isOpen ? '0 0 6px rgba(52,211,153,0.4)' : 'none' }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <p style={{ fontSize: '0.8rem', color: isActive ? C.white : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, marginLeft: 6 }}>
-                        {tk.unread > 0 && (
-                          <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: 'var(--col-text)', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 3px' }}>
-                            {tk.unread}
-                          </span>
-                        )}
-                        {tk.lastTime && <span style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap' }}>{timeFmt(tk.lastTime)}</span>}
+                  style={{ width: '100%', textAlign: 'left', padding: '0.875rem 1rem', display: 'flex', alignItems: 'center', gap: 12, background: isActive ? 'rgba(var(--rgb-acc),0.07)' : 'transparent', border: 'none', borderLeft: `3px solid ${isActive ? 'var(--col-acc)' : 'transparent'}`, borderBottom: '1px solid rgba(var(--rgb-hi),0.04)', cursor: 'pointer', transition: 'background .15s' }}>
+
+                  {/* Avatar */}
+                  <div className="tk-avatar" style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: isOpen ? 'rgba(52,211,153,0.1)' : 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${isOpen ? 'rgba(52,211,153,0.22)' : 'rgba(var(--rgb-hi),0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <span style={{ fontSize: 14, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: isOpen ? '#34d399' : 'var(--col-acc)' }}>{avatarLabel}</span>
+                    {tk.unread > 0 && (
+                      <div style={{ position: 'absolute', top: -2, right: -2, minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: '#fff', fontSize: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 3px', border: `2px solid ${C.card}` }}>
+                        {tk.unread}
                       </div>
+                    )}
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* Title row */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <p style={{ fontSize: '0.84rem', color: isActive ? C.white : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: isActive || tk.unread > 0 ? 600 : 400, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1 }}>{tk.title}</p>
+                      {tk.lastTime && <span style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', whiteSpace: 'nowrap', marginLeft: 8, flexShrink: 0 }}>{timeFmt(tk.lastTime)}</span>}
                     </div>
-                    <p style={{ fontSize: '0.72rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+
+                    {/* Last message */}
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginBottom: 5 }}>
                       {tk.lastMsg || 'No messages yet'}
                     </p>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 5 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                        <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'var(--col-text)', fontWeight: 600 }}>
+
+                    {/* Meta row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: isOpen ? '#34d399' : 'rgba(var(--rgb-hi),0.2)', boxShadow: isOpen ? '0 0 5px rgba(52,211,153,0.5)' : 'none', flexShrink: 0 }} />
+                        <span style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'rgba(var(--rgb-hi),0.25)', fontWeight: 600 }}>
                           {tk.status}
                         </span>
-                        {tk.appointment_id && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 5px', borderRadius: 4, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)' }}>
-                            <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>APPT</span>
-                          </span>
-                        )}
                       </div>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 20, background: tk.recipient ? 'rgba(52,211,153,0.07)' : 'var(--col-acc)', border: `1px solid ${tk.recipient ? 'rgba(52,211,153,0.2)' : 'var(--col-acc)'}` }}>
-                        <div style={{ width: 4, height: 4, borderRadius: '50%', background: tk.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
-                        <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: tk.recipient ? 'rgba(52,211,153,0.8)' : C.goldDim, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
-                          {tk.recipient?.full_name || 'Store'}
-                        </span>
+                      <span style={{ color: 'rgba(var(--rgb-hi),0.15)', fontSize: 10 }}>·</span>
+                      <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', color: 'rgba(var(--rgb-hi),0.35)', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+                        {tk.recipient?.full_name || 'HairGo Store'}
                       </span>
+                      {tk.appointment_id && (
+                        <>
+                          <span style={{ color: 'rgba(var(--rgb-hi),0.15)', fontSize: 10 }}>·</span>
+                          <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>APPT</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </button>
@@ -252,11 +295,11 @@ export default function Chat() {
           {/* Profile footer */}
           <div style={{ padding: '0.75rem 1rem', borderTop: `1px solid ${C.border}`, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontSize: 12, color: 'var(--col-bg)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{displayName[0]?.toUpperCase()}</span>
+              <span style={{ fontSize: 11, color: 'var(--col-bg)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{displayName[0]?.toUpperCase()}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: '0.75rem', color: C.white, fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{displayName}</p>
-              <p style={{ fontSize: 11, color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Client</p>
+              <p style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Client</p>
             </div>
           </div>
         </div>
@@ -264,33 +307,33 @@ export default function Chat() {
         {/* ── RIGHT: thread ────────────────────────────────── */}
         <div className="chat-thread" style={{ background: C.card, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {!selected ? (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, textAlign: 'center', padding: '2rem' }}>
-              <div style={{ width: 52, height: 52, borderRadius: 14, background: C.goldBg, border: `1px solid ${C.goldBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Scissors size={20} color={C.gold} strokeWidth={1.5} style={{ transform: 'rotate(45deg)' }} />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, textAlign: 'center', padding: '2rem' }}>
+              <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Scissors size={22} color="var(--col-acc)" strokeWidth={1.5} style={{ transform: 'rotate(45deg)' }} />
               </div>
               <div>
-                <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 4 }}>Select a ticket</p>
-                <p style={{ color: C.muted, fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>or open a new one to start</p>
+                <p style={{ color: C.white, fontSize: '0.92rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, marginBottom: 5 }}>Select a conversation</p>
+                <p style={{ color: 'rgba(var(--rgb-hi),0.3)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif' }}>or open a new ticket to get started</p>
               </div>
-              <button onClick={() => setShowNew(true)} style={{ padding: '8px 20px', borderRadius: 8, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-                New Ticket
+              <button onClick={() => setShowNew(true)} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 22px', borderRadius: 11, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+                <Plus size={12} /> New Ticket
               </button>
             </div>
           ) : (
             <>
               {/* Thread header */}
-              <div style={{ padding: '0.875rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: 'linear-gradient(180deg, rgba(var(--rgb-hi),0.02) 0%, transparent 100%)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+              <div className="thread-hdr" style={{ padding: '0.875rem 1.25rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: 'linear-gradient(180deg, rgba(var(--rgb-hi),0.02) 0%, transparent 100%)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7 }}>
                   <button className="chat-back" onClick={() => setSelected(null)}
-                    style={{ alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.06)', border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', flexShrink: 0, padding: 0 }}>
+                    style={{ alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 9, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', flexShrink: 0, padding: 0 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
                   </button>
-                  <p style={{ color: C.white, fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1, margin: 0 }}>{selected.title}</p>
+                  <p style={{ color: C.white, fontSize: '0.92rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', flex: 1, margin: 0 }}>{selected.title}</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: selected.recipient ? 'rgba(52,211,153,0.1)' : 'var(--col-acc)', border: `1px solid ${selected.recipient ? 'rgba(52,211,153,0.3)' : 'var(--col-acc)'}` }}>
-                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: selected.recipient ? '#34d399' : C.gold, letterSpacing: '0.04em' }}>
+                <div className="thread-hdr-badge-row" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: selected.recipient ? 'rgba(52,211,153,0.1)' : 'var(--col-acc)', border: `1px solid ${selected.recipient ? 'rgba(52,211,153,0.3)' : 'rgba(var(--rgb-acc),0.6)'}` }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.recipient ? '#34d399' : 'var(--col-bg)', flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: selected.recipient ? '#34d399' : 'var(--col-bg)', letterSpacing: '0.04em' }}>
                       {selected.recipient?.full_name || 'HairGo Store'}
                     </span>
                   </span>
@@ -301,18 +344,18 @@ export default function Chat() {
                   {selected.appointment_id && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)' }}>
                       <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Appointment Request</span>
+                      <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Appt</span>
                     </span>
                   )}
-                  <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
+                  <span className="thread-hdr-date" style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
                 </div>
               </div>
 
               {/* Messages */}
-              <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', background: C.msgBg }}>
+              <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '1rem 1.125rem', display: 'flex', flexDirection: 'column', gap: '0.375rem', background: C.msgBg }}>
                 {messages.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <p style={{ color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No messages yet — start the conversation</p>
+                    <p style={{ color: 'rgba(var(--rgb-hi),0.25)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No messages yet — start the conversation</p>
                   </div>
                 ) : messages.map((msg, i) => {
                   const isMe = !msg.is_from_admin
@@ -321,29 +364,29 @@ export default function Chat() {
                   return (
                     <div key={msg.id} style={{ marginBottom: 2 }}>
                       {showDate && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.75rem 0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '0.875rem 0' }}>
                           <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.05)' }} />
-                          <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '2px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.04)', border: '1px solid rgba(var(--rgb-hi),0.06)' }}>
+                          <span style={{ fontSize: 11, color: 'rgba(var(--rgb-hi),0.3)', fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap', padding: '3px 12px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.03)', border: '1px solid rgba(var(--rgb-hi),0.06)' }}>
                             {isToday(new Date(msg.created_at)) ? 'Today' : isYesterday(new Date(msg.created_at)) ? 'Yesterday' : format(new Date(msg.created_at), 'MMMM d')}
                           </span>
                           <div style={{ flex: 1, height: 1, background: 'rgba(var(--rgb-hi),0.05)' }} />
                         </div>
                       )}
                       <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}
-                        style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start', marginTop: prevSame ? 2 : 8 }}>
+                        style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start', marginTop: prevSame ? 2 : 10 }}>
                         {!isMe && (
-                          <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, rgba(var(--rgb-acc),0.22), rgba(var(--rgb-acc),0.12))', border: '1px solid rgba(var(--rgb-acc),0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ fontSize: 11, color: C.gold, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '-0.01em' }}>HG</span>
+                          <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, rgba(var(--rgb-acc),0.2), rgba(var(--rgb-acc),0.1))', border: '1px solid rgba(var(--rgb-acc),0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ fontSize: 10, color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>HG</span>
                           </div>
                         )}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
+                        <div className="msg-bubble-wrap" style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, maxWidth: '68%' }}>
                           {!isMe && !prevSame && (
-                            <span style={{ fontSize: 11, color: C.goldDim, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', paddingLeft: 3 }}>{msg.sender?.full_name || 'HairGo Team'}</span>
+                            <span style={{ fontSize: 11, color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', paddingLeft: 3 }}>{msg.sender?.full_name || 'HairGo Team'}</span>
                           )}
-                          <div style={{ padding: '0.6rem 1rem', borderRadius: isMe ? '14px 14px 3px 14px' : '14px 14px 14px 3px', fontSize: '0.84rem', lineHeight: 1.6, fontFamily: 'DM Sans,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontWeight: 500, boxShadow: '0 4px 16px rgba(var(--rgb-acc),0.22)' } : { background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.09)', color: 'var(--col-text)', backdropFilter: 'blur(6px)' }) }}>
+                          <div className="msg-content" style={{ padding: '0.6rem 1rem', borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px', fontSize: '0.84rem', lineHeight: 1.65, fontFamily: 'DM Sans,sans-serif', ...(isMe ? { background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontWeight: 500, boxShadow: '0 4px 16px rgba(var(--rgb-acc),0.22)' } : { background: 'rgba(var(--rgb-hi),0.06)', border: '1px solid rgba(var(--rgb-hi),0.08)', color: 'var(--col-text)', backdropFilter: 'blur(6px)' }) }}>
                             {msg.content}
                           </div>
-                          <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
+                          <span style={{ fontSize: 10, color: 'rgba(var(--rgb-hi),0.28)', fontFamily: 'DM Sans,sans-serif', paddingLeft: isMe ? 0 : 3, paddingRight: isMe ? 3 : 0 }}>{format(new Date(msg.created_at), 'HH:mm')}</span>
                         </div>
                       </motion.div>
                     </div>
@@ -355,19 +398,22 @@ export default function Chat() {
               {/* Input */}
               {selected.status === 'closed' ? (
                 <div style={{ padding: '0.875rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <CheckCircle size={14} color="var(--col-text)" />
-                  <p style={{ fontSize: '0.8rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>This ticket has been closed by the team.</p>
+                  <CheckCircle size={14} color="rgba(var(--rgb-hi),0.3)" />
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif' }}>This ticket has been closed by the team.</p>
                 </div>
               ) : (
-                <div style={{ padding: '0.875rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card }}>
-                  <form onSubmit={send} style={{ display: 'flex', gap: '0.625rem', alignItems: 'center', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.375rem 0.375rem 0.375rem 0.875rem', transition: 'border-color .2s' }}
-                    onFocus={e => e.currentTarget.style.borderColor = C.goldBorder}
+                <div className="chat-input-area" style={{ padding: '0.75rem 1.25rem', borderTop: `1px solid ${C.border}`, background: C.card }}>
+                  <form onSubmit={send} className="chat-inp-form" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 14, padding: '0.375rem 0.375rem 0.375rem 0.875rem', transition: 'border-color .2s' }}
+                    onFocus={e => e.currentTarget.style.borderColor = 'rgba(var(--rgb-acc),0.4)'}
                     onBlur={e => e.currentTarget.style.borderColor = C.border}>
                     <input value={input} onChange={e => setInput(e.target.value)} placeholder="Reply to the team…" className="msg-inp"
-                      style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.3rem 0', fontSize: '0.84rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300 }} />
-                    <button type="submit" disabled={!input.trim() || sending} className="send-btn"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.45rem 0.875rem', borderRadius: 8, background: input.trim() ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.06)', color: input.trim() ? 'var(--col-bg)' : 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', flexShrink: 0, letterSpacing: '0.08em' }}>
-                      {sending ? <div style={{ width: 12, height: 12, border: '2px solid rgba(0,0,0,.2)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : <><Send size={11} /> Send</>}
+                      style={{ flex: 1, background: 'transparent', border: 'none', padding: '0.35rem 0', fontSize: '0.84rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300 }} />
+                    <button type="submit" disabled={!input.trim() || sending} className="send-btn chat-send-btn"
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0.45rem 0.875rem', borderRadius: 10, background: input.trim() ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.06)', color: input.trim() ? 'var(--col-bg)' : 'rgba(var(--rgb-hi),0.25)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all .2s', flexShrink: 0, letterSpacing: '0.08em' }}>
+                      {sending
+                        ? <div style={{ width: 12, height: 12, border: '2px solid rgba(0,0,0,.2)', borderTopColor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                        : <><Send size={12} /><span className="chat-send-label"> Send</span></>
+                      }
                     </button>
                   </form>
                 </div>
@@ -380,54 +426,54 @@ export default function Chat() {
       {/* ── New Ticket Modal ─────────────────────────────── */}
       <AnimatePresence>
         {showNew && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
+          <motion.div className="new-modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}
             onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }}>
-            <motion.div initial={{ opacity: 0, scale: 0.94, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
+            <motion.div className="new-modal-panel" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: 'spring', damping: 28, stiffness: 340 }}
               onClick={e => e.stopPropagation()}
-              style={{ width: '100%', maxWidth: 440, background: 'var(--col-card)', border: `1px solid ${C.goldBorder}`, borderRadius: 18, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,.7)' }}>
+              style={{ width: '100%', maxWidth: 440, background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-acc),0.15)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,.7)' }}>
               <div style={{ height: 3, background: `linear-gradient(90deg,${C.gold},var(--col-acc2),rgba(var(--rgb-acc),.2))` }} />
               <div style={{ padding: '1.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                   <div>
-                    <h2 className="font-display" style={{ fontSize: '1.4rem', color: C.white, marginBottom: 2 }}>New Ticket</h2>
-                    <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Our team will reply as soon as possible</p>
+                    <h2 className="font-display" style={{ fontSize: '1.5rem', color: C.white, marginBottom: 3 }}>New Ticket</h2>
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif' }}>Our team will reply as soon as possible</p>
                   </div>
-                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(var(--rgb-hi),.05)', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),.05)', border: `1px solid ${C.border}`, color: 'rgba(var(--rgb-hi),0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                     <X size={13} />
                   </button>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+                <div className="new-modal-inputs" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Send to</label>
+                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>Send to</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {[{ id: null, full_name: 'Store' }, ...workers].map(w => (
                         <button key={w.id ?? 'store'} type="button" onClick={() => setRecipientId(w.id)}
-                          style={{ padding: '5px 14px', borderRadius: 20, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.08em', border: `1px solid ${recipientId === w.id ? C.goldBorder : C.border}`, background: recipientId === w.id ? C.goldBg : 'transparent', color: recipientId === w.id ? C.gold : C.muted }}>
+                          style={{ padding: '6px 16px', borderRadius: 20, fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .15s', letterSpacing: '0.06em', border: `1px solid ${recipientId === w.id ? 'rgba(var(--rgb-acc),0.5)' : C.border}`, background: recipientId === w.id ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: recipientId === w.id ? C.gold : 'rgba(var(--rgb-hi),0.45)' }}>
                           {w.full_name}
                         </button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Subject *</label>
+                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>Subject *</label>
                     <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="e.g. Question about my appointment…" className="new-inp"
-                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s, box-shadow .2s' }} />
+                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.7rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', transition: 'border-color .2s, box-shadow .2s' }} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: 6 }}>Message <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--col-text)' }}>(optional)</span></label>
+                    <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.35)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>Message <span style={{ textTransform: 'none', letterSpacing: 0, color: 'rgba(var(--rgb-hi),0.2)' }}>(optional)</span></label>
                     <textarea value={newMsg} onChange={e => setNewMsg(e.target.value)} rows={3} placeholder="Describe your question or request…" className="new-inp"
-                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 9, padding: '0.6rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', resize: 'none', transition: 'border-color .2s, box-shadow .2s' }} />
+                      style={{ width: '100%', background: 'rgba(var(--rgb-hi),.04)', border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.7rem 0.875rem', fontSize: '0.85rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 300, boxSizing: 'border-box', resize: 'none', transition: 'border-color .2s, box-shadow .2s' }} />
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem' }}>
-                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ flex: 1, padding: '0.6rem', borderRadius: 9, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={() => { setShowNew(false); setNewTitle(''); setNewMsg(''); setRecipientId(null) }} style={{ flex: 1, padding: '0.7rem', borderRadius: 10, background: 'transparent', border: `1px solid ${C.border}`, color: 'rgba(var(--rgb-hi),0.35)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>Cancel</button>
                   <button onClick={createTicket} disabled={creating || !newTitle.trim()}
-                    style={{ flex: 2, padding: '0.6rem', borderRadius: 9, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: creating || !newTitle.trim() ? 'not-allowed' : 'pointer', opacity: creating || !newTitle.trim() ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                    {creating ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.2)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : 'Create Ticket'}
+                    style={{ flex: 2, padding: '0.7rem', borderRadius: 10, background: `linear-gradient(135deg,${C.gold},var(--col-acc2))`, color: 'var(--col-bg)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: creating || !newTitle.trim() ? 'not-allowed' : 'pointer', opacity: creating || !newTitle.trim() ? 0.45 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'opacity .2s' }}>
+                    {creating ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,.25)', borderTopColor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} /> : 'Create Ticket'}
                   </button>
                 </div>
               </div>

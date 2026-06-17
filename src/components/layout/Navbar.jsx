@@ -263,18 +263,18 @@ export default function Navbar() {
             <motion.div
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 50, width: 280, background: 'var(--col-draw)', borderLeft: '1px solid rgba(184,212,232,0.08)', display: 'flex', flexDirection: 'column' }}
+              style={{ position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 50, width: 280, background: 'var(--col-draw)', borderLeft: '1px solid rgba(var(--rgb-acc),0.08)', display: 'flex', flexDirection: 'column' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(var(--rgb-hi),0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                   <img src={hairgoLogo} alt="HairGo" style={{
                     height: 38, width: 38, borderRadius: '50%', objectFit: 'cover',
-                    border: '1.5px solid rgba(184,212,232,0.4)',
-                    boxShadow: '0 0 10px rgba(184,212,232,0.2)',
+                    border: '1.5px solid rgba(var(--rgb-acc),0.4)',
+                    boxShadow: '0 0 10px rgba(var(--rgb-acc),0.2)',
                   }} />
-                  <span className="font-display" style={{ fontSize: '1.3rem', color: '#fff' }}>Hair<span style={{ color: '#B8D4E8' }}>Go</span></span>
+                  <span className="font-display" style={{ fontSize: '1.3rem', color: 'var(--col-text)' }}>Hair<span style={{ color: 'var(--col-acc)' }}>Go</span></span>
                 </div>
-                <button onClick={() => setMenuOpen(false)} style={{ padding: 6, color: 'rgba(255,255,255,0.4)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                <button onClick={() => setMenuOpen(false)} style={{ padding: 6, color: 'rgba(var(--rgb-hi),0.4)', background: 'none', border: 'none', cursor: 'pointer' }}>
                   <X size={18} />
                 </button>
               </div>
@@ -284,9 +284,9 @@ export default function Navbar() {
                   <NavLink key={to} to={to} end={exact} onClick={() => setMenuOpen(false)}
                     style={({ isActive }) => ({
                       padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
-                      color: isActive ? '#B8D4E8' : 'rgba(255,255,255,0.45)',
-                      background: isActive ? 'rgba(184,212,232,0.08)' : 'transparent',
-                      border: isActive ? '1px solid rgba(184,212,232,0.15)' : '1px solid transparent',
+                      color: isActive ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.55)',
+                      background: isActive ? 'rgba(var(--rgb-acc),0.08)' : 'transparent',
+                      border: isActive ? '1px solid rgba(var(--rgb-acc),0.15)' : '1px solid transparent',
                       textDecoration: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s',
                     })}>
                     {label}
@@ -295,9 +295,9 @@ export default function Navbar() {
                     <NavLink key="my-profile" to="/profile" end onClick={() => setMenuOpen(false)}
                       style={({ isActive }) => ({
                         padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
-                        color: isActive ? '#B8D4E8' : 'rgba(255,255,255,0.45)',
-                        background: isActive ? 'rgba(184,212,232,0.08)' : 'transparent',
-                        border: isActive ? '1px solid rgba(184,212,232,0.15)' : '1px solid transparent',
+                        color: isActive ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.55)',
+                        background: isActive ? 'rgba(var(--rgb-acc),0.08)' : 'transparent',
+                        border: isActive ? '1px solid rgba(var(--rgb-acc),0.15)' : '1px solid transparent',
                         textDecoration: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s',
                       })}>
                       My Profile
@@ -306,13 +306,13 @@ export default function Navbar() {
                 </>))}
                 {(profile?.role === 'admin' || profile?.role === 'artist') && (
                   <button onClick={() => { sessionStorage.removeItem('studio_access'); setMenuOpen(false); navigate('/studio') }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#B8D4E8', background: 'rgba(184,212,232,0.08)', border: '1px solid rgba(184,212,232,0.15)', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-acc)', background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.15)', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
                     <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
                   </button>
                 )}
               </nav>
 
-              <div style={{ padding: '1.25rem 1rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ padding: '1.25rem 1rem 2rem', borderTop: '1px solid rgba(var(--rgb-hi),0.06)', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {user ? (
                   <>
                     <button onClick={() => { handleSignOut(); setMenuOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.6)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>
@@ -321,7 +321,7 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
-                    <Link to="/login" onClick={() => setMenuOpen(false)} style={{ display: 'block', textAlign: 'center', padding: '13px', borderRadius: 9999, border: '1px solid rgba(255,255,255,0.1)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontFamily: 'DM Sans,sans-serif' }}>
+                    <Link to="/login" onClick={() => setMenuOpen(false)} style={{ display: 'block', textAlign: 'center', padding: '13px', borderRadius: 9999, border: '1px solid rgba(var(--rgb-hi),0.15)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(var(--rgb-hi),0.55)', textDecoration: 'none', fontFamily: 'DM Sans,sans-serif' }}>
                       Sign In
                     </Link>
                     <Link to="/register" onClick={() => setMenuOpen(false)} className="btn-gold" style={{ width: '100%' }}>

@@ -171,6 +171,10 @@ export default function StudioAppointmentsList() {
     const { error } = await supabase.from('appointments').delete().eq('id', deleteTarget.id)
     setDeleting(false)
     if (error) { toast.error(error.message); return }
+    log('appointment.deleted', {
+      entityType: 'appointment', entityId: deleteTarget.id,
+      details: { message: `deleted ${clientName(deleteTarget) || 'client'}'s "${deleteTarget.services?.name || 'appointment'}" on ${deleteTarget.date}` },
+    })
     setAppointments(prev => prev.filter(a => a.id !== deleteTarget.id))
     setDetails(null)
     toast.success('Appointment deleted')

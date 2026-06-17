@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCw, MessageSquare, Tag, Calendar, Clock, X, Scissors, CheckCircle, ChevronRight, ChevronLeft } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
+import { useLogAction } from '../../hooks/useLogAction'
 import {
   format, formatDistanceToNow, parseISO,
   addMonths, subMonths, startOfMonth, endOfMonth,
@@ -27,6 +28,7 @@ const BLUE  = { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)', border: 'rgba(96,1
 
 export default function StudioRescheduleRequests() {
   const { user } = useAuth()
+  const log = useLogAction()
   const navigate  = useNavigate()
 
   const [requests,       setRequests]       = useState([])
@@ -129,6 +131,10 @@ export default function StudioRescheduleRequests() {
         is_from_admin: true, read: false,
       })
       await supabase.from('tickets').update({ status: 'resolved' }).eq('id', ticket.id)
+      log('reschedule.approved', {
+        entityType: 'appointment', entityId: ticket.appointment_id,
+        details: { message: `rescheduled ${ticket.profiles?.full_name || 'client'}'s appointment to ${reschedDate} at ${reschedTime}${stylist ? ` with ${stylist.name}` : ''}` },
+      })
       setRequests(prev => prev.filter(t => t.id !== ticket.id))
       setReschedModal(null)
       toast.success('Appointment rescheduled & client notified')
@@ -149,6 +155,10 @@ export default function StudioRescheduleRequests() {
         is_from_admin: true, read: false,
       })
       await supabase.from('tickets').update({ status: 'resolved' }).eq('id', ticket.id)
+      log('reschedule.cancelled', {
+        entityType: 'appointment', entityId: ticket.appointment_id,
+        details: { message: `cancelled ${ticket.profiles?.full_name || 'client'}'s appointment from reschedule request (no credit)` },
+      })
       setRequests(prev => prev.filter(t => t.id !== ticket.id))
       toast.success('Appointment cancelled')
     } catch (err) {
@@ -173,6 +183,10 @@ export default function StudioRescheduleRequests() {
         content: creditMsg, is_from_admin: true, read: false,
       })
       await supabase.from('tickets').update({ status: 'resolved' }).eq('id', ticket.id)
+      log('reschedule.credit_issued', {
+        entityType: 'appointment', entityId: ticket.appointment_id,
+        details: { message: `cancelled ${ticket.profiles?.full_name || 'client'}'s appointment from reschedule request${data?.couponCode ? ` — store credit ${data.couponCode} ($${data.creditAmount}) issued` : ' (no credit, no payment on file)'}` },
+      })
       setRequests(prev => prev.filter(t => t.id !== ticket.id))
       toast.success(data?.couponCode ? `Credit ${data.couponCode} ($${data.creditAmount}) issued` : 'Appointment cancelled')
     } catch (err) {

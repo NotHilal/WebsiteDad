@@ -10,6 +10,7 @@ import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import StripeCheckout from '../components/payment/StripeCheckout'
 import { Copy, CheckCheck } from 'lucide-react'
+import { useLogAction } from '../hooks/useLogAction'
 
 const TABS = ['Appointments', 'Cart', 'Orders', 'Rewards']
 
@@ -60,6 +61,7 @@ export default function Profile() {
   const { cartItems, cartTotal, removeFromCart, commitQtyUpdate, expireItem, clearCart } = useCart()
   const navigate  = useNavigate()
   const location  = useLocation()
+  const log       = useLogAction()
 
   const [tab, setTab]             = useState(() => {
     const t = location.state?.tab
@@ -148,6 +150,10 @@ export default function Profile() {
           read: false,
         })
       }
+      log('ticket.opened', {
+        entityType: 'ticket',
+        details: { message: `opened support ticket for "${serviceName} on ${apptDate} at ${apptTime}"` },
+      })
       setContactAppt(null)
       setContactMsg('')
       navigate('/chat')
@@ -160,6 +166,9 @@ export default function Profile() {
 
   async function saveName() {
     await supabase.from('profiles').update({ full_name: nameInput }).eq('id', user.id)
+    log('profile.name_updated', {
+      details: { message: `updated display name to "${nameInput}"` },
+    })
     await fetchProfile(user.id)
     setEditName(false)
     toast.success('Name updated')
@@ -233,6 +242,10 @@ export default function Profile() {
       }
       await clearCart()
       setCartCoupon(null); setCartCouponCode('')
+      const itemSummary = cartItems.map(i => `${i.quantity}× ${i.products?.name || 'item'}`).join(', ')
+      log('order.placed', {
+        details: { message: `placed in-store order: ${itemSummary} (pay in store)` },
+      })
       toast.success('Items reserved! Come pay in store within 7 days.')
       loadAll()
       setTab('Orders')
@@ -271,6 +284,10 @@ export default function Profile() {
       await clearCart()
       setCartCoupon(null); setCartCouponCode('')
       setPayStep(null); setClientSecret(null)
+      const itemSummary = cartItems.map(i => `${i.quantity}× ${i.products?.name || 'item'}`).join(', ')
+      log('order.placed', {
+        details: { message: `placed online order: ${itemSummary}${cartCoupon ? ` (coupon: ${cartCoupon.code})` : ''} — paid online` },
+      })
       toast.success('Payment confirmed! Come pick up your order.')
       loadAll()
       setTab('Orders')
