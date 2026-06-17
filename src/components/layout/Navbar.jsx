@@ -280,7 +280,7 @@ export default function Navbar() {
               </div>
 
               <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {links.map(({ to, label, exact }) => (
+                {links.map(({ to, label, exact }, idx) => (<>
                   <NavLink key={to} to={to} end={exact} onClick={() => setMenuOpen(false)}
                     style={({ isActive }) => ({
                       padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -291,7 +291,19 @@ export default function Navbar() {
                     })}>
                     {label}
                   </NavLink>
-                ))}
+                  {idx === 0 && user && (
+                    <NavLink key="my-profile" to="/profile" end onClick={() => setMenuOpen(false)}
+                      style={({ isActive }) => ({
+                        padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
+                        color: isActive ? '#B8D4E8' : 'rgba(255,255,255,0.45)',
+                        background: isActive ? 'rgba(184,212,232,0.08)' : 'transparent',
+                        border: isActive ? '1px solid rgba(184,212,232,0.15)' : '1px solid transparent',
+                        textDecoration: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s',
+                      })}>
+                      My Profile
+                    </NavLink>
+                  )}
+                </>))}
                 {(profile?.role === 'admin' || profile?.role === 'artist') && (
                   <button onClick={() => { sessionStorage.removeItem('studio_access'); setMenuOpen(false); navigate('/studio') }}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#B8D4E8', background: 'rgba(184,212,232,0.08)', border: '1px solid rgba(184,212,232,0.15)', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
@@ -303,9 +315,6 @@ export default function Navbar() {
               <div style={{ padding: '1.25rem 1rem 2rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {user ? (
                   <>
-                    <Link to="/profile" onClick={() => setMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', textDecoration: 'none', fontFamily: 'DM Sans,sans-serif' }}>
-                      <User size={13} />Profile
-                    </Link>
                     <button onClick={() => { handleSignOut(); setMenuOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(239,68,68,0.6)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}>
                       <LogOut size={13} />Sign Out
                     </button>

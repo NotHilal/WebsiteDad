@@ -184,7 +184,7 @@ function ProductCard({ p, inCart, cartItems, onAddToCart, onViewDetail, isGuest 
               onMouseLeave={e => { e.currentTarget.style.boxShadow = outOfStock ? 'none' : '0 4px 16px rgba(var(--rgb-acc),0.25)'; e.currentTarget.style.transform = 'translateY(0)' }}>
               {adding
                 ? <div style={{ width: 13, height: 13, border: '2px solid rgba(0,0,0,0.3)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-                : <><ShoppingCart size={12} /> {inCart ? 'Add More' : 'Add'}</>
+                : <><ShoppingCart size={12} /><span className="cart-btn-text">Add</span></>
               }
             </button>
           </div>
@@ -261,7 +261,7 @@ export default function Store() {
           {/* Cart summary */}
           {user && (
             <button onClick={() => navigate('/profile', { state: { tab: 'Cart' } })}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', borderRadius: 12, background: cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.08)'}`, cursor: 'pointer', transition: 'all 0.2s' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', borderRadius: 12, background: cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartQty > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.08)'}`, cursor: 'pointer', transition: 'all 0.2s', overflow: 'visible', flexShrink: 0 }}>
               <div style={{ position: 'relative' }}>
                 <ShoppingCart size={16} color={cartQty > 0 ? 'var(--col-bg)' : 'var(--col-text)'} />
                 {cartQty > 0 && (
@@ -300,7 +300,7 @@ export default function Store() {
 
         {/* ── Product grid ─────────────────────── */}
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))', gap: '1.25rem' }}>
+          <div className="store-grid">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} style={{ borderRadius: 16, overflow: 'hidden', background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-hi),0.06)' }}>
                 <div className="shimmer" style={{ aspectRatio: '1/1' }} />
@@ -318,7 +318,7 @@ export default function Store() {
             No products in this category yet.
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px,1fr))', gap: '1.25rem' }}>
+          <div className="store-grid">
             {filtered.map((p, i) => (
               <ProductCard
                 key={p.id}
@@ -429,7 +429,7 @@ export default function Store() {
                   <button onClick={handleAddFromDetail} disabled={dAdding || detail.stock === 0} className="btn-gold" style={{ width: '100%', justifyContent: 'center' }}>
                     {dAdding
                       ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
-                      : <><ShoppingCart size={14} /> {inCart(detail.id) ? 'Add More' : 'Add to Cart'} · ${(parseFloat(detail.price) * dQty).toFixed(2)}</>
+                      : <><ShoppingCart size={14} /><span className="cart-btn-text">Add to Cart · ${(parseFloat(detail.price) * dQty).toFixed(2)}</span></>
                     }
                   </button>
                 ) : (
@@ -516,6 +516,7 @@ export default function Store() {
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+          className="store-checkout-bar"
           style={{
             position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
             zIndex: 50, display: 'flex', alignItems: 'center', gap: 16,
@@ -539,6 +540,27 @@ export default function Store() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .product-card:hover .qv-btn { opacity: 1 !important; }
+        .store-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 1.25rem;
+        }
+        .cart-btn-text { margin-left: 5px; }
+        @media (max-width: 540px) {
+          .cart-btn-text { display: none; }
+          .store-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+          }
+          .store-checkout-bar {
+            left: 12px !important;
+            right: 12px !important;
+            bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
+            transform: none !important;
+            white-space: normal !important;
+            justify-content: space-between;
+          }
+        }
         @media (max-width: 720px) {
           .store-detail-modal {
             grid-template-columns: 1fr !important;

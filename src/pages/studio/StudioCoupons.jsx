@@ -41,10 +41,14 @@ function TypeToggle({ value, onChange }) {
   )
 }
 
-function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign, onAssign }) {
+function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign, onAssign, isExpired }) {
   const disc = coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` : `$${coupon.discount_value}`
   const usedByClient = assignment?.used === true
-  const used = !coupon.active || usedByClient
+  const used = !coupon.active || usedByClient || isExpired
+  const statusLabel = isExpired ? 'Expired' : (usedByClient || !coupon.active) ? 'Used' : 'Active'
+  const statusColor = isExpired ? '#f59e0b' : used ? 'var(--col-text)' : '#34d399'
+  const statusBg    = isExpired ? 'rgba(245,158,11,0.1)' : used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)'
+  const statusBorder = isExpired ? 'rgba(245,158,11,0.25)' : used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'
   const sharedBorder = `1px solid ${used ? C.border : C.goldBorder}`
   return (
     <div>
@@ -73,7 +77,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
           ) : (
             <span style={{ flex: 1, fontSize: '0.84rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>Not assigned</span>
           )}
-          <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+          <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: statusColor, background: statusBg, border: `1px solid ${statusBorder}` }}>{statusLabel}</span>
           <button onClick={() => onToggle(coupon.id, coupon.active, usedByClient)} className={used ? 'btn-mark-active' : 'btn-mark-used'} style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: used ? `1px solid ${C.border}` : '1px solid rgba(248,113,113,0.22)', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(248,113,113,0.07)', color: used ? C.muted : 'rgba(248,113,113,0.75)' }}>{used ? 'Mark active' : 'Mark used'}</button>
           {assignment
             ? <button onClick={() => onUnassign(coupon.id)} className="btn-unassign" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: '1px solid rgba(var(--rgb-hi),0.1)', background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}>Unassign</button>
@@ -99,7 +103,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
               <div style={{ padding: '4px 10px', borderRadius: 7, background: used ? 'rgba(var(--rgb-hi),0.03)' : 'var(--col-acc)', border: `1px solid ${used ? C.border : 'var(--col-acc)'}`, overflow: 'hidden' }}>
                 <span style={{ fontFamily: '"Courier New",monospace', fontSize: '1.06rem', color: used ? C.muted : 'var(--col-bg)', letterSpacing: '0.12em' }}>{coupon.code}</span>
               </div>
-              <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: used ? 'var(--col-text)' : '#34d399', background: used ? 'rgba(var(--rgb-hi),0.04)' : 'rgba(52,211,153,0.1)', border: `1px solid ${used ? 'rgba(var(--rgb-hi),0.07)' : 'rgba(52,211,153,0.22)'}` }}>{used ? 'Used' : 'Active'}</span>
+              <span style={{ fontSize: 11, padding: '3px 9px', borderRadius: 20, flexShrink: 0, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'uppercase', color: statusColor, background: statusBg, border: `1px solid ${statusBorder}` }}>{statusLabel}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
@@ -302,14 +306,31 @@ export default function StudioCoupons() {
     finally { setSaving(false) }
   }
 
-  const activeCount = coupons.filter(c => c.active).length
-  const usedCount   = coupons.filter(c => !c.active).length
+  const now = new Date()
+  const isExp = c => !!(c.expiry_date && new Date(c.expiry_date) < now)
+  const activeCount  = coupons.filter(c => c.active && !isExp(c)).length
+  const usedCount    = coupons.filter(c => !c.active && !isExp(c)).length
+  const expiredCount = coupons.filter(c => isExp(c)).length
 
-  const filtered = useMemo(() => coupons.filter(c => {
-    const matchStatus = statusFilter === 'all' || (statusFilter === 'used' ? !c.active : c.active)
-    const q = search.toLowerCase()
-    return matchStatus && (!q || c.code.toLowerCase().includes(q))
-  }), [coupons, statusFilter, search])
+  const filtered = useMemo(() => {
+    const n = new Date()
+    const priority = c => {
+      const expired = !!(c.expiry_date && new Date(c.expiry_date) < n)
+      if (expired) return 2
+      if (!c.active) return 1
+      return 0
+    }
+    return coupons.filter(c => {
+      const expired = !!(c.expiry_date && new Date(c.expiry_date) < n)
+      const matchStatus =
+        statusFilter === 'all' ? true :
+        statusFilter === 'expired' ? expired :
+        statusFilter === 'used' ? (!c.active && !expired) :
+        (c.active && !expired)
+      const q = search.toLowerCase()
+      return matchStatus && (!q || c.code.toLowerCase().includes(q))
+    }).sort((a, b) => priority(a) - priority(b))
+  }, [coupons, statusFilter, search])
 
   useEffect(() => setPage(0), [statusFilter, search])
   const paged = filtered.slice(page * 6, (page + 1) * 6)
@@ -353,6 +374,7 @@ export default function StudioCoupons() {
             <span style={{ fontSize: '0.9rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>{coupons.length} total</span>
             {activeCount > 0 && <span style={{ fontSize: '0.84rem', color: '#34d399', fontFamily: 'DM Sans,sans-serif', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.18)', padding: '2px 8px', borderRadius: 20 }}>{activeCount} active</span>}
             {usedCount > 0 && <span style={{ fontSize: '0.84rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}`, padding: '2px 8px', borderRadius: 20 }}>{usedCount} used</span>}
+            {expiredCount > 0 && <span style={{ fontSize: '0.84rem', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', padding: '2px 8px', borderRadius: 20 }}>{expiredCount} expired</span>}
           </div>
         </div>
         <div className="uc-hdr-btns" style={{ display: 'flex', gap: 7 }}>
@@ -371,7 +393,7 @@ export default function StudioCoupons() {
             style={{ width: '100%', boxSizing: 'border-box', background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0.52rem 0.75rem 0.52rem 2.2rem', fontSize: '0.96rem', color: C.white, outline: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'all .2s' }} />
           {search && <button onClick={() => setSearch('')} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: C.muted, display: 'flex' }}><X size={12} /></button>}
         </div>
-        {[['all','All',coupons.length],['active','Active',activeCount],['used','Used',usedCount]].map(([val,label,count]) => (
+        {[['all','All',coupons.length],['active','Active',activeCount],['used','Used',usedCount],['expired','Expired',expiredCount]].map(([val,label,count]) => (
           <button key={val} onClick={() => setStatusFilter(val)} className="btn-pill"
             style={{ padding: '5px 14px', borderRadius: 20, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'all .15s', whiteSpace: 'nowrap', border: `1px solid ${statusFilter === val ? C.goldBorder : C.border}`, background: statusFilter === val ? C.goldBg : 'transparent', color: statusFilter === val ? C.gold : C.muted }}>
             {label} · {count}
@@ -398,6 +420,7 @@ export default function StudioCoupons() {
           {paged.map(c => (
             <CouponCard key={c.id} coupon={c}
               assignment={assignments[c.id] || null}
+              isExpired={isExp(c)}
               onEdit={c => { setForm({ code: c.code, discount_type: c.discount_type, discount_value: c.discount_value?.toString(), expiry_date: c.expiry_date || '', id: c.id }); setModal('edit') }}
               onToggle={toggleActive}
               onUnassign={unassignCoupon}

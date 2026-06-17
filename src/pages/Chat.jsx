@@ -145,7 +145,7 @@ export default function Chat() {
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'You'
 
   return (
-    <div style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: C.bg, paddingTop: 68 }}>
+    <div style={{ position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', background: C.bg }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .tk-item:hover { background: rgba(var(--rgb-hi),0.025) !important; }
@@ -207,7 +207,7 @@ export default function Chat() {
               const isOpen = tk.status === 'open'
               return (
                 <button key={tk.id} className="tk-item" onClick={() => setSelected(tk)}
-                  style={{ width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10, background: isActive ? 'var(--col-acc)' : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(var(--rgb-hi),0.04)', cursor: 'pointer', transition: 'background .15s' }}>
+                  style={{ width: '100%', textAlign: 'left', padding: '0.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: 10, background: isActive ? C.goldBg : 'transparent', border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`, borderBottom: '1px solid rgba(var(--rgb-hi),0.04)', cursor: 'pointer', transition: 'background .15s' }}>
                   {/* Status indicator */}
                   <div style={{ marginTop: 5, width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: isOpen ? '#34d399' : 'var(--col-text)', boxShadow: isOpen ? '0 0 6px rgba(52,211,153,0.4)' : 'none' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -226,9 +226,16 @@ export default function Chat() {
                       {tk.lastMsg || 'No messages yet'}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 5 }}>
-                      <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'var(--col-text)', fontWeight: 600 }}>
-                        {tk.status}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <span style={{ fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: isOpen ? 'rgba(52,211,153,0.7)' : 'var(--col-text)', fontWeight: 600 }}>
+                          {tk.status}
+                        </span>
+                        {tk.appointment_id && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 5px', borderRadius: 4, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)' }}>
+                            <span style={{ fontSize: 9, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.12em', textTransform: 'uppercase' }}>APPT</span>
+                          </span>
+                        )}
+                      </div>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 20, background: tk.recipient ? 'rgba(52,211,153,0.07)' : 'var(--col-acc)', border: `1px solid ${tk.recipient ? 'rgba(52,211,153,0.2)' : 'var(--col-acc)'}` }}>
                         <div style={{ width: 4, height: 4, borderRadius: '50%', background: tk.recipient ? '#34d399' : C.gold, flexShrink: 0 }} />
                         <span style={{ fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: tk.recipient ? 'rgba(52,211,153,0.8)' : C.goldDim, letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
@@ -291,6 +298,12 @@ export default function Chat() {
                     <div style={{ width: 5, height: 5, borderRadius: '50%', background: selected.status === 'open' ? '#34d399' : 'var(--col-text)', boxShadow: selected.status === 'open' ? '0 0 5px rgba(52,211,153,0.4)' : 'none', flexShrink: 0 }} />
                     <span style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: selected.status === 'open' ? 'rgba(52,211,153,0.8)' : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>{selected.status}</span>
                   </span>
+                  {selected.appointment_id && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)' }}>
+                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: '#f59e0b', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Appointment Request</span>
+                    </span>
+                  )}
                   <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{format(new Date(selected.created_at), 'MMM d, yyyy')}</span>
                 </div>
               </div>

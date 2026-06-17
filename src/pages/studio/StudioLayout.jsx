@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Calendar, CalendarOff, Package, Image, MessageSquare,
-  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote, Activity, Sun, Moon
+  Tag, Users, UserCheck, LogOut, Scissors, Menu, BarChart2, ClipboardList, ShoppingBag, Sparkles, Clock, Banknote, Activity, Sun, Moon,
 } from 'lucide-react'
 import hairgoLogo from '../../assets/hairgo.png'
 import AppointmentAlert from '../../components/AppointmentAlert'
@@ -53,9 +53,9 @@ const workerNavItems = [
 ]
 
 export default function StudioLayout() {
-  const [open,           setOpen]           = useState(false)
-  const [unread,         setUnread]         = useState(0)
-  const [pendingDayoffs, setPendingDayoffs] = useState(0)
+  const [open,             setOpen]             = useState(false)
+  const [unread,           setUnread]           = useState(0)
+  const [pendingDayoffs,   setPendingDayoffs]   = useState(0)
   const { signOut, profile, isAdmin, user } = useAuth()
   const { isDark, toggleTheme } = useTheme()
 
@@ -70,6 +70,7 @@ export default function StudioLayout() {
     fetchPendingDayoffs()
     const sub = supabase.channel('studio-unread-badge')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ticket_messages' }, fetchUnread)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, fetchUnread)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'blocked_dates' }, fetchPendingDayoffs)
       .subscribe()
     return () => supabase.removeChannel(sub)

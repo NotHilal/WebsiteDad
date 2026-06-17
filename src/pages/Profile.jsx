@@ -251,6 +251,7 @@ export default function Profile() {
           user_id: user.id, product_id: item.product_id, quantity: item.quantity,
           status: 'active', payment_intent_id: paymentIntentId, payment_status: 'paid',
           order_group_id: orderGroupId,
+          ...(cartCoupon ? { coupon_code: cartCoupon.code, discount_amount: parseFloat(cartCoupon.discount_value) } : {}),
         })
         await supabase.rpc('decrement_product_stock', {
           p_product_id: item.product_id,
@@ -298,6 +299,8 @@ export default function Profile() {
     const inStore   = order.payment_status === 'pay_in_store'
     const total     = ((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)
     const unitPrice = parseFloat(order.products?.price || 0).toFixed(2)
+    const discount  = parseFloat(order.discount_amount) || 0
+    const finalTotal = discount > 0 ? Math.max(0, parseFloat(total) - discount).toFixed(2) : total
     const orderDate = format(new Date(order.created_at), 'MMMM d, yyyy')
     const orderId   = order.id.slice(0, 8).toUpperCase()
     const customer  = profile?.full_name || user?.email || 'Customer'
@@ -395,6 +398,13 @@ export default function Profile() {
     doc.text('Subtotal', colL, y)
     doc.text(`$${total}`, W - mr, y, { align: 'right' })
 
+    if (discount > 0) {
+      y += 7
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(34, 160, 100)
+      doc.text(`Discount (${order.coupon_code})`, colL, y)
+      doc.text(`-$${discount.toFixed(2)}`, W - mr, y, { align: 'right' })
+    }
+
     y += 8
     doc.setDrawColor(...steel); doc.setLineWidth(0.5); doc.line(colL, y, W - mr, y)
     y += 7
@@ -402,7 +412,7 @@ export default function Profile() {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
     doc.text('TOTAL', colL, y)
     doc.setFontSize(18); doc.setTextColor(...gold)
-    doc.text(`$${total}`, W - mr, y, { align: 'right' })
+    doc.text(`$${finalTotal}`, W - mr, y, { align: 'right' })
 
     y += 16
 
@@ -460,6 +470,10 @@ export default function Profile() {
     const apptDate    = format(new Date(appt.date), 'MMMM d, yyyy')
     const bookedOn    = appt.created_at ? format(new Date(appt.created_at), 'MMMM d, yyyy') : apptDate
     const price       = parseFloat(appt.services?.price || 0).toFixed(2)
+    const couponMatch = appt.notes?.match(/\[Coupon: (\S+) — .+? · Final: \$([0-9.]+)\]/)
+    const apptCouponCode   = couponMatch?.[1] || null
+    const apptFinalPrice   = couponMatch ? couponMatch[2] : price
+    const apptDiscount     = couponMatch ? (parseFloat(price) - parseFloat(couponMatch[2])).toFixed(2) : null
     const timeStr     = appt.time ? appt.time.slice(0, 5) : ''
     const customer    = profile?.full_name || user?.email || 'Customer'
 
@@ -568,6 +582,13 @@ export default function Profile() {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
     doc.text('Subtotal', colL, y); doc.text(`$${price}`, W - mr, y, { align: 'right' })
 
+    if (apptDiscount) {
+      y += 7
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(34, 160, 100)
+      doc.text(`Discount (${apptCouponCode})`, colL, y)
+      doc.text(`-$${apptDiscount}`, W - mr, y, { align: 'right' })
+    }
+
     y += 8
     doc.setDrawColor(...steel); doc.setLineWidth(0.5); doc.line(colL, y, W - mr, y)
     y += 7
@@ -575,7 +596,7 @@ export default function Profile() {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
     doc.text('TOTAL', colL, y)
     doc.setFontSize(18); doc.setTextColor(...gold)
-    doc.text(`$${price}`, W - mr, y, { align: 'right' })
+    doc.text(`$${apptFinalPrice}`, W - mr, y, { align: 'right' })
 
     y += 16
 
@@ -788,7 +809,7 @@ export default function Profile() {
                             <p className="font-display" style={{ fontSize: '1.6rem', color: 'var(--col-acc)', lineHeight: 1 }}>${cartFinalTotal.toFixed(2)}</p>
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 15, justifyContent: 'center' }}>
+                            <button onClick={startCartPayment} disabled={payStep === 'loading' || reserving} className="btn-gold" style={{ padding: '10px 22px', fontSize: 15, justifyContent: 'center', borderRadius: 10 }}>
                               {payStep === 'loading'
                                 ? <div style={{ width: 14, height: 14, border: '2px solid rgba(0,0,0,0.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
                                 : 'Pay Online'
@@ -988,6 +1009,8 @@ export default function Profile() {
                         const first = group[0]
                         const s = STATUS_MAP[first.status] ?? STATUS_MAP.active
                         const groupTotal = group.reduce((sum, o) => sum + (parseFloat(o.products?.price) || 0) * o.quantity, 0)
+                        const groupDiscount = parseFloat(first.discount_amount) || 0
+                        const groupPaid = groupDiscount > 0 ? Math.max(0, groupTotal - groupDiscount) : groupTotal
                         const groupId = (first.order_group_id || first.id).slice(0, 8).toUpperCase()
                         return (
                           <div key={groupId} style={{ borderRadius: 14, border: `1px solid ${BD}`, overflow: 'hidden', background: 'rgba(var(--rgb-hi),0.02)' }}>
@@ -1006,7 +1029,10 @@ export default function Profile() {
                             </div>
 
                             {/* Items */}
-                            {group.map((order, i) => (
+                            {group.map((order, i) => {
+                              const itemTotal = ((parseFloat(order.products?.price) || 0) * order.quantity)
+                              const isSingleWithDiscount = group.length === 1 && groupDiscount > 0
+                              return (
                               <div key={order.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', borderBottom: i < group.length - 1 ? `1px solid ${BD}` : 'none' }}>
                                 <div style={{ width: 44, height: 44, borderRadius: 8, background: 'var(--col-card)', border: `1px solid ${BD}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                   {order.products?.image_url
@@ -1021,11 +1047,19 @@ export default function Profile() {
                                     Qty {order.quantity}{order.products?.price ? ` · $${parseFloat(order.products.price).toFixed(2)} each` : ''}
                                   </p>
                                 </div>
-                                <p className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.15rem', lineHeight: 1, flexShrink: 0 }}>
-                                  ${((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)}
-                                </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1, flexShrink: 0 }}>
+                                  {isSingleWithDiscount && (
+                                    <span style={{ fontSize: '0.8rem', color: 'var(--col-text)', opacity: 0.4, textDecoration: 'line-through', fontFamily: 'DM Sans,sans-serif' }}>
+                                      ${itemTotal.toFixed(2)}
+                                    </span>
+                                  )}
+                                  <span className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.15rem', lineHeight: 1 }}>
+                                    ${isSingleWithDiscount ? groupPaid.toFixed(2) : itemTotal.toFixed(2)}
+                                  </span>
+                                </div>
                               </div>
-                            ))}
+                              )
+                            })}
 
                             {/* Footer */}
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderTop: `1px solid ${BD}`, background: 'rgba(var(--rgb-hi),0.01)' }}>
@@ -1036,19 +1070,31 @@ export default function Profile() {
                                     {first.payment_status === 'paid' ? 'Paid via Stripe' : first.payment_status === 'pay_in_store' ? 'Pay in store' : 'Payment pending'}
                                   </span>
                                 </div>
+                                {first.coupon_code && groupDiscount > 0 && (
+                                  <span style={{ fontSize: 13, color: '#34d399', fontFamily: 'DM Sans,sans-serif', paddingLeft: 11 }}>
+                                    {first.coupon_code} — ${groupDiscount.toFixed(2)} off
+                                  </span>
+                                )}
                                 {first.payment_status === 'pay_in_store' && first.expires_at && first.status === 'active' && (
                                   <span style={{ fontSize: 15, color: 'rgba(245,158,11,0.55)', fontFamily: 'DM Sans,sans-serif', paddingLeft: 11 }}>
                                     Hold expires {format(new Date(first.expires_at), 'MMM d')}
                                   </span>
                                 )}
                               </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                                 {group.length > 1 && (
-                                  <span className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem' }}>
-                                    ${groupTotal.toFixed(2)}
-                                  </span>
+                                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+                                    {groupDiscount > 0 && (
+                                      <span style={{ fontSize: '0.8rem', color: 'var(--col-text)', opacity: 0.4, textDecoration: 'line-through', fontFamily: 'DM Sans,sans-serif' }}>
+                                        ${groupTotal.toFixed(2)}
+                                      </span>
+                                    )}
+                                    <span className="font-display" style={{ color: 'var(--col-acc)', fontSize: '1.1rem' }}>
+                                      ${groupPaid.toFixed(2)}
+                                    </span>
+                                  </div>
                                 )}
-<button onClick={() => setReceipt(first)}
+                                <button onClick={() => setReceipt(first)}
                                   style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.18)', color: 'var(--col-bg)', fontSize: 14, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                                   <Receipt size={10} /> Receipt
                                 </button>
@@ -1186,11 +1232,21 @@ export default function Profile() {
                   </span>
                 </div>
 
+                {/* Discount row */}
+                {receipt.coupon_code && parseFloat(receipt.discount_amount) > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, fontFamily: 'DM Sans,sans-serif', color: '#34d399' }}>{receipt.coupon_code} — discount</span>
+                    <span style={{ fontSize: 13, fontFamily: 'DM Sans,sans-serif', color: '#34d399', fontWeight: 600 }}>−${parseFloat(receipt.discount_amount).toFixed(2)}</span>
+                  </div>
+                )}
+
                 {/* Total */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
                   <span style={{ fontSize: 14, letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', fontWeight: 600 }}>Total</span>
                   <span className="font-display gold-gradient" style={{ fontSize: '1.6rem', lineHeight: 1 }}>
-                    ${((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}
+                    {receipt.coupon_code && parseFloat(receipt.discount_amount) > 0
+                      ? `$${Math.max(0, ((parseFloat(receipt.products?.price) || 0) * receipt.quantity) - parseFloat(receipt.discount_amount)).toFixed(2)}`
+                      : `$${((parseFloat(receipt.products?.price) || 0) * receipt.quantity).toFixed(2)}`}
                   </span>
                 </div>
 
