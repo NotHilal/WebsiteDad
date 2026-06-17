@@ -614,8 +614,7 @@ export default function StudioSchedule() {
         @media (max-width: 767px) {
           .week-scroll-wrap { overflow-x: auto !important; overflow-y: hidden !important; height: 100%; }
           .week-inner { min-width: 600px; }
-          .sched-day-grid   { display: none; }
-          .sched-day-mobile { display: flex; }
+          .sched-day-mobile { display: none !important; }
           /* Toolbar: hide full labels, show short ones */
           .sched-view-label-full { display: none; }
           .sched-view-label-short { display: inline; }

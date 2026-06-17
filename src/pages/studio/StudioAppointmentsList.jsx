@@ -231,9 +231,26 @@ export default function StudioAppointmentsList() {
     })
   }, [appointments, search, statusFilter, viewMode, weekOffset])
 
+  const countBase = useMemo(() => {
+    const { start, end } = getWeekBounds(weekOffset)
+    return appointments.filter(a => {
+      const q = search.toLowerCase()
+      const matchSearch = !q ||
+        a.profiles?.full_name?.toLowerCase().includes(q) ||
+        a.profiles?.phone?.includes(q) ||
+        a.guest_name?.toLowerCase().includes(q) ||
+        a.guest_phone?.includes(q) ||
+        a.guest_email?.toLowerCase().includes(q) ||
+        a.services?.name?.toLowerCase().includes(q) ||
+        a.stylists?.name?.toLowerCase().includes(q)
+      const matchWeek = viewMode === 'all' || (() => { const d = parseISO(a.date); return d >= start && d <= end })()
+      return matchSearch && matchWeek
+    })
+  }, [appointments, search, viewMode, weekOffset])
+
   const counts = useMemo(() =>
-    ALL_STATUSES.reduce((acc, s) => { acc[s] = filtered.filter(a => a.status === s).length; return acc }, {}),
-    [filtered]
+    ALL_STATUSES.reduce((acc, s) => { acc[s] = countBase.filter(a => a.status === s).length; return acc }, {}),
+    [countBase]
   )
 
   const PER_PAGE = 6
@@ -396,9 +413,10 @@ export default function StudioAppointmentsList() {
           .al-root { font-size: 15px !important; }
 
           /* Stat cards */
-          .stat-card { padding: 0.55rem 0.75rem !important; }
-          .stat-card .stat-num { font-size: 1.2rem !important; }
-          .stat-card .stat-lbl { font-size: 11px !important; letter-spacing: 0.06em !important; }
+          .stat-card { padding: 0.35rem 0.4rem !important; gap: 5px !important; }
+          .stat-card .stat-num { font-size: 1rem !important; }
+          .stat-card .stat-lbl { font-size: 8px !important; letter-spacing: 0.04em !important; }
+          .stat-grid { gap: 0.3rem !important; }
 
           /* List rows */
           .al-row { padding: 0.875rem 1rem !important; }
@@ -458,7 +476,7 @@ export default function StudioAppointmentsList() {
           </div>
 
           {/* Stat cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.5rem', flexShrink: 0 }}>
+          <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.5rem', flexShrink: 0 }}>
             {statCards.map(({ s, label, cfg }) => (
               <button key={s} className="stat-card"
                 onClick={() => { setStatusFilter(statusFilter === s ? 'all' : s); setPage(0) }}

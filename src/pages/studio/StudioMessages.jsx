@@ -451,8 +451,8 @@ export default function StudioMessages() {
         {isAdmin && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[
-              { key: 'direct',   Icon: Scissors,  label: 'My Messages',    color: C.blue,  bg: C.blueBg,  border: C.blueBorder },
-              { key: 'store',    Icon: Store,      label: 'Store Messages', color: C.gold,  bg: C.goldBg,  border: C.goldBorder },
+              { key: 'store',    Icon: Store,      label: 'Store',           color: C.gold,  bg: C.goldBg,  border: C.goldBorder },
+              { key: 'direct',   Icon: Scissors,   label: 'My Messages',     color: C.blue,  bg: C.blueBg,  border: C.blueBorder },
               { key: 'requests', Icon: RefreshCw,  label: 'Client Requests', color: C.amber, bg: C.amberBg, border: C.amberBorder },
             ].map(({ key, Icon, label, color, bg, border }) => (
               <button key={key} onClick={() => setTab(key)}
@@ -460,7 +460,7 @@ export default function StudioMessages() {
                 <Icon size={12} strokeWidth={tab === key ? 2.5 : 1.5} />
                 {label}
                 {key === 'requests' && requestsCount > 0 && (
-                  <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: C.amber, color: '#000', fontSize: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
+                  <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: '#fff', fontSize: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
                     {requestsCount}
                   </span>
                 )}

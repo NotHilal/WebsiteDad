@@ -84,22 +84,46 @@ export default function StudioLayout() {
     const isAdm = isAdminRef.current
     if (!usr) return
 
-    // Only count messages in tickets relevant to this user's role
+    // Unread client messages in store/direct tickets
     let ticketQ = supabase.from('tickets').select('id')
-    if (isAdm) ticketQ = ticketQ.is('recipient_id', null)          // admin: store tickets
-    else       ticketQ = ticketQ.eq('recipient_id', usr.id)        // artist: their own direct tickets
+    if (isAdm) ticketQ = ticketQ.is('recipient_id', null).is('appointment_id', null)
+    else       ticketQ = ticketQ.eq('recipient_id', usr.id)
 
     const { data: tkts } = await ticketQ
     const ids = (tkts || []).map(t => t.id)
-    if (!ids.length) { setUnread(0); return }
 
-    const { count } = await supabase
-      .from('ticket_messages')
-      .select('*', { count: 'exact', head: true })
-      .in('ticket_id', ids)
-      .eq('is_from_admin', false)
-      .eq('read', false)
-    setUnread(count || 0)
+    let msgCount = 0
+    if (ids.length) {
+      const { count } = await supabase
+        .from('ticket_messages')
+        .select('*', { count: 'exact', head: true })
+        .in('ticket_id', ids)
+        .eq('is_from_admin', false)
+        .eq('read', false)
+      msgCount = count || 0
+    }
+
+    // Admin: open request tickets where admin has not yet replied
+    let reqCount = 0
+    if (isAdm) {
+      const { data: openReqs } = await supabase
+        .from('tickets')
+        .select('id')
+        .not('appointment_id', 'is', null)
+        .eq('status', 'open')
+      const reqIds = (openReqs || []).map(t => t.id)
+      if (reqIds.length) {
+        const { data: replied } = await supabase
+          .from('ticket_messages')
+          .select('ticket_id')
+          .in('ticket_id', reqIds)
+          .eq('is_from_admin', true)
+        const repliedSet = new Set((replied || []).map(m => m.ticket_id))
+        reqCount = reqIds.filter(id => !repliedSet.has(id)).length
+      }
+    }
+
+    setUnread(msgCount + reqCount)
   }
 
   async function fetchPendingDayoffs() {
@@ -159,9 +183,7 @@ export default function StudioLayout() {
                 <Icon size={14} strokeWidth={isActive ? 2 : 1.5} style={{ flexShrink: 0 }} />
                 {label}
                 {label === 'Messages' && unread > 0 && (
-                  <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
-                    {unread > 9 ? '9+' : unread}
-                  </span>
+                  <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#ef4444', flexShrink: 0, boxShadow: '0 0 5px rgba(239,68,68,0.5)' }} />
                 )}
                 {label === 'Blocked Dates' && isAdmin && pendingDayoffs > 0 && (
                   <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
