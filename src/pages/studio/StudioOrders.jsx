@@ -260,12 +260,12 @@ export default function StudioOrders() {
                       </div>
                     </div>
 
-                    {/* Right: price + arrow */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                    {/* Right: price + action + arrow */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                       <span style={{ fontSize: '1rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: C.gold, letterSpacing: '-0.01em' }}>
                         ${total.toFixed(2)}
                       </span>
-                      <div className="o-details-btn" style={{ width: 28, height: 28, borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}>
+<div className="o-details-btn" style={{ width: 28, height: 28, borderRadius: 8, background: 'transparent', border: `1px solid ${C.border}`, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .18s' }}>
                         <ChevronRight size={13} />
                       </div>
                     </div>
