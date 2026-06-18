@@ -423,8 +423,8 @@ export default function StudioMessages() {
           .msg-has-chat .msg-list-panel { display: none !important; }
           .msg-layout:not(.msg-has-chat) .msg-chat-panel { display: none !important; }
           .msg-back-btn { display: flex !important; }
-          .msg-hdr-wrap { flex-direction: column !important; gap: 8px !important; }
-          .hdr-actions  { flex-wrap: wrap !important; gap: 4px !important; width: 100% !important; }
+          .msg-hdr-wrap { flex-direction: column !important; gap: 8px !important; align-items: flex-start !important; }
+          .hdr-actions  { flex-wrap: wrap !important; gap: 4px !important; width: 100% !important; margin-right: 0 !important; }
           .hdr-actions button { flex: 1 1 auto !important; justify-content: center !important; min-width: 0 !important; }
           .msg-hdr-appt { white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
         }
@@ -566,8 +566,13 @@ export default function StudioMessages() {
           ) : (
             <>
               {/* Thread header */}
-              <div style={{ padding: '0.75rem 1rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: isRequestsTab ? 'linear-gradient(180deg, rgba(245,158,11,0.04) 0%, transparent 100%)' : 'linear-gradient(180deg, rgba(var(--rgb-hi),0.02) 0%, transparent 100%)' }}>
-                <div className="msg-hdr-wrap" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+              <div style={{ position: 'relative', padding: '0.75rem 1rem', paddingRight: '3.5rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0, background: isRequestsTab ? 'linear-gradient(180deg, rgba(245,158,11,0.04) 0%, transparent 100%)' : 'linear-gradient(180deg, rgba(var(--rgb-hi),0.02) 0%, transparent 100%)' }}>
+                {/* Close / Reopen — top-right corner */}
+                <button onClick={toggleStatus} disabled={toggling} className="btn-g"
+                  style={{ position: 'absolute', top: '0.75rem', right: '1rem', display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: toggling ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: toggling ? 0.6 : 1, whiteSpace: 'nowrap', ...(selected.status === 'open' ? { background: 'rgba(248,113,113,0.12)', color: '#f87171' } : { background: 'rgba(52,211,153,0.1)', color: '#34d399' }) }}>
+                  {selected.status === 'open' ? <><CheckCircle size={11} /> Close</> : <><RotateCcw size={11} /> Reopen</>}
+                </button>
+                <div className="msg-hdr-wrap" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
                   <button onClick={() => setSelected(null)} className="msg-back-btn"
                     style={{ display: 'none', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 8, background: 'rgba(var(--rgb-hi),0.06)', border: `1px solid ${C.border}`, color: C.dim, cursor: 'pointer', flexShrink: 0 }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
@@ -598,16 +603,10 @@ export default function StudioMessages() {
                   </div>
 
                   {/* Action buttons */}
-                  <div className="hdr-actions" style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                  <div className="hdr-actions" style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, marginRight: '-3rem' }}>
                     {/* Client Requests extras */}
                     {isRequestsTab && (isAdmin || isManager) && selected.appointment_id && (
                       <>
-                        {selected.appointments?.payment_status === 'paid' && (
-                          <button onClick={() => { setCouponCode(''); setCouponModal(true) }} className="btn-g"
-                            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: `1px solid rgba(167,139,250,0.28)`, background: 'rgba(167,139,250,0.08)', color: '#a78bfa', cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
-                            <Gift size={11} /> Give Coupon
-                          </button>
-                        )}
                         <button
                           onClick={() => {
                             setReschedDate(selected.appointments?.date || '')
@@ -619,19 +618,19 @@ export default function StudioMessages() {
                             setReschedModal(true)
                           }}
                           className="btn-g"
-                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: `1px solid ${C.amberBorder}`, background: C.amberBg, color: C.amber, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '5px 11px', minWidth: 100, borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: `1px solid ${C.amberBorder}`, background: C.amberBg, color: C.amber, cursor: 'pointer', transition: 'all .2s', whiteSpace: 'nowrap' }}>
                           <RefreshCw size={11} /> Reschedule
                         </button>
                         {selected.appointments?.payment_status === 'paid' ? (
                           <button onClick={handleIssueCredit} disabled={creditWorking} className="btn-g"
-                            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: `1px solid ${C.greenBorder}`, background: C.greenBg, color: C.green, cursor: creditWorking ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: creditWorking ? 0.6 : 1, whiteSpace: 'nowrap' }}>
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '5px 11px', minWidth: 100, borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: `1px solid ${C.greenBorder}`, background: C.greenBg, color: C.green, cursor: creditWorking ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: creditWorking ? 0.6 : 1, whiteSpace: 'nowrap' }}>
                             {creditWorking
                               ? <div style={{ width: 11, height: 11, border: `2px solid ${C.green}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                               : <><Tag size={11} /> Issue Credit</>}
                           </button>
                         ) : (
                           <button onClick={handleCancelOnly} disabled={creditWorking} className="btn-g"
-                            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: '1px solid rgba(248,113,113,0.28)', background: 'rgba(248,113,113,0.1)', color: '#f87171', cursor: creditWorking ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: creditWorking ? 0.6 : 1, whiteSpace: 'nowrap' }}>
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '5px 11px', minWidth: 100, borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: '1px solid rgba(248,113,113,0.28)', background: 'rgba(248,113,113,0.1)', color: '#f87171', cursor: creditWorking ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: creditWorking ? 0.6 : 1, whiteSpace: 'nowrap' }}>
                             {creditWorking
                               ? <div style={{ width: 11, height: 11, border: '2px solid #f87171', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
                               : 'Cancel'}
@@ -639,10 +638,6 @@ export default function StudioMessages() {
                         )}
                       </>
                     )}
-                    <button onClick={toggleStatus} disabled={toggling} className="btn-g"
-                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, border: 'none', cursor: toggling ? 'not-allowed' : 'pointer', transition: 'all .2s', opacity: toggling ? 0.6 : 1, whiteSpace: 'nowrap', ...(selected.status === 'open' ? { background: 'rgba(248,113,113,0.12)', color: '#f87171' } : { background: 'rgba(52,211,153,0.1)', color: '#34d399' }) }}>
-                      {selected.status === 'open' ? <><CheckCircle size={11} /> Close</> : <><RotateCcw size={11} /> Reopen</>}
-                    </button>
                     {isAdmin && (
                       <button onClick={() => setConfirmDel(true)} className="btn-g"
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.15)', color: '#f87171', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}

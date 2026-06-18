@@ -30,6 +30,7 @@ export default function Chat() {
   const [input,    setInput]    = useState('')
   const [loading,  setLoading]  = useState(true)
   const [sending,  setSending]  = useState(false)
+  const [loadingMsgs, setLoadingMsgs] = useState(false)
   const [showNew,  setShowNew]  = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newMsg,   setNewMsg]   = useState('')
@@ -65,6 +66,7 @@ export default function Chat() {
 
   useEffect(() => {
     if (!selected) return
+    setMessages([])
     loadMessages(selected.id)
   }, [selected?.id])
 
@@ -91,9 +93,11 @@ export default function Chat() {
   }
 
   async function loadMessages(ticketId) {
+    setLoadingMsgs(true)
     const { data } = await supabase
       .from('ticket_messages').select('*, sender:profiles!sender_id(full_name)').eq('ticket_id', ticketId).order('created_at')
     setMessages(data || [])
+    setLoadingMsgs(false)
     await supabase.from('ticket_messages')
       .update({ read: true }).eq('ticket_id', ticketId).eq('is_from_admin', true).eq('read', false)
     loadTickets()
@@ -353,7 +357,11 @@ export default function Chat() {
 
               {/* Messages */}
               <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '1rem 1.125rem', display: 'flex', flexDirection: 'column', gap: '0.375rem', background: C.msgBg }}>
-                {messages.length === 0 ? (
+                {loadingMsgs ? (
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 20, height: 20, border: '2px solid rgba(var(--rgb-acc),0.2)', borderTopColor: 'var(--col-acc)', borderRadius: '50%', animation: 'spin .7s linear infinite' }} />
+                  </div>
+                ) : messages.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <p style={{ color: 'rgba(var(--rgb-hi),0.25)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontStyle: 'italic' }}>No messages yet — start the conversation</p>
                   </div>
