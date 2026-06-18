@@ -49,7 +49,7 @@ function TabBtn({ id, label, icon: Icon, active, set }) {
 }
 
 export default function StudioBlockedDates() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isManager } = useAuth()
   const log = useLogAction()
 
   const [loading,        setLoading]        = useState(true)
@@ -76,13 +76,13 @@ export default function StudioBlockedDates() {
   const [myHours,        setMyHours]        = useState([])
   const [myRequests,     setMyRequests]     = useState([])
 
-  useEffect(() => { load() }, [isAdmin])
+  useEffect(() => { load() }, [isAdmin, isManager])
 
   async function load() {
     setLoading(true)
     try {
-      if (isAdmin) await loadAdmin()
-      else         await loadWorker()
+      if (isAdmin || isManager) await loadAdmin()
+      else                      await loadWorker()
     } finally {
       setLoading(false)
     }
@@ -170,14 +170,14 @@ export default function StudioBlockedDates() {
   // ── Derived maps ──
   const salonBlockedMap = Object.fromEntries(salonBlocked.map(d => [d.date || d, d]))
 
-  const hoursMap = (isAdmin ? salonHours : myHours).reduce((acc, h) => {
+  const hoursMap = ((isAdmin || isManager) ? salonHours : myHours).reduce((acc, h) => {
     if (!acc[h.date]) acc[h.date] = []
     acc[h.date].push(h.hour)
     return acc
   }, {})
 
   // pending requests keyed by date
-  const pendingMap = isAdmin
+  const pendingMap = (isAdmin || isManager)
     ? Object.fromEntries(pendingRequests.map(r => [r.date, r]))
     : myRequests.reduce((acc, r) => { acc[r.date] = r; return acc }, {})
 
@@ -216,7 +216,7 @@ export default function StudioBlockedDates() {
     })
     setReason(pendingMap[key]?.reason || salonBlockedMap[key]?.reason || '')
     setSelHours(hoursMap[key] || [])
-    setBlockTab(isAdmin ? (salonBlockedMap[key] ? 'day' : 'hours') : 'hours')
+    setBlockTab((isAdmin || isManager) ? (salonBlockedMap[key] ? 'day' : 'hours') : 'hours')
   }
 
   function closeModal() { setSelected(null); setReason(''); setSelHours([]); setBlockTab('hours') }
@@ -264,7 +264,7 @@ export default function StudioBlockedDates() {
   async function saveHours() {
     setSaving(true)
     try {
-      if (!isAdmin) {
+      if (!isAdmin && !isManager) {
         // Quota check: count existing hours this month excluding today's (they'll be replaced)
         const existing = myHours.filter(h => h.date >= today && h.date <= monthEnd && h.date !== selected.key).length
         if (existing + selHours.length > effectiveMaxHours) {
@@ -354,15 +354,15 @@ export default function StudioBlockedDates() {
       <div style={{ flexShrink: 0, marginBottom: '1.25rem', paddingBottom: '1.1rem', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div>
           <h1 className="font-display font-light" style={{ fontSize: 'clamp(1.6rem,2.5vw,2.2rem)', color: C.white, lineHeight: 1.1, marginBottom: '0.15rem' }}>
-            {isAdmin ? 'Availability Management' : 'My Availability'}
+            {(isAdmin || isManager) ? 'Availability Management' : 'My Availability'}
           </h1>
           <p style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
-            {isAdmin
+            {(isAdmin || isManager)
               ? 'Block salon-wide days · Approve day-off requests · Configure monthly caps'
               : 'Block your hours freely · Full days need manager approval'}
           </p>
         </div>
-        {isAdmin && (
+        {isAdmin && !isManager && (
           <button onClick={openSettings}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 0.875rem', borderRadius: 9, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
             <Settings size={12} /> Caps
@@ -371,7 +371,7 @@ export default function StudioBlockedDates() {
       </div>
 
       {/* ── Worker: account not linked ── */}
-      {!isAdmin && !loading && !myStylist && (
+      {!isAdmin && !isManager && !loading && !myStylist && (
         <div style={{ background: C.warnBg, border: `1px solid ${C.warnBorder}`, borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1rem', display: 'flex', gap: 10 }}>
           <AlertCircle size={15} color={C.warning} style={{ flexShrink: 0, marginTop: 1 }} />
           <div>
@@ -382,7 +382,7 @@ export default function StudioBlockedDates() {
       )}
 
       {/* ── Worker: monthly quota bar ── */}
-      {!isAdmin && myStylist && (
+      {!isAdmin && !isManager && myStylist && (
         <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: '0.875rem 1.25rem', marginBottom: '1rem', display: 'flex', gap: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Hours */}
           <div>
@@ -413,7 +413,7 @@ export default function StudioBlockedDates() {
       )}
 
       {/* ── Admin: pending requests ── */}
-      {isAdmin && pendingRequests.length > 0 && (
+      {(isAdmin || isManager) && pendingRequests.length > 0 && (
         <div style={{ background: C.infoBg, border: `1px solid ${C.infoBorder}`, borderRadius: 12, padding: '0.875rem 1.1rem', marginBottom: '1rem' }}>
           <p style={{ fontSize: '0.78rem', color: C.info, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: '0.625rem' }}>
             {pendingRequests.length} day-off request{pendingRequests.length !== 1 ? 's' : ''} awaiting approval
@@ -521,7 +521,7 @@ export default function StudioBlockedDates() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                             <Clock size={8} color={C.info} />
                             <span style={{ fontSize: 8, color: C.info, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>
-                              {isAdmin ? (pending.stylist?.name?.split(' ')[0] || 'Request') : (pending.status === 'approved' ? 'Day off' : pending.status === 'rejected' ? 'Rejected' : 'Pending')}
+                              {(isAdmin || isManager) ? (pending.stylist?.name?.split(' ')[0] || 'Request') : (pending.status === 'approved' ? 'Day off' : pending.status === 'rejected' ? 'Rejected' : 'Pending')}
                             </span>
                           </div>
                         )}
@@ -559,8 +559,8 @@ export default function StudioBlockedDates() {
                 ? <p style={{ color: C.muted, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', textAlign: 'center', padding: '0.75rem 0' }}>None scheduled</p>
                 : upcomingSalon.map((d, i) => (
                   <div key={d.id || i}
-                    onClick={() => isAdmin && handleDayClick(new Date((d.date || d) + 'T00:00:00'))}
-                    style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, borderRadius: 9, padding: '0.6rem 0.875rem', marginBottom: 5, cursor: isAdmin ? 'pointer' : 'default' }}>
+                    onClick={() => (isAdmin || isManager) && handleDayClick(new Date((d.date || d) + 'T00:00:00'))}
+                    style={{ background: C.dangerBg, border: `1px solid ${C.dangerBorder}`, borderRadius: 9, padding: '0.6rem 0.875rem', marginBottom: 5, cursor: (isAdmin || isManager) ? 'pointer' : 'default' }}>
                     <p style={{ color: C.danger, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>
                       {format(new Date((d.date || d) + 'T00:00:00'), 'EEE, MMM d')}
                     </p>
@@ -572,7 +572,7 @@ export default function StudioBlockedDates() {
           </div>
 
           {/* Worker: my requests */}
-          {!isAdmin && myStylist && (() => {
+          {!isAdmin && !isManager && myStylist && (() => {
             const upcoming = myRequests.filter(r => !isPast(new Date(r.date + 'T00:00:00'))).sort((a, b) => a.date.localeCompare(b.date))
             return (
               <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 16, overflow: 'hidden', flex: '1', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
@@ -636,7 +636,7 @@ export default function StudioBlockedDates() {
 
               {/* Tabs */}
               <div style={{ display: 'flex', background: C.subtle, borderRadius: 10, padding: 3, marginBottom: '1.25rem', gap: 3 }}>
-                {isAdmin ? (
+                {(isAdmin || isManager) ? (
                   <>
                     <TabBtn id="day"   label="Salon Day"   icon={BanIcon}   active={blockTab} set={setBlockTab} />
                     <TabBtn id="hours" label="Salon Hours"  icon={Clock}     active={blockTab} set={setBlockTab} />
@@ -650,7 +650,7 @@ export default function StudioBlockedDates() {
               </div>
 
               {/* ── Admin: Salon day tab ── */}
-              {isAdmin && blockTab === 'day' && (
+              {(isAdmin || isManager) && blockTab === 'day' && (
                 selected.salonClosed ? (
                   <>
                     <p style={{ fontSize: '0.82rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', marginBottom: '1.25rem', lineHeight: 1.6 }}>
@@ -683,7 +683,7 @@ export default function StudioBlockedDates() {
               {blockTab === 'hours' && (
                 <>
                   {/* Worker quota pill */}
-                  {!isAdmin && (
+                  {!isAdmin && !isManager && (
                     <div style={{ background: hoursUsed >= effectiveMaxHours ? C.dangerBg : C.goldBg, border: `1px solid ${hoursUsed >= effectiveMaxHours ? C.dangerBorder : C.goldBorder}`, borderRadius: 8, padding: '0.45rem 0.75rem', marginBottom: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: hoursUsed >= effectiveMaxHours ? C.danger : C.goldDim }}>Hours this month</span>
                       <span style={{ fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: hoursUsed >= effectiveMaxHours ? C.danger : C.gold }}>
@@ -698,7 +698,7 @@ export default function StudioBlockedDates() {
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                     <p style={{ fontSize: '0.78rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>
-                      {isAdmin ? 'Block slots salon-wide' : 'Select slots to block'}
+                      {(isAdmin || isManager) ? 'Block slots salon-wide' : 'Select slots to block'}
                     </p>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button onClick={() => setSelHours([...SLOTS])} style={{ fontSize: 9, padding: '3px 9px', borderRadius: 7, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.goldDim, cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>All</button>
@@ -738,7 +738,7 @@ export default function StudioBlockedDates() {
               )}
 
               {/* ── Worker: Day off tab ── */}
-              {!isAdmin && blockTab === 'dayoff' && (
+              {!isAdmin && !isManager && blockTab === 'dayoff' && (
                 selected.request ? (
                   // Existing request
                   <>

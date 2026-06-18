@@ -20,7 +20,7 @@ export default function StudioGate() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!authLoading && user && sessionStorage.getItem('studio_access') === 'true' && (profile?.role === 'admin' || profile?.role === 'artist')) {
+    if (!authLoading && user && sessionStorage.getItem('studio_access') === 'true' && (profile?.role === 'admin' || profile?.role === 'artist' || profile?.role === 'manager')) {
       navigate('/studio/dashboard')
     }
   }, [authLoading, user, profile])
@@ -62,7 +62,7 @@ export default function StudioGate() {
         const { data: prof } = await supabase.from('profiles').select('role').eq('id', currentUser.id).single()
         role = prof?.role
       }
-      if (role !== 'admin' && role !== 'artist') {
+      if (role !== 'admin' && role !== 'artist' && role !== 'manager') {
         toast.error('This account does not have studio access')
         setLoading(false)
         return

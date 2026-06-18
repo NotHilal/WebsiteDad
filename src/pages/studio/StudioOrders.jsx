@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
 import { useLogAction } from '../../hooks/useLogAction'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Search, Package, Check, X, Trash2, AlertTriangle, ChevronRight, RotateCcw } from 'lucide-react'
@@ -25,6 +26,7 @@ const STATUS_STYLE = {
 const STATUS_TABS = ['All', 'Active', 'Retrieved', 'Expired', 'Cancelled']
 
 export default function StudioOrders() {
+  const { isAdmin } = useAuth()
   const log = useLogAction()
   const [orders,       setOrders]       = useState([])
   const [loading,      setLoading]      = useState(true)
@@ -426,10 +428,12 @@ export default function StudioOrders() {
                         </button>
                       </div>
                     )}
-                    <button onClick={() => openDelete(details)} className="o-delete"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.6rem', borderRadius: 10, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.6)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.06em' }}>
-                      <Trash2 size={12} /> Delete Order
-                    </button>
+                    {isAdmin && (
+                      <button onClick={() => openDelete(details)} className="o-delete"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.6rem', borderRadius: 10, background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.6)', fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.06em' }}>
+                        <Trash2 size={12} /> Delete Order
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>

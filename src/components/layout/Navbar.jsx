@@ -143,7 +143,7 @@ export default function Navbar() {
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.05)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.1)'; e.currentTarget.style.color = 'var(--col-text)' }}>
               {isDark ? <Sun size={14} /> : <Moon size={14} />}
             </button>
-            {(profile?.role === 'admin' || profile?.role === 'artist') && (
+            {(profile?.role === 'admin' || profile?.role === 'artist' || profile?.role === 'manager') && (
               <button onClick={() => { sessionStorage.removeItem('studio_access'); navigate('/studio') }}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 8, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-bg)', fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', letterSpacing: '0.04em' }}>
                 <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio
@@ -304,7 +304,7 @@ export default function Navbar() {
                     </NavLink>
                   )}
                 </>))}
-                {(profile?.role === 'admin' || profile?.role === 'artist') && (
+                {(profile?.role === 'admin' || profile?.role === 'artist' || profile?.role === 'manager') && (
                   <button onClick={() => { sessionStorage.removeItem('studio_access'); setMenuOpen(false); navigate('/studio') }}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-acc)', background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.15)', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>
                     <Scissors size={11} style={{ transform: 'rotate(45deg)' }} /> Studio

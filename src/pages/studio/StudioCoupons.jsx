@@ -2,6 +2,7 @@
 import { Plus, X, Save, Trash2, Edit2, Search, Scissors, AlertTriangle, ChevronRight, ChevronLeft, UserPlus } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useAuth } from '../../contexts/AuthContext'
 import { useLogAction } from '../../hooks/useLogAction'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -84,7 +85,7 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
             : <button onClick={() => onAssign(coupon)} className="btn-assign-uc" style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 8, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all .18s', whiteSpace: 'nowrap', border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.goldDim }}>Assign</button>
           }
           <button onClick={() => onEdit(coupon)} className="btn-edit-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}><Edit2 size={12} /></button>
-          <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
+          {onDelete && <button onClick={() => onDelete(coupon)} className="btn-del-uc" style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>}
         </div>
       </div>
 
@@ -140,8 +141,8 @@ function CouponCard({ coupon, assignment, onEdit, onToggle, onDelete, onUnassign
           <div style={{ display: 'flex', gap: 5, marginLeft: 'auto' }}>
             <button onClick={() => onEdit(coupon)} className="btn-edit-uc"
               style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.03)', color: C.muted }}><Edit2 size={12} /></button>
-            <button onClick={() => onDelete(coupon)} className="btn-del-uc"
-              style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>
+            {onDelete && <button onClick={() => onDelete(coupon)} className="btn-del-uc"
+              style={{ width: 32, height: 32, borderRadius: 8, cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(248,113,113,0.15)', background: 'rgba(248,113,113,0.05)', color: 'rgba(248,113,113,0.45)' }}><Trash2 size={12} /></button>}
           </div>
         </div>
       </div>
@@ -175,6 +176,7 @@ function SelectableCouponCard({ coupon, selected, onSelect }) {
 
 /* ── Main ──────────────────────────────────────────── */
 export default function StudioCoupons() {
+  const { isAdmin } = useAuth()
   const log = useLogAction()
   const [coupons,      setCoupons]      = useState([])
   const [users,        setUsers]        = useState([])
@@ -425,7 +427,7 @@ export default function StudioCoupons() {
               onToggle={toggleActive}
               onUnassign={unassignCoupon}
               onAssign={openAssignForCoupon}
-              onDelete={setDeleteTarget} />
+              onDelete={isAdmin ? setDeleteTarget : undefined} />
           ))}
           <Pager page={page} total={filtered.length} onChange={setPage} />
           </>

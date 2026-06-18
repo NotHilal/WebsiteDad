@@ -25,7 +25,7 @@ function fmtMins(mins) {
 
 
 export default function StudioTimesheets() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isManager } = useAuth()
   const log = useLogAction()
   const [week,         setWeek]         = useState(new Date())
   const [stylists,     setStylists]     = useState([])
@@ -59,10 +59,10 @@ export default function StudioTimesheets() {
   }, [isAdmin])
 
   useEffect(() => {
-    if (!isAdmin) return
+    if (!isAdmin && !isManager) return
     const t = setInterval(() => setTick(v => v + 1), 60_000)
     return () => clearInterval(t)
-  }, [isAdmin])
+  }, [isAdmin, isManager])
 
   async function loadLiveClockIns() {
     const { data } = await supabase
@@ -83,7 +83,7 @@ export default function StudioTimesheets() {
     setLoading(true)
     setError(null)
 
-    if (isAdmin) {
+    if (isAdmin || isManager) {
       const [{ data: stys, error: e1 }, { data: ents, error: e2 }] = await Promise.all([
         supabase.from('stylists').select('id, name, photo_url').order('display_order'),
         supabase.from('timesheets')
@@ -194,7 +194,7 @@ export default function StudioTimesheets() {
       </div>
 
       {/* Not linked warning for employees */}
-      {!isAdmin && !loading && !linkedStylist && (
+      {!isAdmin && !isManager && !loading && !linkedStylist && (
         <div style={{ flexShrink: 0, padding: '1rem 1.25rem', borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
           <p style={{ color: '#f59e0b', fontSize: '0.98rem', fontFamily: 'DM Sans,sans-serif' }}>
             Your account hasn't been linked to a team member yet. Ask an admin to link your account in the <strong>Stylists</strong> page.

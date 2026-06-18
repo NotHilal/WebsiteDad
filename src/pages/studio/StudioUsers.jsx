@@ -18,15 +18,17 @@ const C = {
 }
 
 const ROLE_STYLE = {
-  user:   { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.05)', border: 'rgba(var(--rgb-hi),0.1)',  label: 'User'   },
-  artist: { color: '#60a5fa',              bg: 'rgba(96,165,250,0.1)',   border: 'rgba(96,165,250,0.22)', label: 'Artist' },
-  admin:  { color: 'var(--col-acc)',               bg: 'var(--col-acc)', border: 'var(--col-acc)', label: 'Admin'  },
+  user:    { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.05)', border: 'rgba(var(--rgb-hi),0.1)',   label: 'User'    },
+  artist:  { color: '#60a5fa',         bg: 'rgba(96,165,250,0.1)',     border: 'rgba(96,165,250,0.22)',     label: 'Artist'  },
+  manager: { color: '#a78bfa',         bg: 'rgba(167,139,250,0.1)',    border: 'rgba(167,139,250,0.22)',    label: 'Manager' },
+  admin:   { color: 'var(--col-acc)',  bg: 'var(--col-acc)',           border: 'var(--col-acc)',            label: 'Admin'   },
 }
 
 const TABS = [
-  { key: 'user',   label: 'Users' },
-  { key: 'artist', label: 'Artists' },
-  { key: 'admin',  label: 'Admins' },
+  { key: 'user',    label: 'Users'    },
+  { key: 'artist',  label: 'Artists'  },
+  { key: 'manager', label: 'Managers' },
+  { key: 'admin',   label: 'Admins'   },
 ]
 
 function RoleOption({ rrs, isActive, label, onClick }) {
@@ -80,9 +82,10 @@ function RoleSelector({ value, onChange }) {
           style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 9999, background: 'var(--col-card)', border: '1px solid rgba(var(--rgb-acc),0.18)', borderRadius: 12, overflow: 'hidden', minWidth: 130, boxShadow: '0 20px 56px rgba(0,0,0,0.65), 0 0 0 1px rgba(var(--rgb-hi),0.03)' }}>
           <div style={{ height: 2, background: 'linear-gradient(90deg,var(--col-acc),var(--col-acc2),rgba(var(--rgb-acc),0.1))' }} />
           {[
-            { role: 'user',   label: 'User'   },
-            { role: 'artist', label: 'Artist' },
-            { role: 'admin',  label: 'Admin'  },
+            { role: 'user',    label: 'User'    },
+            { role: 'artist',  label: 'Artist'  },
+            { role: 'manager', label: 'Manager' },
+            { role: 'admin',   label: 'Admin'   },
           ].map(({ role, label }) => (
             <RoleOption key={role} rrs={ROLE_STYLE[role]} isActive={role === value} label={label}
               onClick={() => { onChange(role); setOpen(false) }} />

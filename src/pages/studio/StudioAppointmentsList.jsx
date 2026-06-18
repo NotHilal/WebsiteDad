@@ -104,7 +104,7 @@ function StatusDropdown({ appt, onUpdate }) {
 }
 
 export default function StudioAppointmentsList() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, isManager } = useAuth()
   const log = useLogAction()
   const navigate = useNavigate()
 
@@ -141,7 +141,7 @@ export default function StudioAppointmentsList() {
 
   async function load() {
     if (!user) return
-    if (isAdmin) {
+    if (isAdmin || isManager) {
       const { data } = await supabase
         .from('appointments')
         .select('*, profiles(full_name, phone), services(name, price, duration), stylists(name)')

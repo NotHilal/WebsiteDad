@@ -70,8 +70,8 @@ serve(async (req) => {
     const { data: profile } = await supabase
       .from('profiles').select('role').eq('id', user.id).single()
 
-    if (profile?.role !== 'admin' && profile?.role !== 'artist') {
-      return deny('Forbidden — studio access requires admin or artist role', 403)
+    if (profile?.role !== 'admin' && profile?.role !== 'artist' && profile?.role !== 'manager') {
+      return deny('Forbidden — studio access requires admin, artist, or manager role', 403)
     }
 
     // Auth confirmed — now check the TOTP token

@@ -3,6 +3,7 @@ import Pager from '../../lib/Pager'
 import { Plus, Trash2, Image, X, Save, Edit2, Eye, EyeOff, ShieldAlert, ChevronDown, Check, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useAuth } from '../../contexts/AuthContext'
 import { useLogAction } from '../../hooks/useLogAction'
 import toast from 'react-hot-toast'
 
@@ -81,6 +82,7 @@ function Select({ value, onChange, options }) {
 }
 
 export default function StudioGallery() {
+  const { isAdmin } = useAuth()
   const log = useLogAction()
   const [images,      setImages]      = useState([])
   const [stylists,    setStylists]    = useState([])
@@ -399,10 +401,12 @@ export default function StudioGallery() {
                         style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: `1px solid ${C.border}`, background: 'rgba(var(--rgb-hi),0.04)', color: C.muted }}>
                         <Edit2 size={14} />
                       </button>
-                      <button onClick={() => openDelete(img)} className="gal-del-btn" title="Delete"
-                        style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid rgba(248,113,113,0.2)', background: 'rgba(248,113,113,0.06)', color: 'rgba(248,113,113,0.5)' }}>
-                        <Trash2 size={14} />
-                      </button>
+                      {isAdmin && (
+                        <button onClick={() => openDelete(img)} className="gal-del-btn" title="Delete"
+                          style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '1px solid rgba(248,113,113,0.2)', background: 'rgba(248,113,113,0.06)', color: 'rgba(248,113,113,0.5)' }}>
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 )
@@ -560,7 +564,7 @@ export default function StudioGallery() {
                         <div style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color, flexShrink: 0, boxShadow: `0 0 8px ${cat.color}66` }} />
                         <span style={{ flex: 1, color: C.white, fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{cat.name}</span>
                         <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', marginRight: 6 }}>{images.filter(i => i.category === cat.name).length} photos</span>
-                        {catDelId !== cat.id && (
+                        {isAdmin && catDelId !== cat.id && (
                           <button onClick={() => setCatDelId(cat.id)}
                             className="cat-del-row-btn"
                             style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .15s' }}>

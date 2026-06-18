@@ -40,7 +40,7 @@ export default function StudioDashboard() {
   const [mobileTab,     setMobileTab]     = useState('overview')
   const [activeClockIn, setActiveClockIn] = useState(undefined) // undefined = not yet fetched
   const navigate = useNavigate()
-  const { isAdmin, user } = useAuth()
+  const { isAdmin, isManager, user } = useAuth()
 
   useEffect(() => { load() }, [])
 
@@ -77,7 +77,7 @@ export default function StudioDashboard() {
       .from('timesheets').select('*', { count: 'exact', head: true }).is('clock_out', null)
     setStats(s => ({ ...s, clockedIn: clockedInCount || 0 }))
 
-    if (!isAdmin && user) {
+    if (!isAdmin && !isManager && user) {
       const { data: linked } = await supabase
         .from('stylists').select('id').eq('profile_id', user.id).single()
       if (linked) {
@@ -94,7 +94,7 @@ export default function StudioDashboard() {
   const statCards = [
     { icon: Calendar,      label: 'Appointments', value: stats.appointments, sub: `${stats.pending} pending`, link: '/studio/schedule', color: C.gold },
     { icon: ShoppingBag,   label: 'Orders',       value: stats.preorders,    sub: 'Awaiting pickup',          link: '/studio/orders',      color: '#a78bfa' },
-    isAdmin
+    (isAdmin || isManager)
       ? { icon: UserCheck, label: 'Artists In', value: stats.clockedIn, sub: `of ${stylists.length} artist${stylists.length !== 1 ? 's' : ''}`, link: '/studio/timesheets', color: '#34d399' }
       : { icon: Clock,     label: 'Timesheets', value: null,             sub: 'My time logs',                                                    link: '/studio/timesheets', color: '#34d399' },
     { icon: MessageSquare, label: 'Messages',     value: stats.msgs,         sub: 'Unread',                   link: '/studio/messages',  color: '#60a5fa' },
@@ -133,7 +133,7 @@ export default function StudioDashboard() {
       {/* Stat cards */}
       <div className={`dash-stats${mobileTab !== 'overview' ? ' dash-m-hide' : ''}`} style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem', flexShrink: 0 }}>
         {statCards.map(c => {
-          const isClockCard = !isAdmin && c.label === 'Timesheets'
+          const isClockCard = !isAdmin && !isManager && c.label === 'Timesheets'
           const clockedIn   = isClockCard && !!activeClockIn
           const elapsed     = clockedIn ? Math.floor((Date.now() - new Date(activeClockIn.clock_in)) / 60000) : 0
           const elapsedStr  = elapsed >= 60 ? `${Math.floor(elapsed/60)}h ${elapsed%60}m` : `${elapsed}m`

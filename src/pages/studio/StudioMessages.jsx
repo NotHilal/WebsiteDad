@@ -32,7 +32,7 @@ const FILTERS = ['All', 'Open', 'Closed']
 const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
 
 export default function StudioMessages() {
-  const { user, profile, isAdmin } = useAuth()
+  const { user, profile, isAdmin, isManager } = useAuth()
   const log = useLogAction()
   const [searchParams, setSearchParams] = useSearchParams()
   const [tickets,        setTickets]       = useState([])
@@ -333,10 +333,7 @@ export default function StudioMessages() {
         .single()
       if (fetchErr) throw fetchErr
 
-      // Cancel the old appointment to free its slot
-      await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', selected.appointment_id)
-
-      // Create the new appointment at the new date/time
+      // Create the new appointment first — if this fails we leave the old one untouched
       const newRow = {
         user_id:          old.user_id,
         service_id:       old.service_id,
@@ -354,6 +351,9 @@ export default function StudioMessages() {
       const { data: newAppt, error: insertErr } = await supabase
         .from('appointments').insert(newRow).select('id').single()
       if (insertErr) throw insertErr
+
+      // Cancel the old appointment only after the new one is confirmed
+      await supabase.from('appointments').update({ status: 'cancelled' }).eq('id', selected.appointment_id)
 
       // Point the ticket at the new appointment
       await supabase.from('tickets').update({ appointment_id: newAppt.id }).eq('id', selected.id)
@@ -392,8 +392,8 @@ export default function StudioMessages() {
   }
 
   const canReply = selected && selected.status === 'open' && (
-    (isAdmin && !selected.recipient_id) ||
-    (!isAdmin && selected.recipient_id === user?.id)
+    ((isAdmin || isManager) && !selected.recipient_id) ||
+    (!isAdmin && !isManager && selected.recipient_id === user?.id)
   )
 
   const totalUnread = tickets.reduce((sum, t) => sum + (t.unread || 0), 0)
@@ -447,8 +447,8 @@ export default function StudioMessages() {
           </div>
         </div>
 
-        {/* Tabs — admin only */}
-        {isAdmin && (
+        {/* Tabs — admin / manager */}
+        {(isAdmin || isManager) && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[
               { key: 'store',    Icon: Store,      label: 'Store',           color: C.gold,  bg: C.goldBg,  border: C.goldBorder },
@@ -530,7 +530,7 @@ export default function StudioMessages() {
                         </span>
                       </span>
                     )}
-                    {isAdmin && tab === 'direct' && tk.recipient?.full_name && (
+                    {(isAdmin || isManager) && tab === 'direct' && tk.recipient?.full_name && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 6px', borderRadius: 20, background: C.blueBg, border: `1px solid ${C.blueBorder}` }}>
                         <div style={{ width: 4, height: 4, borderRadius: '50%', background: C.blue, flexShrink: 0 }} />
                         <span style={{ fontSize: 8, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: 'rgba(96,165,250,0.75)', whiteSpace: 'nowrap' }}>
@@ -538,7 +538,7 @@ export default function StudioMessages() {
                         </span>
                       </span>
                     )}
-                    {!isAdmin && (
+                    {!isAdmin && !isManager && (
                       <p style={{ fontSize: '0.65rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{tk.lastMsg || '—'}</p>
                     )}
                   </div>
@@ -596,7 +596,7 @@ export default function StudioMessages() {
                   {/* Action buttons */}
                   <div className="hdr-actions" style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
                     {/* Client Requests extras */}
-                    {isRequestsTab && isAdmin && selected.appointment_id && (
+                    {isRequestsTab && (isAdmin || isManager) && selected.appointment_id && (
                       <>
                         {selected.appointments?.payment_status === 'paid' && (
                           <button onClick={() => { setCouponCode(''); setCouponModal(true) }} className="btn-g"

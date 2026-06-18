@@ -1,5 +1,5 @@
-﻿import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+﻿import { useState, useEffect, useRef } from 'react'
+import { ChevronLeft, ChevronRight, ChevronDown, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
@@ -63,6 +63,45 @@ function layoutAppts(appts) {
   }))
 }
 
+function StatusDropdown({ appt, onUpdate }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const cfg = STATUS[appt.status] || STATUS.pending
+
+  useEffect(() => {
+    if (!open) return
+    function handler(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+      <button onClick={() => setOpen(o => !o)}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px 5px 8px', borderRadius: 8, cursor: 'pointer', background: cfg.bg, border: `1px solid ${open ? cfg.color : cfg.border}`, transition: 'all .15s' }}>
+        <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
+        <span style={{ fontSize: 11, color: cfg.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'capitalize' }}>{appt.status}</span>
+        <ChevronDown size={10} style={{ color: cfg.color, opacity: 0.7, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
+      </button>
+      {open && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 200, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
+          {ALL_STATUSES.filter(s => s !== appt.status).map(s => {
+            const c = STATUS[s]
+            return (
+              <button key={s} onClick={() => { onUpdate(appt.id, s); setOpen(false) }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer', transition: 'background .12s', textAlign: 'left' }}
+                className={`st-btn-${s}`}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: c.color, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: c.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textTransform: 'capitalize' }}>{s}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function StudioSchedule() {
   const [appointments,  setAppointments]  = useState([])
   const [stylists,      setStylists]      = useState([])
@@ -97,6 +136,13 @@ export default function StudioSchedule() {
     setAppointments(allAppts || [])
     setStylists(stylistList || [])
     setLoading(false)
+  }
+
+  async function updateStatus(id, newStatus) {
+    const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id)
+    if (error) return
+    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
+    if (selectedAppt?.id === id) setSelectedAppt(prev => ({ ...prev, status: newStatus }))
   }
 
   // ── Derived ──
@@ -551,10 +597,7 @@ export default function StudioSchedule() {
                     <p className="font-display" style={{ color: C.white, fontSize: '1.3rem', lineHeight: 1.1, marginBottom: 4 }}>
                       {a.profiles?.full_name || 'Client'}
                     </p>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}` }}>
-                      <div style={{ width: 5, height: 5, borderRadius: '50%', background: s.color }} className={a.status === 'pending' ? 'dot-pulse' : ''} />
-                      <span style={{ fontSize: 9, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, textTransform: 'capitalize', letterSpacing: '0.08em' }}>{a.status}</span>
-                    </div>
+                    <StatusDropdown appt={a} onUpdate={updateStatus} />
                   </div>
                 </div>
                 <button onClick={() => setSelectedAppt(null)} className="modal-x"

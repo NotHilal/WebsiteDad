@@ -41,6 +41,19 @@ const adminNavItems = [
   { to: '/studio/logs',          icon: Activity,        label: 'Activity Logs' },
 ]
 
+const managerNavItems = [
+  { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
+  { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
+  { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
+  { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
+  { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
+  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
+  { to: '/studio/products',      icon: Package,         label: 'Products' },
+  { to: '/studio/gallery',       icon: Image,           label: 'Gallery' },
+  { to: '/studio/coupons',       icon: Tag,             label: 'Coupons' },
+]
+
 const workerNavItems = [
   { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
@@ -56,14 +69,16 @@ export default function StudioLayout() {
   const [open,             setOpen]             = useState(false)
   const [unread,           setUnread]           = useState(0)
   const [pendingDayoffs,   setPendingDayoffs]   = useState(0)
-  const { signOut, profile, isAdmin, user } = useAuth()
+  const { signOut, profile, isAdmin, isManager, user } = useAuth()
   const { isDark, toggleTheme } = useTheme()
 
   // Refs so the realtime handler always sees the latest values
-  const isAdminRef = useRef(isAdmin)
-  const userRef    = useRef(user)
-  useEffect(() => { isAdminRef.current = isAdmin }, [isAdmin])
-  useEffect(() => { userRef.current = user },       [user])
+  const isAdminRef   = useRef(isAdmin)
+  const isManagerRef = useRef(isManager)
+  const userRef      = useRef(user)
+  useEffect(() => { isAdminRef.current   = isAdmin   }, [isAdmin])
+  useEffect(() => { isManagerRef.current = isManager }, [isManager])
+  useEffect(() => { userRef.current      = user      }, [user])
 
   useEffect(() => {
     fetchUnread()
@@ -81,7 +96,7 @@ export default function StudioLayout() {
 
   async function fetchUnread() {
     const usr  = userRef.current
-    const isAdm = isAdminRef.current
+    const isAdm = isAdminRef.current || isManagerRef.current
     if (!usr) return
 
     // Unread client messages in store/direct tickets
@@ -103,7 +118,7 @@ export default function StudioLayout() {
       msgCount = count || 0
     }
 
-    // Admin: open request tickets where admin has not yet replied
+    // Admin/Manager: open request tickets where admin has not yet replied
     let reqCount = 0
     if (isAdm) {
       const { data: openReqs } = await supabase
@@ -136,7 +151,7 @@ export default function StudioLayout() {
   }
   const navigate = useNavigate()
   const location = useLocation()
-  const navItems = isAdmin ? adminNavItems : workerNavItems
+  const navItems = isAdmin ? adminNavItems : isManager ? managerNavItems : workerNavItems
   const currentPage = navItems.find(n => location.pathname.startsWith(n.to))?.label ?? 'Studio'
 
   async function handleSignOut() {
@@ -185,7 +200,7 @@ export default function StudioLayout() {
                 {label === 'Messages' && unread > 0 && (
                   <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: '#ef4444', flexShrink: 0, boxShadow: '0 0 5px rgba(239,68,68,0.5)' }} />
                 )}
-                {label === 'Blocked Dates' && isAdmin && pendingDayoffs > 0 && (
+                {label === 'Blocked Dates' && (isAdmin || isManager) && pendingDayoffs > 0 && (
                   <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#ef4444', color: '#fff', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
                     {pendingDayoffs > 9 ? '9+' : pendingDayoffs}
                   </span>
@@ -203,7 +218,7 @@ export default function StudioLayout() {
             {profile?.full_name || 'Admin'}
           </p>
           <p style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.goldDim, fontFamily: 'DM Sans,sans-serif', marginTop: 2 }}>
-            {isAdmin ? 'Studio Admin' : 'Artist'}
+            {isAdmin ? 'Studio Admin' : isManager ? 'Manager' : 'Artist'}
           </p>
         </div>
         <button onClick={handleSignOut} className="s-signout"

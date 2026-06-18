@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, EyeOff, ShieldAlert, Search, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
+import { useAuth } from '../../contexts/AuthContext'
 import { useLogAction } from '../../hooks/useLogAction'
 import Pager from '../../lib/Pager'
 import toast from 'react-hot-toast'
@@ -41,6 +42,7 @@ const STATUS_FILTERS = [
 ]
 
 export default function StudioProducts() {
+  const { isAdmin } = useAuth()
   const log = useLogAction()
   const [products,      setProducts]      = useState([])
   const [loading,       setLoading]       = useState(true)
@@ -462,10 +464,12 @@ export default function StudioProducts() {
                           style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s' }}>
                           <Edit2 size={9} /> Edit
                         </button>
-                        <button onClick={() => openDelete(p)} className="prod-del-btn"
-                          style={{ width: 26, height: 26, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.13)', color: 'rgba(248,113,113,0.38)', cursor: 'pointer', transition: 'all .18s' }}>
-                          <Trash2 size={9} />
-                        </button>
+                        {isAdmin && (
+                          <button onClick={() => openDelete(p)} className="prod-del-btn"
+                            style={{ width: 26, height: 26, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.13)', color: 'rgba(248,113,113,0.38)', cursor: 'pointer', transition: 'all .18s' }}>
+                            <Trash2 size={9} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -653,7 +657,7 @@ export default function StudioProducts() {
                       <div style={{ display: 'flex', alignItems: 'center', padding: '0.625rem 1.5rem', gap: 10 }}>
                         <div style={{ width: 14, height: 14, borderRadius: '50%', background: cat.color, flexShrink: 0, boxShadow: `0 0 8px ${cat.color}66` }} />
                         <span style={{ flex: 1, color: C.white, fontSize: '1.1rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 500 }}>{cat.name}</span>
-                        {catDelId !== cat.id && (
+                        {isAdmin && catDelId !== cat.id && (
                           <button onClick={() => setCatDelId(cat.id)} className="cat-del-row-btn"
                             style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(248,113,113,0.07)', border: '1px solid rgba(248,113,113,0.15)', color: 'rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, transition: 'all .15s' }}>
                             <Trash2 size={11} />

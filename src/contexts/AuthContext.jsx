@@ -64,12 +64,13 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
-  const isAdmin  = profile?.role === 'admin'
-  const isWorker = profile?.role === 'artist'
-  const isStaff  = isAdmin || isWorker
+  const isAdmin   = profile?.role === 'admin'
+  const isWorker  = profile?.role === 'artist'
+  const isManager = profile?.role === 'manager'
+  const isStaff   = isAdmin || isWorker || isManager
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isWorker, isStaff, signUp, signIn, signOut, fetchProfile }}>
+    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isWorker, isManager, isStaff, signUp, signIn, signOut, fetchProfile }}>
       {children}
     </AuthContext.Provider>
   )

@@ -36,6 +36,7 @@ import StudioLogs                from './pages/studio/StudioLogs'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import AdminRoute from './components/auth/AdminRoute'
 import AdminOnlyRoute from './components/auth/AdminOnlyRoute'
+import ManagerRoute from './components/auth/ManagerRoute'
 
 export default function App() {
   return (
@@ -81,11 +82,11 @@ export default function App() {
             <Route path="blocked-dates" element={<AdminRoute><StudioBlockedDates /></AdminRoute>} />
             <Route path="services"  element={<AdminOnlyRoute><StudioServices /></AdminOnlyRoute>} />
             <Route path="stylists"  element={<AdminOnlyRoute><StudioStylists /></AdminOnlyRoute>} />
-            <Route path="products"  element={<AdminOnlyRoute><StudioProducts /></AdminOnlyRoute>} />
+            <Route path="products"  element={<ManagerRoute><StudioProducts /></ManagerRoute>} />
             <Route path="orders"    element={<AdminRoute><StudioOrders /></AdminRoute>} />
-            <Route path="gallery"   element={<AdminOnlyRoute><StudioGallery /></AdminOnlyRoute>} />
+            <Route path="gallery"   element={<ManagerRoute><StudioGallery /></ManagerRoute>} />
             <Route path="messages"  element={<AdminRoute><StudioMessages /></AdminRoute>} />
-            <Route path="coupons"   element={<AdminOnlyRoute><StudioCoupons /></AdminOnlyRoute>} />
+            <Route path="coupons"   element={<ManagerRoute><StudioCoupons /></ManagerRoute>} />
             <Route path="users"        element={<AdminOnlyRoute><StudioUsers /></AdminOnlyRoute>} />
             <Route path="home-display" element={<AdminOnlyRoute><StudioHomeDisplay /></AdminOnlyRoute>} />
             <Route path="timesheets"  element={<AdminRoute><StudioTimesheets /></AdminRoute>} />
