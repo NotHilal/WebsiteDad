@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info, Mail, UserPlus, Tag } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { getOrFetch } from '../lib/cache'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
@@ -32,7 +32,7 @@ function slotOverlapsBlocked(slot, durationMins, blockedSlots) {
 }
 
 const STEPS = ['Service', 'Stylist', 'Date & Time', 'Confirm']
-const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
+const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00']
 const SERVICES_PER_PAGE = 4
 
 const slide = {
@@ -44,6 +44,7 @@ const slide = {
 export default function Appointments() {
   const { user, profile } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const reschedule = location.state?.reschedule
   const [step,     setStep]     = useState(() => {
     if (reschedule?.service && reschedule?.stylist) return 2
@@ -75,6 +76,7 @@ export default function Appointments() {
   const [availableCoupons, setAvailableCoupons] = useState([])
   const [appliedCoupon,    setAppliedCoupon]    = useState(null)
   const [couponCode,       setCouponCode]       = useState('')
+  const [showAllCoupons,   setShowAllCoupons]   = useState(false)
   const [couponError,      setCouponError]      = useState(null)
   const [validatingCode,   setValidatingCode]   = useState(false)
   const [stylistDayOffs,   setStylistDayOffs]   = useState([])
@@ -87,9 +89,13 @@ export default function Appointments() {
         const { data } = await supabase.from('services').select('*').order('category')
         return data || []
       }, TTL),
-      getOrFetch('stylists_all', async () => {
-        const { data } = await supabase.from('stylists').select('*').not('profile_id', 'is', null).order('display_order')
-        return data || []
+      getOrFetch('stylists_artists', async () => {
+        const { data } = await supabase
+          .from('stylists')
+          .select('*, profiles!profile_id(role)')
+          .not('profile_id', 'is', null)
+          .order('display_order')
+        return (data || []).filter(s => s.profiles?.role === 'artist')
       }, TTL),
       getOrFetch('blocked_dates', async () => {
         const { data } = await supabase.from('blocked_dates').select('date').is('stylist_id', null).eq('status', 'approved')
@@ -159,6 +165,7 @@ export default function Appointments() {
     setAppliedCoupon(null)
     setCouponCode('')
     setCouponError(null)
+    setShowAllCoupons(false)
     supabase
       .from('user_coupons')
       .select('id, used, coupons(id, code, discount_type, discount_value, expiry_date, active)')
@@ -191,7 +198,7 @@ export default function Appointments() {
 
   const days     = eachDayOfInterval({ start:startOfMonth(month), end:endOfMonth(month) })
   const startPad = getDay(startOfMonth(month))
-  const isOff    = d => isBefore(d, startOfDay(new Date())) || getDay(d)===0 || blocked.includes(format(d,'yyyy-MM-dd')) || (sel.stylist && stylistDayOffs.includes(format(d,'yyyy-MM-dd')))
+  const isOff    = d => isBefore(d, startOfDay(new Date())) || blocked.includes(format(d,'yyyy-MM-dd')) || (sel.stylist && stylistDayOffs.includes(format(d,'yyyy-MM-dd')))
 
   const guestInfoValid = user || (
     guestInfo.name.trim() !== '' &&
@@ -451,7 +458,7 @@ export default function Appointments() {
         {payInStore && (
           <div style={{ padding:'12px 18px', borderRadius:12, background:'rgba(245,158,11,0.07)', border:'1px solid rgba(245,158,11,0.15)', margin:'1.25rem auto 0', maxWidth:380 }}>
             <p style={{ color:'rgba(245,158,11,0.85)', fontSize:'1.01rem', fontFamily:'DM Sans,sans-serif', lineHeight:1.7, margin:0 }}>
-              Your slot is reserved — please bring <strong style={{ color:'#f59e0b' }}>${sel.service?.price}</strong> to pay at the salon.
+              Your slot is reserved — please bring <strong style={{ color:'#f59e0b' }}>${finalPrice.toFixed(2)}</strong> to pay at the salon.{appliedCoupon && sel.service?.price && <span style={{ fontSize:'0.9rem', opacity:0.6 }}> ({sel.service.price} − coupon)</span>}
             </p>
           </div>
         )}
@@ -469,8 +476,8 @@ export default function Appointments() {
             <span key={i} style={{ padding:'6px 16px', borderRadius:9999, background:'rgba(var(--rgb-acc),0.12)', border:'1px solid rgba(var(--rgb-acc),0.3)', fontSize:13, color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif' }}>{l}</span>
           ))}
         </div>
-        <button className="btn-gold" onClick={() => { setDone(false); setStep(0); setSel({ service:null, stylist:null, date:null, time:null, notes:'' }); setPayStep(null); setClientSecret(null); setPayInStore(false); setGuestInfo({ name:'', phone:'', email:'' }); setShowPromo(true) }}>
-          Book Another <ArrowRight size={15}/>
+        <button className="btn-gold" onClick={() => navigate('/profile')}>
+          Go to Profile <ArrowRight size={15}/>
         </button>
       </motion.div>
     </div>
@@ -1042,7 +1049,7 @@ export default function Appointments() {
                       <>
                         <p style={{ fontSize:13, letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--col-text)', marginBottom:8, fontFamily:'DM Sans,sans-serif' }}>Your coupons</p>
                         <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                          {availableCoupons.map(uc => {
+                          {(showAllCoupons ? availableCoupons : availableCoupons.slice(0, 3)).map(uc => {
                             const c = uc.coupons
                             const isApplied = appliedCoupon?.id === uc.id
                             const discLabel = c.discount_type === 'percentage' ? `${c.discount_value}% off` : `$${c.discount_value} off`
@@ -1065,6 +1072,12 @@ export default function Appointments() {
                               </button>
                             )
                           })}
+                          {availableCoupons.length > 3 && (
+                            <button onClick={() => setShowAllCoupons(p => !p)}
+                              style={{ alignSelf:'center', background:'none', border:'none', color:'var(--col-acc)', fontFamily:'DM Sans,sans-serif', fontSize:'0.85rem', fontWeight:600, cursor:'pointer', padding:'4px 0', letterSpacing:'0.02em' }}>
+                              {showAllCoupons ? 'Show less' : `Show ${availableCoupons.length - 3} more`}
+                            </button>
+                          )}
                         </div>
                       </>
                     )}
@@ -1094,21 +1107,21 @@ export default function Appointments() {
 
                     {/* Applied summary — shown for both user_coupons and manual codes */}
                     {appliedCoupon && (
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0.6rem 0.9rem', marginTop:10, borderRadius:10, background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.18)' }}>
-                        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                          <Check size={13} color="#34d399"/>
-                          <span style={{ fontSize:'1.1rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.06em', color:'#34d399' }}>{appliedCoupon.coupons.code}</span>
-                          <span style={{ fontSize:'1.05rem', fontFamily:'DM Sans,sans-serif', color:'rgba(52,211,153,0.7)' }}>applied</span>
-                        </div>
-                        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                          <div style={{ textAlign:'right' }}>
-                            <span style={{ fontSize:'1.05rem', fontFamily:'DM Sans,sans-serif', color:'var(--col-text)', textDecoration:'line-through', opacity:0.5 }}>${basePrice.toFixed(2)}</span>
-                            <span style={{ fontSize:'1.25rem', fontFamily:'DM Sans,sans-serif', color:'#34d399', fontWeight:700, marginLeft:8 }}>${finalPrice.toFixed(2)}</span>
+                      <div style={{ padding:'0.65rem 0.9rem', marginTop:10, borderRadius:10, background:'rgba(52,211,153,0.06)', border:'1px solid rgba(52,211,153,0.18)' }}>
+                        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+                          <div style={{ display:'flex', alignItems:'center', gap:8, minWidth:0 }}>
+                            <Check size={13} color="#34d399" style={{ flexShrink:0 }}/>
+                            <span style={{ fontSize:'1.05rem', fontFamily:'"Courier New", monospace', letterSpacing:'0.06em', color:'#34d399', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{appliedCoupon.coupons.code}</span>
+                            <span style={{ fontSize:'0.85rem', fontFamily:'DM Sans,sans-serif', color:'rgba(52,211,153,0.7)', flexShrink:0 }}>applied</span>
                           </div>
                           <button onClick={() => { setAppliedCoupon(null); setCouponCode(''); setCouponError(null); if (user) sessionStorage.removeItem(`hg_booking_coupon_${user.id}`) }}
-                            style={{ background:'none', border:'none', color:'rgba(248,113,113,0.55)', cursor:'pointer', padding:'2px 4px', fontSize:12, fontFamily:'DM Sans,sans-serif', lineHeight:1 }}>
+                            style={{ background:'rgba(248,113,113,0.1)', border:'1px solid rgba(248,113,113,0.25)', borderRadius:6, color:'#f87171', cursor:'pointer', padding:'3px 10px', fontSize:11, fontFamily:'DM Sans,sans-serif', fontWeight:600, flexShrink:0, whiteSpace:'nowrap' }}>
                             Remove
                           </button>
+                        </div>
+                        <div style={{ display:'flex', alignItems:'baseline', gap:8, marginTop:5 }}>
+                          <span style={{ fontSize:'1rem', fontFamily:'DM Sans,sans-serif', color:'var(--col-text)', textDecoration:'line-through', opacity:0.45 }}>${basePrice.toFixed(2)}</span>
+                          <span style={{ fontSize:'1.2rem', fontFamily:'DM Sans,sans-serif', color:'#34d399', fontWeight:700 }}>${finalPrice.toFixed(2)}</span>
                         </div>
                       </div>
                     )}

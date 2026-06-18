@@ -77,9 +77,11 @@ export default function Profile() {
   const [receipt,   setReceipt]   = useState(null)
   const [apptPage,  setApptPage]  = useState(0)
   const [ordPage,   setOrdPage]   = useState(0)
+  const [coupPage,  setCoupPage]  = useState(0)
   const [apptFilter,   setApptFilter]   = useState('upcoming')
   const [ordFilter,    setOrdFilter]    = useState('pickup')
   const [rewardFilter, setRewardFilter] = useState('active')
+  const [coupPerPage,  setCoupPerPage]  = useState(() => window.innerWidth <= 640 ? 3 : 4)
   const PER_PAGE = 3
 
   // Payment modal state
@@ -105,6 +107,12 @@ export default function Profile() {
 
 
   useEffect(() => { if (user) loadAll() }, [user])
+
+  useEffect(() => {
+    const handler = () => setCoupPerPage(window.innerWidth <= 640 ? 3 : 4)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   async function loadAll() {
     const [{ data: a }, { data: o }, { data: c }] = await Promise.all([
@@ -848,10 +856,20 @@ export default function Profile() {
 
                 {/* ── Appointments ── */}
                 {tab === 'Appointments' && (() => {
-                  const filtered = appointments.filter(a =>
-                    apptFilter === 'upcoming' ? (a.status === 'confirmed' || a.status === 'pending') :
-                    apptFilter === 'completed' ? a.status === 'completed' : a.status === 'cancelled'
-                  )
+                  const filtered = appointments
+                    .filter(a =>
+                      apptFilter === 'upcoming' ? (a.status === 'confirmed' || a.status === 'pending') :
+                      apptFilter === 'completed' ? a.status === 'completed' : a.status === 'cancelled'
+                    )
+                    .sort((a, b) => {
+                      const dateCmp = apptFilter === 'upcoming'
+                        ? a.date.localeCompare(b.date)
+                        : b.date.localeCompare(a.date)
+                      if (dateCmp !== 0) return dateCmp
+                      return apptFilter === 'upcoming'
+                        ? (a.time || '').localeCompare(b.time || '')
+                        : (b.time || '').localeCompare(a.time || '')
+                    })
                   const pageAppts = filtered.slice(apptPage * PER_PAGE, (apptPage + 1) * PER_PAGE)
                   const apptCounts = {
                     upcoming:  appointments.filter(a => a.status === 'confirmed' || a.status === 'pending').length,
@@ -884,6 +902,8 @@ export default function Profile() {
                         const s = STATUS_MAP[appt.status] ?? STATUS_MAP.pending
                         const apptDate = format(new Date(appt.date), 'MMM d, yyyy')
                         const isUpcoming = appt.status === 'confirmed' || appt.status === 'pending'
+                        const couponMatch = appt.notes?.match(/\[Coupon: (\S+) — (.+?) · Final: \$([0-9.]+)\]/)
+                        const discountedPrice = couponMatch ? couponMatch[3] : null
                         return (
                           <div key={appt.id} style={{ borderRadius: 16, border: `1px solid ${isUpcoming ? 'rgba(var(--rgb-acc),0.28)' : BD}`, overflow: 'hidden', background: 'var(--col-bg)', boxShadow: isUpcoming ? '0 4px 24px rgba(var(--rgb-acc),0.08)' : 'none', display: 'flex', transition: 'box-shadow 0.2s' }}>
 
@@ -913,9 +933,22 @@ export default function Profile() {
                                     )}
                                   </div>
                                   {appt.services?.price && (
-                                    <span className="font-display" style={{ color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontSize: '1.25rem', flexShrink: 0, marginLeft: 10 }}>
-                                      ${appt.services.price}
-                                    </span>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, marginLeft: 10 }}>
+                                      {discountedPrice ? (
+                                        <>
+                                          <span className="font-display" style={{ color: 'var(--col-text)', fontSize: '1rem', opacity: 0.35, textDecoration: 'line-through', lineHeight: 1.2 }}>
+                                            ${appt.services.price}
+                                          </span>
+                                          <span className="font-display" style={{ color: '#34d399', fontSize: '1.25rem', lineHeight: 1.2 }}>
+                                            ${discountedPrice}
+                                          </span>
+                                        </>
+                                      ) : (
+                                        <span className="font-display" style={{ color: isUpcoming ? 'var(--col-acc)' : 'var(--col-text)', fontSize: '1.25rem' }}>
+                                          ${appt.services.price}
+                                        </span>
+                                      )}
+                                    </div>
                                   )}
                                 </div>
 
@@ -932,18 +965,14 @@ export default function Profile() {
                                   )}
                                 </div>
 
-                                {(() => {
-                                  const m = appt.notes?.match(/\[Coupon: (\S+) — (.+?) · Final: \$([0-9.]+)\]/)
-                                  if (!m) return null
-                                  return (
-                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '5px 10px', borderRadius: 8, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)' }}>
-                                      <Tag size={10} color="#34d399" />
-                                      <span style={{ fontSize: 15, fontFamily: 'DM Sans,sans-serif', color: '#34d399', letterSpacing: '0.06em' }}>
-                                        {m[1]} — {m[2]} · paid <strong>${m[3]}</strong>
-                                      </span>
-                                    </div>
-                                  )
-                                })()}
+                                {couponMatch && (
+                                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '5px 10px', borderRadius: 8, background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.18)' }}>
+                                    <Tag size={10} color="#34d399" />
+                                    <span style={{ fontSize: 15, fontFamily: 'DM Sans,sans-serif', color: '#34d399', letterSpacing: '0.06em' }}>
+                                      {couponMatch[1]} — {couponMatch[2]}
+                                    </span>
+                                  </div>
+                                )}
 
                                 {isUpcoming && (
                                   <div style={{ marginTop: 10, display: 'flex', justifyContent: 'flex-start' }}>
@@ -1139,7 +1168,7 @@ export default function Profile() {
                       {[['active','Available'],['past','Used & Expired']].map(([key, label]) => {
                         const count = key === 'active' ? activeCouponsList.length : pastCouponsList.length
                         return (
-                          <button key={key} onClick={() => setRewardFilter(key)}
+                          <button key={key} onClick={() => { setRewardFilter(key); setCoupPage(0) }}
                             style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 14px', borderRadius:20, fontSize:15, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'DM Sans,sans-serif', fontWeight: rewardFilter===key ? 600 : 400, cursor:'pointer', border:`1px solid ${rewardFilter===key ? 'rgba(var(--rgb-acc),0.4)' : BD}`, background: rewardFilter===key ? 'rgba(var(--rgb-acc),0.1)' : 'transparent', color: rewardFilter===key ? 'var(--col-acc)' : 'var(--col-text)', transition:'all 0.15s' }}>
                             {label}
                             {count > 0 && <span style={{ fontSize:14, fontWeight:700, background:'rgba(var(--rgb-acc),0.15)', color:'var(--col-acc)', padding:'1px 6px', borderRadius:10 }}>{count}</span>}
@@ -1155,12 +1184,13 @@ export default function Profile() {
                       ) : displayList.length === 0 ? (
                         <EmptyState icon={Star} text={rewardFilter === 'active' ? 'No available coupons right now.' : 'No used or expired coupons.'} />
                       ) : (
-                        displayList.map(({ id, coupons: c, used }) => {
+                        displayList.slice(coupPage * coupPerPage, (coupPage + 1) * coupPerPage).map(({ id, coupons: c, used }) => {
                           const expired = !used && !!(c?.expiry_date && new Date(c.expiry_date) < now)
                           return <CouponCard key={id} coupon={c} used={used} expired={expired} />
                         })
                       )}
                     </div>
+                    <Pager page={coupPage} total={Math.ceil(displayList.length / coupPerPage)} onChange={setCoupPage} />
                   </div>
                   )
                 })()}

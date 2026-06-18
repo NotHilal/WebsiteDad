@@ -120,8 +120,16 @@ export default function StudioAppointmentsList() {
   const [deleting,     setDeleting]     = useState(false)
   const [page,         setPage]         = useState(0)
 
+  // Responsive per-page
+  const [perPage, setPerPage] = useState(() => window.innerWidth <= 640 ? 4 : 5)
+  useEffect(() => {
+    const handler = () => setPerPage(window.innerWidth <= 640 ? 4 : 5)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
   // Sub-tab + calendar state
-  const [tab,         setTab]         = useState('calendar')   // 'list' | 'calendar'
+  const [tab,         setTab]         = useState('list')   // 'list' | 'calendar'
   const [calDate,     setCalDate]     = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(null)
   const [dayPage,     setDayPage]     = useState(0)
@@ -257,8 +265,7 @@ export default function StudioAppointmentsList() {
     [countBase]
   )
 
-  const PER_PAGE = 6
-  const paged = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
+  const paged = filtered.slice(page * perPage, (page + 1) * perPage)
 
   // Group appointments by date for calendar
   const apptsByDate = useMemo(() => {
@@ -277,8 +284,7 @@ export default function StudioAppointmentsList() {
     return (apptsByDate.get(key) || []).sort((a, b) => (a.time || '').localeCompare(b.time || ''))
   }, [selectedDay, apptsByDate])
 
-  const DAY_PER_PAGE = 6
-  const pagedDay = dayAppts.slice(dayPage * DAY_PER_PAGE, (dayPage + 1) * DAY_PER_PAGE)
+  const pagedDay = dayAppts.slice(dayPage * perPage, (dayPage + 1) * perPage)
 
   const statCards = [
     { s: 'confirmed', label: 'Confirmed', cfg: STATUS_CFG.confirmed },
@@ -464,8 +470,8 @@ export default function StudioAppointmentsList() {
           <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
             <div style={{ display: 'inline-flex', borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.border}` }}>
               {[
-                { key: 'calendar', icon: Calendar,   label: 'Calendar' },
                 { key: 'list',     icon: LayoutList, label: 'List'     },
+                { key: 'calendar', icon: Calendar,   label: 'Calendar' },
               ].map(({ key, icon: Icon, label }, i) => {
                 const active = tab === key
                 return (
@@ -567,7 +573,7 @@ export default function StudioAppointmentsList() {
           <div className="al-list-box" style={{ flex: 1, minHeight: 0, overflowY: 'auto', background: C.card, border: `1px solid ${C.border}`, borderRadius: 14 }}>
             {loading ? (
               <div>
-                {Array.from({ length: 7 }).map((_, i) => (
+                {Array.from({ length: perPage }).map((_, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '1rem 1.25rem', borderBottom: `1px solid ${C.border}` }}>
                     <div style={{ width: 32, height: 32, borderRadius: '50%', background: C.card2 }} className="shimmer" />
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -596,7 +602,7 @@ export default function StudioAppointmentsList() {
             ) : (
               <>{paged.map((appt, i) => (
                 <ApptRow key={appt.id} appt={appt} i={i} last={i === paged.length - 1} />
-              ))}<Pager page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} /></>
+              ))}<Pager page={page} total={filtered.length} perPage={perPage} onChange={setPage} /></>
             )}
           </div>
 
@@ -612,8 +618,8 @@ export default function StudioAppointmentsList() {
             {/* View switcher */}
             <div style={{ display: 'inline-flex', borderRadius: 10, overflow: 'hidden', border: `1px solid ${C.border}` }}>
               {[
-                { key: 'calendar', icon: Calendar,   label: 'Calendar' },
                 { key: 'list',     icon: LayoutList, label: 'List'     },
+                { key: 'calendar', icon: Calendar,   label: 'Calendar' },
               ].map(({ key, icon: Icon, label }, i) => {
                 const active = tab === key
                 return (
@@ -689,7 +695,7 @@ export default function StudioAppointmentsList() {
                     {pagedDay.map((appt, i) => (
                       <ApptRow key={appt.id} appt={appt} i={i} last={i === pagedDay.length - 1} />
                     ))}
-                    <Pager page={dayPage} total={dayAppts.length} perPage={DAY_PER_PAGE} onChange={setDayPage} />
+                    <Pager page={dayPage} total={dayAppts.length} perPage={perPage} onChange={setDayPage} />
                   </>
                 )}
               </motion.div>
@@ -795,7 +801,10 @@ export default function StudioAppointmentsList() {
                           <div style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color, boxShadow: `0 0 8px ${cfg.color}88`, flexShrink: 0 }} />
                           <span style={{ fontSize: '0.8rem', color: cfg.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Status</span>
                         </div>
-                        <StatusDropdown appt={details} onUpdate={updateStatus} />
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px 5px 8px', borderRadius: 8, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
+                          <span style={{ fontSize: 11, color: cfg.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>{cfg.label}</span>
+                        </div>
                       </div>
                       {isAdmin && (
                         <button onClick={() => openDelete(details)} className="del-row-btn"

@@ -26,7 +26,7 @@ const STATUS_STYLE = {
 const STATUS_TABS = ['All', 'Active', 'Retrieved', 'Expired', 'Cancelled']
 
 export default function StudioOrders() {
-  const { isAdmin } = useAuth()
+  const { isAdmin, isManager } = useAuth()
   const log = useLogAction()
   const [orders,       setOrders]       = useState([])
   const [loading,      setLoading]      = useState(true)
@@ -163,7 +163,7 @@ export default function StudioOrders() {
     return c
   }, [grouped])
 
-  const PER_PAGE = window.innerWidth < 768 ? 5 : 10
+  const PER_PAGE = window.innerWidth < 768 ? 7 : 8
   const paged = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
 
   return (
@@ -422,10 +422,12 @@ export default function StudioOrders() {
                             : <Check size={14} />}
                           Mark as Picked Up
                         </button>
-                        <button onClick={() => cancelOrder(details)} disabled={updating === details.groupId} className="o-cancel"
-                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.65rem 1rem', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: updating === details.groupId ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.groupId ? 0.5 : 1, whiteSpace: 'nowrap' }}>
-                          <X size={13} /> Cancel
-                        </button>
+                        {!isManager && (
+                          <button onClick={() => cancelOrder(details)} disabled={updating === details.groupId} className="o-cancel"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0.65rem 1rem', borderRadius: 10, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: updating === details.groupId ? 'not-allowed' : 'pointer', transition: 'all .18s', opacity: updating === details.groupId ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                            <X size={13} /> Cancel
+                          </button>
+                        )}
                       </div>
                     )}
                     {isAdmin && (

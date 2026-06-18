@@ -297,7 +297,7 @@ export default function StudioCoupons() {
     if (!assignCoupon || !assignUser) return
     setSaving(true)
     try {
-      const { error } = await supabase.from('user_coupons').insert({ user_id: assignUser.id, coupon_id: assignCoupon.id, granted_by: 'admin', used: false })
+      const { error } = await supabase.from('user_coupons').upsert({ user_id: assignUser.id, coupon_id: assignCoupon.id, granted_by: 'admin', used: false }, { onConflict: 'user_id,coupon_id' })
       if (error) throw error
       setAssignedIds(prev => new Set([...prev, assignCoupon.id]))
       setAssignments(prev => ({ ...prev, [assignCoupon.id]: { name: assignUser.full_name || 'Unknown', used: false } }))

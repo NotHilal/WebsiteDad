@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef, useMemo } from 'react'
 import Pager from '../../lib/Pager'
-import { Plus, Trash2, Image, X, Save, Edit2, Eye, EyeOff, ShieldAlert, ChevronDown, Check, Tag } from 'lucide-react'
+import { Plus, Trash2, Image, X, Save, Edit2, Eye, EyeOff, ShieldAlert, ChevronDown, Check, Tag, Search } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
 import { useAuth } from '../../contexts/AuthContext'
@@ -88,6 +88,7 @@ export default function StudioGallery() {
   const [stylists,    setStylists]    = useState([])
   const [loading,     setLoading]     = useState(true)
   const [filter,      setFilter]      = useState('all')
+  const [search,      setSearch]      = useState('')
   const [modal,       setModal]       = useState(null)
   const [editing,     setEditing]     = useState(null)
   const [form,        setForm]        = useState(EMPTY)
@@ -238,13 +239,20 @@ export default function StudioGallery() {
 
   const hidden = images.filter(img => img.visible === false)
   const filtered = useMemo(() => {
-    if (filter === 'archived') return images.filter(img => img.visible === false)
-    if (filter === 'all')      return images
-    return images.filter(img => img.category === filter)
-  }, [images, filter])
+    let base
+    if (filter === 'archived') base = images.filter(img => img.visible === false)
+    else if (filter === 'all') base = images
+    else                       base = images.filter(img => img.category === filter)
+    if (!search.trim()) return base
+    const q = search.trim().toLowerCase()
+    return base.filter(img =>
+      img.title?.toLowerCase().includes(q) ||
+      img.stylists?.name?.toLowerCase().includes(q)
+    )
+  }, [images, filter, search])
 
   const paged = filtered.slice(page * perPage, (page + 1) * perPage)
-  useEffect(() => setPage(0), [filter, perPage])
+  useEffect(() => setPage(0), [filter, search, perPage])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '0.875rem' }}>
@@ -304,6 +312,24 @@ export default function StudioGallery() {
         </div>
       </div>
 
+      {/* ── Search ─────────────────────────────────────────── */}
+      <div style={{ flexShrink: 0, position: 'relative' }}>
+        <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
+        <input
+          type="text"
+          placeholder="Search by title or stylist…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ ...inp, paddingLeft: '2rem', fontSize: '0.82rem' }}
+        />
+        {search && (
+          <button onClick={() => setSearch('')}
+            style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--col-text)', display: 'flex', alignItems: 'center', padding: 2 }}>
+            <X size={13} />
+          </button>
+        )}
+      </div>
+
       {/* ── Filters ────────────────────────────────────────── */}
       <div style={{ flexShrink: 0, display: 'flex', gap: 5, flexWrap: 'wrap' }}>
         {/* All */}
@@ -350,7 +376,7 @@ export default function StudioGallery() {
               <Image size={20} color="rgba(var(--rgb-hi),0.12)" strokeWidth={1} />
             </div>
             <p style={{ color: C.muted, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif' }}>
-              {filter === 'archived' ? 'No archived photos' : filter === 'all' ? 'No photos yet' : `No ${filter} photos`}
+              {search.trim() ? `No results for "${search.trim()}"` : filter === 'archived' ? 'No archived photos' : filter === 'all' ? 'No photos yet' : `No ${filter} photos`}
             </p>
           </div>
         ) : (

@@ -35,7 +35,7 @@ export default function StudioMessages() {
   const { user, profile, isAdmin, isManager } = useAuth()
   const log = useLogAction()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [tickets,        setTickets]       = useState([])
+  const [allTickets,     setAllTickets]    = useState([])
   const [selected,       setSelected]      = useState(null)
   const [messages,       setMessages]      = useState([])
   const [input,          setInput]         = useState('')
@@ -68,7 +68,7 @@ export default function StudioMessages() {
   const loadTicketsRef = useRef(null)
 
   useEffect(() => {
-    if (profile?.role === 'artist') setTab('direct')
+    if (profile?.role === 'artist' || profile?.role === 'manager') setTab('direct')
   }, [profile?.role])
 
   useEffect(() => { selectedRef.current = selected }, [selected])
@@ -98,7 +98,6 @@ export default function StudioMessages() {
   useEffect(() => {
     setSelected(null)
     setMessages([])
-    loadTickets()
     if (tab === 'requests') loadStylists()
   }, [tab])
 
@@ -131,16 +130,13 @@ export default function StudioMessages() {
 
     if (role === 'artist') {
       query = query.eq('recipient_id', user.id)
-    } else if (tab === 'store') {
-      query = query.is('recipient_id', null).is('appointment_id', null)
-    } else if (tab === 'direct') {
-      query = query.eq('recipient_id', user.id)
-    } else if (tab === 'requests') {
-      query = query.not('appointment_id', 'is', null)
+    } else if (role === 'manager') {
+      query = query.or(`recipient_id.eq.${user.id},recipient_id.is.null`)
     }
+    // admin: no filter — sees everything
 
     const { data: tkts } = await query
-    if (!tkts?.length) { setTickets([]); setLoading(false); return }
+    if (!tkts?.length) { setAllTickets([]); setLoading(false); return }
 
     const ids = tkts.map(t => t.id)
     const { data: msgs } = await supabase
@@ -155,7 +151,7 @@ export default function StudioMessages() {
       if (!m.read && !m.is_from_admin) meta[m.ticket_id].unread++
     }
     const enriched = tkts.map(t => ({ ...t, ...(meta[t.id] || {}) }))
-    setTickets(enriched)
+    setAllTickets(enriched)
     setLoading(false)
 
     const paramId = searchParams.get('ticket')
@@ -392,11 +388,19 @@ export default function StudioMessages() {
   }
 
   const canReply = selected && selected.status === 'open' && (
-    ((isAdmin || isManager) && !selected.recipient_id) ||
-    (!isAdmin && !isManager && selected.recipient_id === user?.id)
+    selected.recipient_id === user?.id ||
+    ((isAdmin || isManager) && !selected.recipient_id)
   )
 
-  const totalUnread = tickets.reduce((sum, t) => sum + (t.unread || 0), 0)
+  const tickets = (() => {
+    if (profile?.role === 'artist') return allTickets
+    if (tab === 'store')    return allTickets.filter(t => !t.recipient_id && !t.appointment_id)
+    if (tab === 'direct')   return allTickets.filter(t => t.recipient_id === user?.id)
+    if (tab === 'requests') return allTickets.filter(t => !!t.appointment_id)
+    return allTickets
+  })()
+
+  const totalUnread = allTickets.reduce((sum, t) => sum + (t.unread || 0), 0)
   const filtered = tickets.filter(t => filter === 'All' || t.status === filter.toLowerCase())
   const isRequestsTab = tab === 'requests'
 

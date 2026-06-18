@@ -41,6 +41,7 @@ export default function StudioTimesheets() {
   const [showFilter,     setShowFilter]     = useState(false)
   const [liveClockIns,   setLiveClockIns]   = useState([])
   const [tick,           setTick]           = useState(0)
+  const [confirmClockOut, setConfirmClockOut] = useState(null) // stylistId to clock out
 
   const weekStart = startOfWeek(week, { weekStartsOn: 1 })
   const weekEnd   = endOfWeek(week,   { weekStartsOn: 1 })
@@ -138,11 +139,19 @@ export default function StudioTimesheets() {
   }
 
   async function clockOut(stylistId) {
+    const now = new Date().toISOString()
+    // Optimistic update — stamp clock_out immediately so UI reflects it
+    setEntries(prev => prev.map(e =>
+      e.stylist_id === stylistId && !e.clock_out ? { ...e, clock_out: now } : e
+    ))
+    setLiveClockIns(prev => prev.filter(e => e.stylist_id !== stylistId))
+    setConfirmClockOut(null)
+
     const { error } = await supabase.from('timesheets')
-      .update({ clock_out: new Date().toISOString() })
+      .update({ clock_out: now })
       .eq('stylist_id', stylistId)
       .is('clock_out', null)
-    if (error) { toast.error('Could not clock out'); return }
+    if (error) { toast.error('Could not clock out'); load(); return }
     toast.success('Clocked out!')
     const stylistName = stylists.find(s => s.id === stylistId)?.name || 'Unknown'
     log('timesheet.clock_out', { entityType: 'timesheet', entityId: stylistId, details: { message: `clocked out (${stylistName})` } })
@@ -158,7 +167,7 @@ export default function StudioTimesheets() {
   }, 0)
 
   const filtered = filterStylist ? entries.filter(e => e.stylist_id === filterStylist.id) : entries
-  const PER_PAGE = 3
+  const PER_PAGE = 5
   const paged          = filtered.slice(page * PER_PAGE, (page + 1) * PER_PAGE)
   const isCurrentWeek  = isSameWeek(week, new Date(), { weekStartsOn: 1 })
 
@@ -214,8 +223,8 @@ export default function StudioTimesheets() {
           </div>
         ))}
 
-        {/* Filter by stylist (admin only) */}
-        {isAdmin && (
+        {/* Filter by stylist (admin + manager) */}
+        {(isAdmin || isManager) && (
           <button onClick={() => setShowFilter(true)} className="ts-filter-btn"
             style={{ flex: 1, background: filterStylist ? C.goldBg : C.card, border: `1px solid ${filterStylist ? C.goldBorder : C.border}`, borderRadius: 12, padding: '0.75rem', cursor: 'pointer', transition: 'all .15s', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
             {filterStylist ? (
@@ -283,7 +292,7 @@ export default function StudioTimesheets() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: C.card, border: `1px solid ${C.border}`, borderRadius: 14, padding: '0.5rem 0.625rem' }}>
           {/* Main row: clear + arrows + date */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {isAdmin && filterStylist && (
+            {(isAdmin || isManager) && filterStylist && (
               <button onClick={() => { setFilterStylist(null); setPage(0) }} className="week-nav"
                 style={{ height: 36, padding: '0 12px', borderRadius: 9, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: '0.86rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', cursor: 'pointer', transition: 'all .15s', flexShrink: 0, whiteSpace: 'nowrap' }}>
                 Clear
@@ -380,8 +389,8 @@ export default function StudioTimesheets() {
         })()}
       </div>
 
-      {/* ── Who's In strip (admin realtime view) ─────────────── */}
-      {isAdmin && (
+      {/* ── Who's In strip (admin + manager realtime view) ─────────────── */}
+      {(isAdmin || isManager) && (
         <div style={{ flexShrink: 0, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.625rem 0.875rem', borderBottom: liveClockIns.length > 0 ? `1px solid ${C.border}` : 'none' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -403,7 +412,7 @@ export default function StudioTimesheets() {
                 const elapsed = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`
                 const s       = entry.stylists
                 return (
-                  <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.4rem 0.875rem 0.4rem 0.4rem', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
+                  <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: isManager ? '0.4rem 0.5rem 0.4rem 0.4rem' : '0.4rem 0.875rem 0.4rem 0.4rem', borderRadius: 9999, background: C.greenBg, border: `1px solid ${C.greenBorder}` }}>
                     {s?.photo_url
                       ? <img src={s.photo_url} alt={s.name} style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', objectPosition: 'top', flexShrink: 0, border: `1.5px solid ${C.greenBorder}` }} />
                       : <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(52,211,153,0.1)', border: `1.5px solid ${C.greenBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 12, color: C.green, fontWeight: 700 }}>
@@ -414,6 +423,12 @@ export default function StudioTimesheets() {
                       <p style={{ fontSize: '0.9rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: C.white, lineHeight: 1.2 }}>{s?.name?.split(' ')[0] || 'Stylist'}</p>
                       <p style={{ fontSize: '0.78rem', fontFamily: 'DM Sans,sans-serif', color: C.green }}>{format(new Date(entry.clock_in), 'HH:mm')} · {elapsed}</p>
                     </div>
+                    {isManager && (
+                      <button onClick={() => setConfirmClockOut(entry.stylist_id)} className="clk-out"
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s', flexShrink: 0 }}>
+                        <StopCircle size={10} /> Out
+                      </button>
+                    )}
                   </div>
                 )
               })}
@@ -422,8 +437,8 @@ export default function StudioTimesheets() {
         </div>
       )}
 
-      {/* ── Today's status strip (employees only) ───────────── */}
-      {!isAdmin && stylists.length > 0 && (
+      {/* ── Today's status strip (artists only) ───────────── */}
+      {!isAdmin && !isManager && stylists.length > 0 && (
         <div style={{ flexShrink: 0, display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
           {stylists.map(s => {
             const active    = isAdmin
@@ -463,7 +478,7 @@ export default function StudioTimesheets() {
                     : <span style={{ fontSize: 11, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', padding: '4px 10px', borderRadius: 9999, background: C.subtle, border: `1px solid ${C.border}` }}>Off</span>
                 ) : (
                   active
-                    ? <button onClick={() => clockOut(s.id)} className="clk-out"
+                    ? <button onClick={() => setConfirmClockOut(s.id)} className="clk-out"
                         style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 6, background: C.redBg, border: `1px solid ${C.redBorder}`, color: C.red, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', transition: 'background .15s' }}>
                         <StopCircle size={11} /> Out
                       </button>
@@ -551,6 +566,39 @@ export default function StudioTimesheets() {
       </div>
 
       {!loading && <Pager page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} />}
+
+      {/* ── Clock-out confirm modal ── */}
+      {confirmClockOut && (() => {
+        const stylist = stylists.find(s => s.id === confirmClockOut)
+        return (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+            onMouseDown={e => { if (e.target === e.currentTarget) setConfirmClockOut(null) }}>
+            <div style={{ width: '100%', maxWidth: 380, background: 'var(--col-modal)', borderRadius: 18, overflow: 'hidden', border: `1px solid ${C.redBorder}`, boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}
+              onClick={e => e.stopPropagation()}>
+              <div style={{ height: 3, background: `linear-gradient(90deg,${C.red},rgba(248,113,113,0.3))` }} />
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.875rem' }}>
+                  <StopCircle size={18} color={C.red} />
+                  <h2 className="font-display" style={{ fontSize: '1.4rem', color: 'var(--col-text)', lineHeight: 1 }}>Clock out</h2>
+                </div>
+                <p style={{ fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', color: 'var(--col-text)', opacity: 0.7, marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                  Clock out <strong style={{ opacity: 1 }}>{stylist?.name || 'this stylist'}</strong> now? This will end their current session.
+                </p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setConfirmClockOut(null)}
+                    style={{ flex: 1, padding: '0.65rem', borderRadius: 10, background: 'transparent', border: `1px solid rgba(var(--rgb-hi),0.1)`, color: 'var(--col-text)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                  <button onClick={() => clockOut(confirmClockOut)}
+                    style={{ flex: 1.4, padding: '0.65rem', borderRadius: 10, background: C.redBg, border: `1.5px solid ${C.redBorder}`, color: C.red, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                    <StopCircle size={13} /> Clock Out
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

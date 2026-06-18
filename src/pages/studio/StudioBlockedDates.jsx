@@ -24,7 +24,7 @@ const C = {
   success: '#4ade80', successBg: 'rgba(74,222,128,0.1)', successBorder: 'rgba(74,222,128,0.25)',
 }
 
-const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00']
+const SLOTS = ['09:00','10:00','11:00','12:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00']
 const WDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 // ── Shared button / input styles ──
@@ -59,6 +59,8 @@ export default function StudioBlockedDates() {
   const [reason,         setReason]         = useState('')
   const [selHours,       setSelHours]       = useState([])
   const [saving,         setSaving]         = useState(false)
+  const [conflictAppts,  setConflictAppts]  = useState([])
+  const [checkingConflicts, setCheckingConflicts] = useState(false)
 
   // Admin
   const [salonBlocked,   setSalonBlocked]   = useState([])  // blocked_dates where stylist_id IS NULL & approved
@@ -77,6 +79,25 @@ export default function StudioBlockedDates() {
   const [myRequests,     setMyRequests]     = useState([])
 
   useEffect(() => { load() }, [isAdmin, isManager])
+
+  // Check for active appointments when admin/manager selects a day to potentially block
+  useEffect(() => {
+    if (!selected || (!isAdmin && !isManager) || selected.salonClosed) {
+      setConflictAppts([])
+      return
+    }
+    let cancelled = false
+    setCheckingConflicts(true)
+    supabase
+      .from('appointments')
+      .select('id, time, status, profiles(full_name), stylists(name)')
+      .eq('date', selected.key)
+      .in('status', ['pending', 'confirmed'])
+      .then(({ data }) => {
+        if (!cancelled) { setConflictAppts(data || []); setCheckingConflicts(false) }
+      })
+    return () => { cancelled = true }
+  }, [selected])
 
   async function load() {
     setLoading(true)
@@ -219,11 +240,15 @@ export default function StudioBlockedDates() {
     setBlockTab((isAdmin || isManager) ? (salonBlockedMap[key] ? 'day' : 'hours') : 'hours')
   }
 
-  function closeModal() { setSelected(null); setReason(''); setSelHours([]); setBlockTab('hours') }
+  function closeModal() { setSelected(null); setReason(''); setSelHours([]); setBlockTab('hours'); setConflictAppts([]) }
   function toggleHour(h) { setSelHours(p => p.includes(h) ? p.filter(x => x !== h) : [...p, h]) }
 
   // ── Admin: salon-wide day block ──
   async function blockSalonDay() {
+    if (conflictAppts.length > 0) {
+      toast.error('Resolve all pending/confirmed appointments before closing this day.')
+      return
+    }
     setSaving(true)
     try {
       const { error } = await supabase.from('blocked_dates').insert({
@@ -339,7 +364,8 @@ export default function StudioBlockedDates() {
         .bd-today-btn:hover { background: ${C.gold} !important; color: #000 !important; }
         .m-inp:focus { border-color: ${C.goldBorder} !important; box-shadow: 0 0 0 3px rgba(var(--rgb-acc),0.08); outline: none; }
         .hour-pill { transition: all .15s ease; }
-        .hour-pill:hover { border-color: ${C.gold} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
+        .hour-pill:not(.hour-pill-on):hover { border-color: ${C.gold} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
+        .hour-pill-on:hover { filter: brightness(1.12) !important; }
         .block-tab-btn:hover:not(.active) { color: ${C.dim} !important; background: rgba(var(--rgb-hi),0.04) !important; }
         .unblock-btn:hover { background: rgba(248,113,113,0.08) !important; }
         .approve-btn:hover { background: rgba(74,222,128,0.12) !important; }
@@ -665,13 +691,50 @@ export default function StudioBlockedDates() {
                   </>
                 ) : (
                   <>
+                    {/* Conflict warning */}
+                    {checkingConflicts && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem', padding: '0.6rem 0.875rem', borderRadius: 10, background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${C.border}` }}>
+                        <Spinner />
+                        <span style={{ fontSize: '0.75rem', color: C.muted, fontFamily: 'DM Sans,sans-serif' }}>Checking appointments…</span>
+                      </div>
+                    )}
+
+                    {!checkingConflicts && conflictAppts.length > 0 && (
+                      <div style={{ background: C.warnBg, border: `1px solid ${C.warnBorder}`, borderRadius: 10, padding: '0.875rem', marginBottom: '1.1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                          <AlertCircle size={13} color={C.warning} />
+                          <p style={{ fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, color: C.warning }}>
+                            {conflictAppts.length} active appointment{conflictAppts.length !== 1 ? 's' : ''} on this day
+                          </p>
+                        </div>
+                        <p style={{ fontSize: '0.72rem', color: 'rgba(245,158,11,0.7)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8, lineHeight: 1.5 }}>
+                          Cancel or reschedule these before closing the day:
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                          {conflictAppts.map(a => (
+                            <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,158,11,0.06)', borderRadius: 7, padding: '6px 9px' }}>
+                              <div style={{ width: 6, height: 6, borderRadius: '50%', background: a.status === 'pending' ? '#f59e0b' : '#34d399', flexShrink: 0 }} />
+                              <span style={{ flex: 1, fontSize: '0.75rem', color: C.white, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {a.profiles?.full_name || 'Client'}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>{a.time}</span>
+                              {a.stylists?.name && (
+                                <span style={{ fontSize: '0.68rem', color: C.muted, fontFamily: 'DM Sans,sans-serif', flexShrink: 0 }}>· {a.stylists.name.split(' ')[0]}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div style={{ marginBottom: '1.1rem' }}>
                       <label style={labelStyle}>Reason <span style={{ textTransform: 'none', letterSpacing: 0, color: 'var(--col-text)' }}>(optional)</span></label>
                       <input value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g. Public holiday, Team day…" className="m-inp" autoFocus style={inputStyle} />
                     </div>
                     <div style={{ display: 'flex', gap: '0.625rem' }}>
                       <button onClick={closeModal} style={btnSecondary}>Cancel</button>
-                      <button onClick={blockSalonDay} disabled={saving} style={{ ...btnGold, opacity: saving ? 0.5 : 1 }}>
+                      <button onClick={blockSalonDay} disabled={saving || checkingConflicts || conflictAppts.length > 0}
+                        style={{ ...btnGold, opacity: (saving || checkingConflicts || conflictAppts.length > 0) ? 0.45 : 1 }}>
                         {saving ? <Spinner dark /> : <><Lock size={13} /> Close Full Day</>}
                       </button>
                     </div>
@@ -717,7 +780,7 @@ export default function StudioBlockedDates() {
                           {slots.map(h => {
                             const on = selHours.includes(h)
                             return (
-                              <button key={h} onClick={() => toggleHour(h)} className="hour-pill"
+                              <button key={h} onClick={() => toggleHour(h)} className={`hour-pill${on ? ' hour-pill-on' : ''}`}
                                 style={{ padding: '0.45rem 0', borderRadius: 8, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: on ? 700 : 400, cursor: 'pointer', border: on ? 'none' : `1px solid ${C.border}`, background: on ? `linear-gradient(135deg,${C.gold},var(--col-acc2))` : 'rgba(var(--rgb-hi),0.03)', color: on ? 'var(--col-bg)' : C.muted, boxShadow: on ? `0 3px 10px rgba(var(--rgb-acc),0.3)` : 'none', transition: 'all .15s' }}>
                                 {h}
                               </button>

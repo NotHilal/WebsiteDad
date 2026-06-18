@@ -139,7 +139,7 @@ export default function Navbar() {
             {/* Theme toggle */}
             <button onClick={toggleTheme} title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: '1px solid rgba(var(--rgb-hi),0.1)', color: 'var(--col-text)', cursor: 'pointer', transition: 'all 0.3s', flexShrink: 0 }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--col-acc)'; e.currentTarget.style.borderColor = 'var(--col-acc)'; e.currentTarget.style.color = 'var(--col-acc)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(var(--rgb-acc),0.12)'; e.currentTarget.style.borderColor = 'var(--col-acc)'; e.currentTarget.style.color = 'var(--col-acc)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.05)'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-hi),0.1)'; e.currentTarget.style.color = 'var(--col-text)' }}>
               {isDark ? <Sun size={14} /> : <Moon size={14} />}
             </button>

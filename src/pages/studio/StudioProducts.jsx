@@ -222,10 +222,20 @@ export default function StudioProducts() {
         .btn-cat:hover { border-color: var(--col-text) !important; color: ${C.white} !important; background: rgba(var(--rgb-hi),0.08) !important; }
         .cat-chip:hover  { border-color: ${C.goldBorder} !important; color: ${C.white} !important; }
         .stat-chip:hover { border-color: var(--col-text) !important; color: ${C.dim} !important; }
-        .stock-minus:not(:disabled):hover { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.5) !important; color: ${C.red} !important; }
-        .stock-plus:not(:disabled):hover  { background: rgba(var(--rgb-acc),0.2) !important; border-color: ${C.gold} !important; }
-        .prod-edit-btn:hover { border-color: ${C.goldBorder} !important; color: ${C.gold} !important; background: ${C.goldBg} !important; }
-        .prod-del-btn:hover  { background: rgba(248,113,113,0.15) !important; border-color: rgba(248,113,113,0.4) !important; color: ${C.red} !important; }
+        .stock-minus:not(:disabled):hover { background: rgba(248,113,113,0.18) !important; }
+        .stock-plus:not(:disabled):hover  { background: rgba(var(--rgb-acc),0.22) !important; }
+        .prod-edit-btn:hover { opacity: 0.82 !important; transform: translateY(-1px); }
+        .prod-del-btn:hover  { background: rgba(248,113,113,0.2) !important; border-color: rgba(248,113,113,0.5) !important; color: ${C.red} !important; }
+        .prod-footer { padding: 0.6rem 1rem; }
+        .prod-stepper-btn { width: 30px; height: 30px; font-size: 18px; }
+        .prod-stepper-mid { padding: 0 10px; min-width: 42px; }
+        .prod-edit-label { display: inline; }
+        @media (max-width: 640px) {
+          .prod-footer { padding: 0.45rem 0.6rem; gap: 5px !important; justify-content: flex-start !important; }
+          .prod-edit-label { display: inline !important; }
+          .prod-edit-btn { height: 30px !important; padding: 0 10px !important; }
+          .prod-del-btn  { height: 30px !important; width: 30px !important; }
+        }
         .sp-search:focus { border-color: ${C.goldBorder} !important; background: rgba(var(--rgb-hi),0.07) !important; }
         .sp-search::placeholder { color: var(--col-text); opacity: 0.45; }
         .sp-filter-scroll { display: flex; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
@@ -326,9 +336,9 @@ export default function StudioProducts() {
               return (
                 <button key={f.key} onClick={() => setStatusFilter(f.key)} className="stat-chip"
                   style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 9, fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: active ? 700 : 400, cursor: 'pointer', transition: 'all .15s', border: `1px solid ${active ? colors.border : 'transparent'}`, background: active ? colors.bg : 'transparent', color: active ? colors.c : C.muted, flexShrink: 0, whiteSpace: 'nowrap' }}>
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: active ? colors.c : 'rgba(var(--rgb-hi),0.22)', flexShrink: 0, transition: 'background .15s' }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: active ? colors.c : colors.c, flexShrink: 0, transition: 'background .15s', opacity: active ? 1 : 0.35 }} />
                   {f.label}
-                  <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 9999, background: active ? 'rgba(0,0,0,0.15)' : 'rgba(var(--rgb-hi),0.08)', color: active ? colors.c : 'rgba(var(--rgb-hi),0.3)', fontWeight: 700, lineHeight: 1.5 }}>
+                  <span style={{ fontSize: 11, padding: '1px 7px', borderRadius: 9999, background: active ? colors.bg : 'rgba(var(--rgb-hi),0.07)', color: active ? colors.c : 'var(--col-text)', fontWeight: 700, lineHeight: 1.5, border: `1px solid ${active ? colors.border : 'rgba(var(--rgb-hi),0.1)'}`, opacity: active ? 1 : 0.6 }}>
                     {count}
                   </span>
                 </button>
@@ -435,39 +445,43 @@ export default function StudioProducts() {
                     </div>
 
                     {/* Body */}
-                    <div style={{ padding: '0.8rem 0.9rem', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <div style={{ padding: '0.75rem 1rem', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                        <p style={{ color: C.white, fontSize: '0.95rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, lineHeight: 1.25, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</p>
-                        <span className="font-display" style={{ color: C.gold, fontSize: '1.05rem', flexShrink: 0, fontWeight: 400 }}>${p.price}</span>
+                        <p style={{ color: 'var(--col-text)', fontSize: '0.93rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, lineHeight: 1.25, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</p>
+                        <span className="font-display" style={{ color: C.gold, fontSize: '1.05rem', flexShrink: 0, fontWeight: 500 }}>${p.price}</span>
                       </div>
                       {p.description && (
-                        <p style={{ color: C.muted, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', opacity: 0.7 }}>
+                        <p style={{ color: 'var(--col-text)', fontSize: '0.73rem', fontFamily: 'DM Sans,sans-serif', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', opacity: 0.5 }}>
                           {p.description}
                         </p>
                       )}
                     </div>
 
-                    {/* Footer: stock controls + actions */}
-                    <div style={{ borderTop: `1px solid ${C.border}`, padding: '0.55rem 0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: 'rgba(0,0,0,0.14)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    {/* Footer: stock stepper + actions */}
+                    <div className="prod-footer" style={{ borderTop: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, background: 'rgba(var(--rgb-hi),0.03)' }}>
+
+                      {/* Stepper */}
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 0, borderRadius: 10, border: `1.5px solid ${level.border}`, background: level.bg, overflow: 'hidden', flexShrink: 0 }}>
                         <button onClick={() => adjustStock(p.id, -1, stock)} disabled={stock === 0} className="stock-minus"
-                          style={{ width: 26, height: 26, borderRadius: 7, border: `1px solid ${stock === 0 ? 'rgba(var(--rgb-hi),0.06)' : 'rgba(248,113,113,0.25)'}`, background: stock === 0 ? 'transparent' : 'rgba(248,113,113,0.07)', color: stock === 0 ? 'rgba(var(--rgb-hi),0.2)' : C.red, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, lineHeight: 1, fontFamily: 'DM Sans,sans-serif', transition: 'all .18s' }}>−</button>
-                        <div style={{ minWidth: 30, textAlign: 'center' }}>
-                          <span style={{ fontSize: '0.95rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, color: level.color, display: 'block', lineHeight: 1 }}>{stock}</span>
-                          <span style={{ fontSize: 9, color: C.muted, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.05em' }}>units</span>
+                          style={{ width: 26, height: 30, border: 'none', borderRight: `1px solid ${level.border}`, background: 'transparent', color: stock === 0 ? 'rgba(var(--rgb-hi),0.2)' : level.color, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, lineHeight: 1, transition: 'all .18s', flexShrink: 0, fontWeight: 300 }}>−</button>
+                        <div style={{ padding: '0 8px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontFamily: '"Cormorant Garamond",serif', fontWeight: 600, color: level.color, fontSize: 16, letterSpacing: '0.02em' }}>{stock}</span>
+                          <span style={{ fontFamily: 'DM Sans,sans-serif', color: level.color, fontSize: 9, opacity: 0.6, marginLeft: 3, letterSpacing: '0.08em', textTransform: 'uppercase' }}>units</span>
                         </div>
                         <button onClick={() => adjustStock(p.id, 1, stock)} className="stock-plus"
-                          style={{ width: 26, height: 26, borderRadius: 7, border: `1px solid ${C.goldBorder}`, background: C.goldBg, color: C.gold, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, lineHeight: 1, fontFamily: 'DM Sans,sans-serif', transition: 'all .18s' }}>+</button>
+                          style={{ width: 26, height: 30, border: 'none', borderLeft: `1px solid ${level.border}`, background: 'transparent', color: level.color, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, lineHeight: 1, transition: 'all .18s', flexShrink: 0, fontWeight: 300 }}>+</button>
                       </div>
-                      <div style={{ display: 'flex', gap: 4 }}>
+
+                      {/* Action buttons */}
+                      <div style={{ display: 'flex', gap: 5 }}>
                         <button onClick={() => openModal('edit', p)} className="prod-edit-btn"
-                          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: C.subtle, border: `1px solid ${C.border}`, color: C.muted, fontSize: 10, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s' }}>
-                          <Edit2 size={9} /> Edit
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 8, background: C.goldBg, border: `1px solid ${C.goldBorder}`, color: C.gold, fontSize: 11, fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', transition: 'all .18s' }}>
+                          <Edit2 size={10} /><span className="prod-edit-label"> Edit</span>
                         </button>
                         {isAdmin && (
                           <button onClick={() => openDelete(p)} className="prod-del-btn"
-                            style={{ width: 26, height: 26, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.13)', color: 'rgba(248,113,113,0.38)', cursor: 'pointer', transition: 'all .18s' }}>
-                            <Trash2 size={9} />
+                            style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', color: C.red, cursor: 'pointer', transition: 'all .18s' }}>
+                            <Trash2 size={10} />
                           </button>
                         )}
                       </div>
@@ -584,8 +598,8 @@ export default function StudioProducts() {
                       const maxed    = (form.tags || []).length >= 3 && !selected
                       return (
                         <button key={cat.id} type="button" onClick={() => toggleCat(cat.name)} disabled={maxed} className="sp-tag-btn"
-                          style={{ '--tag-color': cat.color, padding: '5px 13px', borderRadius: 9999, fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: 500, letterSpacing: '0.05em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? cat.color + '88' : 'rgba(var(--rgb-hi),0.1)'}`, background: selected ? cat.color + '22' : 'rgba(var(--rgb-hi),0.03)', color: selected ? cat.color : maxed ? 'rgba(var(--rgb-hi),0.12)' : 'var(--col-text)', outline: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: selected ? cat.color : 'var(--col-text)', flexShrink: 0, display: 'inline-block', transition: 'background .15s' }} />
+                          style={{ '--tag-color': cat.color, padding: '5px 13px', borderRadius: 9999, fontSize: 13, fontFamily: 'DM Sans,sans-serif', fontWeight: selected ? 600 : 500, letterSpacing: '0.04em', cursor: maxed ? 'not-allowed' : 'pointer', transition: 'all .15s', border: `1px solid ${selected ? cat.color : maxed ? C.border : 'rgba(var(--rgb-hi),0.2)'}`, background: selected ? cat.color + '22' : 'transparent', color: selected ? cat.color : maxed ? 'rgba(var(--rgb-hi),0.3)' : 'var(--col-text)', outline: 'none', display: 'flex', alignItems: 'center', gap: 6, opacity: maxed ? 0.45 : 1 }}>
+                          <span style={{ width: 7, height: 7, borderRadius: '50%', background: selected ? cat.color : maxed ? 'rgba(var(--rgb-hi),0.25)' : cat.color, flexShrink: 0, display: 'inline-block', opacity: selected ? 1 : maxed ? 0.4 : 0.7, transition: 'all .15s' }} />
                           {cat.name}
                         </button>
                       )
@@ -691,10 +705,10 @@ export default function StudioProducts() {
 
             <div style={{ borderTop: `1px solid ${C.border}`, padding: '1.25rem 1.5rem 1.5rem', flexShrink: 0 }}>
               <label style={{ ...lbl, marginBottom: 10 }}>New Category</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 10 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
                 {COLOR_PRESETS.map(color => (
                   <button key={color} type="button" onClick={() => setNewCatColor(color)} className="color-swatch"
-                    style={{ width: 22, height: 22, borderRadius: '50%', background: color, border: newCatColor === color ? '2.5px solid #fff' : '2.5px solid transparent', cursor: 'pointer', flexShrink: 0, boxShadow: newCatColor === color ? `0 0 10px ${color}99` : 'none', transition: 'all .15s', outline: 'none' }} />
+                    style={{ width: 28, height: 28, borderRadius: '50%', background: color, border: 'none', cursor: 'pointer', flexShrink: 0, outline: 'none', transition: 'all .15s', boxShadow: newCatColor === color ? `0 0 0 2px var(--col-modal), 0 0 0 4px ${color}, 0 4px 12px ${color}88` : `0 2px 6px rgba(0,0,0,0.18)` }} />
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
