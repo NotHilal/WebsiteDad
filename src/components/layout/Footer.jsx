@@ -17,8 +17,8 @@ const CONTACT = [
 ]
 
 const HOURS = [
-  { day: 'Mon – Fri', time: '9:00 – 19:00', open: true  },
-  { day: 'Sat – Sun', time: '10:00 – 18:00', open: true  },
+  { day: 'Mon – Fri', time: '9:00 – 21:00', open: true  },
+  { day: 'Sat – Sun', time: '10:00 – 21:00', open: true  },
 ]
 
 export default function Footer() {

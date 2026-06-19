@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Link2, Scissors, User } from 'lucide-react'
+import { Link2, Scissors, User, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { getOrFetch } from '../lib/cache'
 
@@ -194,12 +195,15 @@ export default function Stylists() {
               <Scissors size={18} color="var(--col-acc)" style={{ transform: 'rotate(45deg)' }} />
             </div>
             <h3 className="font-display font-light" style={{ fontSize: '2rem', color: 'var(--col-text)', marginBottom: '1rem' }}>
-              Join the family
+              Ready for your transformation?
             </h3>
             <div className="gold-bar" />
-            <p style={{ color: 'var(--col-text)', fontSize: '0.87rem', lineHeight: 1.9, maxWidth: 320, margin: '0 auto' }}>
-              Passionate about hair? We're always looking for talented artists to join the HairGo team.
+            <p style={{ color: 'var(--col-text)', fontSize: '0.87rem', lineHeight: 1.9, maxWidth: 320, margin: '0 auto 1.75rem' }}>
+              Our stylists are ready to bring your vision to life. Book an appointment today and experience the HairGo difference.
             </p>
+            <Link to="/appointments" className="btn-gold" style={{ fontSize: 11, padding: '9px 22px', gap: 8 }}>
+              Book Now <ArrowRight size={13} />
+            </Link>
           </div>
         </motion.div>
 

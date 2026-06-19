@@ -34,10 +34,10 @@ const adminNavItems = [
   { to: '/studio/home-display',  icon: Sparkles,        label: 'Home Display' },
   { to: '/studio/services',      icon: Scissors,        label: 'Services' },
   { to: '/studio/stylists',      icon: UserCheck,       label: 'Stylists' },
+  { to: '/studio/users',         icon: Users,           label: 'Users' },
   { to: '/studio/products',      icon: Package,         label: 'Products' },
   { to: '/studio/gallery',       icon: Image,           label: 'Gallery' },
   { to: '/studio/coupons',       icon: Tag,             label: 'Coupons' },
-  { to: '/studio/users',         icon: Users,           label: 'Users' },
   { to: '/studio/logs',          icon: Activity,        label: 'Activity Logs' },
 ]
 

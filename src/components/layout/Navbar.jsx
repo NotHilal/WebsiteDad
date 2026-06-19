@@ -150,9 +150,8 @@ export default function Navbar() {
               </button>
             )}
             {user && (
-              <Link to="/profile"
-                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}
-                onClick={() => {}}>
+              <Link to="/profile" state={{ tab: 'Cart' }}
+                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 34, height: 34, borderRadius: '50%', background: cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${cartCount > 0 ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.08)'}`, transition: 'all 0.3s', textDecoration: 'none' }}>
                 <ShoppingCart size={13} color={cartCount > 0 ? 'var(--col-bg)' : 'var(--col-text)'} />
                 {cartCount > 0 && (
                   <span style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--col-acc)', color: 'var(--col-bg)', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, sans-serif' }}>

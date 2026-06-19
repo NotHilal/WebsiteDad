@@ -86,10 +86,10 @@ export default function Appointments() {
       getOrFetch('stylists_artists', async () => {
         const { data } = await supabase
           .from('stylists')
-          .select('*, profiles!profile_id(role)')
+          .select('*')
           .not('profile_id', 'is', null)
           .order('display_order')
-        return (data || []).filter(s => s.profiles?.role === 'artist')
+        return data || []
       }, TTL),
       getOrFetch('blocked_dates', async () => {
         const { data } = await supabase.from('blocked_dates').select('date').is('stylist_id', null).eq('status', 'approved')
