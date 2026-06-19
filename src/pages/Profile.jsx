@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ShoppingCart, Trash2, Download, Receipt, Scissors, ChevronRight, Minus, Plus, Phone, MessageSquare } from 'lucide-react'
+import { Calendar, Package, Tag, Star, Clock, X, Edit2, Check, LogOut, ShoppingCart, Trash2, Download, Receipt, Scissors, ChevronRight, Minus, Plus, Phone, MessageSquare, Lock, Eye, EyeOff } from 'lucide-react'
 import jsPDF from 'jspdf'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
@@ -74,6 +74,12 @@ export default function Profile() {
   const [editName, setEditName]   = useState(false)
   const [nameInput, setNameInput] = useState(profile?.full_name || '')
   const [loggingOut, setOut]      = useState(false)
+  const [newPass,     setNewPass]     = useState('')
+  const [confirmPass, setConfirmPass] = useState('')
+  const [showNewPass, setShowNewPass] = useState(false)
+  const [showConf,    setShowConf]    = useState(false)
+  const [changingPass,  setChangingPass]  = useState(false)
+  const [changePwModal, setChangePwModal] = useState(false)
   const [receipt,   setReceipt]   = useState(null)
   const [apptPage,  setApptPage]  = useState(0)
   const [ordPage,   setOrdPage]   = useState(0)
@@ -180,6 +186,24 @@ export default function Profile() {
     await fetchProfile(user.id)
     setEditName(false)
     toast.success('Name updated')
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault()
+    if (newPass.length < 8) { toast.error('Password must be at least 8 characters'); return }
+    if (newPass !== confirmPass) { toast.error('Passwords do not match'); return }
+    setChangingPass(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPass })
+      if (error) throw error
+      toast.success('Password updated')
+      setNewPass(''); setConfirmPass('')
+      setChangePwModal(false)
+    } catch (err) {
+      toast.error(err.message || 'Failed to update password')
+    } finally {
+      setChangingPass(false)
+    }
   }
 
   async function handleLogout() {
@@ -703,9 +727,17 @@ export default function Profile() {
                 </button>
               )}
               <p style={{ fontSize: 15, color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', marginBottom: 9, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
-              <span style={{ display: 'inline-block', fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.18em', fontWeight: 600, color: 'var(--col-bg)', background: 'var(--col-acc)', padding: '3px 10px', borderRadius: 5 }}>
-                {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''}`}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ display: 'inline-block', fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.18em', fontWeight: 600, color: 'var(--col-bg)', background: 'var(--col-acc)', padding: '3px 10px', borderRadius: 5 }}>
+                  {isAdmin ? 'Admin' : `${totalVisits} visit${totalVisits !== 1 ? 's' : ''}`}
+                </span>
+                <button onClick={() => { setChangePwModal(true); setNewPass(''); setConfirmPass(''); setShowNewPass(false); setShowConf(false) }}
+                  style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 8, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${BD}`, color: 'var(--col-text)', fontSize: 11, fontFamily: 'DM Sans,sans-serif', letterSpacing: '0.1em', cursor: 'pointer', opacity: 0.5, transition: 'opacity 0.2s, border-color 0.2s, color 0.2s' }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.borderColor = 'rgba(var(--rgb-acc),0.35)'; e.currentTarget.style.color = 'var(--col-acc)' }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.borderColor = BD; e.currentTarget.style.color = 'var(--col-text)' }}>
+                  <Lock size={11} /> Change Password
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1210,6 +1242,77 @@ export default function Profile() {
           {loggingOut ? 'Signing out' : 'Sign Out'}
         </motion.button>
       </div>
+
+      {/* ── Change Password modal ── */}
+      <AnimatePresence>
+        {changePwModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => !changingPass && setChangePwModal(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }}>
+            <motion.div initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
+              onClick={e => e.stopPropagation()}
+              style={{ width: '100%', maxWidth: 400, background: 'var(--col-modal)', border: '1px solid rgba(var(--rgb-acc),0.18)', borderRadius: 20, overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}>
+              <div style={{ height: 3, background: 'linear-gradient(90deg, var(--col-acc), var(--col-acc2))' }} />
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                  <div>
+                    <p style={{ fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 4 }}>Account</p>
+                    <h3 style={{ color: 'var(--col-text)', fontFamily: '"Cormorant Garamond",serif', fontSize: '1.35rem', fontWeight: 500, margin: 0 }}>Change Password</h3>
+                  </div>
+                  <button onClick={() => setChangePwModal(false)} style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${BD}`, color: 'var(--col-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                    <X size={13} />
+                  </button>
+                </div>
+                <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>New Password</p>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={12} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', opacity: 0.35, pointerEvents: 'none' }} />
+                      <input type={showNewPass ? 'text' : 'password'} value={newPass} onChange={e => setNewPass(e.target.value)} required
+                        placeholder="Min. 8 chars" autoFocus
+                        style={{ width: '100%', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${BD}`, borderRadius: 10, padding: '11px 40px 11px 36px', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                        onFocus={e => e.target.style.borderColor = 'rgba(var(--rgb-acc),0.45)'}
+                        onBlur={e => e.target.style.borderColor = BD} />
+                      <button type="button" onClick={() => setShowNewPass(!showNewPass)}
+                        style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--col-text)', opacity: 0.4, padding: 2 }}>
+                        {showNewPass ? <EyeOff size={13} /> : <Eye size={13} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-text)', opacity: 0.45, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, marginBottom: 6 }}>Confirm Password</p>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={12} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', opacity: 0.35, pointerEvents: 'none' }} />
+                      <input type={showConf ? 'text' : 'password'} value={confirmPass} onChange={e => setConfirmPass(e.target.value)} required
+                        placeholder="Repeat new password"
+                        style={{ width: '100%', background: 'rgba(var(--rgb-hi),0.04)', border: `1px solid ${BD}`, borderRadius: 10, padding: '11px 40px 11px 36px', fontSize: '0.85rem', color: 'var(--col-text)', outline: 'none', fontFamily: 'DM Sans,sans-serif', boxSizing: 'border-box', transition: 'border-color 0.2s' }}
+                        onFocus={e => e.target.style.borderColor = 'rgba(var(--rgb-acc),0.45)'}
+                        onBlur={e => e.target.style.borderColor = BD} />
+                      <button type="button" onClick={() => setShowConf(!showConf)}
+                        style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--col-text)', opacity: 0.4, padding: 2 }}>
+                        {showConf ? <EyeOff size={13} /> : <Eye size={13} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                    <button type="button" onClick={() => setChangePwModal(false)} disabled={changingPass}
+                      style={{ flex: 1, padding: '0.65rem', borderRadius: 9, background: 'transparent', border: `1px solid ${BD}`, color: 'var(--col-text)', opacity: 0.6, fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', cursor: changingPass ? 'not-allowed' : 'pointer' }}>
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={changingPass || !newPass || !confirmPass}
+                      style={{ flex: 1, padding: '0.65rem', borderRadius: 9, border: 'none', background: (newPass && confirmPass) ? 'linear-gradient(135deg, var(--col-acc), var(--col-acc2))' : 'rgba(var(--rgb-hi),0.06)', color: (newPass && confirmPass) ? 'var(--col-bg)' : 'var(--col-text)', fontSize: '0.82rem', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: (changingPass || !newPass || !confirmPass) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: changingPass ? 0.6 : 1, transition: 'all 0.2s' }}>
+                      {changingPass
+                        ? <><div style={{ width: 13, height: 13, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Updating…</>
+                        : <><Lock size={12} /> Update</>}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Receipt modal ── */}
       <AnimatePresence>

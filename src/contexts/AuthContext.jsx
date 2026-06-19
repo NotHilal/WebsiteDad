@@ -26,9 +26,12 @@ export function AuthProvider({ children }) {
 
   async function fetchProfile(userId) {
     try {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
-      if (!error) setProfile(data)
-    } catch (_) {}
+      const { data, error } = await supabase.from('profiles').select('id, role, full_name, email, phone, points').eq('id', userId).single()
+      if (error) console.error('Profile fetch failed:', error.message)
+      else setProfile(data)
+    } catch (err) {
+      console.error('Profile fetch error:', err)
+    }
     setLoading(false)
   }
 

@@ -66,12 +66,12 @@ function Select({ value, onChange, options }) {
             const active = value === o.value
             return (
               <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false) }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'var(--col-acc)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(var(--rgb-hi),0.04)`, color: active ? C.gold : 'var(--col-text)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 9, padding: '0.6rem 0.9rem', background: active ? 'var(--col-acc)' : 'transparent', border: 'none', borderBottom: `1px solid rgba(var(--rgb-hi),0.04)`, color: active ? 'var(--col-bg)' : 'var(--col-text)', fontSize: '0.85rem', fontFamily: 'DM Sans,sans-serif', cursor: 'pointer', textAlign: 'left', transition: 'background .12s' }}
                 onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(var(--rgb-hi),0.05)' }}
                 onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}>
                 {o.dot && <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.dot, flexShrink: 0 }} />}
                 <span style={{ flex: 1 }}>{o.label}</span>
-                {active && <Check size={12} color={C.gold} />}
+                {active && <Check size={12} color="var(--col-bg)" />}
               </button>
             )
           })}

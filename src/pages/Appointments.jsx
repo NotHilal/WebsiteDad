@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, ChevronLeft, ChevronRight, Check, User, ArrowRight, Sparkles, Calendar, Scissors, Star, X, Info, Mail, UserPlus, Tag } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { getOrFetch } from '../lib/cache'
 import {
   format, addMonths, subMonths, startOfMonth, endOfMonth,
@@ -43,14 +43,8 @@ const slide = {
 
 export default function Appointments() {
   const { user, profile } = useAuth()
-  const location = useLocation()
   const navigate = useNavigate()
-  const reschedule = location.state?.reschedule
-  const [step,     setStep]     = useState(() => {
-    if (reschedule?.service && reschedule?.stylist) return 2
-    if (reschedule?.service) return 1
-    return 0
-  })
+  const [step,     setStep]     = useState(0)
   const [services, setServices] = useState([])
   const [stylists, setStylists] = useState([])
   const [blocked,  setBlocked]  = useState([])
@@ -63,8 +57,8 @@ export default function Appointments() {
   const [guestInfo,    setGuestInfo]    = useState({ name:'', phone:'', email:'' })
   const [showPromo,    setShowPromo]    = useState(true)
   const [sel,          setSel]          = useState(() => ({
-    service: reschedule?.service ?? null,
-    stylist: reschedule?.stylist ?? null,
+    service: null,
+    stylist: null,
     date: null,
     time: null,
     notes: '',
@@ -122,8 +116,7 @@ export default function Appointments() {
     if (!sel.date || !sel.stylist) return
     const dateStr = format(sel.date, 'yyyy-MM-dd')
     if (stylistDayOffs.includes(dateStr)) { setTaken([...SLOTS]); setBlockedSlots([]); return }
-    let apptQuery = supabase.from('appointments').select('time, services(duration)').eq('stylist_id', sel.stylist.id).eq('date', dateStr).neq('status', 'cancelled')
-    if (reschedule?.appointmentId) apptQuery = apptQuery.neq('id', reschedule.appointmentId)
+    const apptQuery = supabase.from('appointments').select('time, services(duration)').eq('stylist_id', sel.stylist.id).eq('date', dateStr).neq('status', 'cancelled')
     Promise.all([
       apptQuery,
       supabase.from('blocked_hours').select('hour').eq('date', dateStr).or(`stylist_id.eq.${sel.stylist.id},stylist_id.is.null`),
@@ -400,46 +393,7 @@ export default function Appointments() {
     }
   }
 
-  async function confirmReschedule() {
-    if (!reschedule?.appointmentId) return
-    setSaving(true)
-    try {
-      const { error } = await supabase
-        .from('appointments')
-        .update({
-          date: format(sel.date, 'yyyy-MM-dd'),
-          time: sel.time,
-          notes: sel.notes,
-          stylist_id: sel.stylist.id,
-          service_id: sel.service.id,
-          status: 'confirmed',
-        })
-        .eq('id', reschedule.appointmentId)
-      if (error) throw error
-      await Promise.all([
-        sendConfirmationEmail('paid', null),
-        (async () => { try { await supabase.from('activity_logs').insert({
-          actor_id:   user?.id || null,
-          actor_name: profile?.full_name || user?.email || 'Client',
-          actor_role: profile?.role || 'user',
-          action:     'appointment.rescheduled',
-          details: {
-            message:        `${profile?.full_name || user?.email} rescheduled their ${sel.service?.name} with ${sel.stylist?.name} to ${format(sel.date, 'MMM d, yyyy')} at ${sel.time}`,
-            appointment_id: reschedule.appointmentId,
-            service:        sel.service?.name,
-            stylist:        sel.stylist?.name,
-            new_date:       format(sel.date, 'yyyy-MM-dd'),
-            new_time:       sel.time,
-          },
-        }) } catch {} })(),
-      ])
-      setDone(true)
-    } catch (err) {
-      toast.error(err.message || 'Could not reschedule appointment')
-    } finally {
-      setSaving(false)
-    }
-  }
+
 
   /* ── Success ── */
   if (done) return (
@@ -1042,7 +996,7 @@ export default function Appointments() {
                 </div>
 
                 {/* ── Coupons ── */}
-                {!reschedule?.appointmentId && user && (
+                {user && (
                   <div style={{ marginBottom:18 }}>
                     {/* Pre-assigned user coupons */}
                     {availableCoupons.length > 0 && (
@@ -1150,15 +1104,7 @@ export default function Appointments() {
                   </div>
                 )}
 
-                {reschedule?.appointmentId ? (
-                  <button className="btn-gold" onClick={confirmReschedule} disabled={saving} style={{ width:'100%', justifyContent:'center', borderRadius:10 }}>
-                    {saving
-                      ? <div style={{ width:16,height:16,border:'2px solid rgba(0,0,0,0.25)',borderTopColor:'var(--col-bg)',borderRadius:'50%',animation:'spin 0.8s linear infinite' }}/>
-                      : <>Confirm Reschedule <ArrowRight size={15}/></>
-                    }
-                  </button>
-                ) : (
-                  <>
+                <>
                     <div style={{ display:'flex', gap:10 }}>
                       <button className="btn-gold" onClick={startPayment} disabled={payStep==='loading'||saving||!guestInfoValid} style={{ flex:1, justifyContent:'center', borderRadius:10 }}>
                         {payStep==='loading'
@@ -1179,7 +1125,6 @@ export default function Appointments() {
                       <p style={{ fontSize:11, color: 'var(--col-text)', letterSpacing:'0.12em', fontFamily:'DM Sans,sans-serif' }}>Every completed visit counts toward your 30% reward</p>
                     </div>
                   </>
-                )}
               </motion.div>
             )}
 

@@ -21,7 +21,7 @@ const ROLE_STYLE = {
   user:    { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.05)', border: 'rgba(var(--rgb-hi),0.1)',   label: 'User'    },
   artist:  { color: '#60a5fa',         bg: 'rgba(96,165,250,0.1)',     border: 'rgba(96,165,250,0.22)',     label: 'Artist'  },
   manager: { color: '#a78bfa',         bg: 'rgba(167,139,250,0.1)',    border: 'rgba(167,139,250,0.22)',    label: 'Manager' },
-  admin:   { color: 'var(--col-acc)',  bg: 'var(--col-acc)',           border: 'var(--col-acc)',            label: 'Admin'   },
+  admin:   { color: 'var(--col-acc)',  bg: 'rgba(var(--rgb-acc),0.08)', border: 'rgba(var(--rgb-acc),0.22)', label: 'Admin'   },
 }
 
 const TABS = [
@@ -297,7 +297,7 @@ export default function StudioUsers() {
     try {
       const title = msgTitle.trim() || 'Message from HairGo'
       const { data: ticket, error: te } = await supabase
-        .from('tickets').insert({ user_id: msgModal.id, title, status: 'open' }).select().single()
+        .from('tickets').insert({ user_id: msgModal.id, title, status: 'open', recipient_id: adminUser.id }).select().single()
       if (te) throw te
       const { error: me } = await supabase.from('ticket_messages').insert({
         ticket_id: ticket.id, sender_id: adminUser.id, content: msgBody.trim(), is_from_admin: true, read: false,

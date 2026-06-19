@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -280,19 +280,23 @@ export default function Navbar() {
               </div>
 
               <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {links.map(({ to, label, exact }, idx) => (<>
-                  <NavLink key={to} to={to} end={exact} onClick={() => setMenuOpen(false)}
+                {links.map(({ to, label, exact }, idx) => (<React.Fragment key={to}>
+                  <NavLink to={to} end={exact} onClick={() => setMenuOpen(false)}
                     style={({ isActive }) => ({
                       padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
                       color: isActive ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.55)',
                       background: isActive ? 'rgba(var(--rgb-acc),0.08)' : 'transparent',
                       border: isActive ? '1px solid rgba(var(--rgb-acc),0.15)' : '1px solid transparent',
                       textDecoration: 'none', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s',
+                      display: 'flex', alignItems: 'center', gap: 8,
                     })}>
                     {label}
+                    {to === '/chat' && unread > 0 && (
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', flexShrink: 0 }} />
+                    )}
                   </NavLink>
                   {idx === 0 && user && (
-                    <NavLink key="my-profile" to="/profile" end onClick={() => setMenuOpen(false)}
+                    <NavLink to="/profile" end onClick={() => setMenuOpen(false)}
                       style={({ isActive }) => ({
                         padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase',
                         color: isActive ? 'var(--col-acc)' : 'rgba(var(--rgb-hi),0.55)',
@@ -303,7 +307,7 @@ export default function Navbar() {
                       My Profile
                     </NavLink>
                   )}
-                </>))}
+                </React.Fragment>))}
                 {(profile?.role === 'admin' || profile?.role === 'artist' || profile?.role === 'manager') && (
                   <button onClick={() => { sessionStorage.removeItem('studio_access'); setMenuOpen(false); navigate('/studio') }}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderRadius: 12, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--col-acc)', background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.15)', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif', transition: 'all 0.2s', marginTop: 4, width: '100%', textAlign: 'left' }}>

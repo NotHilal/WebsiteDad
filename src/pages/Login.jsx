@@ -1,15 +1,20 @@
 ﻿import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Mail, Lock, Eye, EyeOff, Scissors, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Mail, Lock, Eye, EyeOff, Scissors, ArrowRight, ChevronLeft } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 
 export default function Login() {
-  const [email, setEmail]   = useState('')
-  const [password, setPass] = useState('')
-  const [show, setShow]     = useState(false)
-  const [loading, setLoad]  = useState(false)
+  const [email, setEmail]       = useState('')
+  const [password, setPass]     = useState('')
+  const [show, setShow]         = useState(false)
+  const [loading, setLoad]      = useState(false)
+  const [mode, setMode]         = useState('login') // 'login' | 'forgot'
+  const [resetEmail, setReset]  = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const [resetLoading, setResetLoad] = useState(false)
   const { signIn }          = useAuth()
   const navigate            = useNavigate()
   const location            = useLocation()
@@ -26,6 +31,23 @@ export default function Login() {
       toast.error(err.message || 'Invalid credentials')
     } finally {
       setLoad(false)
+    }
+  }
+
+  async function sendReset(e) {
+    e.preventDefault()
+    if (!resetEmail.trim()) return
+    setResetLoad(true)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      if (error) throw error
+      setResetSent(true)
+    } catch (err) {
+      toast.error(err.message || 'Failed to send reset email')
+    } finally {
+      setResetLoad(false)
     }
   }
 
@@ -69,44 +91,97 @@ export default function Login() {
 
         {/* Card */}
         <div className="glass" style={{ borderRadius: 26, padding: '2.5rem' }}>
-          <form onSubmit={submit}>
-            <div style={{ marginBottom: 18 }}>
-              <label style={lbl}>Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={13} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="your@email.com" style={inp} onFocus={onFocus} onBlur={onBlur} />
-              </div>
-            </div>
+          <AnimatePresence mode="wait">
+            {mode === 'login' ? (
+              <motion.div key="login" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.22 }}>
+                <form onSubmit={submit}>
+                  <div style={{ marginBottom: 18 }}>
+                    <label style={lbl}>Email Address</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={13} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
+                      <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="your@email.com" style={inp} onFocus={onFocus} onBlur={onBlur} />
+                    </div>
+                  </div>
 
-            <div style={{ marginBottom: 28 }}>
-              <label style={lbl}>Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={13} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
-                <input type={show ? 'text' : 'password'} value={password} onChange={e => setPass(e.target.value)} required placeholder="••••••••" style={{ ...inp, paddingRight: 46 }} onFocus={onFocus} onBlur={onBlur} />
-                <button type="button" onClick={() => setShow(!show)} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                  {show ? <EyeOff size={13} /> : <Eye size={13} />}
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={lbl}>Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <Lock size={13} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
+                      <input type={show ? 'text' : 'password'} value={password} onChange={e => setPass(e.target.value)} required placeholder="••••••••" style={{ ...inp, paddingRight: 46 }} onFocus={onFocus} onBlur={onBlur} />
+                      <button type="button" onClick={() => setShow(!show)} style={{ position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                        {show ? <EyeOff size={13} /> : <Eye size={13} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: 'right', marginBottom: 24 }}>
+                    <button type="button" onClick={() => { setMode('forgot'); setReset(email); setResetSent(false) }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem', color: 'var(--col-acc)', fontFamily: 'DM Sans,sans-serif', padding: 0 }}>
+                      Forgot password?
+                    </button>
+                  </div>
+
+                  <button type="submit" disabled={loading} className="btn-gold" style={{ width: '100%' }}>
+                    {loading
+                      ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                      : <>Sign In <ArrowRight size={14} /></>
+                    }
+                  </button>
+                </form>
+
+                <div style={{ marginTop: 24, paddingTop: 22, borderTop: '1px solid rgba(var(--rgb-hi),0.06)', textAlign: 'center' }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--col-text)' }}>
+                    Don't have an account?{' '}
+                    <Link to="/register" style={{ color: 'var(--col-acc)', textDecoration: 'none', fontWeight: 400 }}
+                      onMouseEnter={e => e.currentTarget.style.color = '#E8D5A3'}
+                      onMouseLeave={e => e.currentTarget.style.color = 'var(--col-acc)'}>
+                      Create one
+                    </Link>
+                  </p>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div key="forgot" initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 16 }} transition={{ duration: 0.22 }}>
+                <button type="button" onClick={() => { setMode('login'); setResetSent(false) }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--col-text)', fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', marginBottom: 22, padding: 0, opacity: 0.6 }}>
+                  <ChevronLeft size={13} /> Back to sign in
                 </button>
-              </div>
-            </div>
 
-            <button type="submit" disabled={loading} className="btn-gold" style={{ width: '100%' }}>
-              {loading
-                ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,0.25)', borderTopcolor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                : <>Sign In <ArrowRight size={14} /></>
-              }
-            </button>
-          </form>
-
-          <div style={{ marginTop: 24, paddingTop: 22, borderTop: '1px solid rgba(var(--rgb-hi),0.06)', textAlign: 'center' }}>
-            <p style={{ fontSize: '0.85rem', color: 'var(--col-text)' }}>
-              Don't have an account?{' '}
-              <Link to="/register" style={{ color: 'var(--col-acc)', textDecoration: 'none', fontWeight: 400 }}
-                onMouseEnter={e => e.currentTarget.style.color = '#E8D5A3'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--col-acc)'}>
-                Create one
-              </Link>
-            </p>
-          </div>
+                {resetSent ? (
+                  <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(var(--rgb-acc),0.1)', border: '1px solid rgba(var(--rgb-acc),0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                      <Mail size={18} color="var(--col-acc)" />
+                    </div>
+                    <p style={{ fontSize: '1rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', marginBottom: 8 }}>Check your inbox</p>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--col-text)', opacity: 0.5, fontFamily: 'DM Sans,sans-serif', lineHeight: 1.6 }}>
+                      We sent a password reset link to <strong style={{ color: 'var(--col-acc)', opacity: 1 }}>{resetEmail}</strong>
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--col-text)', opacity: 0.55, fontFamily: 'DM Sans,sans-serif', marginBottom: 22, lineHeight: 1.6 }}>
+                      Enter your email and we'll send you a link to reset your password.
+                    </p>
+                    <form onSubmit={sendReset}>
+                      <div style={{ marginBottom: 24 }}>
+                        <label style={lbl}>Email Address</label>
+                        <div style={{ position: 'relative' }}>
+                          <Mail size={13} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
+                          <input type="email" value={resetEmail} onChange={e => setReset(e.target.value)} required placeholder="your@email.com" style={inp} onFocus={onFocus} onBlur={onBlur} autoFocus />
+                        </div>
+                      </div>
+                      <button type="submit" disabled={resetLoading} className="btn-gold" style={{ width: '100%' }}>
+                        {resetLoading
+                          ? <div style={{ width: 15, height: 15, border: '2px solid rgba(0,0,0,0.25)', borderTopColor: 'var(--col-bg)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                          : <>Send Reset Link <ArrowRight size={14} /></>
+                        }
+                      </button>
+                    </form>
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </div>

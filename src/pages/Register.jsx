@@ -17,7 +17,7 @@ export default function Register() {
   async function submit(e) {
     e.preventDefault()
     if (form.password !== form.confirm) return toast.error('Passwords do not match')
-    if (form.password.length < 6)       return toast.error('Password must be at least 6 characters')
+    if (form.password.length < 8)       return toast.error('Password must be at least 8 characters')
     setLoad(true)
     try {
       await signUp(form.email, form.password, form.fullName, form.phone)
@@ -87,7 +87,7 @@ export default function Register() {
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Phone size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
-                  <input type="tel" value={form.phone} onChange={set('phone')} placeholder="+33 6 ..." style={inp} onFocus={onFocus} onBlur={onBlur} />
+                  <input type="tel" value={form.phone} onChange={set('phone')} placeholder="+64 ..." style={inp} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
             </div>
@@ -107,7 +107,7 @@ export default function Register() {
                 <label style={lbl}>Password</label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={13} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', pointerEvents: 'none' }} />
-                  <input type={show ? 'text' : 'password'} value={form.password} onChange={set('password')} required placeholder="Min. 6 chars" style={{ ...inp, paddingRight: 38 }} onFocus={onFocus} onBlur={onBlur} />
+                  <input type={show ? 'text' : 'password'} value={form.password} onChange={set('password')} required placeholder="Min. 8 chars" style={{ ...inp, paddingRight: 38 }} onFocus={onFocus} onBlur={onBlur} />
                   <button type="button" onClick={() => setShow(!show)} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: 'var(--col-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                     {show ? <EyeOff size={12} /> : <Eye size={12} />}
                   </button>

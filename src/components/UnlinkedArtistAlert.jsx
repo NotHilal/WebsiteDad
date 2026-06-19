@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 
 const C = {
   border: 'rgba(var(--rgb-hi),0.07)', white: 'var(--col-text)', muted: 'var(--col-text)',
-  gold: 'var(--col-acc)', goldBg: 'var(--col-acc)', goldBorder: 'var(--col-acc)',
+  gold: 'var(--col-acc)', goldBg: 'rgba(var(--rgb-acc),0.08)', goldBorder: 'rgba(var(--rgb-acc),0.18)',
 }
 
 export default function UnlinkedArtistAlert() {

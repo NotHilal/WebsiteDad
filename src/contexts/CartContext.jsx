@@ -26,8 +26,8 @@ export function CartProvider({ children }) {
     const expired = data.filter(i => new Date(i.expires_at) <= now)
     const valid   = data.filter(i => new Date(i.expires_at) >  now)
 
-    for (const item of expired) {
-      await supabase.from('cart_items').delete().eq('id', item.id)
+    if (expired.length) {
+      await supabase.from('cart_items').delete().in('id', expired.map(i => i.id))
     }
 
     setCartItems(valid)

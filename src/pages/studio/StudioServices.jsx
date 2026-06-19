@@ -19,7 +19,7 @@ const CAT = {
   cut:       { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',   gradient: 'rgba(96,165,250,0.15)',   label: 'Cut' },
   color:     { color: '#c084fc', bg: 'rgba(192,132,252,0.1)',  gradient: 'rgba(192,132,252,0.15)',  label: 'Color' },
   treatment: { color: '#34d399', bg: 'rgba(52,211,153,0.1)',   gradient: 'rgba(52,211,153,0.15)',   label: 'Treatment' },
-  style:     { color: 'var(--col-acc)', bg: 'var(--col-acc)',   gradient: 'var(--col-acc)',   label: 'Style' },
+  style:     { color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.1)', gradient: 'rgba(var(--rgb-acc),0.15)', label: 'Style' },
   other:     { color: 'var(--col-text)', bg: 'rgba(var(--rgb-hi),0.06)', gradient: 'rgba(var(--rgb-hi),0.06)', label: 'Other' },
 }
 

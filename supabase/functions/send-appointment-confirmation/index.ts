@@ -42,70 +42,144 @@ Deno.serve(async (req) => {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Appointment Confirmation</title>
 </head>
-<body style="margin:0;padding:0;background:#0a0a12;font-family:'Georgia',serif;color:#f0f0f0;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a12;padding:40px 16px;">
-    <tr><td align="center">
-      <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;background:#12121a;border:1px solid rgba(201,168,76,0.15);border-radius:16px;overflow:hidden;">
+<body style="margin:0;padding:0;background:#F5F2ED;font-family:Arial,sans-serif;">
 
-        <!-- Header -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F2ED;padding:48px 16px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+        <!-- Logo bar -->
         <tr>
-          <td style="background:linear-gradient(135deg,#C9A84C,#C4956A);padding:28px 36px;">
-            <p style="margin:0;font-size:26px;font-weight:300;color:#000;font-family:'Georgia',serif;">Hair<strong>Go</strong></p>
-            <p style="margin:6px 0 0;font-size:12px;color:rgba(0,0,0,0.5);font-family:Arial,sans-serif;letter-spacing:0.12em;text-transform:uppercase;">Appointment Confirmed</p>
+          <td align="center" style="padding-bottom:28px;">
+            <p style="margin:0;font-size:30px;font-weight:300;color:#1a1212;font-family:Georgia,serif;letter-spacing:0.02em;">
+              Hair<strong style="color:#C9A84C;">Go</strong>
+            </p>
+            <p style="margin:4px 0 0;font-size:10px;letter-spacing:0.26em;text-transform:uppercase;color:#9b8e82;font-family:Arial,sans-serif;">
+              Auckland&nbsp;&nbsp;·&nbsp;&nbsp;Hair Studio
+            </p>
           </td>
         </tr>
 
-        <!-- Body -->
+        <!-- Card -->
         <tr>
-          <td style="padding:32px 36px;">
-            <p style="margin:0 0 24px;font-size:15px;color:rgba(255,255,255,0.55);font-family:Arial,sans-serif;">
-              Hi <strong style="color:#fff;">${name}</strong>, your appointment is all set!
-            </p>
+          <td style="background:#FFFFFF;border-radius:16px;border:1px solid #E8E2DA;overflow:hidden;">
 
-            <!-- Details table -->
+            <!-- Gold top stripe -->
             <table width="100%" cellpadding="0" cellspacing="0">
-              ${[
-                ['Service',  service],
-                ['Stylist',  stylist],
-                ['Date',     date],
-                ['Time',     time],
-              ].map(([label, value]) => `
               <tr>
-                <td style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3);">${label}</td>
-                <td style="padding:11px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-family:Arial,sans-serif;font-size:14px;color:rgba(255,255,255,0.8);text-align:right;">${value}</td>
-              </tr>`).join('')}
-              <tr>
-                <td style="padding:11px 0;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.3);">Price</td>
-                <td style="padding:11px 0;font-family:Arial,sans-serif;font-size:18px;color:#C9A84C;text-align:right;font-weight:700;">$${price}</td>
+                <td style="height:4px;background:linear-gradient(90deg,#C9A84C,#C4956A,#e8c97a);font-size:0;line-height:0;">&nbsp;</td>
               </tr>
             </table>
 
-            <!-- Payment status box -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:24px;">
+            <!-- Header -->
+            <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td style="padding:14px 18px;border-radius:10px;${isInStore ? 'background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);' : 'background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);'}">
-                  <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;${isInStore ? 'color:rgba(245,158,11,0.9);' : 'color:rgba(52,211,153,0.9);'}">
-                    ${isInStore
-                      ? `<strong>Pay in store</strong> — please bring <strong>$${price}</strong> to the salon at the time of your appointment.`
-                      : `<strong>Payment confirmed</strong> — your payment of <strong>$${price}</strong> has been processed.`
-                    }
+                <td style="padding:32px 40px 24px;">
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:4px 14px;background:#FBF7EE;border:1px solid #E8D9B0;border-radius:20px;">
+                        <span style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;font-family:Arial,sans-serif;font-weight:700;">Confirmed</span>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin:16px 0 0;font-size:24px;font-weight:300;color:#1a1212;font-family:Georgia,serif;line-height:1.2;">
+                    Your appointment<br>is all set, <strong>${name}</strong>.
+                  </p>
+                  <p style="margin:10px 0 0;font-size:13px;color:#9b8e82;font-family:Arial,sans-serif;line-height:1.6;">
+                    We look forward to seeing you. Here's a summary of your booking.
                   </p>
                 </td>
               </tr>
             </table>
+
+            <!-- Divider -->
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr><td style="height:1px;background:#F0EBE3;margin:0 40px;font-size:0;">&nbsp;</td></tr>
+            </table>
+
+            <!-- Details -->
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:24px 40px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF8F5;border-radius:12px;border:1px solid #EDE8E0;">
+                    ${[
+                      ['Service', service],
+                      ['Stylist',  stylist],
+                      ['Date',    date],
+                      ['Time',    time],
+                    ].map(([label, value], i, arr) => `
+                    <tr>
+                      <td style="padding:14px 20px;${i < arr.length - 1 ? 'border-bottom:1px solid #EDE8E0;' : ''}">
+                        <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#b0a396;font-family:Arial,sans-serif;">${label}</span>
+                      </td>
+                      <td style="padding:14px 20px;text-align:right;${i < arr.length - 1 ? 'border-bottom:1px solid #EDE8E0;' : ''}">
+                        <span style="font-size:14px;color:#1a1212;font-family:Arial,sans-serif;font-weight:600;">${value}</span>
+                      </td>
+                    </tr>`).join('')}
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Price row -->
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:0 40px 24px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#FBF7EE,#FDF9F2);border-radius:12px;border:1px solid #E8D9B0;">
+                    <tr>
+                      <td style="padding:16px 20px;">
+                        <span style="font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#b0a396;font-family:Arial,sans-serif;">Total</span>
+                      </td>
+                      <td style="padding:16px 20px;text-align:right;">
+                        <span style="font-size:22px;color:#C9A84C;font-family:Georgia,serif;font-weight:700;">$${price}</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Payment status -->
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:0 40px 32px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="${isInStore
+                    ? 'background:#FFFBF0;border:1px solid #F0D98A;border-radius:12px;'
+                    : 'background:#F0FBF6;border:1px solid #A8DFC2;border-radius:12px;'}">
+                    <tr>
+                      <td style="padding:14px 20px;">
+                        <p style="margin:0;font-size:13px;line-height:1.65;font-family:Arial,sans-serif;${isInStore ? 'color:#92700A;' : 'color:#1A7A4A;'}">
+                          ${isInStore
+                            ? `<strong>Pay in store</strong> &mdash; please bring <strong>$${price}</strong> to the salon at the time of your appointment.`
+                            : `<strong>&#10003;&nbsp; Payment received</strong> &mdash; your payment of <strong>$${price}</strong> has been successfully processed.`
+                          }
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
           </td>
         </tr>
 
         <!-- Footer -->
         <tr>
-          <td style="padding:20px 36px;border-top:1px solid rgba(255,255,255,0.05);text-align:center;font-family:Arial,sans-serif;font-size:11px;color:rgba(255,255,255,0.2);">
-            HairGo &nbsp;·&nbsp; Auckland, New Zealand
+          <td align="center" style="padding:28px 16px 0;">
+            <p style="margin:0;font-size:11px;color:#b0a396;font-family:Arial,sans-serif;letter-spacing:0.06em;">
+              HairGo &nbsp;&middot;&nbsp; Auckland, New Zealand
+            </p>
+            <p style="margin:6px 0 0;font-size:11px;color:#c8bfb4;font-family:Arial,sans-serif;">
+              Questions? Reply to this email or visit us in store.
+            </p>
           </td>
         </tr>
 
       </table>
     </td></tr>
   </table>
+
 </body>
 </html>`
 

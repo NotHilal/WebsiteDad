@@ -139,6 +139,7 @@ export default function StudioSchedule() {
     const [{ data: allAppts }, { data: stylistList }] = await Promise.all([
       supabase.from('appointments')
         .select('*, profiles(full_name, phone), services(name, price, duration), stylists(name, photo_url)')
+        .neq('status', 'cancelled')
         .order('date', { ascending: true })
         .order('time', { ascending: true }),
       supabase.from('stylists').select('id, name, photo_url').order('display_order'),

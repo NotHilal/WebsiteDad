@@ -12,6 +12,7 @@ import Stylists from './pages/Stylists'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
+import ResetPassword from './pages/ResetPassword'
 import Chat from './pages/Chat'
 import StudioGate from './pages/studio/StudioGate'
 import StudioLayout from './pages/studio/StudioLayout'
@@ -70,6 +71,7 @@ export default function App() {
             <Route path="register" element={<Register />} />
             <Route path="chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="reset-password" element={<ResetPassword />} />
           </Route>
 
           {/* Studio (admin) routes */}

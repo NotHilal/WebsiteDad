@@ -2,7 +2,7 @@
 import { Calendar, ShoppingBag, UserCheck, MessageSquare, Clock, LayoutDashboard } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch } from '../../lib/cache'
-import { format, getHours } from 'date-fns'
+import { format, getHours, startOfMonth, endOfMonth } from 'date-fns'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -51,8 +51,8 @@ export default function StudioDashboard() {
         { count: apptCount }, { count: pending }, { count: preorders },
         { count: msgs }, { data: todayList }, { data: stylistList },
       ] = await Promise.all([
-        supabase.from('appointments').select('*', { count: 'exact', head: true }),
-        supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('appointments').select('*', { count: 'exact', head: true }).gte('date', format(startOfMonth(new Date()), 'yyyy-MM-dd')).lte('date', format(endOfMonth(new Date()), 'yyyy-MM-dd')),
+        supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('status', 'pending').gte('date', format(startOfMonth(new Date()), 'yyyy-MM-dd')).lte('date', format(endOfMonth(new Date()), 'yyyy-MM-dd')),
         supabase.from('preorders').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('messages').select('*', { count: 'exact', head: true }).eq('read', false),
         supabase.from('appointments')
@@ -92,7 +92,7 @@ export default function StudioDashboard() {
   }
 
   const statCards = [
-    { icon: Calendar,      label: 'Appointments', value: stats.appointments, sub: `${stats.pending} pending`, link: '/studio/schedule', color: C.gold },
+    { icon: Calendar,      label: 'Appointments', value: stats.appointments, sub: `${stats.pending} pending · this month`, link: '/studio/schedule', color: C.gold },
     { icon: ShoppingBag,   label: 'Orders',       value: stats.preorders,    sub: 'Awaiting pickup',          link: '/studio/orders',      color: '#a78bfa' },
     (isAdmin || isManager)
       ? { icon: UserCheck, label: 'Artists In', value: stats.clockedIn, sub: `of ${stylists.length} artist${stylists.length !== 1 ? 's' : ''}`, link: '/studio/timesheets', color: '#34d399' }

@@ -401,6 +401,8 @@ export default function StudioMessages() {
   })()
 
   const totalUnread = allTickets.reduce((sum, t) => sum + (t.unread || 0), 0)
+  const storeUnread = allTickets.filter(t => !t.recipient_id && !t.appointment_id).reduce((sum, t) => sum + (t.unread || 0), 0)
+  const directUnread = allTickets.filter(t => t.recipient_id === user?.id).reduce((sum, t) => sum + (t.unread || 0), 0)
   const filtered = tickets.filter(t => filter === 'All' || t.status === filter.toLowerCase())
   const isRequestsTab = tab === 'requests'
 
@@ -455,17 +457,17 @@ export default function StudioMessages() {
         {(isAdmin || isManager) && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {[
-              { key: 'store',    Icon: Store,      label: 'Store',           color: C.gold,  bg: C.goldBg,  border: C.goldBorder },
-              { key: 'direct',   Icon: Scissors,   label: 'My Messages',     color: C.blue,  bg: C.blueBg,  border: C.blueBorder },
-              { key: 'requests', Icon: RefreshCw,  label: 'Client Requests', color: C.amber, bg: C.amberBg, border: C.amberBorder },
-            ].map(({ key, Icon, label, color, bg, border }) => (
+              { key: 'store',    Icon: Store,      label: 'Store',           color: C.gold,  bg: C.goldBg,  border: C.goldBorder, badge: storeUnread },
+              { key: 'direct',   Icon: Scissors,   label: 'My Messages',     color: C.blue,  bg: C.blueBg,  border: C.blueBorder, badge: directUnread },
+              { key: 'requests', Icon: RefreshCw,  label: 'Client Requests', color: C.amber, bg: C.amberBg, border: C.amberBorder, badge: requestsCount },
+            ].map(({ key, Icon, label, color, bg, border, badge }) => (
               <button key={key} onClick={() => setTab(key)}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 9, fontSize: '0.8rem', fontFamily: 'DM Sans,sans-serif', fontWeight: tab === key ? 600 : 400, cursor: 'pointer', transition: 'all .15s', background: tab === key ? bg : 'transparent', border: `1px solid ${tab === key ? border : C.border}`, color: tab === key ? color : C.muted }}>
                 <Icon size={12} strokeWidth={tab === key ? 2.5 : 1.5} />
                 {label}
-                {key === 'requests' && requestsCount > 0 && (
+                {badge > 0 && (
                   <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: '#ef4444', color: '#fff', fontSize: 9, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, padding: '0 4px' }}>
-                    {requestsCount}
+                    {badge > 9 ? '9+' : badge}
                   </span>
                 )}
               </button>

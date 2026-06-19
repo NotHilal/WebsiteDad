@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Plus, Edit2, Trash2, X, Package, Save, Image, AlertTriangle, EyeOff, ShieldAlert, Search, Tag } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { getOrFetch, invalidate } from '../../lib/cache'
@@ -55,6 +55,7 @@ export default function StudioProducts() {
   const [catFilter,     setCatFilter]     = useState('All')
   const [statusFilter,  setStatusFilter]  = useState('all')
   const [adjusting,     setAdjusting]     = useState(null)
+  const stockTimeouts = useRef({})
   const [deleteTarget,  setDeleteTarget]  = useState(null)
   const [deleting,      setDeleting]      = useState(false)
 
@@ -109,14 +110,21 @@ export default function StudioProducts() {
     setNewCatName(''); setNewCatColor(COLOR_PRESETS[0])
   }
 
-  async function adjustStock(id, delta, current) {
-    const newStock = Math.max(0, (current ?? 0) + delta)
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, stock: newStock } : p))
-    const { error } = await supabase.from('products').update({ stock: newStock }).eq('id', id)
-    if (error) {
-      setProducts(prev => prev.map(p => p.id === id ? { ...p, stock: current } : p))
-      toast.error(error.message)
-    }
+  function adjustStock(id, delta) {
+    setProducts(prev => {
+      const cur = prev.find(p => p.id === id)?.stock ?? 0
+      const newStock = Math.max(0, cur + delta)
+      return prev.map(p => p.id === id ? { ...p, stock: newStock } : p)
+    })
+    clearTimeout(stockTimeouts.current[id])
+    stockTimeouts.current[id] = setTimeout(() => {
+      setProducts(prev => {
+        const latest = prev.find(p => p.id === id)?.stock ?? 0
+        supabase.from('products').update({ stock: latest }).eq('id', id)
+          .then(({ error }) => { if (error) { toast.error(error.message); load() } })
+        return prev
+      })
+    }, 700)
   }
 
   function handleFile(e) {
@@ -174,13 +182,31 @@ export default function StudioProducts() {
 
   async function confirmDelete() {
     setDeleting(true)
-    const { error } = await supabase.from('products').delete().eq('id', deleteTarget.id)
-    if (error) { toast.error(error.message); setDeleting(false); return }
-    toast.success('Product deleted')
-    log('product.deleted', { entityType: 'product', entityId: deleteTarget.id, details: { message: `deleted product "${deleteTarget.name}"` } })
-    setDeleteTarget(null)
-    setDeleting(false)
-    invalidate('studio_products'); load()
+    try {
+      // Check for existing orders first
+      const { count: orderCount } = await supabase
+        .from('preorders')
+        .select('*', { count: 'exact', head: true })
+        .eq('product_id', deleteTarget.id)
+      if (orderCount > 0) {
+        toast.error(`This product has ${orderCount} order${orderCount > 1 ? 's' : ''} — mark it as unavailable instead.`)
+        setDeleting(false)
+        return
+      }
+      // Remove any dangling cart items first
+      await supabase.from('cart_items').delete().eq('product_id', deleteTarget.id)
+      // Now delete the product
+      const { error } = await supabase.from('products').delete().eq('id', deleteTarget.id)
+      if (error) throw error
+      toast.success('Product deleted')
+      log('product.deleted', { entityType: 'product', entityId: deleteTarget.id, details: { message: `deleted product "${deleteTarget.name}"` } })
+      setDeleteTarget(null)
+      invalidate('studio_products'); load()
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete product')
+    } finally {
+      setDeleting(false)
+    }
   }
 
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }))
@@ -231,9 +257,9 @@ export default function StudioProducts() {
         .prod-stepper-mid { padding: 0 10px; min-width: 42px; }
         .prod-edit-label { display: inline; }
         @media (max-width: 640px) {
-          .prod-footer { padding: 0.45rem 0.6rem; gap: 5px !important; justify-content: flex-start !important; }
-          .prod-edit-label { display: inline !important; }
-          .prod-edit-btn { height: 30px !important; padding: 0 10px !important; }
+          .prod-footer { padding: 0.45rem 0.6rem; gap: 5px !important; justify-content: space-between !important; }
+          .prod-edit-label { display: none !important; }
+          .prod-edit-btn { height: 30px !important; width: 30px !important; padding: 0 !important; justify-content: center !important; }
           .prod-del-btn  { height: 30px !important; width: 30px !important; }
         }
         .sp-search:focus { border-color: ${C.goldBorder} !important; background: rgba(var(--rgb-hi),0.07) !important; }
@@ -462,13 +488,12 @@ export default function StudioProducts() {
 
                       {/* Stepper */}
                       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 0, borderRadius: 10, border: `1.5px solid ${level.border}`, background: level.bg, overflow: 'hidden', flexShrink: 0 }}>
-                        <button onClick={() => adjustStock(p.id, -1, stock)} disabled={stock === 0} className="stock-minus"
+                        <button onClick={() => adjustStock(p.id, -1)} disabled={stock === 0} className="stock-minus"
                           style={{ width: 26, height: 30, border: 'none', borderRight: `1px solid ${level.border}`, background: 'transparent', color: stock === 0 ? 'rgba(var(--rgb-hi),0.2)' : level.color, cursor: stock === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, lineHeight: 1, transition: 'all .18s', flexShrink: 0, fontWeight: 300 }}>−</button>
                         <div style={{ padding: '0 8px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                           <span style={{ fontFamily: '"Cormorant Garamond",serif', fontWeight: 600, color: level.color, fontSize: 16, letterSpacing: '0.02em' }}>{stock}</span>
-                          <span style={{ fontFamily: 'DM Sans,sans-serif', color: level.color, fontSize: 9, opacity: 0.6, marginLeft: 3, letterSpacing: '0.08em', textTransform: 'uppercase' }}>units</span>
                         </div>
-                        <button onClick={() => adjustStock(p.id, 1, stock)} className="stock-plus"
+                        <button onClick={() => adjustStock(p.id, 1)} className="stock-plus"
                           style={{ width: 26, height: 30, border: 'none', borderLeft: `1px solid ${level.border}`, background: 'transparent', color: level.color, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, lineHeight: 1, transition: 'all .18s', flexShrink: 0, fontWeight: 300 }}>+</button>
                       </div>
 

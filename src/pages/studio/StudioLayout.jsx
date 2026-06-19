@@ -24,13 +24,13 @@ const C = {
 const adminNavItems = [
   { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/studio/sales',         icon: BarChart2,       label: 'Sales' },
+  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
+  { to: '/studio/pay-runs',      icon: Banknote,        label: 'Pay Runs' },
   { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
   { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
   { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
   { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
   { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
-  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
-  { to: '/studio/pay-runs',      icon: Banknote,        label: 'Pay Runs' },
   { to: '/studio/home-display',  icon: Sparkles,        label: 'Home Display' },
   { to: '/studio/services',      icon: Scissors,        label: 'Services' },
   { to: '/studio/stylists',      icon: UserCheck,       label: 'Stylists' },
@@ -43,12 +43,12 @@ const adminNavItems = [
 
 const managerNavItems = [
   { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
   { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
   { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
   { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
   { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
   { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
-  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
   { to: '/studio/products',      icon: Package,         label: 'Products' },
   { to: '/studio/gallery',       icon: Image,           label: 'Gallery' },
   { to: '/studio/coupons',       icon: Tag,             label: 'Coupons' },
@@ -56,13 +56,13 @@ const managerNavItems = [
 
 const workerNavItems = [
   { to: '/studio/dashboard',     icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
+  { to: '/studio/paysheet',      icon: Banknote,        label: 'Paysheet' },
   { to: '/studio/appointments',  icon: ClipboardList,   label: 'Appointments' },
   { to: '/studio/schedule',      icon: Calendar,        label: 'Schedule' },
   { to: '/studio/blocked-dates', icon: CalendarOff,     label: 'Blocked Dates' },
   { to: '/studio/messages',      icon: MessageSquare,   label: 'Messages' },
   { to: '/studio/orders',        icon: ShoppingBag,     label: 'Orders' },
-  { to: '/studio/timesheets',    icon: Clock,           label: 'Timesheets' },
-  { to: '/studio/paysheet',      icon: Banknote,        label: 'Paysheet' },
 ]
 
 export default function StudioLayout() {

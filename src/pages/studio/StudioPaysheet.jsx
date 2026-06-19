@@ -422,7 +422,7 @@ export default function StudioPaysheet() {
       <div style={{ flexShrink: 0, display: 'flex', gap: 3, background: 'rgba(var(--rgb-hi),0.03)', border: `1px solid ${C.border}`, borderRadius: 12, padding: 3 }}>
         {[['calendar', 'Calendar'], ['table', 'Table']].map(([key, label]) => (
           <button key={key} onClick={() => { setActiveTab(key); setPage(0) }}
-            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'var(--col-acc)' : 'transparent', color: activeTab === key ? 'var(--col-acc)' : C.muted, border: `1px solid ${activeTab === key ? 'var(--col-acc)' : 'transparent'}`, transition: 'all .18s' }}>
+            style={{ flex: 1, padding: '0.42rem 0.625rem', borderRadius: 8, fontSize: '0.75rem', fontFamily: 'DM Sans,sans-serif', fontWeight: activeTab === key ? 600 : 400, cursor: 'pointer', background: activeTab === key ? 'var(--col-acc)' : 'transparent', color: activeTab === key ? 'var(--col-bg)' : C.muted, border: `1px solid ${activeTab === key ? 'var(--col-acc)' : 'transparent'}`, transition: 'all .18s' }}>
             {label}
           </button>
         ))}

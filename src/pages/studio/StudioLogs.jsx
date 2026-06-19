@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import {
   Activity, Calendar, CalendarOff, Users, UserCheck, MessageSquare,
   Clock, Banknote, ShoppingBag, Sparkles, Scissors, Package, Image,
-  Tag, RefreshCw, ChevronDown, ChevronLeft, ChevronRight, X,
+  Tag, RefreshCw, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X,
 } from 'lucide-react'
 
 const C = {
@@ -123,6 +123,7 @@ export default function StudioLogs() {
   const [filterAction, setFilterAction] = useState('all')
   const [groupByDay,   setGroupByDay]   = useState(true)
   const [weekOffset,   setWeekOffset]   = useState(0)
+  const [page,         setPage]         = useState(0)
 
   async function load(offset = weekOffset) {
     setLoading(true)
@@ -139,6 +140,8 @@ export default function StudioLogs() {
   }
 
   useEffect(() => { load(weekOffset) }, [weekOffset])
+
+  useEffect(() => { setPage(0) }, [filterActor, filterAction, weekOffset])
 
   useEffect(() => {
     const sub = supabase.channel('activity-logs-realtime')
@@ -168,15 +171,24 @@ export default function StudioLogs() {
     return true
   }), [logs, filterActor, filterAction])
 
+  const PAGE_SIZE = 8
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages - 1)
+
+  const paginated = useMemo(
+    () => filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE),
+    [filtered, safePage, PAGE_SIZE]
+  )
+
   const grouped = useMemo(() => {
     const map = new Map()
-    filtered.forEach(log => {
+    paginated.forEach(log => {
       const key = format(new Date(log.created_at), 'yyyy-MM-dd')
       if (!map.has(key)) map.set(key, [])
       map.get(key).push(log)
     })
     return [...map.entries()]
-  }, [filtered])
+  }, [paginated])
 
   const hasFilters = filterActor !== 'all' || filterAction !== 'all'
 
@@ -269,6 +281,7 @@ export default function StudioLogs() {
 
         <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: C.muted }}>
           {filtered.length} event{filtered.length !== 1 ? 's' : ''}
+          {totalPages > 1 && ` · p. ${safePage + 1}/${totalPages}`}
         </span>
       </div>
 
@@ -296,7 +309,7 @@ export default function StudioLogs() {
 
         {!loading && !groupByDay && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {filtered.map(log => {
+            {paginated.map(log => {
               const { Icon, color, bg, label } = getActionMeta(log.action)
               const isAdm = log.actor_role === 'admin'
               const actorColor  = isAdm ? C.gold   : C.blue
@@ -402,6 +415,43 @@ export default function StudioLogs() {
             </div>
           </div>
         ))}
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, paddingTop: '1rem', paddingBottom: '0.25rem', flexShrink: 0 }}>
+            {/* Go to first */}
+            <button onClick={() => setPage(0)} disabled={safePage === 0}
+              style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: safePage === 0 ? 'transparent' : C.subtle, border: `1px solid ${safePage === 0 ? 'transparent' : C.border}`, color: safePage === 0 ? 'rgba(var(--rgb-hi),0.12)' : C.dim, cursor: safePage === 0 ? 'default' : 'pointer' }}>
+              <ChevronsLeft size={12} />
+            </button>
+            {/* Previous */}
+            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={safePage === 0}
+              style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: safePage === 0 ? 'transparent' : C.subtle, border: `1px solid ${safePage === 0 ? 'transparent' : C.border}`, color: safePage === 0 ? 'rgba(var(--rgb-hi),0.12)' : C.dim, cursor: safePage === 0 ? 'default' : 'pointer' }}>
+              <ChevronLeft size={12} />
+            </button>
+            {(() => {
+              const WINDOW = 5
+              let start = Math.max(0, safePage - Math.floor(WINDOW / 2))
+              let end = start + WINDOW
+              if (end > totalPages) { end = totalPages; start = Math.max(0, end - WINDOW) }
+              return Array.from({ length: end - start }, (_, i) => start + i).map(i => (
+                <button key={i} onClick={() => setPage(i)}
+                  style={{ minWidth: 28, height: 28, borderRadius: 7, padding: '0 6px', background: i === safePage ? C.goldBg : C.subtle, border: `1px solid ${i === safePage ? C.goldBorder : C.border}`, color: i === safePage ? C.gold : C.dim, fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', fontWeight: i === safePage ? 700 : 400, cursor: 'pointer', transition: 'all .15s' }}>
+                  {i + 1}
+                </button>
+              ))
+            })()}
+            {/* Next */}
+            <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={safePage === totalPages - 1}
+              style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: safePage === totalPages - 1 ? 'transparent' : C.subtle, border: `1px solid ${safePage === totalPages - 1 ? 'transparent' : C.border}`, color: safePage === totalPages - 1 ? 'rgba(var(--rgb-hi),0.12)' : C.dim, cursor: safePage === totalPages - 1 ? 'default' : 'pointer' }}>
+              <ChevronRight size={12} />
+            </button>
+            {/* Go to last */}
+            <button onClick={() => setPage(totalPages - 1)} disabled={safePage === totalPages - 1}
+              style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: safePage === totalPages - 1 ? 'transparent' : C.subtle, border: `1px solid ${safePage === totalPages - 1 ? 'transparent' : C.border}`, color: safePage === totalPages - 1 ? 'rgba(var(--rgb-hi),0.12)' : C.dim, cursor: safePage === totalPages - 1 ? 'default' : 'pointer' }}>
+              <ChevronsRight size={12} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
