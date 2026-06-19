@@ -25,7 +25,7 @@ const STATUS = {
 const PAY_IN_STORE_STYLE = { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.22)' }
 const apptStyle = a => a.payment_status === 'pay_in_store' ? PAY_IN_STORE_STYLE : (STATUS[a.status] || STATUS.pending)
 
-const ALL_STATUSES = ['pending', 'confirmed', 'completed', 'cancelled']
+const ALL_STATUSES = ['confirmed', 'completed', 'cancelled']
 const ARTIST_COLORS = ['#a78bfa','#34d399','#f59e0b','#60a5fa','#f87171','#fb923c','#e879f9','#2dd4bf']
 const WDAYS_SHORT  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const WDAYS_SUN    = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -67,26 +67,35 @@ function layoutAppts(appts) {
 
 function StatusDropdown({ appt, onUpdate }) {
   const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+  const [pos,  setPos]  = useState({ top: 0, right: 0 })
+  const btnRef = useRef(null)
   const cfg = STATUS[appt.status] || STATUS.pending
 
   useEffect(() => {
     if (!open) return
-    function handler(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    function handler(e) { if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
+  function handleOpen() {
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect()
+      setPos({ top: r.bottom + 6, right: window.innerWidth - r.right })
+    }
+    setOpen(o => !o)
+  }
+
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button onClick={() => setOpen(o => !o)}
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <button ref={btnRef} onClick={handleOpen}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px 5px 8px', borderRadius: 8, cursor: 'pointer', background: cfg.bg, border: `1px solid ${open ? cfg.color : cfg.border}`, transition: 'all .15s' }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
         <span style={{ fontSize: 11, color: cfg.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'capitalize' }}>{appt.status}</span>
         <ChevronDown size={10} style={{ color: cfg.color, opacity: 0.7, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 200, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
+        <div style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
           {ALL_STATUSES.filter(s => s !== appt.status).map(s => {
             const c = STATUS[s]
             return (

@@ -66,26 +66,35 @@ function dateLabel(dateStr) {
 
 function StatusDropdown({ appt, onUpdate }) {
   const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+  const [pos,  setPos]  = useState({ top: 0, right: 0 })
+  const btnRef = useRef(null)
   const cfg = STATUS_CFG[appt.status] || STATUS_CFG.confirmed
 
   useEffect(() => {
     if (!open) return
-    function handler(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    function handler(e) { if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
+  function handleOpen() {
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect()
+      setPos({ top: r.bottom + 6, right: window.innerWidth - r.right })
+    }
+    setOpen(o => !o)
+  }
+
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button onClick={() => setOpen(o => !o)}
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <button ref={btnRef} onClick={handleOpen}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px 5px 8px', borderRadius: 8, cursor: 'pointer', background: cfg.bg, border: `1px solid ${open ? cfg.color : cfg.border}`, transition: 'all .15s' }}>
         <div style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />
         <span style={{ fontSize: 11, color: cfg.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>{cfg.label}</span>
         <ChevronDown size={10} style={{ color: cfg.color, opacity: 0.7, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 100, background: 'var(--col-card)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
+        <div style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999, background: 'var(--col-card)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
           {ALL_STATUSES.filter(s => s !== appt.status).map(s => {
             const c = STATUS_CFG[s]
             return (
