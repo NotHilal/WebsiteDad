@@ -68,12 +68,17 @@ function layoutAppts(appts) {
 function StatusDropdown({ appt, onUpdate }) {
   const [open, setOpen] = useState(false)
   const [pos,  setPos]  = useState({ top: 0, right: 0 })
-  const btnRef = useRef(null)
+  const btnRef      = useRef(null)
+  const dropdownRef = useRef(null)
   const cfg = STATUS[appt.status] || STATUS.pending
 
   useEffect(() => {
     if (!open) return
-    function handler(e) { if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false) }
+    function handler(e) {
+      if (btnRef.current?.contains(e.target)) return
+      if (dropdownRef.current?.contains(e.target)) return
+      setOpen(false)
+    }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
@@ -95,7 +100,7 @@ function StatusDropdown({ appt, onUpdate }) {
         <ChevronDown size={10} style={{ color: cfg.color, opacity: 0.7, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
       </button>
       {open && (
-        <div style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
+        <div ref={dropdownRef} style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999, background: 'var(--col-modal)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
           {ALL_STATUSES.filter(s => s !== appt.status).map(s => {
             const c = STATUS[s]
             return (
@@ -159,6 +164,7 @@ export default function StudioSchedule() {
   }
 
   async function updateStatus(id, newStatus) {
+    const appt = appointments.find(a => a.id === id)
     const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id)
     if (error) return
     setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))

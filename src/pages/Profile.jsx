@@ -329,355 +329,258 @@ export default function Profile() {
   }
 
   function downloadReceipt(order) {
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' })
-    const W   = doc.internal.pageSize.getWidth()   // 148
-    const H   = doc.internal.pageSize.getHeight()  // 210
-    const ml  = 14
-    const mr  = 14
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const W   = 210
+    const ml  = 18
+    const mr  = 18
 
-    // Brand palette
-    const steel  = [184, 212, 232]
-    const steel2 = [88, 148, 186]
-    const gold   = [201, 168, 76]
-    const ink    = [14, 18, 32]
-    const gray   = [100, 106, 122]
-    const lite   = [162, 167, 182]
-    const rule   = [220, 226, 238]
+    const navy  = [30,  50,  80]
+    const cream = [250, 249, 246]
+    const steel = [46,  111, 163]
+    const muted = [154, 163, 174]
+    const ink   = [90,  99,  112]
+    const line  = [220, 218, 212]
+    const fmt   = (n) => `$${Number(n).toFixed(2)}`
 
-    const paid      = order.payment_status === 'paid'
-    const inStore   = order.payment_status === 'pay_in_store'
-    const total     = ((parseFloat(order.products?.price) || 0) * order.quantity).toFixed(2)
-    const unitPrice = parseFloat(order.products?.price || 0).toFixed(2)
-    const discount  = parseFloat(order.discount_amount) || 0
-    const finalTotal = discount > 0 ? Math.max(0, parseFloat(total) - discount).toFixed(2) : total
-    const orderDate = format(new Date(order.created_at), 'MMMM d, yyyy')
-    const orderId   = order.id.slice(0, 8).toUpperCase()
-    const customer  = profile?.full_name || user?.email || 'Customer'
+    const orderId    = order.id.slice(0, 8).toUpperCase()
+    const orderDate  = format(new Date(order.created_at), 'MMMM d, yyyy')
+    const customer   = profile?.full_name || user?.email || 'Customer'
+    const unitPrice  = parseFloat(order.products?.price || 0)
+    const subtotal   = unitPrice * (order.quantity || 1)
+    const discount   = parseFloat(order.discount_amount) || 0
+    const total      = Math.max(0, subtotal - discount)
+    const isPaid     = order.payment_status === 'paid'
+    const isInStore  = order.payment_status === 'pay_in_store'
 
-    // ── Full white page ──
-    doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F')
+    // Page background
+    doc.setFillColor(...cream); doc.rect(0, 0, W, 297, 'F')
 
-    // Top steel bar
-    doc.setFillColor(...steel); doc.rect(0, 0, W, 3, 'F')
-    // Bottom steel bar
-    doc.setFillColor(...steel); doc.rect(0, H - 3, W, 3, 'F')
+    // Navy header
+    doc.setFillColor(...navy); doc.rect(0, 0, W, 36, 'F')
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(22); doc.setTextColor(250, 249, 246)
+    doc.text('Hair', ml, 22)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Go', ml + doc.getTextWidth('Hair'), 22)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setCharSpace(1.2)
+    doc.text('AUCKLAND, NEW ZEALAND', ml, 29); doc.setCharSpace(0)
 
-    // ── HEADER ──
-    let y = 18
+    // Steel accent band
+    doc.setFillColor(...steel); doc.rect(0, 36, W, 14, 'F')
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(250, 249, 246); doc.setCharSpace(1.5)
+    doc.text('PURCHASE RECEIPT', ml, 44); doc.setCharSpace(0)
 
-    // Wordmark left
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(...ink)
-    doc.text('Hair', ml, y)
-    doc.setTextColor(...steel2)
-    doc.text('Go', ml + doc.getTextWidth('Hair'), y)
-    // Underline wordmark
-    const wmarkW = doc.getTextWidth('Hair') + doc.getTextWidth('Go')
-    doc.setDrawColor(...steel); doc.setLineWidth(0.7); doc.line(ml, y + 2, ml + wmarkW, y + 2)
+    // Meta row
+    let y = 62
+    const rx = W - mr
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.setCharSpace(0.8)
+    doc.text('PREPARED FOR', ml, y); doc.setCharSpace(0)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...navy)
+    doc.text(customer, ml, y + 6)
 
-    // Tagline
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...lite)
-    doc.text('PREMIUM HAIR STUDIO  ·  AUCKLAND, NEW ZEALAND', ml, y + 8)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.setCharSpace(0.8)
+    doc.text('ORDER NUMBER', rx, y, { align: 'right' }); doc.setCharSpace(0)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...navy)
+    doc.text(`#${orderId}`, rx, y + 6, { align: 'right' })
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.setCharSpace(0.8)
+    doc.text('DATE', rx, y + 14, { align: 'right' }); doc.setCharSpace(0)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...ink)
+    doc.text(orderDate, rx, y + 20, { align: 'right' })
+    y += 34
 
-    // RECEIPT label right
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(...ink)
-    doc.text('RECEIPT', W - mr, y, { align: 'right' })
+    // Divider + items header
+    doc.setDrawColor(...line); doc.setLineWidth(0.3); doc.line(ml, y, W - mr, y); y += 8
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...muted); doc.setCharSpace(1)
+    doc.text('ITEM', ml, y); doc.text('QTY', W / 2, y, { align: 'center' }); doc.text('PRICE', W - mr, y, { align: 'right' }); doc.setCharSpace(0)
+    y += 4; doc.setDrawColor(...line); doc.setLineWidth(0.3); doc.line(ml, y, W - mr, y); y += 6
 
-    // Ref # + date right
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
-    doc.text(`# ${orderId}`, W - mr, y + 7, { align: 'right' })
-    doc.setFontSize(7.5); doc.setTextColor(...lite)
-    doc.text(orderDate, W - mr, y + 12.5, { align: 'right' })
-
-    y += 22
-
-    // Full steel rule
-    doc.setDrawColor(...steel); doc.setLineWidth(0.6); doc.line(ml, y, W - mr, y)
-
-    y += 10
-
-    // ── BILLED TO ──
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
-    doc.text('BILLED TO', ml, y)
-    y += 5
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
-    doc.text(customer, ml, y)
-    if (user?.email && profile?.full_name) {
-      y += 5
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
-      doc.text(user.email, ml, y)
-    }
-
+    // Item row
+    doc.setFillColor(244, 243, 240); doc.rect(ml - 2, y - 4, W - ml - mr + 4, 8, 'F')
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...navy)
+    doc.text(order.products?.name || 'Product', ml, y)
+    doc.setTextColor(...ink); doc.text(String(order.quantity || 1), W / 2, y, { align: 'center' })
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(...steel)
+    doc.text(fmt(subtotal), W - mr, y, { align: 'right' })
     y += 12
 
-    // ── ITEMS TABLE ──
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 6
-
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
-    doc.text('DESCRIPTION', ml, y)
-    doc.text('AMOUNT', W - mr, y, { align: 'right' })
-
-    y += 4
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 8
-
-    // Product
-    const productName = order.products?.name || 'Product'
-    const maxNW = W - ml - mr - 30
-    let dispName = productName
-    while (doc.getTextWidth(dispName) > maxNW && dispName.length > 4) dispName = dispName.slice(0, -1)
-    if (dispName !== productName) dispName += '...'
-
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...ink)
-    doc.text(dispName, ml, y)
-    doc.text(`$${total}`, W - mr, y, { align: 'right' })
-
-    y += 6
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
-    doc.text(`${order.quantity} unit${order.quantity > 1 ? 's' : ''}  ×  $${unitPrice} each`, ml, y)
-
-    y += 12
-
-    // ── TOTALS ──
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 8
-
-    const colL = W / 2 + 8
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
-    doc.text('Subtotal', colL, y)
-    doc.text(`$${total}`, W - mr, y, { align: 'right' })
-
+    // Totals
+    doc.setDrawColor(...line); doc.setLineWidth(0.3); doc.line(ml, y, W - mr, y); y += 7
+    const totalsL = W / 2 + 10
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...ink)
+    doc.text('Subtotal', totalsL, y); doc.text(fmt(subtotal), W - mr, y, { align: 'right' }); y += 7
     if (discount > 0) {
-      y += 7
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(34, 160, 100)
-      doc.text(`Discount (${order.coupon_code})`, colL, y)
-      doc.text(`-$${discount.toFixed(2)}`, W - mr, y, { align: 'right' })
+      doc.setTextColor(34, 160, 100)
+      doc.text(`Discount (${order.coupon_code})`, totalsL, y)
+      doc.text(`-${fmt(discount)}`, W - mr, y, { align: 'right' }); y += 7
     }
+    doc.setDrawColor(...steel); doc.setLineWidth(0.4); doc.line(totalsL, y, W - mr, y); y += 6
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...navy)
+    doc.text('TOTAL', totalsL, y)
+    doc.setTextColor(...steel); doc.text(fmt(total), W - mr, y, { align: 'right' }); y += 10
 
-    y += 8
-    doc.setDrawColor(...steel); doc.setLineWidth(0.5); doc.line(colL, y, W - mr, y)
-    y += 7
+    // Payment method
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted)
+    doc.text(isPaid ? 'Paid via Stripe' : isInStore ? 'Pay in store' : 'Payment pending', W - mr, y, { align: 'right' }); y += 14
 
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
-    doc.text('TOTAL', colL, y)
-    doc.setFontSize(18); doc.setTextColor(...gold)
-    doc.text(`$${finalTotal}`, W - mr, y, { align: 'right' })
-
-    y += 16
-
-    // ── PAYMENT STATUS ──
-    if (paid) {
-      doc.setFillColor(232, 252, 240); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
-      doc.setDrawColor(120, 205, 155); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
-      doc.setFillColor(34, 197, 94); doc.ellipse(W / 2 - 18, y + 1, 1.6, 1.6, 'F')
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(20, 115, 58)
-      doc.text('Paid via Stripe', W / 2 - 13, y + 1.4)
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 180, 130)
-      doc.text('·  Payment complete', W / 2 + 16, y + 1.4)
+    // Payment status box
+    if (isPaid) {
+      doc.setFillColor(235, 244, 251); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'F')
+      doc.setDrawColor(...steel); doc.setLineWidth(0.4); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'S')
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...steel)
+      doc.text('Payment confirmed', ml + 5, y + 7)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...ink)
+      doc.text(`${fmt(total)} processed via Stripe`, ml + 5, y + 13)
     } else {
-      doc.setFillColor(255, 249, 232); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
-      doc.setDrawColor(234, 172, 62); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
-      doc.setFillColor(245, 158, 11); doc.ellipse(W / 2 - 16, y + 1, 1.6, 1.6, 'F')
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(133, 85, 0)
-      doc.text(inStore ? 'Pay in Store' : 'Payment Pending', W / 2 - 11, y + 1.4)
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(200, 145, 40)
-      doc.text(inStore ? '·  Due at salon' : '·  Awaiting payment', W / 2 + 18, y + 1.4)
+      doc.setFillColor(254, 243, 219); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'F')
+      doc.setDrawColor(146, 98, 10); doc.setLineWidth(0.4); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'S')
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(146, 98, 10)
+      doc.text(isInStore ? 'Pay in store' : 'Payment pending', ml + 5, y + 7)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120, 80, 10)
+      doc.text(isInStore ? `Please bring ${fmt(total)} to the salon when picking up your order.` : 'Awaiting payment.', ml + 5, y + 13)
     }
 
-    y += 20
-
-    // ── FOOTER ──
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 8
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...lite)
-    doc.text('Thank you for shopping with HairGo.', W / 2, y, { align: 'center' })
-    y += 5
-    doc.setFontSize(7); doc.setTextColor(...steel2)
-    doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, y, { align: 'center' })
+    // Footer
+    const footerY = 272
+    doc.setDrawColor(...line); doc.setLineWidth(0.3); doc.line(ml, footerY, W - mr, footerY)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted)
+    doc.text('Thank you for shopping with HairGo.', W / 2, footerY + 6, { align: 'center' })
+    doc.setFontSize(7); doc.setCharSpace(0.5)
+    doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, footerY + 12, { align: 'center' }); doc.setCharSpace(0)
 
     doc.save(`HairGo-Receipt-${orderId}.pdf`)
   }
 
   function downloadApptReceipt(appt) {
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' })
-    const W   = doc.internal.pageSize.getWidth()
-    const H   = doc.internal.pageSize.getHeight()
-    const ml  = 14
-    const mr  = 14
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const W   = 210
+    const ml  = 18
+    const mr  = 18
 
-    const steel  = [184, 212, 232]
-    const steel2 = [88, 148, 186]
-    const gold   = [201, 168, 76]
-    const ink    = [14, 18, 32]
-    const gray   = [100, 106, 122]
-    const lite   = [162, 167, 182]
-    const rule   = [220, 226, 238]
+    const navy    = [30,  50,  80]
+    const cream   = [250, 249, 246]
+    const steel   = [46,  111, 163]
+    const muted   = [154, 163, 174]
+    const ink     = [90,  99,  112]
+    const line    = [220, 218, 212]
+    const amber   = [146, 98,  10]
+    const amberBg = [254, 243, 219]
 
-    const paid        = appt.payment_status === 'paid'
-    const inStoreAppt = appt.payment_status === 'pay_in_store'
-    const apptId      = appt.id.slice(0, 8).toUpperCase()
-    const apptDate    = format(new Date(appt.date), 'MMMM d, yyyy')
-    const bookedOn    = appt.created_at ? format(new Date(appt.created_at), 'MMMM d, yyyy') : apptDate
-    const price       = parseFloat(appt.services?.price || 0).toFixed(2)
-    const couponMatch = appt.notes?.match(/\[Coupon: (\S+) — .+? · Final: \$([0-9.]+)\]/)
-    const apptCouponCode   = couponMatch?.[1] || null
-    const apptFinalPrice   = couponMatch ? couponMatch[2] : price
-    const apptDiscount     = couponMatch ? (parseFloat(price) - parseFloat(couponMatch[2])).toFixed(2) : null
-    const timeStr     = appt.time ? appt.time.slice(0, 5) : ''
-    const customer    = profile?.full_name || user?.email || 'Customer'
+    const apptId       = appt.id.slice(0, 8).toUpperCase()
+    const apptDate     = format(new Date(appt.date), 'MMMM d, yyyy')
+    const issuedDate   = appt.created_at ? format(new Date(appt.created_at), 'MMMM d, yyyy') : apptDate
+    const timeStr      = appt.time ? appt.time.slice(0, 5) : ''
+    const customer     = profile?.full_name || user?.email || 'Customer'
+    const price        = parseFloat(appt.services?.price || 0)
+    const couponMatch  = appt.notes?.match(/\[Coupon: (\S+) — .+? · Final: \$([0-9.]+)\]/)
+    const couponCode   = couponMatch?.[1] || null
+    const finalPrice   = couponMatch ? parseFloat(couponMatch[2]) : price
+    const discount     = couponMatch ? price - parseFloat(couponMatch[2]) : 0
+    const isPaid       = appt.payment_status === 'paid'
+    const fmt          = (n) => `$${Number(n).toFixed(2)}`
 
-    // ── Full white page ──
-    doc.setFillColor(255, 255, 255); doc.rect(0, 0, W, H, 'F')
-    doc.setFillColor(...steel); doc.rect(0, 0, W, 3, 'F')
-    doc.setFillColor(...steel); doc.rect(0, H - 3, W, 3, 'F')
+    // Page background
+    doc.setFillColor(...cream); doc.rect(0, 0, W, 297, 'F')
 
-    // ── HEADER ──
-    let y = 18
+    // Navy header
+    doc.setFillColor(...navy); doc.rect(0, 0, W, 36, 'F')
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(22); doc.setTextColor(250, 249, 246)
+    doc.text('Hair', ml, 22)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Go', ml + doc.getTextWidth('Hair'), 22)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setCharSpace(1.2)
+    doc.text('AUCKLAND, NEW ZEALAND', ml, 29); doc.setCharSpace(0)
 
-    // Wordmark
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(...ink)
-    doc.text('Hair', ml, y)
-    doc.setTextColor(...steel2)
-    doc.text('Go', ml + doc.getTextWidth('Hair'), y)
-    const wmarkW = doc.getTextWidth('Hair') + doc.getTextWidth('Go')
-    doc.setDrawColor(...steel); doc.setLineWidth(0.7); doc.line(ml, y + 2, ml + wmarkW, y + 2)
+    // Steel accent band
+    doc.setFillColor(...steel); doc.rect(0, 36, W, 14, 'F')
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(250, 249, 246); doc.setCharSpace(1.5)
+    doc.text('APPOINTMENT RECEIPT', ml, 44); doc.setCharSpace(0)
 
-    // Tagline
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(...lite)
-    doc.text('PREMIUM HAIR STUDIO  ·  AUCKLAND, NEW ZEALAND', ml, y + 8)
+    // Meta row
+    let y = 62
+    const rx = W - mr
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.setCharSpace(0.8)
+    doc.text('CLIENT', ml, y); doc.setCharSpace(0)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...navy)
+    doc.text(customer, ml, y + 6)
 
-    // RECEIPT label right
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(...ink)
-    doc.text('RECEIPT', W - mr, y, { align: 'right' })
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.setCharSpace(0.8)
+    doc.text('RECEIPT NUMBER', rx, y, { align: 'right' }); doc.setCharSpace(0)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...navy)
+    doc.text(`#${apptId}`, rx, y + 6, { align: 'right' })
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted); doc.setCharSpace(0.8)
+    doc.text('ISSUED', rx, y + 14, { align: 'right' }); doc.setCharSpace(0)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...ink)
+    doc.text(issuedDate, rx, y + 20, { align: 'right' })
+    y += 34
 
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
-    doc.text(`# ${apptId}`, W - mr, y + 7, { align: 'right' })
-    doc.setFontSize(7.5); doc.setTextColor(...lite)
-    doc.text(bookedOn, W - mr, y + 12.5, { align: 'right' })
+    // Divider
+    doc.setDrawColor(...line); doc.setLineWidth(0.3); doc.line(ml, y, W - mr, y); y += 10
 
-    y += 22
-
-    // Full steel rule
-    doc.setDrawColor(...steel); doc.setLineWidth(0.6); doc.line(ml, y, W - mr, y)
-
-    y += 10
-
-    // ── BILLED TO ──
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
-    doc.text('BILLED TO', ml, y)
-    y += 5
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
-    doc.text(customer, ml, y)
-    if (user?.email && profile?.full_name) {
-      y += 5
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...gray)
-      doc.text(user.email, ml, y)
-    }
-
-    y += 12
-
-    // ── SERVICE TABLE ──
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 6
-
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
-    doc.text('DESCRIPTION', ml, y); doc.text('AMOUNT', W - mr, y, { align: 'right' })
-
+    // Appointment detail rows
+    const rows = [
+      ['SERVICE',  appt.services?.name || '—'],
+      ['STYLIST',  appt.stylists?.name || '—'],
+      ['DATE',     apptDate],
+      ['TIME',     timeStr || '—'],
+      ...(appt.services?.duration ? [['DURATION', `${appt.services.duration} min`]] : []),
+    ]
+    rows.forEach(([label, value], i) => {
+      if (i % 2 === 0) { doc.setFillColor(244, 243, 240); doc.rect(ml - 2, y - 5, W - ml - mr + 4, 9, 'F') }
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...muted); doc.setCharSpace(0.8)
+      doc.text(label, ml, y); doc.setCharSpace(0)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...navy)
+      doc.text(value, W - mr, y, { align: 'right' }); y += 10
+    })
     y += 4
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 8
 
-    // Service name
-    const svcName = appt.services?.name || 'Service'
-    const maxSvcW = W - ml - mr - 30
-    let svcDisp = svcName
-    while (doc.getTextWidth(svcDisp) > maxSvcW && svcDisp.length > 4) svcDisp = svcDisp.slice(0, -1)
-    if (svcDisp !== svcName) svcDisp += '...'
+    // Price block
+    doc.setDrawColor(...line); doc.setLineWidth(0.3); doc.line(ml, y, W - mr, y); y += 8
+    const totalsL = W / 2 + 10
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...ink)
+    doc.text('Service total', totalsL, y)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...ink)
+    doc.text(fmt(price), W - mr, y, { align: 'right' }); y += 7
 
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...ink)
-    doc.text(svcDisp, ml, y)
-    doc.text(`$${price}`, W - mr, y, { align: 'right' })
-
-    y += 6
-    const subtitle = [
-      appt.stylists?.name ? `with ${appt.stylists.name}` : null,
-      appt.services?.duration ? `${appt.services.duration} min` : null,
-    ].filter(Boolean).join('  ·  ')
-    if (subtitle) {
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
-      doc.text(subtitle, ml, y)
-      y += 5
+    if (discount > 0) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(34, 160, 100)
+      doc.text(`Discount (${couponCode})`, totalsL, y)
+      doc.text(`-${fmt(discount)}`, W - mr, y, { align: 'right' }); y += 7
     }
 
-    y += 8
+    doc.setDrawColor(...steel); doc.setLineWidth(0.4); doc.line(totalsL, y, W - mr, y); y += 6
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...navy)
+    doc.text('TOTAL', totalsL, y)
+    doc.setTextColor(...steel); doc.setFontSize(16)
+    doc.text(fmt(finalPrice), W - mr, y + 1, { align: 'right' }); y += 14
 
-    // ── APPOINTMENT DATE/TIME ──
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 8
-
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(...steel2)
-    doc.text('APPOINTMENT', ml, y)
-    y += 5
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...ink)
-    doc.text(`${apptDate}${timeStr ? '   ·   ' + timeStr : ''}`, ml, y)
-
-    y += 12
-
-    // ── TOTALS ──
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 8
-
-    const colL = W / 2 + 8
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...gray)
-    doc.text('Subtotal', colL, y); doc.text(`$${price}`, W - mr, y, { align: 'right' })
-
-    if (apptDiscount) {
-      y += 7
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(34, 160, 100)
-      doc.text(`Discount (${apptCouponCode})`, colL, y)
-      doc.text(`-$${apptDiscount}`, W - mr, y, { align: 'right' })
-    }
-
-    y += 8
-    doc.setDrawColor(...steel); doc.setLineWidth(0.5); doc.line(colL, y, W - mr, y)
-    y += 7
-
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...ink)
-    doc.text('TOTAL', colL, y)
-    doc.setFontSize(18); doc.setTextColor(...gold)
-    doc.text(`$${apptFinalPrice}`, W - mr, y, { align: 'right' })
-
-    y += 16
-
-    // ── PAYMENT STATUS ──
-    if (paid) {
-      doc.setFillColor(232, 252, 240); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
-      doc.setDrawColor(120, 205, 155); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
-      doc.setFillColor(34, 197, 94); doc.ellipse(W / 2 - 18, y + 1, 1.6, 1.6, 'F')
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(20, 115, 58)
-      doc.text('Paid via Stripe', W / 2 - 13, y + 1.4)
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 180, 130)
-      doc.text('·  Payment complete', W / 2 + 16, y + 1.4)
+    // Payment status box
+    if (isPaid) {
+      doc.setFillColor(235, 244, 251); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'F')
+      doc.setDrawColor(...steel); doc.setLineWidth(0.4); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'S')
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...steel)
+      doc.text('Payment confirmed', ml + 5, y + 7)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...ink)
+      doc.text(`${fmt(finalPrice)} processed via Stripe`, ml + 5, y + 13)
     } else {
-      doc.setFillColor(255, 249, 232); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'F')
-      doc.setDrawColor(234, 172, 62); doc.setLineWidth(0.25); doc.roundedRect(ml, y - 4, W - ml - mr, 11, 3, 3, 'S')
-      doc.setFillColor(245, 158, 11); doc.ellipse(W / 2 - 16, y + 1, 1.6, 1.6, 'F')
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(133, 85, 0)
-      doc.text(inStoreAppt ? 'Pay in Store' : 'Payment Pending', W / 2 - 11, y + 1.4)
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(200, 145, 40)
-      doc.text(inStoreAppt ? '·  Due at salon' : '·  Awaiting payment', W / 2 + 18, y + 1.4)
+      doc.setFillColor(...amberBg); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'F')
+      doc.setDrawColor(...amber); doc.setLineWidth(0.4); doc.roundedRect(ml, y, W - ml - mr, 16, 2, 2, 'S')
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...amber)
+      doc.text('Pay in store', ml + 5, y + 7)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120, 80, 10)
+      doc.text(`Please bring ${fmt(finalPrice)} to the salon at the time of your appointment.`, ml + 5, y + 13)
     }
+    y += 24
 
-    y += 20
+    // Cancellation note
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(8); doc.setTextColor(...muted)
+    doc.text('Need to reschedule or cancel? Please contact us at least 24 hours before your appointment.', ml, y, { maxWidth: W - ml - mr })
 
-    // ── FOOTER ──
-    doc.setDrawColor(...rule); doc.setLineWidth(0.25); doc.line(ml, y, W - mr, y)
-    y += 8
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...lite)
-    doc.text('Thank you for choosing HairGo. We look forward to seeing you again.', W / 2, y, { align: 'center' })
-    y += 5
-    doc.setFontSize(7); doc.setTextColor(...steel2)
-    doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, y, { align: 'center' })
+    // Footer
+    const footerY = 272
+    doc.setDrawColor(...line); doc.setLineWidth(0.3); doc.line(ml, footerY, W - mr, footerY)
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted)
+    doc.text('Thank you for choosing HairGo.', W / 2, footerY + 6, { align: 'center' })
+    doc.setFontSize(7); doc.setCharSpace(0.5)
+    doc.text('hairgo.co.nz  ·  Auckland, New Zealand', W / 2, footerY + 12, { align: 'center' }); doc.setCharSpace(0)
 
     doc.save(`HairGo-Appointment-${apptId}.pdf`)
   }
@@ -1024,7 +927,7 @@ export default function Profile() {
                                     {appt.payment_status === 'paid' ? 'Paid online' : appt.payment_status === 'pay_in_store' ? 'Pay in store' : 'No payment on file'}
                                   </span>
                                 </div>
-                                {appt.payment_status === 'paid' && (
+                                {(appt.payment_status === 'paid' || appt.payment_status === 'pay_in_store') && (
                                   <button onClick={() => downloadApptReceipt(appt)}
                                     style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, background: 'rgba(var(--rgb-acc),0.08)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-acc)', fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
                                     <Download size={9} /> Receipt

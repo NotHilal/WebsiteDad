@@ -17,10 +17,9 @@ const C = {
 }
 
 const APPT_COLORS = {
-  completed: 'var(--col-acc)', confirmed: '#34d399', pending: '#f59e0b', cancelled: '#f87171',
+  completed: 'var(--col-acc)', confirmed: '#34d399', cancelled: '#f87171',
 }
 const STATUS_APPT = {
-  pending:   { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.22)'  },
   confirmed: { color: '#34d399', bg: 'rgba(52,211,153,0.12)',  border: 'rgba(52,211,153,0.22)'  },
   cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.22)' },
   completed: { color: 'var(--col-acc)', bg: 'rgba(var(--rgb-acc),0.12)',  border: 'rgba(var(--rgb-acc),0.22)' },
@@ -119,9 +118,9 @@ export default function StudioSales() {
     setLoading(false)
   }
 
-  const paidAppts       = appointments.filter(a => a.payment_status === 'paid')
+  const paidAppts       = appointments.filter(a => a.payment_status === 'paid' || (a.payment_status === 'pay_in_store' && a.status === 'completed'))
   const servicesRevenue = paidAppts.reduce((s, a) => s + (parseFloat(a.services?.price) || 0), 0)
-  const paidOrders      = preorders.filter(p => p.payment_status === 'paid')
+  const paidOrders      = preorders.filter(p => p.payment_status === 'paid' || (p.payment_status === 'pay_in_store' && p.status === 'retrieved'))
   const productsRevenue = paidOrders.reduce((s, p) => s + (parseFloat(p.products?.price) || 0) * (p.quantity || 1), 0)
   const totalRevenue    = servicesRevenue + productsRevenue
 
@@ -308,7 +307,7 @@ export default function StudioSales() {
                 </thead>
                 <tbody>
                   {desktopAppts.map((appt, i) => {
-                    const s = STATUS_APPT[appt.status] || STATUS_APPT.pending
+                    const s = STATUS_APPT[appt.status] || STATUS_APPT.confirmed
                     return (
                       <tr key={appt.id} style={{ borderBottom: i < desktopAppts.length - 1 ? `1px solid ${C.border}` : 'none' }} className="s-row">
                         <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'DM Sans,sans-serif', fontSize: '0.85rem', color: C.muted, whiteSpace: 'nowrap' }}>
@@ -331,11 +330,15 @@ export default function StudioSales() {
                         </td>
                         <td style={{ padding: '0.6rem 1.1rem' }}>
                           {appt.payment_status === 'paid'
-                            ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Paid</span>
-                            : <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Unpaid</span>
+                            ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Paid online</span>
+                            : appt.payment_status === 'pay_in_store' && appt.status === 'completed'
+                              ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Paid in store</span>
+                              : appt.payment_status === 'pay_in_store'
+                                ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Pay in store</span>
+                                : <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Unpaid</span>
                           }
                         </td>
-                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'DM Sans,sans-serif', fontSize: '0.95rem', color: appt.payment_status === 'paid' ? C.gold : C.muted, fontWeight: appt.payment_status === 'paid' ? 600 : 400 }}>
+                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'DM Sans,sans-serif', fontSize: '0.95rem', color: (appt.payment_status === 'paid' || (appt.payment_status === 'pay_in_store' && appt.status === 'completed')) ? C.gold : C.muted, fontWeight: (appt.payment_status === 'paid' || (appt.payment_status === 'pay_in_store' && appt.status === 'completed')) ? 600 : 400 }}>
                           {appt.services?.price ? `$${appt.services.price}` : '—'}
                         </td>
                       </tr>
@@ -361,8 +364,11 @@ export default function StudioSales() {
                   if (!appt) return (
                     <div key={`empty-${i}`} style={{ minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', background: 'var(--col-modal)' }} />
                   )
-                  const s = STATUS_APPT[appt.status] || STATUS_APPT.pending
-                  const paid = appt.payment_status === 'paid'
+                  const s = STATUS_APPT[appt.status] || STATUS_APPT.confirmed
+                  const paidOnline = appt.payment_status === 'paid'
+                  const paidStore = appt.payment_status === 'pay_in_store' && appt.status === 'completed'
+                  const payStore = appt.payment_status === 'pay_in_store' && appt.status !== 'completed'
+                  const anyPaid = paidOnline || paidStore
                   return (
                     <div key={appt.id} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${s.color}` }}>
                       {/* Line 1 */}
@@ -371,11 +377,15 @@ export default function StudioSales() {
                           {appt.profiles?.full_name || '—'}
                         </p>
                         <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textTransform: 'capitalize', flexShrink: 0 }}>{appt.status}</span>
-                        {paid
-                          ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Paid</span>
-                          : <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Unpaid</span>
+                        {paidOnline
+                          ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Paid online</span>
+                          : paidStore
+                            ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Paid in store</span>
+                            : payStore
+                              ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Pay in store</span>
+                              : <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Unpaid</span>
                         }
-                        {appt.services?.price && <span style={{ fontSize: '0.8rem', color: paid ? C.gold : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: paid ? 700 : 400, flexShrink: 0 }}>${appt.services.price}</span>}
+                        {appt.services?.price && <span style={{ fontSize: '0.8rem', color: anyPaid ? C.gold : C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: anyPaid ? 700 : 400, flexShrink: 0 }}>${appt.services.price}</span>}
                       </div>
                       {/* Line 2 */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
@@ -436,12 +446,16 @@ export default function StudioSales() {
                         </td>
                         <td style={{ padding: '0.6rem 1.1rem' }}>
                           {order.payment_status === 'paid'
-                            ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Paid</span>
-                            : <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Unpaid</span>
+                            ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Paid online</span>
+                            : order.payment_status === 'pay_in_store' && order.status === 'retrieved'
+                              ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Paid in store</span>
+                              : order.payment_status === 'pay_in_store'
+                                ? <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Pay in store</span>
+                                : <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Unpaid</span>
                           }
                         </td>
                         <td style={{ padding: '0.6rem 1.1rem', color: C.muted, fontSize: '0.86rem', fontFamily: 'DM Sans,sans-serif' }}>{order.products?.price ? `$${order.products.price}` : '—'}</td>
-                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'DM Sans,sans-serif', fontSize: '0.95rem', color: order.payment_status === 'paid' ? C.gold : C.muted, fontWeight: order.payment_status === 'paid' ? 600 : 400 }}>
+                        <td style={{ padding: '0.6rem 1.1rem', fontFamily: 'DM Sans,sans-serif', fontSize: '0.95rem', color: (order.payment_status === 'paid' || (order.payment_status === 'pay_in_store' && order.status === 'retrieved')) ? C.gold : C.muted, fontWeight: (order.payment_status === 'paid' || (order.payment_status === 'pay_in_store' && order.status === 'retrieved')) ? 600 : 400 }}>
                           {order.products?.price ? `$${lineTotal.toFixed(2)}` : '—'}
                         </td>
                       </tr>
@@ -466,7 +480,10 @@ export default function StudioSales() {
                     <div key={`empty-${i}`} style={{ minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', background: 'var(--col-modal)' }} />
                   )
                   const s = STATUS_ORDER[order.status] || STATUS_ORDER.active
-                  const paid = order.payment_status === 'paid'
+                  const paidOnlineO = order.payment_status === 'paid'
+                  const paidStoreO = order.payment_status === 'pay_in_store' && order.status === 'retrieved'
+                  const payStoreO = order.payment_status === 'pay_in_store' && order.status !== 'retrieved'
+                  const anyPaidO = paidOnlineO || paidStoreO
                   const lineTotal = (parseFloat(order.products?.price) || 0) * (order.quantity || 1)
                   return (
                     <div key={order.id} style={{ padding: '0.875rem 1rem', minHeight: 70, borderBottom: i < MOBILE_PER_PAGE - 1 ? `1px solid ${C.border}` : 'none', borderLeft: `3px solid ${s.color}` }}>
@@ -481,9 +498,13 @@ export default function StudioSales() {
                         <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, textTransform: 'capitalize', flexShrink: 0 }}>
                           {order.status === 'active' ? 'Pickup' : order.status}
                         </span>
-                        {paid
-                          ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Paid</span>
-                          : <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Unpaid</span>
+                        {paidOnlineO
+                          ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Paid online</span>
+                          : paidStoreO
+                            ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Paid in store</span>
+                            : payStoreO
+                              ? <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Pay in store</span>
+                              : <span style={{ fontSize: 12, padding: '3px 8px', borderRadius: 20, background: 'rgba(var(--rgb-hi),0.05)', border: `1px solid ${C.border}`, color: C.muted, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flexShrink: 0 }}>Unpaid</span>
                         }
                       </div>
                       {/* Line 2 */}
@@ -493,7 +514,7 @@ export default function StudioSales() {
                         <span style={{ fontSize: '0.83rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>×{order.quantity || 1}</span>
                         {order.products?.price && <><span style={{ color: 'var(--col-text)' }}>·</span><span style={{ fontSize: '0.83rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>${order.products.price} each</span></>}
                         <span style={{ color: 'var(--col-text)' }}>·</span>
-                        <span style={{ fontSize: '0.84rem', color: paid ? C.gold : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: paid ? 700 : 400 }}>${lineTotal.toFixed(2)}</span>
+                        <span style={{ fontSize: '0.84rem', color: anyPaidO ? C.gold : 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', fontWeight: anyPaidO ? 700 : 400 }}>${lineTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   )
@@ -603,10 +624,10 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
   const data = days.map(day => {
     const dayStr = format(day, 'yyyy-MM-dd')
     const apptRev = appointments
-      .filter(a => a.payment_status === 'paid' && a.created_at?.startsWith(dayStr))
+      .filter(a => (a.payment_status === 'paid' || (a.payment_status === 'pay_in_store' && a.status === 'completed')) && a.created_at?.startsWith(dayStr))
       .reduce((s, a) => s + (parseFloat(a.services?.price) || 0), 0)
     const ordRev = preorders
-      .filter(p => p.payment_status === 'paid' && p.created_at?.startsWith(dayStr))
+      .filter(p => (p.payment_status === 'paid' || (p.payment_status === 'pay_in_store' && p.status === 'retrieved')) && p.created_at?.startsWith(dayStr))
       .reduce((s, p) => s + (parseFloat(p.products?.price) || 0) * (p.quantity || 1), 0)
     return { day, label: mode === 'month' ? format(day, 'd') : format(day, 'EEE'), total: apptRev + ordRev, apptRev, ordRev }
   })
@@ -674,8 +695,8 @@ function PeriodChart({ appointments, preorders, start, end, mode }) {
                         animate={{ height: `${hp}%` }}
                         transition={{ duration: 0.55, delay: i * 0.02, ease: [0.22, 1, 0.36, 1] }}
                         style={{ position: 'absolute', bottom: 0, width: '100%', borderRadius: '4px 4px 0 0', overflow: 'hidden', display: 'flex', flexDirection: 'column', outline: isSel ? '2px solid var(--col-acc)' : 'none', outlineOffset: 1 }}>
-                        {ordRev > 0 && <div style={{ flex: ordRev, background: today ? 'linear-gradient(to top, #c4b5fd, rgba(167,139,250,0.4))' : 'linear-gradient(to top, #a78bfa, rgba(167,139,250,0.27))' }} />}
-                        {apptRev > 0 && <div style={{ flex: apptRev, background: today ? 'linear-gradient(to top, var(--col-acc), rgba(var(--rgb-acc),0.4))' : 'linear-gradient(to top, #34d399, rgba(52,211,153,0.27))' }} />}
+                        {ordRev > 0 && <div style={{ flex: ordRev, background: 'linear-gradient(to top, #a78bfa, rgba(167,139,250,0.27))' }} />}
+                        {apptRev > 0 && <div style={{ flex: apptRev, background: 'linear-gradient(to top, #34d399, rgba(52,211,153,0.27))' }} />}
                       </motion.div>
                     </>
                 }
@@ -732,12 +753,12 @@ function YearlyChart({ appointments, preorders, anchor }) {
 
   const byS = {}, byP = {}
   appointments.forEach(a => {
-    if (a.payment_status !== 'paid' || !a.created_at) return
+    if (!(a.payment_status === 'paid' || (a.payment_status === 'pay_in_store' && a.status === 'completed')) || !a.created_at) return
     const k = a.created_at.slice(0, 7)
     byS[k] = (byS[k] || 0) + (parseFloat(a.services?.price) || 0)
   })
   preorders.forEach(p => {
-    if (p.payment_status !== 'paid' || !p.created_at) return
+    if (!(p.payment_status === 'paid' || (p.payment_status === 'pay_in_store' && p.status === 'retrieved')) || !p.created_at) return
     const k = p.created_at.slice(0, 7)
     byP[k] = (byP[k] || 0) + (parseFloat(p.products?.price) || 0) * (p.quantity || 1)
   })
@@ -856,7 +877,7 @@ function HourlyChart({ appointments, hours }) {
   const counts = hours.map(h => {
     const hStr = String(h).padStart(2, '0')
     const slot  = appointments.filter(a => a.time?.startsWith(hStr) && a.status !== 'cancelled')
-    return { h, total: slot.length, completed: slot.filter(a => a.status === 'completed').length, confirmed: slot.filter(a => a.status === 'confirmed').length, pending: slot.filter(a => a.status === 'pending').length }
+    return { h, total: slot.length, completed: slot.filter(a => a.status === 'completed').length, confirmed: slot.filter(a => a.status === 'confirmed').length }
   })
   const maxCount = Math.max(1, ...counts.map(c => c.total))
   const nMax = niceMax(maxCount)
@@ -871,7 +892,7 @@ function HourlyChart({ appointments, hours }) {
         <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(var(--rgb-hi),0.4)', padding: '0 0 0 8px', fontSize: 18, lineHeight: 1 }}>×</button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        {[['Completed', 'completed', C.gold], ['Confirmed', 'confirmed', '#34d399'], ['Pending', 'pending', '#f59e0b']].map(([lbl, key, col]) => (
+        {[['Completed', 'completed', C.gold], ['Confirmed', 'confirmed', '#34d399']].map(([lbl, key, col]) => (
           <div key={key} style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
             <span style={{ fontSize: 12, color: col, fontFamily: 'DM Sans,sans-serif' }}>{lbl}</span>
             <span style={{ fontSize: 12, color: col, fontFamily: 'DM Sans,sans-serif', fontWeight: 700 }}>{selected[key]}</span>
@@ -904,14 +925,14 @@ function HourlyChart({ appointments, hours }) {
                 <div key={pct} style={{ position: 'absolute', bottom: `${pct}%`, left: 0, right: 0, height: 1, background: 'rgba(var(--rgb-hi),0.04)', pointerEvents: 'none', zIndex: 0 }} />
               ))}
               <div className="chart-bars" style={{ height: 120, display: 'flex', alignItems: 'flex-end', gap: BAR_GAP, position: 'relative', zIndex: 1 }}>
-                {counts.map(({ h, total, completed, confirmed, pending }, i) => {
+                {counts.map(({ h, total, completed, confirmed }, i) => {
                   const hp = total === 0 ? 0 : Math.max(2, (total / nMax) * 100)
-                  const color = completed > 0 ? 'var(--col-acc)' : confirmed > 0 ? '#34d399' : pending > 0 ? '#f59e0b' : null
-                  const colorAlpha = completed > 0 ? 'rgba(var(--rgb-acc),0.4)' : confirmed > 0 ? 'rgba(52,211,153,0.4)' : pending > 0 ? 'rgba(245,158,11,0.4)' : null
+                  const color = completed > 0 ? 'var(--col-acc)' : confirmed > 0 ? '#34d399' : null
+                  const colorAlpha = completed > 0 ? 'rgba(var(--rgb-acc),0.4)' : confirmed > 0 ? 'rgba(52,211,153,0.4)' : null
                   const isSel = selected?.h === h
                   return (
                     <div key={h} className="bar-col"
-                      onClick={() => setSelected(isSel ? null : { h, total, completed, confirmed, pending })}
+                      onClick={() => setSelected(isSel ? null : { h, total, completed, confirmed })}
                       style={{ width: BAR_W, flexShrink: 0, position: 'relative', height: '100%', cursor: 'pointer' }}>
                       {total === 0
                         ? <div style={{ position: 'absolute', bottom: 0, width: '100%', height: 2, background: 'rgba(var(--rgb-hi),0.04)', borderRadius: 2 }} />
@@ -939,7 +960,7 @@ function HourlyChart({ appointments, hours }) {
         </div>
       </div>
       <div style={{ display: 'flex', gap: 14, marginTop: 2, paddingLeft: Y_W + 4 }}>
-        {[['completed', C.gold], ['confirmed', '#34d399'], ['pending', '#f59e0b']].map(([s, col]) => (
+        {[['completed', C.gold], ['confirmed', '#34d399']].map(([s, col]) => (
           <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 7, height: 7, borderRadius: 2, background: col }} />
             <span style={{ fontSize: 13, color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif', textTransform: 'capitalize', letterSpacing: '0.1em' }}>{s}</span>
@@ -953,7 +974,7 @@ function HourlyChart({ appointments, hours }) {
 /* ── Status breakdown ────────────────────────────── */
 function StatusBreakdown({ appointments, compact, horizontal }) {
   const total   = appointments.length
-  const statuses = ['completed', 'confirmed', 'pending', 'cancelled']
+  const statuses = ['completed', 'confirmed', 'cancelled']
   const counts  = statuses.map(s => ({ s, n: appointments.filter(a => a.status === s).length, col: APPT_COLORS[s] }))
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: compact ? 6 : 10 }}>

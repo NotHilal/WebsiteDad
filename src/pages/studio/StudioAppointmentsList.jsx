@@ -67,12 +67,17 @@ function dateLabel(dateStr) {
 function StatusDropdown({ appt, onUpdate }) {
   const [open, setOpen] = useState(false)
   const [pos,  setPos]  = useState({ top: 0, right: 0 })
-  const btnRef = useRef(null)
+  const btnRef      = useRef(null)
+  const dropdownRef = useRef(null)
   const cfg = STATUS_CFG[appt.status] || STATUS_CFG.confirmed
 
   useEffect(() => {
     if (!open) return
-    function handler(e) { if (btnRef.current && !btnRef.current.contains(e.target)) setOpen(false) }
+    function handler(e) {
+      if (btnRef.current?.contains(e.target)) return
+      if (dropdownRef.current?.contains(e.target)) return
+      setOpen(false)
+    }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
@@ -94,7 +99,7 @@ function StatusDropdown({ appt, onUpdate }) {
         <ChevronDown size={10} style={{ color: cfg.color, opacity: 0.7, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
       </button>
       {open && (
-        <div style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999, background: 'var(--col-card)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
+        <div ref={dropdownRef} style={{ position: 'fixed', top: pos.top, right: pos.right, zIndex: 9999, background: 'var(--col-card)', border: `1px solid ${C.border}`, borderRadius: 10, overflow: 'hidden', minWidth: 140, boxShadow: '0 12px 40px rgba(0,0,0,0.55)' }}>
           {ALL_STATUSES.filter(s => s !== appt.status).map(s => {
             const c = STATUS_CFG[s]
             return (
@@ -338,7 +343,8 @@ export default function StudioAppointmentsList() {
           {appt.stylists?.name && <><span style={{ color: 'var(--col-text)' }}>·</span><span style={{ fontSize: '0.7rem', color: 'var(--col-text)', fontFamily: 'DM Sans,sans-serif' }}>{appt.stylists.name}</span></>}
           {appt.services?.price && <><span style={{ color: 'var(--col-text)' }}>·</span><span style={{ fontSize: '0.72rem', fontFamily: 'DM Sans,sans-serif', color: appt.status === 'completed' ? C.gold : 'var(--col-text)', fontWeight: appt.status === 'completed' ? 600 : 400 }}>${appt.services.price}</span></>}
           {appt.payment_status === 'paid' && <><span style={{ color: 'var(--col-text)' }}>·</span><span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Paid online</span></>}
-          {appt.payment_status === 'pay_in_store' && <><span style={{ color: 'var(--col-text)' }}>·</span><span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Pay in store</span></>}
+          {appt.payment_status === 'pay_in_store' && appt.status === 'completed' && <><span style={{ color: 'var(--col-text)' }}>·</span><span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Paid in store</span></>}
+          {appt.payment_status === 'pay_in_store' && appt.status !== 'completed' && <><span style={{ color: 'var(--col-text)' }}>·</span><span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Pay in store</span></>}
         </div>
       </div>
     )
@@ -798,7 +804,14 @@ export default function StudioAppointmentsList() {
                           {details.services?.price && <span className="font-display" style={{ marginLeft: 'auto', fontSize: '1.1rem', color: '#34d399' }}>${details.services.price}</span>}
                         </div>
                       )}
-                      {details.payment_status === 'pay_in_store' && (
+                      {details.payment_status === 'pay_in_store' && details.status === 'completed' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.65rem 1rem', background: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.22)', borderRadius: 10, marginBottom: '0.875rem' }}>
+                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#34d399', flexShrink: 0 }} />
+                          <span style={{ fontSize: '0.8rem', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Paid in store</span>
+                          {details.services?.price && <span className="font-display" style={{ marginLeft: 'auto', fontSize: '1.1rem', color: '#34d399' }}>${details.services.price}</span>}
+                        </div>
+                      )}
+                      {details.payment_status === 'pay_in_store' && details.status !== 'completed' && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0.65rem 1rem', background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.22)', borderRadius: 10, marginBottom: '0.875rem' }}>
                           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#f59e0b', flexShrink: 0 }} />
                           <span style={{ fontSize: '0.8rem', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 600 }}>Payment due in store</span>

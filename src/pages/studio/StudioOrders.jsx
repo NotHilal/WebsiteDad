@@ -4,7 +4,7 @@ import { useLogAction } from '../../hooks/useLogAction'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Search, Package, Check, X, Trash2, AlertTriangle, ChevronRight, RotateCcw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { getOrFetch } from '../../lib/cache'
+import { getOrFetch, invalidate } from '../../lib/cache'
 import Pager from '../../lib/Pager'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -92,6 +92,7 @@ export default function StudioOrders() {
     if (error) { toast.error('Update failed'); setUpdating(null); return }
     toast.success('Marked as retrieved')
     log('order.retrieved', { entityType: 'order', entityId: group.groupId, details: { message: `marked ${group.profiles?.full_name || 'client'}'s order as retrieved` } })
+    invalidate('studio_orders')
     syncGroup(group.groupId, { status: 'retrieved' })
     setUpdating(null)
   }
@@ -127,6 +128,7 @@ export default function StudioOrders() {
     if (error) { toast.error('Update failed'); setUpdating(null); return }
     toast.success('Order reverted to awaiting pickup')
     log('order.reverted', { entityType: 'order', entityId: group.groupId, details: { message: `reverted ${group.profiles?.full_name || 'client'}'s order to awaiting pickup` } })
+    invalidate('studio_orders')
     syncGroup(group.groupId, { status: 'active' })
     setUpdating(null)
   }
@@ -255,7 +257,9 @@ export default function StudioOrders() {
                         </span>
                         {group.payment_status === 'paid'
                           ? <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Paid online</span>
-                          : <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Pay in store</span>
+                          : group.status === 'retrieved'
+                            ? <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Paid in store</span>
+                            : <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 5, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Pay in store</span>
                         }
                       </div>
                     </div>
@@ -398,7 +402,9 @@ export default function StudioOrders() {
                     <span style={{ fontSize: '0.8rem', color: s.color, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, flex: 1 }}>{s.label}</span>
                     {details.payment_status === 'paid'
                       ? <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.22)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Paid online</span>
-                      : <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.22)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pay in store</span>
+                      : details.status === 'retrieved'
+                        ? <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 20, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.22)', color: '#34d399', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Paid in store</span>
+                        : <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 20, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.22)', color: '#f59e0b', fontFamily: 'DM Sans,sans-serif', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pay in store</span>
                     }
                   </div>
 
