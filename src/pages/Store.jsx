@@ -336,7 +336,7 @@ export default function Store() {
         {!user && !loading && filtered.length > 0 && (
           <div style={{ textAlign: 'center', marginTop: 32, display: 'flex', justifyContent: 'center' }}>
             <button onClick={() => setShowGuestModal(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 12, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'rgba(var(--rgb-acc),0.7)', fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em', transition: 'all .2s' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 22px', borderRadius: 12, background: 'var(--col-acc)', border: '1px solid rgba(var(--rgb-acc),0.2)', color: 'var(--col-bg)', fontSize: 12, fontFamily: 'DM Sans,sans-serif', fontWeight: 600, cursor: 'pointer', letterSpacing: '0.08em', transition: 'all .2s' }}>
               <ShoppingCart size={13} /> Sign in to order
             </button>
           </div>
