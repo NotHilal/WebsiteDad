@@ -15,6 +15,11 @@ export default function ResetPassword() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    // Catch the race where Supabase processed the recovery token before the listener registered
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) setReady(true)
+    })
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
     })
