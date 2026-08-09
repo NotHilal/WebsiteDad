@@ -1,2 +1,0 @@
-ALTER TABLE preorders ADD COLUMN IF NOT EXISTS coupon_code TEXT;
-ALTER TABLE preorders ADD COLUMN IF NOT EXISTS discount_amount DECIMAL(10,2);

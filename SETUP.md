@@ -3,7 +3,7 @@
 ## 1. Supabase Setup
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the entire `supabase-schema.sql` file
+2. Go to **SQL Editor** and run the entire `supabase/full-schema.sql` file
 3. Copy your **Project URL** and **Anon Key** from Project Settings → API
 
 ## 2. Environment Variables

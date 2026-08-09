@@ -18,8 +18,8 @@ VITE_STUDIO_PASSWORD=...
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...   ← add this
 ```
 
-## 4. Run the SQL migration
-In Supabase → SQL Editor, paste and run the contents of `supabase/payment-migration.sql`.
+## 4. Run the SQL schema
+Payment columns are already included in `supabase/full-schema.sql` — see SETUP.md.
 
 ## 5. Deploy the Edge Functions
 Install the Supabase CLI if you haven't: https://supabase.com/docs/guides/cli
